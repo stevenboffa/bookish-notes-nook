@@ -18,7 +18,7 @@ export function Navigation() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-book-DEFAULT p-4 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-white border-b p-4 shadow-sm">
       <div className="container mx-auto">
         <div className="flex justify-around items-center">
           {links.map((link) => {
@@ -35,8 +35,8 @@ export function Navigation() {
                   className={cn(
                     "rounded-full transition-all duration-200",
                     location.pathname === link.href 
-                      ? "bg-white text-book-DEFAULT hover:bg-white/90 shadow-md" 
-                      : "text-white hover:bg-white/10"
+                      ? "bg-book-DEFAULT text-white hover:bg-book-accent shadow-md" 
+                      : "text-book-DEFAULT hover:bg-book-light"
                   )}
                 >
                   {Icon && <Icon className="h-5 w-5" />}
@@ -44,13 +44,13 @@ export function Navigation() {
                 <span className={cn(
                   "text-xs mt-1.5 font-medium transition-colors duration-200",
                   location.pathname === link.href 
-                    ? "text-white" 
-                    : "text-white hover:text-white"
+                    ? "text-book-DEFAULT" 
+                    : "text-book-DEFAULT hover:text-book-accent"
                 )}>
                   {link.label}
                 </span>
                 {location.pathname === link.href && (
-                  <div className="absolute -bottom-2 w-1.5 h-1.5 bg-white rounded-full" />
+                  <div className="absolute -bottom-2 w-1.5 h-1.5 bg-book-DEFAULT rounded-full" />
                 )}
               </Link>
             );
