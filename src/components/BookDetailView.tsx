@@ -44,7 +44,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
-  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
+  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus);
   const navigate = useNavigate();
 
   const handleSave = () => {
@@ -64,44 +64,54 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="flex justify-between items-center p-4 border-b">
-        <Button variant="ghost" size="icon" onClick={onClose}>
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
+      <div className="flex justify-between items-center p-4 border-b bg-book-DEFAULT text-white">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="hover:bg-book-accent/20"
+          onClick={onClose}
+        >
           <X className="h-6 w-6" />
         </Button>
-        <Button onClick={handleSave}>
+        <Button 
+          onClick={handleSave}
+          className="bg-book-light text-book-DEFAULT hover:bg-book-light/90"
+        >
           <Save className="mr-2 h-4 w-4" />
           Save
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {!book && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title" className="text-sm font-medium">Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter book title"
+                className="border-book-DEFAULT/20 focus:border-book-DEFAULT"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="author">Author</Label>
+              <Label htmlFor="author" className="text-sm font-medium">Author</Label>
               <Input
                 id="author"
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Enter author name"
+                className="border-book-DEFAULT/20 focus:border-book-DEFAULT"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="genre">Genre</Label>
+              <Label htmlFor="genre" className="text-sm font-medium">Genre</Label>
               <Select value={genre} onValueChange={setGenre}>
-                <SelectTrigger>
+                <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
                   <SelectValue placeholder="Select genre" />
                 </SelectTrigger>
                 <SelectContent>
@@ -117,9 +127,9 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
+          <Label htmlFor="status" className="text-sm font-medium">Status</Label>
           <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-            <SelectTrigger>
+            <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
