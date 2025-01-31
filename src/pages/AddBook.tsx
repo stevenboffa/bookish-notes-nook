@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
 import { Book, Note } from "@/components/BookList";
-import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,7 +11,6 @@ export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { session } = useAuth();
 
   useEffect(() => {
@@ -25,11 +23,7 @@ export default function AddBook() {
           .single();
 
         if (error) {
-          toast({
-            title: "Error",
-            description: "Failed to fetch book details",
-            variant: "destructive",
-          });
+          console.error('Error fetching book:', error);
           return;
         }
 
@@ -60,11 +54,7 @@ export default function AddBook() {
 
   const handleSave = async (updatedBook: Book) => {
     if (!session?.user?.id) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to save books",
-        variant: "destructive",
-      });
+      console.error('User must be logged in to save books');
       return;
     }
 
@@ -75,24 +65,16 @@ export default function AddBook() {
       genre: updatedBook.genre,
       date_read: updatedBook.dateRead,
       rating: updatedBook.rating,
-      status: updatedBook.status as BookStatus,
+      status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
     });
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save book",
-        variant: "destructive",
-      });
+      console.error('Error saving book:', error);
       return;
     }
 
-    toast({
-      title: "Success",
-      description: "Book saved successfully",
-    });
     navigate("/dashboard");
   };
 

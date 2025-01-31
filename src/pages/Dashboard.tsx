@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +9,6 @@ const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const { toast } = useToast();
   const { session } = useAuth();
   const navigate = useNavigate();
 
@@ -56,11 +54,6 @@ const Dashboard = () => {
       setBooks(formattedBooks);
     } catch (error) {
       console.error('Error fetching books:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch books",
-        variant: "destructive",
-      });
     }
   };
 
@@ -77,17 +70,8 @@ const Dashboard = () => {
       if (selectedBook?.id === bookId) {
         setSelectedBook(null);
       }
-      toast({
-        title: "Success",
-        description: "Book deleted successfully",
-      });
     } catch (error) {
       console.error('Error deleting book:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete book",
-        variant: "destructive",
-      });
     }
   };
 
