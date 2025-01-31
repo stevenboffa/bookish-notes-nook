@@ -12,13 +12,13 @@ const Dashboard = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { session } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (session?.user?.id) {
       fetchBooks();
     }
-  }, [user]);
+  }, [session?.user?.id]);
 
   const fetchBooks = async () => {
     try {
@@ -37,7 +37,7 @@ const Dashboard = () => {
             created_at
           )
         `)
-        .eq('user_id', user?.id)
+        .eq('user_id', session?.user?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -76,7 +76,7 @@ const Dashboard = () => {
           author: book.author,
           genre: book.genre,
           date_read: book.dateRead,
-          user_id: user?.id,
+          user_id: session?.user?.id,
         })
         .select()
         .single();
