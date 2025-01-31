@@ -1,33 +1,181 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { NoteSection } from "@/components/NoteSection";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-  const handleAddBook = (book: Book) => {
-    setBooks([...books, book]);
-    setSelectedBook(book);
-  };
+  useEffect(() => {
+    if (user) {
+      fetchBooks();
+    }
+  }, [user]);
 
-  const handleDeleteBook = (bookId: string) => {
-    setBooks(books.filter((book) => book.id !== bookId));
-    if (selectedBook?.id === bookId) {
-      setSelectedBook(null);
+  const fetchBooks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('books')
+        .select(`
+          id,
+          title,
+          author,
+          genre,
+          date_read,
+          rating,
+          notes (
+            id,
+            content,
+            created_at
+          )
+        `)
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedBooks = data.map((book: any) => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        genre: book.genre,
+        dateRead: book.date_read,
+        rating: book.rating || 0,
+        notes: book.notes.map((note: any) => ({
+          id: note.id,
+          content: note.content,
+          createdAt: note.created_at,
+        })),
+      }));
+
+      setBooks(formattedBooks);
+    } catch (error) {
+      console.error('Error fetching books:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch books",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleUpdateBook = (updatedBook: Book) => {
-    setBooks(
-      books.map((book) =>
-        book.id === updatedBook.id ? updatedBook : book
-      )
-    );
-    setSelectedBook(updatedBook);
+  const handleAddBook = async (book: Book) => {
+    try {
+      const { data, error } = await supabase
+        .from('books')
+        .insert({
+          title: book.title,
+          author: book.author,
+          genre: book.genre,
+          date_read: book.dateRead,
+          user_id: user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newBook = {
+        ...book,
+        id: data.id,
+      };
+
+      setBooks([newBook, ...books]);
+      setSelectedBook(newBook);
+      toast({
+        title: "Success",
+        description: "Book added successfully",
+      });
+    } catch (error) {
+      console.error('Error adding book:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add book",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteBook = async (bookId: string) => {
+    try {
+      const { error } = await supabase
+        .from('books')
+        .delete()
+        .eq('id', bookId);
+
+      if (error) throw error;
+
+      setBooks(books.filter((book) => book.id !== bookId));
+      if (selectedBook?.id === bookId) {
+        setSelectedBook(null);
+      }
+      toast({
+        title: "Success",
+        description: "Book deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting book:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete book",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateBook = async (updatedBook: Book) => {
+    try {
+      const { error } = await supabase
+        .from('books')
+        .update({
+          rating: updatedBook.rating,
+        })
+        .eq('id', updatedBook.id);
+
+      if (error) throw error;
+
+      // Handle notes
+      for (const note of updatedBook.notes) {
+        if (!note.id.includes('temp_')) {
+          continue;
+        }
+
+        const { error: noteError } = await supabase
+          .from('notes')
+          .insert({
+            content: note.content,
+            book_id: updatedBook.id,
+          });
+
+        if (noteError) throw noteError;
+      }
+
+      setBooks(
+        books.map((book) =>
+          book.id === updatedBook.id ? updatedBook : book
+        )
+      );
+      setSelectedBook(updatedBook);
+      toast({
+        title: "Success",
+        description: "Book updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating book:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update book",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredBooks = books.filter((book) =>

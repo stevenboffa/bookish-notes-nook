@@ -9,6 +9,68 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      books: {
+        Row: {
+          author: string
+          created_at: string
+          date_read: string
+          genre: string
+          id: string
+          rating: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          author: string
+          created_at?: string
+          date_read: string
+          genre: string
+          id?: string
+          rating?: number | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          author?: string
+          created_at?: string
+          date_read?: string
+          genre?: string
+          id?: string
+          rating?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          book_id: string
+          content: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          book_id: string
+          content: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          book_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

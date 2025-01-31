@@ -99,7 +99,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         />
         <Button
           onClick={handleAddNote}
-          className="bg-book-DEFAULT hover:bg-book-accent"
+          className="bg-[#1A1F2C] hover:bg-[#2C3E50] text-white"
         >
           Add Note
         </Button>
