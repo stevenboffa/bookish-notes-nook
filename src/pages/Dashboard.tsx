@@ -4,6 +4,8 @@ import { BookFilters } from "@/components/BookFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
+import { Home } from "lucide-react";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -80,12 +82,28 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
-      <BookFilters
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-      />
-      <div className="flex-1 overflow-auto pb-20">
+    <div className="flex-1 flex flex-col p-6 animate-fade-in">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">
+              <Home className="h-4 w-4" />
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard" className="font-semibold">
+              Dashboard
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="mt-6">
+        <BookFilters
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+        />
+      </div>
+      <div className="flex-1 overflow-auto pb-20 mt-6">
         <BookList
           books={books}
           selectedBook={selectedBook}

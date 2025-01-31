@@ -55,21 +55,21 @@ export function BookList({
   });
 
   return (
-    <div className="space-y-3 px-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
       {filteredBooks.map((book) => (
         <Card
           key={book.id}
           className={`transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
             selectedBook?.id === book.id
-              ? "bg-[#2C3E50] text-white shadow-lg"
-              : "hover:shadow-md bg-white"
+              ? "bg-gradient-to-br from-book-deep-200 to-book-deep-300 text-white shadow-lg"
+              : "hover:shadow-md bg-white hover:bg-gradient-to-br hover:from-book-warm-100 hover:to-book-warm-200"
           }`}
           onClick={() => onSelectBook(book)}
         >
           <CardHeader className="p-4">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <CardTitle className="font-serif text-lg mb-1">
+                <CardTitle className="font-serif text-lg mb-1 line-clamp-1">
                   {book.title}
                 </CardTitle>
                 <CardDescription
@@ -80,14 +80,14 @@ export function BookList({
                   by {book.author}
                 </CardDescription>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-gray-500 rounded">
+                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-book-deep-300 rounded">
                     {book.genre}
                   </span>
-                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-gray-500 rounded">
+                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-book-deep-300 rounded">
                     {book.status}
                   </span>
-                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-gray-500 rounded">
-                    Rating: {book.rating}/10
+                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-book-deep-300 rounded">
+                    Rating: {book.rating.toFixed(1)}/10
                   </span>
                 </div>
               </div>
@@ -100,7 +100,7 @@ export function BookList({
                 }}
                 className={
                   selectedBook?.id === book.id
-                    ? "hover:bg-[#34495E] text-white"
+                    ? "hover:bg-book-deep-400 text-white"
                     : ""
                 }
               >
