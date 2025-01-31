@@ -33,10 +33,10 @@ export function Navigation() {
                   variant={location.pathname === link.href ? "secondary" : "ghost"}
                   size="icon"
                   className={cn(
-                    "rounded-full transition-all duration-200",
+                    "rounded-full transition-all duration-200 bg-black",
                     location.pathname === link.href 
-                      ? "bg-black text-white hover:bg-black/90" 
-                      : "text-black hover:bg-black hover:text-white"
+                      ? "text-white hover:bg-black/90" 
+                      : "text-white hover:bg-black/80"
                   )}
                 >
                   {Icon && <Icon className="h-5 w-5" />}
