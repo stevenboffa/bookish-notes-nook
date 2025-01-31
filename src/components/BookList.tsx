@@ -66,7 +66,10 @@ export function BookList({
           onKeyPress={(e) => e.key === "Enter" && handleAddBook()}
           className="font-serif"
         />
-        <Button onClick={handleAddBook} className="bg-book-DEFAULT hover:bg-book-accent">
+        <Button 
+          onClick={handleAddBook} 
+          className="bg-[#1A1F2C] hover:bg-[#2C3E50] text-white"
+        >
           <Plus className="h-4 w-4" />
         </Button>
       </div>
@@ -77,7 +80,7 @@ export function BookList({
             key={book.id}
             className={`transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
               selectedBook?.id === book.id
-                ? "bg-book-DEFAULT text-white shadow-lg"
+                ? "bg-[#2C3E50] text-white shadow-lg"
                 : "hover:shadow-md bg-white"
             }`}
             onClick={() => onSelectBook(book)}
@@ -105,7 +108,7 @@ export function BookList({
                   }}
                   className={
                     selectedBook?.id === book.id
-                      ? "hover:bg-book-accent text-white"
+                      ? "hover:bg-[#34495E] text-white"
                       : ""
                   }
                 >
@@ -122,7 +125,7 @@ export function BookList({
                         i < book.rating
                           ? selectedBook?.id === book.id
                             ? "bg-book-light"
-                            : "bg-book-DEFAULT"
+                            : "bg-[#2C3E50]"
                           : "bg-gray-300"
                       }`}
                     />

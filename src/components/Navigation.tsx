@@ -19,8 +19,8 @@ export function Navigation() {
               key={link.href}
               to={link.href}
               className={cn(
-                "text-white hover:text-book-light transition-colors",
-                location.pathname === link.href && "text-book-light"
+                "text-white hover:text-book-light transition-colors font-medium",
+                location.pathname === link.href && "text-book-light font-bold"
               )}
             >
               {link.label}
