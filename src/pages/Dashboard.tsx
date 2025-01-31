@@ -4,6 +4,7 @@ import { BookFilters } from "@/components/BookFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -11,6 +12,7 @@ const Dashboard = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const { toast } = useToast();
   const { session } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -94,6 +96,10 @@ const Dashboard = () => {
     }
   };
 
+  const handleSelectBook = (book: Book) => {
+    navigate(`/edit-book/${book.id}`);
+  };
+
   return (
     <div className="flex-1 flex flex-col">
       <BookFilters
@@ -104,7 +110,7 @@ const Dashboard = () => {
         <BookList
           books={books}
           selectedBook={selectedBook}
-          onSelectBook={setSelectedBook}
+          onSelectBook={handleSelectBook}
           onDeleteBook={handleDeleteBook}
           activeFilter={activeFilter}
         />

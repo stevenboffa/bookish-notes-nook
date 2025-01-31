@@ -44,7 +44,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
-  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
+  const [status, setStatus] = useState<BookStatus>((book?.status as BookStatus) || "Not started");
   const [rating, setRating] = useState(book?.rating || 0);
   const navigate = useNavigate();
 
@@ -116,7 +116,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>

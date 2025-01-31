@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Popover,
   PopoverContent,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NoteSectionProps {
   book: Book;
@@ -24,24 +26,50 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [date, setDate] = useState<Date | undefined>(
     book.dateRead ? new Date(book.dateRead) : undefined
   );
+  const { toast } = useToast();
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     if (!newNote.trim()) return;
 
-    const updatedBook = {
-      ...book,
-      notes: [
-        ...book.notes,
-        {
-          id: `temp_${Date.now()}`,
+    try {
+      const { data: noteData, error: noteError } = await supabase
+        .from('notes')
+        .insert({
           content: newNote,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    };
+          book_id: book.id,
+        })
+        .select()
+        .single();
 
-    onUpdateBook(updatedBook);
-    setNewNote("");
+      if (noteError) throw noteError;
+
+      const updatedBook = {
+        ...book,
+        notes: [
+          ...book.notes,
+          {
+            id: noteData.id,
+            content: noteData.content,
+            createdAt: noteData.created_at,
+          },
+        ],
+      };
+
+      onUpdateBook(updatedBook);
+      setNewNote("");
+      
+      toast({
+        title: "Success",
+        description: "Note added successfully",
+      });
+    } catch (error) {
+      console.error('Error adding note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add note",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRatingChange = (newRating: number) => {
@@ -132,6 +160,11 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
               onChange={(e) => setNewNote(e.target.value)}
               placeholder="Add a note..."
               className="flex-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleAddNote();
+                }
+              }}
             />
             <Button onClick={handleAddNote}>Add Note</Button>
           </div>
