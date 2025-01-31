@@ -48,10 +48,11 @@ const getStatusColor = (status: string) => {
 };
 
 const getRatingColor = (rating: number) => {
-  if (rating >= 8) return "bg-[#8B5CF6] text-white"; // Vivid purple for excellent
-  if (rating >= 6) return "bg-[#0EA5E9] text-white"; // Ocean blue for good
-  if (rating >= 4) return "bg-[#F97316] text-white"; // Bright orange for average
-  return "bg-[#D946EF] text-white"; // Magenta pink for below average
+  if (rating >= 9) return "bg-emerald-500 text-white"; // Bright green for excellent
+  if (rating >= 7) return "bg-green-500 text-white"; // Green for very good
+  if (rating >= 5) return "bg-yellow-500 text-white"; // Yellow for average
+  if (rating >= 3) return "bg-orange-500 text-white"; // Orange for below average
+  return "bg-red-500 text-white"; // Red for poor
 };
 
 export function BookList({
