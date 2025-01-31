@@ -34,19 +34,12 @@ export function Navigation() {
                   size="icon"
                   className={cn(
                     "rounded-full transition-all duration-200",
-                    location.pathname === link.href 
-                      ? "bg-book-DEFAULT text-white hover:bg-book-accent shadow-md" 
-                      : "text-book-DEFAULT hover:bg-book-light"
+                    "text-book-DEFAULT hover:bg-book-light"
                   )}
                 >
                   {Icon && <Icon className="h-5 w-5" />}
                 </Button>
-                <span className={cn(
-                  "text-xs mt-1.5 font-medium transition-colors duration-200",
-                  location.pathname === link.href 
-                    ? "text-book-DEFAULT" 
-                    : "text-book-DEFAULT hover:text-book-accent"
-                )}>
+                <span className="text-xs mt-1.5 font-medium text-book-DEFAULT">
                   {link.label}
                 </span>
                 {location.pathname === link.href && (
