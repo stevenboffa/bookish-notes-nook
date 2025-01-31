@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
-import { Book } from "@/components/BookList";
+import { Book, Note } from "@/components/BookList";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { session } = useAuth();
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -30,10 +32,22 @@ export default function AddBook() {
         }
 
         if (data) {
+          const notes: Note[] = data.notes.map((note: any) => ({
+            id: note.id,
+            content: note.content,
+            createdAt: note.created_at,
+          }));
+
           setBook({
-            ...data,
+            id: data.id,
+            title: data.title,
+            author: data.author,
+            genre: data.genre,
             dateRead: data.date_read,
-            isFavorite: data.is_favorite,
+            rating: data.rating || 0,
+            status: data.status || "Not started",
+            notes,
+            isFavorite: data.is_favorite || false,
           });
         }
       }
@@ -43,6 +57,15 @@ export default function AddBook() {
   }, [id]);
 
   const handleSave = async (updatedBook: Book) => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save books",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { error } = await supabase.from("books").upsert({
       id: updatedBook.id,
       title: updatedBook.title,
@@ -52,6 +75,7 @@ export default function AddBook() {
       rating: updatedBook.rating,
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
+      user_id: session.user.id,
     });
 
     if (error) {

@@ -38,11 +38,13 @@ interface BookDetailViewProps {
   onClose: () => void;
 }
 
+type BookStatus = "Not started" | "In Progress" | "Finished";
+
 export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
-  const [status, setStatus] = useState(book?.status || "Not started");
+  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const [rating, setRating] = useState(book?.rating || 0);
   const navigate = useNavigate();
 
