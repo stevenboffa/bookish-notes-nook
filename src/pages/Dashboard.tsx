@@ -41,7 +41,7 @@ const Dashboard = () => {
         author: book.author,
         genre: book.genre,
         dateRead: book.date_read,
-        rating: book.rating || 0,
+        rating: Number(book.rating) || 0,
         status: book.status || 'Not started',
         isFavorite: book.is_favorite || false,
         notes: book.notes.map((note: any) => ({

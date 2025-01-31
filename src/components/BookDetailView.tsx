@@ -49,7 +49,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [rating, setRating] = useState(book?.rating || 0);
   const navigate = useNavigate();
 
-  // Update local state when book prop changes
   useEffect(() => {
     if (book) {
       setTitle(book.title);
@@ -62,28 +61,26 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
   const handleSave = () => {
     if (!book) {
-      // Creating a new book
       const newBook = {
         id: crypto.randomUUID(),
         title,
         author,
         genre,
         status,
-        rating,
+        rating: Number(rating),
         notes: [],
         dateRead: new Date().toISOString().split('T')[0],
         isFavorite: false,
       };
       onSave(newBook);
     } else {
-      // Updating existing book - maintain all existing properties
       const updatedBook = {
         ...book,
         title,
         author,
         genre,
         status,
-        rating,
+        rating: Number(rating),
       };
       onSave(updatedBook);
     }
@@ -199,7 +196,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
               onValueChange={(value) => setRating(value[0])}
               className="flex-1"
             />
-            <span className="min-w-[60px] text-right">{rating}/10</span>
+            <span className="min-w-[60px] text-right">{rating.toFixed(1)}/10</span>
           </div>
           <div className="flex gap-1 mt-2">
             {renderRatingStars(rating)}
