@@ -4,7 +4,6 @@ import { BookDetailView } from "@/components/BookDetailView";
 import { Book, Note } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
 
@@ -13,7 +12,6 @@ export default function AddBook() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -42,7 +40,7 @@ export default function AddBook() {
             author: data.author,
             genre: data.genre,
             dateRead: data.date_read,
-            rating: data.rating || 0,
+            rating: parseFloat(data.rating) || 0,
             status: data.status as BookStatus || "Not started",
             notes,
             isFavorite: data.is_favorite || false,
@@ -66,7 +64,7 @@ export default function AddBook() {
       author: updatedBook.author,
       genre: updatedBook.genre,
       date_read: updatedBook.dateRead,
-      rating: Math.round(Number(updatedBook.rating)),
+      rating: updatedBook.rating,
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
@@ -78,18 +76,9 @@ export default function AddBook() {
 
     if (error) {
       console.error('Error saving book:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save book",
-        variant: "destructive",
-      });
       return;
     }
 
-    toast({
-      title: "Success",
-      description: "Book saved successfully",
-    });
     navigate("/dashboard");
   };
 

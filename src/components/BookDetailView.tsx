@@ -55,7 +55,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       setAuthor(book.author);
       setGenre(book.genre);
       setStatus(book.status as BookStatus);
-      setRating(book.rating);
+      setRating(parseFloat(String(book.rating)) || 0);
     }
   }, [book]);
 
@@ -67,7 +67,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         author,
         genre,
         status,
-        rating: Number(rating),
+        rating: parseFloat(rating.toFixed(1)),
         notes: [],
         dateRead: new Date().toISOString().split('T')[0],
         isFavorite: false,
@@ -80,7 +80,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         author,
         genre,
         status,
-        rating: Number(rating),
+        rating: parseFloat(rating.toFixed(1)),
       };
       onSave(updatedBook);
     }
@@ -193,7 +193,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
               max={10}
               step={0.5}
               value={[rating]}
-              onValueChange={(value) => setRating(value[0])}
+              onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
               className="flex-1"
             />
             <span className="min-w-[60px] text-right">{rating.toFixed(1)}/10</span>
