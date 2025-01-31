@@ -45,7 +45,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
   const [status, setStatus] = useState<BookStatus>((book?.status as BookStatus) || "Not started");
-  const [rating, setRating] = useState(book?.rating || 0);
   const navigate = useNavigate();
 
   const handleSave = () => {
@@ -55,10 +54,10 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       author,
       genre,
       status,
-      rating,
       id: book?.id || crypto.randomUUID(),
       notes: book?.notes || [],
       dateRead: book?.dateRead || new Date().toISOString().split('T')[0],
+      rating: book?.rating || 0,
       isFavorite: book?.isFavorite || false,
     };
     onSave(updatedBook);
@@ -77,72 +76,58 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter book title"
-            />
-          </div>
+        {!book && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter book title"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="author">Author</Label>
-            <Input
-              id="author"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              placeholder="Enter author name"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="author">Author</Label>
+              <Input
+                id="author"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Enter author name"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="genre">Genre</Label>
-            <Select value={genre} onValueChange={setGenre}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select genre" />
-              </SelectTrigger>
-              <SelectContent>
-                {genres.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Not started">Not started</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Finished">Finished</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Rating</Label>
-            <div className="flex space-x-1">
-              {[...Array(10)].map((_, i) => (
-                <Button
-                  key={i}
-                  variant={rating > i ? "default" : "outline"}
-                  className="h-8 w-8 p-0"
-                  onClick={() => setRating(i + 1)}
-                >
-                  {i + 1}
-                </Button>
-              ))}
+            <div className="space-y-2">
+              <Label htmlFor="genre">Genre</Label>
+              <Select value={genre} onValueChange={setGenre}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select genre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {genres.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {g}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Not started">Not started</SelectItem>
+              <SelectItem value="In Progress">In Progress</SelectItem>
+              <SelectItem value="Finished">Finished</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {book && <NoteSection book={book} onUpdateBook={onSave} />}
