@@ -40,7 +40,7 @@ export default function AddBook() {
             author: data.author,
             genre: data.genre,
             dateRead: data.date_read,
-            rating: data.rating ? Number(data.rating) : 0,
+            rating: Number(data.rating) || 0,
             status: data.status as BookStatus || "Not started",
             notes,
             isFavorite: data.is_favorite || false,
@@ -58,14 +58,14 @@ export default function AddBook() {
       return;
     }
 
-    // When updating, ensure we're sending all required fields
+    // When updating, ensure we're sending all required fields and convert rating to integer
     const bookData = {
       id: updatedBook.id,
       title: updatedBook.title,
       author: updatedBook.author,
       genre: updatedBook.genre,
       date_read: updatedBook.dateRead,
-      rating: Number(updatedBook.rating),
+      rating: Math.round(Number(updatedBook.rating)), // Round the rating to the nearest integer
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
@@ -73,10 +73,7 @@ export default function AddBook() {
 
     const { error } = await supabase
       .from("books")
-      .upsert(bookData, {
-        onConflict: 'id',
-        ignoreDuplicates: false,
-      });
+      .upsert(bookData);
 
     if (error) {
       console.error('Error saving book:', error);
