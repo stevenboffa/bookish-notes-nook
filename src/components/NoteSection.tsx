@@ -54,9 +54,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     const updatedBook = {
       ...book,
       notes: book.notes.map((note) =>
-        note.id === noteId
-          ? { ...note, content: editedContent }
-          : note
+        note.id === noteId ? { ...note, content: editedContent } : note
       ),
     };
     onUpdateBook(updatedBook);
@@ -75,10 +73,12 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
   return (
     <div className="h-full flex flex-col gap-4 p-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-serif font-bold">{book.title}</h2>
+      <div className="flex justify-between items-center border-b border-book-accent/20 pb-4">
+        <h2 className="text-2xl font-serif font-bold text-book-DEFAULT">
+          {book.title}
+        </h2>
         <div className="flex items-center gap-2">
-          <span className="text-sm">Rating:</span>
+          <span className="text-sm font-serif">Rating:</span>
           <Input
             type="number"
             min="0"
@@ -95,17 +95,25 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
           placeholder="Add a new note..."
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
-          className="flex-1"
+          className="flex-1 font-serif"
         />
-        <Button onClick={handleAddNote}>Add Note</Button>
+        <Button
+          onClick={handleAddNote}
+          className="bg-book-DEFAULT hover:bg-book-accent"
+        >
+          Add Note
+        </Button>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto space-y-3">
         {book.notes.map((note) => (
-          <Card key={note.id} className="mb-2">
+          <Card
+            key={note.id}
+            className="border-book-accent/20 animate-fade-in"
+          >
             <CardHeader className="p-4">
               <div className="flex justify-between items-start">
-                <CardDescription>
+                <CardDescription className="font-serif">
                   {new Date(note.createdAt).toLocaleString()}
                 </CardDescription>
                 <div className="flex gap-1">
@@ -115,6 +123,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleUpdateNote(note.id)}
+                        className="hover:bg-book-accent/10"
                       >
                         <Save className="h-4 w-4" />
                       </Button>
@@ -122,6 +131,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => setEditingNote(null)}
+                        className="hover:bg-book-accent/10"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -135,6 +145,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                           setEditingNote(note.id);
                           setEditedContent(note.content);
                         }}
+                        className="hover:bg-book-accent/10"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -142,6 +153,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteNote(note.id)}
+                        className="hover:bg-book-accent/10"
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -153,10 +165,10 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                 <Textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="mt-2"
+                  className="mt-2 font-serif"
                 />
               ) : (
-                <CardContent className="p-0 mt-2">
+                <CardContent className="p-0 mt-2 font-serif">
                   {note.content}
                 </CardContent>
               )}

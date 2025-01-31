@@ -67,6 +67,20 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        "page-turn": {
+          "0%": { transform: "rotateY(0deg)" },
+          "100%": { transform: "rotateY(-180deg)" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "page-turn": "page-turn 0.6s ease-in-out",
+        "fade-in": "fade-in 0.3s ease-out",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -64,26 +64,35 @@ export function BookList({
           value={newBookTitle}
           onChange={(e) => setNewBookTitle(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && handleAddBook()}
+          className="font-serif"
         />
-        <Button onClick={handleAddBook}>
+        <Button onClick={handleAddBook} className="bg-book-DEFAULT hover:bg-book-accent">
           <Plus className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto space-y-3">
         {books.map((book) => (
           <Card
             key={book.id}
-            className={`mb-2 cursor-pointer transition-colors ${
-              selectedBook?.id === book.id ? "bg-book-accent text-white" : ""
+            className={`transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
+              selectedBook?.id === book.id
+                ? "bg-book-DEFAULT text-white shadow-lg"
+                : "hover:shadow-md bg-white"
             }`}
             onClick={() => onSelectBook(book)}
           >
             <CardHeader className="p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="font-serif">{book.title}</CardTitle>
-                  <CardDescription className={selectedBook?.id === book.id ? "text-gray-200" : ""}>
+                  <CardTitle className="font-serif text-xl">
+                    {book.title}
+                  </CardTitle>
+                  <CardDescription
+                    className={
+                      selectedBook?.id === book.id ? "text-book-light" : ""
+                    }
+                  >
                     Read on: {new Date(book.dateRead).toLocaleDateString()}
                   </CardDescription>
                 </div>
@@ -94,12 +103,31 @@ export function BookList({
                     e.stopPropagation();
                     onDeleteBook(book.id);
                   }}
+                  className={
+                    selectedBook?.id === book.id
+                      ? "hover:bg-book-accent text-white"
+                      : ""
+                  }
                 >
                   <Trash className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="mt-2">
-                Rating: {book.rating}/10
+              <div className="mt-2 flex items-center">
+                <span className="text-sm">Rating: </span>
+                <div className="ml-2 flex">
+                  {[...Array(10)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`h-1.5 w-1.5 rounded-full mx-0.5 ${
+                        i < book.rating
+                          ? selectedBook?.id === book.id
+                            ? "bg-book-light"
+                            : "bg-book-DEFAULT"
+                          : "bg-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </CardHeader>
           </Card>
