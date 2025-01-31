@@ -32,6 +32,7 @@ const Dashboard = () => {
           date_read,
           rating,
           status,
+          is_favorite,
           notes (
             id,
             content,
@@ -45,12 +46,13 @@ const Dashboard = () => {
 
       const formattedBooks = data.map((book: any) => ({
         id: book.id,
-        title: book.title,
-        author: book.author,
-        genre: book.genre,
-        dateRead: book.date_read,
+        title: book.title || '',
+        author: book.author || '',
+        genre: book.genre || '',
+        dateRead: book.date_read || new Date().toISOString().split('T')[0],
         rating: book.rating || 0,
         status: book.status || 'Not started',
+        isFavorite: book.is_favorite || false,
         notes: book.notes.map((note: any) => ({
           id: note.id,
           content: note.content,
