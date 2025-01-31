@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function Navigation() {
   const location = useLocation();
@@ -13,17 +14,21 @@ export function Navigation() {
   return (
     <nav className="bg-book-DEFAULT p-4">
       <div className="container mx-auto">
-        <div className="flex gap-6">
+        <div className="flex gap-3">
           {links.map((link) => (
             <Link
               key={link.href}
               to={link.href}
-              className={cn(
-                "text-[#1A1F2C] hover:text-book-light transition-colors font-medium",
-                location.pathname === link.href && "text-book-light font-bold"
-              )}
             >
-              {link.label}
+              <Button
+                variant={location.pathname === link.href ? "secondary" : "outline"}
+                className={cn(
+                  "bg-white hover:bg-book-light transition-colors",
+                  location.pathname === link.href && "bg-book-light font-bold"
+                )}
+              >
+                {link.label}
+              </Button>
             </Link>
           ))}
         </div>
