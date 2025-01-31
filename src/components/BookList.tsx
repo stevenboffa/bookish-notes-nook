@@ -34,6 +34,26 @@ interface BookListProps {
   activeFilter: string;
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Not started":
+      return "bg-[#E5DEFF] text-[#4C1D95]"; // Soft purple
+    case "In Progress":
+      return "bg-[#FEF7CD] text-[#854D0E]"; // Soft yellow
+    case "Finished":
+      return "bg-[#F2FCE2] text-[#3F6212]"; // Soft green
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+const getRatingColor = (rating: number) => {
+  if (rating >= 8) return "bg-[#8B5CF6] text-white"; // Vivid purple for excellent
+  if (rating >= 6) return "bg-[#0EA5E9] text-white"; // Ocean blue for good
+  if (rating >= 4) return "bg-[#F97316] text-white"; // Bright orange for average
+  return "bg-[#D946EF] text-white"; // Magenta pink for below average
+};
+
 export function BookList({
   books,
   selectedBook,
@@ -83,10 +103,14 @@ export function BookList({
                   <span className="text-xs px-2 py-1 bg-opacity-20 bg-gray-500 rounded">
                     {book.genre}
                   </span>
-                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-gray-500 rounded">
+                  <span 
+                    className={`text-xs px-2 py-1 rounded ${getStatusColor(book.status)}`}
+                  >
                     {book.status}
                   </span>
-                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-gray-500 rounded">
+                  <span 
+                    className={`text-xs px-2 py-1 rounded ${getRatingColor(book.rating)}`}
+                  >
                     Rating: {book.rating}/10
                   </span>
                 </div>
