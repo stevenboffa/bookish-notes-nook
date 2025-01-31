@@ -71,18 +71,18 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
-      <div className="flex justify-between items-center p-4 border-b">
+      <div className="flex justify-between items-center p-4 border-b bg-book-DEFAULT">
         <Button 
           variant="ghost" 
           size="icon"
-          className="text-book-DEFAULT hover:bg-book-light/20"
+          className="text-white hover:bg-book-accent/20"
           onClick={onClose}
         >
           <X className="h-6 w-6" />
         </Button>
         <Button 
           onClick={handleSave}
-          className="bg-book-DEFAULT text-white hover:bg-book-accent"
+          className="bg-white text-book-DEFAULT hover:bg-book-light"
         >
           <Save className="mr-2 h-4 w-4" />
           Save
