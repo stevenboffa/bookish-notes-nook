@@ -3,9 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Navigation } from "@/components/Navigation";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
 import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
 import Favorites from "./pages/Favorites";
@@ -21,21 +20,17 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <SidebarProvider>
-            <div className="min-h-screen flex w-full bg-book-warm-100">
-              <AppSidebar />
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={<Welcome />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/favorites" element={<Favorites />} />
-                  <Route path="/add-book" element={<AddBook />} />
-                  <Route path="/edit-book/:id" element={<AddBook />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-          </SidebarProvider>
+          <div className="min-h-screen flex flex-col bg-gray-50">
+            <Navigation />
+            <Routes>
+              <Route path="/" element={<Welcome />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/add-book" element={<AddBook />} />
+              <Route path="/edit-book/:id" element={<AddBook />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

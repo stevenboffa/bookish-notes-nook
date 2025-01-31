@@ -56,18 +56,6 @@ export default {
           DEFAULT: "#2C3E50",
           accent: "#34495E",
           light: "#ECF0F1",
-          warm: {
-            100: "#F5EEE6",
-            200: "#E6D5C3",
-            300: "#C4A484",
-            400: "#8B7355",
-          },
-          deep: {
-            100: "#E3E8F0",
-            200: "#B8C6DB",
-            300: "#5D7CA6",
-            400: "#34495E",
-          }
         },
       },
       fontFamily: {
@@ -88,15 +76,10 @@ export default {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
-        "slide-in": {
-          "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(0)" },
-        },
       },
       animation: {
         "page-turn": "page-turn 0.6s ease-in-out",
         "fade-in": "fade-in 0.3s ease-out",
-        "slide-in": "slide-in 0.3s ease-out",
       },
     },
   },

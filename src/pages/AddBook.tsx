@@ -40,7 +40,7 @@ export default function AddBook() {
             author: data.author,
             genre: data.genre,
             dateRead: data.date_read,
-            rating: data.rating ? parseFloat(data.rating) : 0,
+            rating: parseFloat(data.rating) || 0,
             status: data.status as BookStatus || "Not started",
             notes,
             isFavorite: data.is_favorite || false,
@@ -64,7 +64,7 @@ export default function AddBook() {
       author: updatedBook.author,
       genre: updatedBook.genre,
       date_read: updatedBook.dateRead,
-      rating: String(updatedBook.rating), // Convert number to string here
+      rating: updatedBook.rating,
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
