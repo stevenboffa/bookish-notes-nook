@@ -6,6 +6,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+type BookStatus = "Not started" | "In Progress" | "Finished";
+
 export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
   const { id } = useParams();
@@ -45,7 +47,7 @@ export default function AddBook() {
             genre: data.genre,
             dateRead: data.date_read,
             rating: data.rating || 0,
-            status: data.status || "Not started",
+            status: data.status as BookStatus || "Not started",
             notes,
             isFavorite: data.is_favorite || false,
           });
@@ -73,7 +75,7 @@ export default function AddBook() {
       genre: updatedBook.genre,
       date_read: updatedBook.dateRead,
       rating: updatedBook.rating,
-      status: updatedBook.status,
+      status: updatedBook.status as BookStatus,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
     });
@@ -100,11 +102,7 @@ export default function AddBook() {
 
   return (
     <div className="flex-1 md:container">
-      <BookDetailView
-        book={book}
-        onSave={handleSave}
-        onClose={handleClose}
-      />
+      <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
 }
