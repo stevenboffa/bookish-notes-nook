@@ -1,7 +1,21 @@
 import { useState } from "react";
-import { Plus, Trash, Search } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -13,6 +27,8 @@ import {
 export interface Book {
   id: string;
   title: string;
+  author: string;
+  genre: string;
   dateRead: string;
   rating: number;
   notes: Note[];
@@ -39,40 +55,97 @@ export function BookList({
   onAddBook,
   onDeleteBook,
 }: BookListProps) {
-  const [newBookTitle, setNewBookTitle] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [newBook, setNewBook] = useState({
+    title: "",
+    author: "",
+    genre: "",
+  });
 
   const handleAddBook = () => {
-    if (!newBookTitle.trim()) return;
+    if (!newBook.title.trim() || !newBook.author.trim() || !newBook.genre) return;
 
-    const newBook: Book = {
+    const book: Book = {
       id: Date.now().toString(),
-      title: newBookTitle,
+      title: newBook.title,
+      author: newBook.author,
+      genre: newBook.genre,
       dateRead: new Date().toISOString().split("T")[0],
       rating: 0,
       notes: [],
     };
 
-    onAddBook(newBook);
-    setNewBookTitle("");
+    onAddBook(book);
+    setNewBook({ title: "", author: "", genre: "" });
+    setIsOpen(false);
   };
+
+  const genres = [
+    "Fiction",
+    "Non-Fiction",
+    "Science Fiction",
+    "Fantasy",
+    "Mystery",
+    "Biography",
+    "History",
+    "Self-Help",
+  ];
 
   return (
     <div className="h-full flex flex-col gap-4 p-4">
-      <div className="flex gap-2">
-        <Input
-          placeholder="Add new book..."
-          value={newBookTitle}
-          onChange={(e) => setNewBookTitle(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleAddBook()}
-          className="font-serif"
-        />
-        <Button 
-          onClick={handleAddBook} 
-          className="bg-[#1A1F2C] hover:bg-[#2C3E50] text-white"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button className="bg-[#1A1F2C] hover:bg-[#2C3E50] text-white">
+            <Plus className="h-4 w-4 mr-2" /> Add New Book
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Book</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Input
+                placeholder="Book Title"
+                value={newBook.title}
+                onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+                className="font-serif"
+              />
+            </div>
+            <div>
+              <Input
+                placeholder="Author"
+                value={newBook.author}
+                onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
+                className="font-serif"
+              />
+            </div>
+            <div>
+              <Select
+                value={newBook.genre}
+                onValueChange={(value) => setNewBook({ ...newBook, genre: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Genre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {genres.map((genre) => (
+                    <SelectItem key={genre} value={genre}>
+                      {genre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              onClick={handleAddBook}
+              className="w-full bg-[#1A1F2C] hover:bg-[#2C3E50] text-white"
+            >
+              Add Book
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex-1 overflow-auto space-y-3">
         {books.map((book) => (
@@ -91,6 +164,13 @@ export function BookList({
                   <CardTitle className="font-serif text-xl">
                     {book.title}
                   </CardTitle>
+                  <CardDescription
+                    className={
+                      selectedBook?.id === book.id ? "text-book-light" : ""
+                    }
+                  >
+                    by {book.author} • {book.genre}
+                  </CardDescription>
                   <CardDescription
                     className={
                       selectedBook?.id === book.id ? "text-book-light" : ""

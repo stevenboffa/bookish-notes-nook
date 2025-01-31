@@ -1,14 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navigation() {
   const location = useLocation();
+  const { session } = useAuth();
 
-  const links = [
-    { href: "/", label: "Welcome" },
+  const links = session ? [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/favorites", label: "Favorites" },
+  ] : [
+    { href: "/", label: "Welcome" },
   ];
 
   return (
