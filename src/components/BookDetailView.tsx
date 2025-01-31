@@ -44,7 +44,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
-  const [status, setStatus] = useState<BookStatus>((book?.status as BookStatus) || "Not started");
+  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const navigate = useNavigate();
 
   const handleSave = () => {

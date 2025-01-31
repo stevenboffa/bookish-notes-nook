@@ -27,19 +27,28 @@ export function Navigation() {
               <Link
                 key={link.href}
                 to={link.href}
-                className="flex flex-col items-center"
+                className="flex flex-col items-center group"
               >
                 <Button
                   variant={location.pathname === link.href ? "secondary" : "ghost"}
                   size="icon"
                   className={cn(
-                    "rounded-full",
-                    location.pathname === link.href && "bg-book-light"
+                    "rounded-full transition-all duration-200",
+                    location.pathname === link.href 
+                      ? "bg-book-light text-book-DEFAULT hover:bg-book-light/90" 
+                      : "text-book-light hover:bg-book-accent/20"
                   )}
                 >
                   {Icon && <Icon className="h-5 w-5" />}
                 </Button>
-                <span className="text-xs mt-1 text-white">{link.label}</span>
+                <span className={cn(
+                  "text-xs mt-1 font-medium transition-colors duration-200",
+                  location.pathname === link.href 
+                    ? "text-book-light" 
+                    : "text-book-light/80 group-hover:text-book-light"
+                )}>
+                  {link.label}
+                </span>
               </Link>
             );
           })}
