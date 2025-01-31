@@ -2,38 +2,47 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Grid, Heart, PlusCircle, User } from "lucide-react";
 
 export function Navigation() {
   const location = useLocation();
   const { session } = useAuth();
 
   const links = session ? [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/favorites", label: "Favorites" },
+    { href: "/dashboard", label: "Dashboard", icon: Grid },
+    { href: "/favorites", label: "Favorites", icon: Heart },
+    { href: "/add-book", label: "Add Book", icon: PlusCircle },
+    { href: "/profile", label: "Profile", icon: User },
   ] : [
     { href: "/", label: "Welcome" },
   ];
 
   return (
-    <nav className="bg-book-DEFAULT p-4">
+    <nav className="sticky top-0 z-50 bg-book-DEFAULT p-4 shadow-md">
       <div className="container mx-auto">
-        <div className="flex gap-3">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-            >
-              <Button
-                variant={location.pathname === link.href ? "secondary" : "outline"}
-                className={cn(
-                  "bg-white hover:bg-book-light transition-colors",
-                  location.pathname === link.href && "bg-book-light font-bold"
-                )}
+        <div className="flex justify-around items-center">
+          {links.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="flex flex-col items-center"
               >
-                {link.label}
-              </Button>
-            </Link>
-          ))}
+                <Button
+                  variant={location.pathname === link.href ? "secondary" : "ghost"}
+                  size="icon"
+                  className={cn(
+                    "rounded-full",
+                    location.pathname === link.href && "bg-book-light"
+                  )}
+                >
+                  {Icon && <Icon className="h-5 w-5" />}
+                </Button>
+                <span className="text-xs mt-1 text-white">{link.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>

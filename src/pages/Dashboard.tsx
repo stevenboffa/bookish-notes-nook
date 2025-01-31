@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
-import { NoteSection } from "@/components/NoteSection";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { BookFilters } from "@/components/BookFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
   const { toast } = useToast();
   const { session } = useAuth();
 
@@ -31,6 +29,7 @@ const Dashboard = () => {
           genre,
           date_read,
           rating,
+          status,
           notes (
             id,
             content,
@@ -49,6 +48,7 @@ const Dashboard = () => {
         genre: book.genre,
         dateRead: book.date_read,
         rating: book.rating || 0,
+        status: book.status || 'Not started',
         notes: book.notes.map((note: any) => ({
           id: note.id,
           content: note.content,
@@ -62,43 +62,6 @@ const Dashboard = () => {
       toast({
         title: "Error",
         description: "Failed to fetch books",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleAddBook = async (book: Book) => {
-    try {
-      const { data, error } = await supabase
-        .from('books')
-        .insert({
-          title: book.title,
-          author: book.author,
-          genre: book.genre,
-          date_read: book.dateRead,
-          user_id: session?.user?.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const newBook = {
-        ...book,
-        id: data.id,
-      };
-
-      setBooks([newBook, ...books]);
-      setSelectedBook(newBook);
-      toast({
-        title: "Success",
-        description: "Book added successfully",
-      });
-    } catch (error) {
-      console.error('Error adding book:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add book",
         variant: "destructive",
       });
     }
@@ -131,89 +94,20 @@ const Dashboard = () => {
     }
   };
 
-  const handleUpdateBook = async (updatedBook: Book) => {
-    try {
-      const { error: bookError } = await supabase
-        .from('books')
-        .update({
-          rating: updatedBook.rating,
-          date_read: updatedBook.dateRead,
-          is_favorite: updatedBook.isFavorite
-        })
-        .eq('id', updatedBook.id);
-
-      if (bookError) throw bookError;
-
-      // Handle notes
-      for (const note of updatedBook.notes) {
-        if (note.id.startsWith('temp_')) {
-          const { error: noteError } = await supabase
-            .from('notes')
-            .insert({
-              content: note.content,
-              book_id: updatedBook.id,
-            });
-
-          if (noteError) throw noteError;
-        }
-      }
-
-      await fetchBooks();
-      
-      toast({
-        title: "Success",
-        description: "Changes saved successfully",
-      });
-    } catch (error) {
-      console.error('Error updating book:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save changes",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
-    <div className="flex-1 container mx-auto my-8 px-4">
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Search books..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[calc(100vh-12rem)]">
-        <div className="bg-book-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-          <BookList
-            books={filteredBooks}
-            selectedBook={selectedBook}
-            onSelectBook={setSelectedBook}
-            onAddBook={handleAddBook}
-            onDeleteBook={handleDeleteBook}
-          />
-        </div>
-        <div className="bg-book-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl">
-          {selectedBook ? (
-            <NoteSection
-              book={selectedBook}
-              onUpdateBook={handleUpdateBook}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center text-book-accent">
-              <p className="font-serif text-lg">Select a book to view and manage notes</p>
-            </div>
-          )}
-        </div>
+    <div className="flex-1 flex flex-col">
+      <BookFilters
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
+      />
+      <div className="flex-1 overflow-auto pb-20">
+        <BookList
+          books={books}
+          selectedBook={selectedBook}
+          onSelectBook={setSelectedBook}
+          onDeleteBook={handleDeleteBook}
+          activeFilter={activeFilter}
+        />
       </div>
     </div>
   );

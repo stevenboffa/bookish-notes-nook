@@ -18,6 +18,7 @@ export type Database = {
           id: string
           is_favorite: boolean | null
           rating: number | null
+          status: string | null
           title: string
           user_id: string
         }
@@ -29,6 +30,7 @@ export type Database = {
           id?: string
           is_favorite?: boolean | null
           rating?: number | null
+          status?: string | null
           title: string
           user_id: string
         }
@@ -40,6 +42,7 @@ export type Database = {
           id?: string
           is_favorite?: boolean | null
           rating?: number | null
+          status?: string | null
           title?: string
           user_id?: string
         }
