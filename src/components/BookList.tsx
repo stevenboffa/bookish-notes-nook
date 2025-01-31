@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 
 export interface Book {
   id: string;
@@ -32,6 +38,7 @@ export interface Book {
   dateRead: string;
   rating: number;
   notes: Note[];
+  isFavorite?: boolean;
 }
 
 export interface Note {
@@ -46,6 +53,7 @@ interface BookListProps {
   onSelectBook: (book: Book) => void;
   onAddBook: (book: Book) => void;
   onDeleteBook: (bookId: string) => void;
+  onUpdateBook?: (book: Book) => void;
 }
 
 export function BookList({
@@ -54,30 +62,44 @@ export function BookList({
   onSelectBook,
   onAddBook,
   onDeleteBook,
+  onUpdateBook,
 }: BookListProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
     genre: "",
+    dateRead: new Date().toISOString().split("T")[0],
   });
+  const [date, setDate] = useState<Date>();
 
   const handleAddBook = () => {
-    if (!newBook.title.trim() || !newBook.author.trim() || !newBook.genre) return;
+    if (!newBook.title.trim() || !newBook.author.trim() || !newBook.genre || !date) return;
 
     const book: Book = {
       id: Date.now().toString(),
       title: newBook.title,
       author: newBook.author,
       genre: newBook.genre,
-      dateRead: new Date().toISOString().split("T")[0],
+      dateRead: date.toISOString().split("T")[0],
       rating: 0,
       notes: [],
+      isFavorite: false,
     };
 
     onAddBook(book);
-    setNewBook({ title: "", author: "", genre: "" });
+    setNewBook({ title: "", author: "", genre: "", dateRead: new Date().toISOString().split("T")[0] });
+    setDate(undefined);
     setIsOpen(false);
+  };
+
+  const handleFavoriteToggle = (book: Book) => {
+    if (onUpdateBook) {
+      onUpdateBook({
+        ...book,
+        isFavorite: !book.isFavorite,
+      });
+    }
   };
 
   const genres = [
@@ -137,6 +159,30 @@ export function BookList({
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
             <Button 
               onClick={handleAddBook}
               className="w-full bg-[#1A1F2C] hover:bg-[#2C3E50] text-white"
@@ -160,10 +206,33 @@ export function BookList({
           >
             <CardHeader className="p-4">
               <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="font-serif text-xl">
-                    {book.title}
-                  </CardTitle>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="font-serif text-xl flex items-center gap-2">
+                      {book.title}
+                      {selectedBook?.id === book.id && (
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFavoriteToggle(book);
+                          }}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            checked={book.isFavorite}
+                            className={cn(
+                              selectedBook?.id === book.id ? "border-white" : "",
+                              "h-5 w-5"
+                            )}
+                          />
+                          <Star className={cn(
+                            "h-4 w-4",
+                            book.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
+                          )} />
+                        </div>
+                      )}
+                    </CardTitle>
+                  </div>
                   <CardDescription
                     className={
                       selectedBook?.id === book.id ? "text-book-light" : ""
