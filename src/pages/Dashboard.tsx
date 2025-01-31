@@ -133,46 +133,41 @@ const Dashboard = () => {
 
   const handleUpdateBook = async (updatedBook: Book) => {
     try {
-      const { error } = await supabase
+      // Update book rating
+      const { error: bookError } = await supabase
         .from('books')
-        .update({
-          rating: updatedBook.rating,
-        })
+        .update({ rating: updatedBook.rating })
         .eq('id', updatedBook.id);
 
-      if (error) throw error;
+      if (bookError) throw bookError;
 
       // Handle notes
       for (const note of updatedBook.notes) {
-        if (!note.id.includes('temp_')) {
-          continue;
+        if (note.id.startsWith('temp_')) {
+          // Insert new note
+          const { error: noteError } = await supabase
+            .from('notes')
+            .insert({
+              content: note.content,
+              book_id: updatedBook.id,
+            });
+
+          if (noteError) throw noteError;
         }
-
-        const { error: noteError } = await supabase
-          .from('notes')
-          .insert({
-            content: note.content,
-            book_id: updatedBook.id,
-          });
-
-        if (noteError) throw noteError;
       }
 
-      setBooks(
-        books.map((book) =>
-          book.id === updatedBook.id ? updatedBook : book
-        )
-      );
-      setSelectedBook(updatedBook);
+      // Refresh books to get updated data
+      await fetchBooks();
+      
       toast({
         title: "Success",
-        description: "Book updated successfully",
+        description: "Changes saved successfully",
       });
     } catch (error) {
       console.error('Error updating book:', error);
       toast({
         title: "Error",
-        description: "Failed to update book",
+        description: "Failed to save changes",
         variant: "destructive",
       });
     }

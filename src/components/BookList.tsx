@@ -196,21 +196,7 @@ export function BookList({
                 </Button>
               </div>
               <div className="mt-2 flex items-center">
-                <span className="text-sm">Rating: </span>
-                <div className="ml-2 flex">
-                  {[...Array(10)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={`h-1.5 w-1.5 rounded-full mx-0.5 ${
-                        i < book.rating
-                          ? selectedBook?.id === book.id
-                            ? "bg-book-light"
-                            : "bg-[#2C3E50]"
-                          : "bg-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
+                <span className="text-sm">Rating: {book.rating}/10</span>
               </div>
             </CardHeader>
           </Card>

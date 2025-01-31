@@ -22,53 +22,52 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState("");
   const [rating, setRating] = useState(book.rating);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [pendingNotes, setPendingNotes] = useState<Note[]>(book.notes);
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
 
-    const updatedBook = {
-      ...book,
-      notes: [
-        ...book.notes,
-        {
-          id: Date.now().toString(),
-          content: newNote,
-          createdAt: new Date().toISOString(),
-        },
-      ],
+    const newNoteObj = {
+      id: `temp_${Date.now()}`,
+      content: newNote,
+      createdAt: new Date().toISOString(),
     };
 
-    onUpdateBook(updatedBook);
+    setPendingNotes([...pendingNotes, newNoteObj]);
     setNewNote("");
+    setUnsavedChanges(true);
   };
 
   const handleDeleteNote = (noteId: string) => {
-    const updatedBook = {
-      ...book,
-      notes: book.notes.filter((note) => note.id !== noteId),
-    };
-    onUpdateBook(updatedBook);
+    setPendingNotes(pendingNotes.filter((note) => note.id !== noteId));
+    setUnsavedChanges(true);
   };
 
   const handleUpdateNote = (noteId: string) => {
-    const updatedBook = {
-      ...book,
-      notes: book.notes.map((note) =>
+    setPendingNotes(
+      pendingNotes.map((note) =>
         note.id === noteId ? { ...note, content: editedContent } : note
-      ),
-    };
-    onUpdateBook(updatedBook);
+      )
+    );
     setEditingNote(null);
+    setUnsavedChanges(true);
   };
 
   const handleRatingChange = (newRating: number) => {
     const validRating = Math.max(0, Math.min(10, newRating));
     setRating(validRating);
+    setUnsavedChanges(true);
+  };
+
+  const handleSaveChanges = () => {
     const updatedBook = {
       ...book,
-      rating: validRating,
+      rating,
+      notes: pendingNotes,
     };
     onUpdateBook(updatedBook);
+    setUnsavedChanges(false);
   };
 
   return (
@@ -106,7 +105,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       </div>
 
       <div className="flex-1 overflow-auto space-y-3">
-        {book.notes.map((note) => (
+        {pendingNotes.map((note) => (
           <Card
             key={note.id}
             className="border-book-accent/20 animate-fade-in"
@@ -176,6 +175,15 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
           </Card>
         ))}
       </div>
+
+      {unsavedChanges && (
+        <Button
+          onClick={handleSaveChanges}
+          className="bg-[#1A1F2C] hover:bg-[#2C3E50] text-white mt-4"
+        >
+          Save Changes
+        </Button>
+      )}
     </div>
   );
 }
