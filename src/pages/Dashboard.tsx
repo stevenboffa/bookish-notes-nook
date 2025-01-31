@@ -25,14 +25,7 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('books')
         .select(`
-          id,
-          title,
-          author,
-          genre,
-          date_read,
-          rating,
-          status,
-          is_favorite,
+          *,
           notes (
             id,
             content,
@@ -46,10 +39,10 @@ const Dashboard = () => {
 
       const formattedBooks = data.map((book: any) => ({
         id: book.id,
-        title: book.title || '',
-        author: book.author || '',
-        genre: book.genre || '',
-        dateRead: book.date_read || new Date().toISOString().split('T')[0],
+        title: book.title,
+        author: book.author,
+        genre: book.genre,
+        dateRead: book.date_read,
         rating: book.rating || 0,
         status: book.status || 'Not started',
         isFavorite: book.is_favorite || false,
