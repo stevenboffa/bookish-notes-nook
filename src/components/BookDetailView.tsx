@@ -3,6 +3,7 @@ import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -10,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Save } from "lucide-react";
+import { X, Save, Star, StarHalf } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 
@@ -45,13 +46,17 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
+  const [rating, setRating] = useState(book?.rating || 0);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (book?.status) {
       setStatus(book.status as BookStatus);
     }
-  }, [book?.status]);
+    if (book?.rating) {
+      setRating(book.rating);
+    }
+  }, [book?.status, book?.rating]);
 
   const handleSave = () => {
     const updatedBook = {
@@ -60,33 +65,56 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       author,
       genre,
       status,
+      rating,
       id: book?.id || crypto.randomUUID(),
       notes: book?.notes || [],
       dateRead: book?.dateRead || new Date().toISOString().split('T')[0],
-      rating: book?.rating || 0,
       isFavorite: book?.isFavorite || false,
     };
     onSave(updatedBook);
   };
 
+  const renderRatingStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating / 2);
+    const hasHalfStar = rating % 2 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<Star key={`star-${i}`} className="w-5 h-5 fill-current text-yellow-400" />);
+    }
+
+    if (hasHalfStar) {
+      stars.push(<StarHalf key="half-star" className="w-5 h-5 fill-current text-yellow-400" />);
+    }
+
+    return stars;
+  };
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
       <div className="flex justify-between items-center p-4 border-b bg-gray-100">
-        <Button 
-          variant="default"
-          size="icon"
-          className="bg-gray-800 text-white hover:bg-gray-900"
-          onClick={onClose}
-        >
-          <X className="h-6 w-6" />
-        </Button>
-        <Button 
-          onClick={handleSave}
-          className="bg-gray-800 text-white hover:bg-gray-900"
-        >
-          <Save className="mr-2 h-4 w-4" />
-          Save
-        </Button>
+        <div className="flex-1">
+          <h2 className="text-xl font-semibold">{book ? book.title : title}</h2>
+          <p className="text-gray-600">by {book ? book.author : author}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="default"
+            size="icon"
+            className="bg-gray-800 text-white hover:bg-gray-900"
+            onClick={handleSave}
+          >
+            <Save className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="default"
+            size="icon"
+            className="bg-gray-800 text-white hover:bg-gray-900"
+            onClick={onClose}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -144,6 +172,25 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
               <SelectItem value="Finished">Finished</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="rating" className="text-sm font-medium">Rating</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              id="rating"
+              min={0}
+              max={10}
+              step={0.5}
+              value={[rating]}
+              onValueChange={(value) => setRating(value[0])}
+              className="flex-1"
+            />
+            <span className="min-w-[60px] text-right">{rating}/10</span>
+          </div>
+          <div className="flex gap-1 mt-2">
+            {renderRatingStars(rating)}
+          </div>
         </div>
 
         {book && <NoteSection book={book} onUpdateBook={onSave} />}
