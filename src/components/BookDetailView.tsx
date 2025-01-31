@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,8 +44,14 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
-  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus);
+  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (book?.status) {
+      setStatus(book.status as BookStatus);
+    }
+  }, [book?.status]);
 
   const handleSave = () => {
     const updatedBook = {
@@ -130,7 +136,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
           <Label htmlFor="status" className="text-sm font-medium">Status</Label>
           <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
             <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
-              <SelectValue placeholder="Select status" />
+              <SelectValue>{status}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Not started">Not started</SelectItem>

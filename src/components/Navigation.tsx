@@ -45,7 +45,7 @@ export function Navigation() {
                   "text-xs mt-1.5 font-medium transition-colors duration-200",
                   location.pathname === link.href 
                     ? "text-white" 
-                    : "text-white/90 group-hover:text-white"
+                    : "text-white hover:text-white"
                 )}>
                   {link.label}
                 </span>
