@@ -32,6 +32,7 @@ export interface Book {
   dateRead: string;
   rating: number;
   notes: Note[];
+  isFavorite?: boolean;
 }
 
 export interface Note {

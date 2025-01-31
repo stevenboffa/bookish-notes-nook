@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Book, Note } from "./BookList";
+import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Pencil, Save, Trash, X } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NoteSectionProps {
   book: Book;
@@ -19,171 +20,136 @@ interface NoteSectionProps {
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [newNote, setNewNote] = useState("");
-  const [editingNote, setEditingNote] = useState<string | null>(null);
-  const [editedContent, setEditedContent] = useState("");
   const [rating, setRating] = useState(book.rating);
-  const [unsavedChanges, setUnsavedChanges] = useState(false);
-  const [pendingNotes, setPendingNotes] = useState<Note[]>(book.notes);
+  const [date, setDate] = useState<Date | undefined>(
+    book.dateRead ? new Date(book.dateRead) : undefined
+  );
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
 
-    const newNoteObj = {
-      id: `temp_${Date.now()}`,
-      content: newNote,
-      createdAt: new Date().toISOString(),
+    const updatedBook = {
+      ...book,
+      notes: [
+        ...book.notes,
+        {
+          id: `temp_${Date.now()}`,
+          content: newNote,
+          createdAt: new Date().toISOString(),
+        },
+      ],
     };
 
-    setPendingNotes([...pendingNotes, newNoteObj]);
+    onUpdateBook(updatedBook);
     setNewNote("");
-    setUnsavedChanges(true);
-  };
-
-  const handleDeleteNote = (noteId: string) => {
-    setPendingNotes(pendingNotes.filter((note) => note.id !== noteId));
-    setUnsavedChanges(true);
-  };
-
-  const handleUpdateNote = (noteId: string) => {
-    setPendingNotes(
-      pendingNotes.map((note) =>
-        note.id === noteId ? { ...note, content: editedContent } : note
-      )
-    );
-    setEditingNote(null);
-    setUnsavedChanges(true);
   };
 
   const handleRatingChange = (newRating: number) => {
-    const validRating = Math.max(0, Math.min(10, newRating));
-    setRating(validRating);
-    setUnsavedChanges(true);
+    setRating(newRating);
+    onUpdateBook({ ...book, rating: newRating });
   };
 
-  const handleSaveChanges = () => {
-    const updatedBook = {
-      ...book,
-      rating,
-      notes: pendingNotes,
-    };
-    onUpdateBook(updatedBook);
-    setUnsavedChanges(false);
+  const handleDateChange = (newDate: Date | undefined) => {
+    setDate(newDate);
+    if (newDate) {
+      onUpdateBook({ ...book, dateRead: newDate.toISOString().split('T')[0] });
+    }
+  };
+
+  const handleFavoriteChange = (checked: boolean) => {
+    onUpdateBook({ ...book, isFavorite: checked });
   };
 
   return (
-    <div className="h-full flex flex-col gap-4 p-4">
-      <div className="flex justify-between items-center border-b border-book-accent/20 pb-4">
-        <h2 className="text-2xl font-serif font-bold text-book-DEFAULT">
-          {book.title}
-        </h2>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-serif">Rating:</span>
-          <Input
-            type="number"
-            min="0"
-            max="10"
-            value={rating}
-            onChange={(e) => handleRatingChange(Number(e.target.value))}
-            className="w-20"
-          />
+    <div className="p-4 h-full flex flex-col">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-serif font-semibold">{book.title}</h2>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="favorite"
+              checked={book.isFavorite}
+              onCheckedChange={handleFavoriteChange}
+            />
+            <label
+              htmlFor="favorite"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              <Star className={cn(
+                "h-4 w-4",
+                book.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400"
+              )} />
+            </label>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-[240px] justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={handleDateChange}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium">Rating</h3>
+          <div className="flex space-x-1">
+            {[...Array(10)].map((_, i) => (
+              <Button
+                key={i}
+                variant={rating > i ? "default" : "outline"}
+                className="h-8 w-8 p-0"
+                onClick={() => handleRatingChange(i + 1)}
+              >
+                {i + 1}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-lg font-medium">Notes</h3>
+          <div className="flex space-x-2">
+            <Input
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="Add a note..."
+              className="flex-1"
+            />
+            <Button onClick={handleAddNote}>Add Note</Button>
+          </div>
+          <div className="space-y-2 mt-4">
+            {book.notes.map((note) => (
+              <div
+                key={note.id}
+                className="p-3 bg-white rounded-lg shadow animate-fade-in"
+              >
+                <p className="text-sm">{note.content}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(note.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      <div className="flex gap-2">
-        <Textarea
-          placeholder="Add a new note..."
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-          className="flex-1 font-serif"
-        />
-        <Button
-          onClick={handleAddNote}
-          className="bg-[#1A1F2C] hover:bg-[#2C3E50] text-white"
-        >
-          Add Note
-        </Button>
-      </div>
-
-      <div className="flex-1 overflow-auto space-y-3">
-        {pendingNotes.map((note) => (
-          <Card
-            key={note.id}
-            className="border-book-accent/20 animate-fade-in"
-          >
-            <CardHeader className="p-4">
-              <div className="flex justify-between items-start">
-                <CardDescription className="font-serif">
-                  {new Date(note.createdAt).toLocaleString()}
-                </CardDescription>
-                <div className="flex gap-1">
-                  {editingNote === note.id ? (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleUpdateNote(note.id)}
-                        className="hover:bg-book-accent/10"
-                      >
-                        <Save className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setEditingNote(null)}
-                        className="hover:bg-book-accent/10"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setEditingNote(note.id);
-                          setEditedContent(note.content);
-                        }}
-                        className="hover:bg-book-accent/10"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteNote(note.id)}
-                        className="hover:bg-book-accent/10"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-              {editingNote === note.id ? (
-                <Textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  className="mt-2 font-serif"
-                />
-              ) : (
-                <CardContent className="p-0 mt-2 font-serif">
-                  {note.content}
-                </CardContent>
-              )}
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
-
-      {unsavedChanges && (
-        <Button
-          onClick={handleSaveChanges}
-          className="bg-[#1A1F2C] hover:bg-[#2C3E50] text-white mt-4"
-        >
-          Save Changes
-        </Button>
-      )}
     </div>
   );
 }

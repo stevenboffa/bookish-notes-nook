@@ -16,6 +16,7 @@ export type Database = {
           date_read: string
           genre: string
           id: string
+          is_favorite: boolean | null
           rating: number | null
           title: string
           user_id: string
@@ -26,6 +27,7 @@ export type Database = {
           date_read: string
           genre: string
           id?: string
+          is_favorite?: boolean | null
           rating?: number | null
           title: string
           user_id: string
@@ -36,6 +38,7 @@ export type Database = {
           date_read?: string
           genre?: string
           id?: string
+          is_favorite?: boolean | null
           rating?: number | null
           title?: string
           user_id?: string

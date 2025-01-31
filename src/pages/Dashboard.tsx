@@ -133,10 +133,13 @@ const Dashboard = () => {
 
   const handleUpdateBook = async (updatedBook: Book) => {
     try {
-      // Update book rating
       const { error: bookError } = await supabase
         .from('books')
-        .update({ rating: updatedBook.rating })
+        .update({
+          rating: updatedBook.rating,
+          date_read: updatedBook.dateRead,
+          is_favorite: updatedBook.isFavorite
+        })
         .eq('id', updatedBook.id);
 
       if (bookError) throw bookError;
@@ -144,7 +147,6 @@ const Dashboard = () => {
       // Handle notes
       for (const note of updatedBook.notes) {
         if (note.id.startsWith('temp_')) {
-          // Insert new note
           const { error: noteError } = await supabase
             .from('notes')
             .insert({
@@ -156,7 +158,6 @@ const Dashboard = () => {
         }
       }
 
-      // Refresh books to get updated data
       await fetchBooks();
       
       toast({
