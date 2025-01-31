@@ -58,7 +58,8 @@ export default function AddBook() {
       return;
     }
 
-    const { error } = await supabase.from("books").upsert({
+    // When updating, ensure we're sending all required fields
+    const bookData = {
       id: updatedBook.id,
       title: updatedBook.title,
       author: updatedBook.author,
@@ -68,7 +69,14 @@ export default function AddBook() {
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
-    });
+    };
+
+    const { error } = await supabase
+      .from("books")
+      .upsert(bookData, {
+        onConflict: 'id',
+        ignoreDuplicates: false,
+      });
 
     if (error) {
       console.error('Error saving book:', error);
