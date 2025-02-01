@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -13,13 +14,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface BookStats {
   notStarted: number;
@@ -27,15 +21,10 @@ interface BookStats {
   finished: number;
 }
 
-interface Book {
-  id: string;
-  title: string;
-  is_top_favorite: number | null;
-}
-
 export default function Profile() {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [stats, setStats] = useState<BookStats>({
     notStarted: 0,
     inProgress: 0,
@@ -43,8 +32,6 @@ export default function Profile() {
   });
   const [newPassword, setNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [books, setBooks] = useState<Book[]>([]);
-  const [topFavorites, setTopFavorites] = useState<Record<number, string>>({});
 
   useEffect(() => {
     if (!session) {
@@ -52,7 +39,6 @@ export default function Profile() {
       return;
     }
     fetchStats();
-    fetchBooks();
   }, [session, navigate]);
 
   const fetchStats = async () => {
@@ -87,29 +73,6 @@ export default function Profile() {
     }
   };
 
-  const fetchBooks = async () => {
-    try {
-      const { data } = await supabase
-        .from("books")
-        .select("id, title, is_top_favorite")
-        .eq("user_id", session?.user.id)
-        .order("created_at", { ascending: false });
-
-      if (data) {
-        setBooks(data);
-        const favorites: Record<number, string> = {};
-        data.forEach((book) => {
-          if (book.is_top_favorite) {
-            favorites[book.is_top_favorite] = book.id;
-          }
-        });
-        setTopFavorites(favorites);
-      }
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    }
-  };
-
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -128,45 +91,19 @@ export default function Profile() {
 
       if (error) throw error;
 
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      });
       setNewPassword("");
     } catch (error: any) {
-      console.error("Error changing password:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setIsChangingPassword(false);
-    }
-  };
-
-  const handleTopFavoriteChange = async (position: string, bookId: string) => {
-    const pos = parseInt(position);
-    try {
-      // Remove the previous favorite from this position if it exists
-      if (topFavorites[pos]) {
-        await supabase
-          .from("books")
-          .update({ is_top_favorite: null })
-          .eq("id", topFavorites[pos]);
-      }
-
-      // Remove the book from its previous position if it was a favorite
-      Object.entries(topFavorites).forEach(async ([p, id]) => {
-        if (id === bookId) {
-          await supabase
-            .from("books")
-            .update({ is_top_favorite: null })
-            .eq("id", id);
-        }
-      });
-
-      // Set the new favorite
-      await supabase
-        .from("books")
-        .update({ is_top_favorite: pos })
-        .eq("id", bookId);
-
-      // Refresh the books list
-      fetchBooks();
-    } catch (error) {
-      console.error("Error updating top favorites:", error);
     }
   };
 
@@ -215,42 +152,14 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Top 3 Favorite Books</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3].map((position) => (
-              <div key={position} className="flex items-center gap-2">
-                <span className="font-medium">#{position}</span>
-                <Select
-                  value={topFavorites[position] || ""}
-                  onValueChange={(value) =>
-                    handleTopFavoriteChange(position.toString(), value)
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a book" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {books.map((book) => (
-                      <SelectItem key={book.id} value={book.id}>
-                        {book.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="space-y-4">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full justify-start" size="lg">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              size="lg"
+            >
               <Lock className="mr-2 h-4 w-4" />
               Change Password
             </Button>
