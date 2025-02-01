@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
-import { Book, Note } from "@/components/BookList";
+import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -17,8 +17,8 @@ export default function AddBook() {
   const { session } = useAuth();
 
   useEffect(() => {
-    const fetchBook = async () => {
-      if (id) {
+    if (id) {
+      const fetchBook = async () => {
         const { data, error } = await supabase
           .from("books")
           .select("*, notes(*)")
@@ -32,12 +32,6 @@ export default function AddBook() {
         }
 
         if (data) {
-          const notes: Note[] = data.notes.map((note: any) => ({
-            id: note.id,
-            content: note.content,
-            createdAt: note.created_at,
-          }));
-
           setBook({
             id: data.id,
             title: data.title,
@@ -46,14 +40,31 @@ export default function AddBook() {
             dateRead: data.date_read,
             rating: Number(data.rating) || 0,
             status: data.status as BookStatus || "Not started",
-            notes,
+            notes: data.notes.map((note: any) => ({
+              id: note.id,
+              content: note.content,
+              createdAt: note.created_at,
+            })),
             isFavorite: data.is_favorite || false,
           });
         }
-      }
-    };
+      };
 
-    fetchBook();
+      fetchBook();
+    } else {
+      // Initialize with empty book for new entries
+      setBook({
+        id: '',
+        title: '',
+        author: '',
+        genre: '',
+        dateRead: new Date().toISOString().split('T')[0],
+        rating: 0,
+        status: "Not started",
+        notes: [],
+        isFavorite: false,
+      });
+    }
   }, [id]);
 
   const handleSave = async (updatedBook: Book) => {
@@ -73,23 +84,19 @@ export default function AddBook() {
       user_id: session.user.id,
     };
 
-    // If editing an existing book, include the ID
-    if (id) {
-      bookData.id = id;
-    }
+    try {
+      const { error } = await supabase
+        .from("books")
+        .upsert({ ...bookData, id: id || undefined });
 
-    const { error } = await supabase
-      .from("books")
-      .upsert(bookData);
+      if (error) throw error;
 
-    if (error) {
+      toast.success("Book saved successfully");
+      navigate("/dashboard");
+    } catch (error) {
       console.error('Error saving book:', error);
       toast.error("Failed to save book");
-      return;
     }
-
-    toast.success("Book saved successfully");
-    navigate("/dashboard");
   };
 
   const handleClose = () => {
@@ -99,7 +106,7 @@ export default function AddBook() {
   return (
     <div className="flex-1 md:container px-4 py-8">
       <BookDetailView 
-        book={id ? book : null} 
+        book={book} 
         onSave={handleSave} 
         onClose={handleClose} 
       />
