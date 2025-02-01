@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
@@ -17,7 +16,6 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { session } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -62,11 +60,6 @@ const Dashboard = () => {
 
       setBooks(formattedBooks);
     } catch (error) {
-      toast({
-        title: "Error fetching books",
-        description: "Please try again later",
-        variant: "destructive",
-      });
       console.error('Error fetching books:', error);
     } finally {
       setIsLoading(false);
@@ -86,17 +79,7 @@ const Dashboard = () => {
       if (selectedBook?.id === bookId) {
         setSelectedBook(null);
       }
-      
-      toast({
-        title: "Book deleted",
-        description: "The book has been successfully removed",
-      });
     } catch (error) {
-      toast({
-        title: "Error deleting book",
-        description: "Please try again later",
-        variant: "destructive",
-      });
       console.error('Error deleting book:', error);
     }
   };
@@ -124,17 +107,7 @@ const Dashboard = () => {
       setBooks(books.map(book => 
         book.id === updatedBook.id ? updatedBook : book
       ));
-      
-      toast({
-        title: "Book updated",
-        description: "Changes have been saved successfully",
-      });
     } catch (error) {
-      toast({
-        title: "Error updating book",
-        description: "Please try again later",
-        variant: "destructive",
-      });
       console.error('Error updating book:', error);
     }
   };
