@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface GoogleBook {
   id: string;
@@ -41,24 +41,29 @@ export default function AddBook() {
     setIsSearching(true);
     try {
       // First, get the API key from Supabase
-      const { data: { value: apiKey }, error: keyError } = await supabase
+      const { data: secretData, error: secretError } = await supabase
         .from('secrets')
         .select('value')
         .eq('name', 'GOOGLE_BOOKS_API_KEY')
         .single();
 
-      if (keyError) {
-        throw new Error('Could not retrieve API key');
+      if (secretError) {
+        throw new Error('Could not retrieve API key from secrets');
+      }
+
+      if (!secretData?.value) {
+        throw new Error('API key not found in secrets');
       }
 
       const response = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
           searchQuery
-        )}&key=${apiKey}&maxResults=1`
+        )}&key=${secretData.value}&maxResults=1`
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch book data');
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to fetch book data');
       }
 
       const data = await response.json();
@@ -92,7 +97,7 @@ export default function AddBook() {
       console.error('Error searching books:', error);
       toast({
         title: "Error searching books",
-        description: "Please try again later",
+        description: error instanceof Error ? error.message : "Please try again later",
         variant: "destructive",
       });
     } finally {
