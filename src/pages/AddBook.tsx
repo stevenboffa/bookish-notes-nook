@@ -4,6 +4,7 @@ import { BookDetailView } from "@/components/BookDetailView";
 import { Book, Note } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
 
@@ -24,6 +25,7 @@ export default function AddBook() {
 
         if (error) {
           console.error('Error fetching book:', error);
+          toast.error("Failed to fetch book details");
           return;
         }
 
@@ -54,32 +56,47 @@ export default function AddBook() {
 
   const handleSave = async (updatedBook: Book) => {
     if (!session?.user?.id) {
-      console.error('User must be logged in to save books');
+      toast.error("You must be logged in to save books");
       return;
     }
 
-    const bookData = {
-      id: updatedBook.id,
-      title: updatedBook.title,
-      author: updatedBook.author,
-      genre: updatedBook.genre,
-      date_read: updatedBook.dateRead,
-      rating: Number(updatedBook.rating),
-      status: updatedBook.status,
-      is_favorite: updatedBook.isFavorite,
-      user_id: session.user.id,
-    };
+    try {
+      const bookData = {
+        title: updatedBook.title,
+        author: updatedBook.author,
+        genre: updatedBook.genre,
+        date_read: updatedBook.dateRead,
+        rating: updatedBook.rating,
+        status: updatedBook.status,
+        is_favorite: updatedBook.isFavorite,
+        user_id: session.user.id,
+      };
 
-    const { error } = await supabase
-      .from("books")
-      .upsert(bookData);
+      let response;
+      
+      if (id) {
+        // Update existing book
+        response = await supabase
+          .from("books")
+          .update(bookData)
+          .eq("id", id);
+      } else {
+        // Create new book
+        response = await supabase
+          .from("books")
+          .insert([bookData]);
+      }
 
-    if (error) {
+      if (response.error) {
+        throw response.error;
+      }
+
+      toast.success(id ? "Book updated successfully" : "Book added successfully");
+      navigate("/dashboard");
+    } catch (error) {
       console.error('Error saving book:', error);
-      return;
+      toast.error("Failed to save book");
     }
-
-    navigate("/dashboard");
   };
 
   const handleClose = () => {
