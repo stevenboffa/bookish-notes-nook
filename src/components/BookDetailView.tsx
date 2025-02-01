@@ -14,6 +14,7 @@ import {
 import { X, Save, Star, StarHalf } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const genres = [
   "Fiction",
@@ -48,6 +49,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const [rating, setRating] = useState(book?.rating || 0);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (book) {
@@ -103,25 +105,23 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
-      <div className="flex justify-between items-center p-4 border-b bg-gray-100">
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold">{title}</h2>
-          <p className="text-gray-600">by {author}</p>
+    <div className="flex flex-col h-full bg-white">
+      <div className="flex justify-between items-center p-4 border-b bg-gray-100 sticky top-0 z-10">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl font-semibold truncate">{title}</h2>
+          <p className="text-gray-600 truncate">by {author}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-2">
           <Button 
-            variant="default"
+            variant="ghost"
             size="icon"
-            className="bg-gray-800 text-white hover:bg-gray-900"
             onClick={handleSave}
           >
             <Save className="h-5 w-5" />
           </Button>
           <Button 
-            variant="default"
+            variant="ghost"
             size="icon"
-            className="bg-gray-800 text-white hover:bg-gray-900"
             onClick={onClose}
           >
             <X className="h-5 w-5" />
@@ -129,10 +129,10 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+      <div className={`flex-1 overflow-y-auto p-4 space-y-6 ${isMobile ? 'pb-20' : ''}`}>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-medium">Title</Label>
+            <Label htmlFor="title">Title</Label>
             <Input
               id="title"
               value={title}
@@ -143,7 +143,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="author" className="text-sm font-medium">Author</Label>
+            <Label htmlFor="author">Author</Label>
             <Input
               id="author"
               value={author}
@@ -154,7 +154,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="genre" className="text-sm font-medium">Genre</Label>
+            <Label htmlFor="genre">Genre</Label>
             <Select value={genre} onValueChange={setGenre}>
               <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
                 <SelectValue placeholder="Select genre" />
@@ -171,7 +171,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="status" className="text-sm font-medium">Status</Label>
+          <Label htmlFor="status">Status</Label>
           <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
             <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
               <SelectValue>{status}</SelectValue>
@@ -185,7 +185,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="rating" className="text-sm font-medium">Rating</Label>
+          <Label htmlFor="rating">Rating</Label>
           <div className="flex items-center gap-4">
             <Slider
               id="rating"

@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -16,6 +18,7 @@ const Dashboard = () => {
   const { session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -161,7 +164,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex-1 flex">
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         <BookFilters
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
@@ -176,14 +179,29 @@ const Dashboard = () => {
           />
         </div>
       </div>
-      {selectedBook && (
-        <div className="w-1/3 border-l border-gray-200 h-screen sticky top-0">
-          <BookDetailView
-            book={selectedBook}
-            onSave={handleUpdateBook}
-            onClose={() => setSelectedBook(null)}
-          />
-        </div>
+      
+      {isMobile ? (
+        <Sheet open={!!selectedBook} onOpenChange={(open) => !open && setSelectedBook(null)}>
+          <SheetContent side="bottom" className="h-[85vh] p-0">
+            {selectedBook && (
+              <BookDetailView
+                book={selectedBook}
+                onSave={handleUpdateBook}
+                onClose={() => setSelectedBook(null)}
+              />
+            )}
+          </SheetContent>
+        </Sheet>
+      ) : (
+        selectedBook && (
+          <div className="w-1/3 border-l border-gray-200 h-screen sticky top-0">
+            <BookDetailView
+              book={selectedBook}
+              onSave={handleUpdateBook}
+              onClose={() => setSelectedBook(null)}
+            />
+          </div>
+        )
       )}
     </div>
   );
