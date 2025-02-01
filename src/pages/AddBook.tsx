@@ -46,14 +46,15 @@ export default function AddBook() {
     }
 
     try {
-      const { error } = await supabase
-        .from("books")
-        .insert({
-          ...values,
-          date_read: new Date().toISOString().split('T')[0],
-          user_id: session.user.id,
-          rating: 0,
-        });
+      const { error } = await supabase.from("books").insert({
+        title: values.title,
+        author: values.author,
+        genre: values.genre,
+        status: values.status,
+        date_read: new Date().toISOString().split('T')[0],
+        user_id: session.user.id,
+        rating: 0,
+      });
 
       if (error) throw error;
 
@@ -64,6 +65,25 @@ export default function AddBook() {
       toast.error("Failed to add book");
     }
   };
+
+  const genres = [
+    "Fiction",
+    "Non-Fiction",
+    "Mystery",
+    "Science Fiction",
+    "Fantasy",
+    "Romance",
+    "Thriller",
+    "Horror",
+    "Biography",
+    "History",
+    "Science",
+    "Technology",
+    "Self-Help",
+    "Poetry",
+    "Drama",
+    "Other"
+  ];
 
   return (
     <div className="flex-1 md:container px-4 py-8">
@@ -104,9 +124,18 @@ export default function AddBook() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Genre</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter book genre" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a genre" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {genres.map((genre) => (
+                        <SelectItem key={genre} value={genre}>
+                          {genre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormItem>
               )}
             />
