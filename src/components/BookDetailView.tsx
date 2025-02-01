@@ -14,7 +14,6 @@ import {
 import { X, Save, Star, StarHalf } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
-import { Textarea } from "@/components/ui/textarea";
 
 const genres = [
   "Fiction",
@@ -104,23 +103,25 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="flex justify-between items-center p-4 border-b">
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg">
+      <div className="flex justify-between items-center p-4 border-b bg-gray-100">
         <div className="flex-1">
           <h2 className="text-xl font-semibold">{title}</h2>
           <p className="text-gray-600">by {author}</p>
         </div>
         <div className="flex gap-2">
           <Button 
-            variant="ghost"
+            variant="default"
             size="icon"
+            className="bg-gray-800 text-white hover:bg-gray-900"
             onClick={handleSave}
           >
             <Save className="h-5 w-5" />
           </Button>
           <Button 
-            variant="ghost"
+            variant="default"
             size="icon"
+            className="bg-gray-800 text-white hover:bg-gray-900"
             onClick={onClose}
           >
             <X className="h-5 w-5" />
@@ -128,39 +129,77 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue>{status}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Not started">Not started</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Finished">Finished</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="title" className="text-sm font-medium">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter book title"
+              className="border-book-DEFAULT/20 focus:border-book-DEFAULT"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rating">Rating</Label>
-            <div className="flex items-center gap-4">
-              <Slider
-                id="rating"
-                min={0}
-                max={10}
-                step={0.5}
-                value={[rating]}
-                onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
-                className="flex-1"
-              />
-              <span className="min-w-[60px] text-right">{rating.toFixed(1)}/10</span>
-            </div>
-            <div className="flex gap-1 mt-2">
-              {renderRatingStars(rating)}
-            </div>
+            <Label htmlFor="author" className="text-sm font-medium">Author</Label>
+            <Input
+              id="author"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              placeholder="Enter author name"
+              className="border-book-DEFAULT/20 focus:border-book-DEFAULT"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="genre" className="text-sm font-medium">Genre</Label>
+            <Select value={genre} onValueChange={setGenre}>
+              <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
+                <SelectValue placeholder="Select genre" />
+              </SelectTrigger>
+              <SelectContent>
+                {genres.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status" className="text-sm font-medium">Status</Label>
+          <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
+            <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
+              <SelectValue>{status}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Not started">Not started</SelectItem>
+              <SelectItem value="In Progress">In Progress</SelectItem>
+              <SelectItem value="Finished">Finished</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="rating" className="text-sm font-medium">Rating</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              id="rating"
+              min={0}
+              max={10}
+              step={0.5}
+              value={[rating]}
+              onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
+              className="flex-1"
+            />
+            <span className="min-w-[60px] text-right">{rating.toFixed(1)}/10</span>
+          </div>
+          <div className="flex gap-1 mt-2">
+            {renderRatingStars(rating)}
           </div>
         </div>
 
