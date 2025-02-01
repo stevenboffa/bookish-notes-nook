@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-const GOOGLE_BOOKS_API_KEY = 'AIzaSyBUuPxP7FIfsJhYAjKPABCmtEWSSHv6J8Y';
-
 interface GoogleBook {
   id: string;
   volumeInfo: {
@@ -42,11 +40,27 @@ export default function AddBook() {
 
     setIsSearching(true);
     try {
+      // First, get the API key from Supabase
+      const { data: { value: apiKey }, error: keyError } = await supabase
+        .from('secrets')
+        .select('value')
+        .eq('name', 'GOOGLE_BOOKS_API_KEY')
+        .single();
+
+      if (keyError) {
+        throw new Error('Could not retrieve API key');
+      }
+
       const response = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
           searchQuery
-        )}&key=${GOOGLE_BOOKS_API_KEY}&maxResults=1`
+        )}&key=${apiKey}&maxResults=1`
       );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch book data');
+      }
+
       const data = await response.json();
 
       if (data.items && data.items.length > 0) {
