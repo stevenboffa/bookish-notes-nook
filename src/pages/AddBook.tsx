@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { BookDetailView } from "@/components/BookDetailView";
 import { Book, Note } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Database } from "@/integrations/supabase/types";
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
+type BookData = Database['public']['Tables']['books']['Insert'];
 
 export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
@@ -60,12 +61,12 @@ export default function AddBook() {
       return;
     }
 
-    const bookData = {
+    const bookData: BookData = {
       title: updatedBook.title,
       author: updatedBook.author,
       genre: updatedBook.genre,
       date_read: updatedBook.dateRead,
-      rating: Number(updatedBook.rating),
+      rating: updatedBook.rating,
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
