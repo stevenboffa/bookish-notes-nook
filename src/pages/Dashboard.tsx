@@ -4,14 +4,12 @@ import { BookFilters } from "@/components/BookFilters";
 import { BookDetailView } from "@/components/BookDetailView";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const { session } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -103,7 +101,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex-1 flex">
+    <div className="flex h-screen overflow-hidden">
       <div className="flex-1 flex flex-col">
         <BookFilters
           activeFilter={activeFilter}
@@ -120,7 +118,7 @@ const Dashboard = () => {
         </div>
       </div>
       {selectedBook && (
-        <div className="w-1/3 border-l border-gray-200 h-screen sticky top-0">
+        <div className="w-1/3 border-l border-gray-200 h-screen overflow-y-auto">
           <BookDetailView
             book={selectedBook}
             onSave={handleSaveBook}
