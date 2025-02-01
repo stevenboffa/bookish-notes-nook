@@ -17,6 +17,7 @@ export type Database = {
           genre: string
           id: string
           is_favorite: boolean | null
+          is_top_favorite: number | null
           rating: number | null
           status: string | null
           title: string
@@ -29,6 +30,7 @@ export type Database = {
           genre: string
           id?: string
           is_favorite?: boolean | null
+          is_top_favorite?: number | null
           rating?: number | null
           status?: string | null
           title: string
@@ -41,6 +43,7 @@ export type Database = {
           genre?: string
           id?: string
           is_favorite?: boolean | null
+          is_top_favorite?: number | null
           rating?: number | null
           status?: string | null
           title?: string
