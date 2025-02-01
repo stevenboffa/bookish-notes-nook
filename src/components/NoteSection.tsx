@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Book, Note } from "./BookList";
+import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,8 +34,10 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         createdAt: noteData.created_at,
       };
 
+      // Update local state immediately
       setLocalNotes(prevNotes => [newNoteObject, ...prevNotes]);
 
+      // Update parent component
       const updatedBook = {
         ...book,
         notes: [newNoteObject, ...book.notes],
@@ -51,6 +53,8 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   return (
     <div className="p-4 h-full flex flex-col">
       <div className="space-y-4">
+        <h2 className="text-2xl font-serif font-semibold">{book.title}</h2>
+
         <div className="space-y-2">
           <h3 className="text-lg font-medium">Notes</h3>
           <div className="flex flex-col space-y-2">
