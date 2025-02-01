@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -14,21 +13,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BookDetailView } from "@/components/BookDetailView";
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
 
+interface BookFormData {
+  title: string;
+  author: string;
+  genre: string;
+  dateRead: string;
+  status: BookStatus;
+}
+
 export default function AddBook() {
-  const [book, setBook] = useState<Book>({
-    id: "",
+  const [formData, setFormData] = useState<BookFormData>({
     title: "",
     author: "",
     genre: "",
     dateRead: new Date().toISOString().split('T')[0],
-    rating: 0,
     status: "Not started",
-    isFavorite: false,
-    notes: [],
   });
 
   const { id } = useParams();
@@ -36,93 +38,76 @@ export default function AddBook() {
   const { session } = useAuth();
 
   useEffect(() => {
-    const fetchBook = async () => {
-      if (!id) return;
-
-      try {
-        const { data: bookData, error: bookError } = await supabase
-          .from("books")
-          .select("*, notes(*)")
-          .eq("id", id)
-          .single();
-
-        if (bookError) throw bookError;
-
-        if (bookData) {
-          const notes = bookData.notes.map((note: any) => ({
-            id: note.id,
-            content: note.content,
-            createdAt: note.created_at,
-          }));
-
-          setBook({
-            id: bookData.id,
-            title: bookData.title,
-            author: bookData.author,
-            genre: bookData.genre,
-            dateRead: bookData.date_read,
-            rating: Number(bookData.rating) || 0,
-            status: bookData.status as BookStatus || "Not started",
-            notes,
-            isFavorite: bookData.is_favorite || false,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching book:', error);
-        toast.error("Failed to fetch book details");
-      }
-    };
-
-    fetchBook();
+    if (id) {
+      fetchBook();
+    }
   }, [id]);
 
-  const handleSave = async (updatedBook: Book) => {
+  const fetchBook = async () => {
+    try {
+      const { data: book, error } = await supabase
+        .from("books")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      if (book) {
+        setFormData({
+          title: book.title,
+          author: book.author,
+          genre: book.genre,
+          dateRead: book.date_read,
+          status: book.status as BookStatus,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching book:', error);
+      toast.error("Failed to fetch book details");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!session?.user?.id) {
-      toast.error("You must be logged in to save books");
+      toast.error("You must be logged in to add books");
       return;
     }
 
     try {
       const bookData = {
-        title: updatedBook.title,
-        author: updatedBook.author,
-        genre: updatedBook.genre,
-        date_read: updatedBook.dateRead,
-        rating: updatedBook.rating,
-        status: updatedBook.status,
-        is_favorite: updatedBook.isFavorite,
+        title: formData.title,
+        author: formData.author,
+        genre: formData.genre,
+        date_read: formData.dateRead,
+        status: formData.status,
         user_id: session.user.id,
       };
 
-      let response;
-      
       if (id) {
-        response = await supabase
+        const { error } = await supabase
           .from("books")
           .update(bookData)
           .eq("id", id);
+
+        if (error) throw error;
+        toast.success("Book updated successfully");
       } else {
-        response = await supabase
+        const { error } = await supabase
           .from("books")
           .insert([bookData]);
+
+        if (error) throw error;
+        toast.success("Book added successfully");
       }
 
-      if (response.error) throw response.error;
-
-      toast.success(id ? "Book updated successfully" : "Book added successfully");
       navigate("/dashboard");
     } catch (error) {
       console.error('Error saving book:', error);
       toast.error("Failed to save book");
     }
-  };
-
-  const handleClose = () => {
-    navigate("/dashboard");
-  };
-
-  const handleInputChange = (field: keyof Book, value: string) => {
-    setBook(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -132,32 +117,35 @@ export default function AddBook() {
           <h2 className="text-2xl font-semibold mb-6">
             {id ? "Edit Book" : "Add New Book"}
           </h2>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
-                value={book.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Enter book title"
+                required
               />
             </div>
             <div>
               <Label htmlFor="author">Author</Label>
               <Input
                 id="author"
-                value={book.author}
-                onChange={(e) => handleInputChange("author", e.target.value)}
+                value={formData.author}
+                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                 placeholder="Enter author name"
+                required
               />
             </div>
             <div>
               <Label htmlFor="genre">Genre</Label>
               <Input
                 id="genre"
-                value={book.genre}
-                onChange={(e) => handleInputChange("genre", e.target.value)}
+                value={formData.genre}
+                onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
                 placeholder="Enter book genre"
+                required
               />
             </div>
             <div>
@@ -165,18 +153,19 @@ export default function AddBook() {
               <Input
                 id="dateRead"
                 type="date"
-                value={book.dateRead}
-                onChange={(e) => handleInputChange("dateRead", e.target.value)}
+                value={formData.dateRead}
+                onChange={(e) => setFormData({ ...formData, dateRead: e.target.value })}
+                required
               />
             </div>
             <div>
               <Label htmlFor="status">Status</Label>
               <Select 
-                value={book.status} 
-                onValueChange={(value: BookStatus) => handleInputChange("status", value)}
+                value={formData.status} 
+                onValueChange={(value: BookStatus) => setFormData({ ...formData, status: value })}
               >
                 <SelectTrigger>
-                  <SelectValue>{book.status}</SelectValue>
+                  <SelectValue>{formData.status}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Not started">Not started</SelectItem>
@@ -187,19 +176,20 @@ export default function AddBook() {
             </div>
             <div className="flex gap-2 pt-4">
               <Button
-                onClick={() => handleSave(book)}
+                type="submit"
                 className="bg-gray-900 text-white hover:bg-gray-800"
               >
                 {id ? "Update Book" : "Add Book"}
               </Button>
               <Button
+                type="button"
                 variant="outline"
-                onClick={handleClose}
+                onClick={() => navigate("/dashboard")}
               >
                 Cancel
               </Button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
