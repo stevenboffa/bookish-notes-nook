@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 import AddBook from "./pages/AddBook";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/add-book" element={<AddBook />} />
               <Route path="/edit-book/:id" element={<AddBook />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
