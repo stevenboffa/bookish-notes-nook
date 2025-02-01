@@ -1,15 +1,26 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { BookDetailView } from "@/components/BookDetailView";
 import { Book, Note } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { BookDetailView } from "@/components/BookDetailView";
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
 
 export default function AddBook() {
-  const [book, setBook] = useState<Book | null>(null);
+  const [book, setBook] = useState<Book>({
+    id: "",
+    title: "",
+    author: "",
+    genre: "",
+    dateRead: new Date().toISOString().split('T')[0],
+    rating: 0,
+    status: "Not started",
+    isFavorite: false,
+    notes: [],
+  });
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -104,8 +115,12 @@ export default function AddBook() {
   };
 
   return (
-    <div className="flex-1 md:container">
-      <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
+    <div className="flex-1 md:container p-4">
+      <BookDetailView 
+        book={book} 
+        onSave={handleSave} 
+        onClose={handleClose} 
+      />
     </div>
   );
 }
