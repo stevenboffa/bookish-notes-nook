@@ -21,8 +21,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col bg-gray-50">
-            <Navigation />
+          <div className="min-h-screen flex flex-col bg-gray-50 pb-[80px]">
             <Routes>
               <Route path="/" element={<Welcome />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -32,6 +31,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <Navigation />
           </div>
         </BrowserRouter>
       </TooltipProvider>

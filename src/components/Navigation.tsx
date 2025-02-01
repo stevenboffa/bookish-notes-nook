@@ -32,7 +32,7 @@ export function Navigation() {
   }, []);
 
   return (
-    <nav className="sticky bottom-0 z-50 bg-white border-t shadow-lg pb-safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg pb-safe-bottom">
       <div className="container mx-auto px-4">
         <div className="flex justify-around items-center py-2">
           {links.map((link) => {
