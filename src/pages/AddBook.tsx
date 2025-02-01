@@ -4,6 +4,7 @@ import { BookDetailView } from "@/components/BookDetailView";
 import { Book, Note } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
 
@@ -24,6 +25,7 @@ export default function AddBook() {
 
         if (error) {
           console.error('Error fetching book:', error);
+          toast.error("Failed to fetch book details");
           return;
         }
 
@@ -54,12 +56,11 @@ export default function AddBook() {
 
   const handleSave = async (updatedBook: Book) => {
     if (!session?.user?.id) {
-      console.error('User must be logged in to save books');
+      toast.error('You must be logged in to save books');
       return;
     }
 
     const bookData = {
-      id: updatedBook.id,
       title: updatedBook.title,
       author: updatedBook.author,
       genre: updatedBook.genre,
@@ -70,15 +71,22 @@ export default function AddBook() {
       user_id: session.user.id,
     };
 
+    // If editing an existing book, include the ID
+    if (id) {
+      bookData.id = id;
+    }
+
     const { error } = await supabase
       .from("books")
       .upsert(bookData);
 
     if (error) {
       console.error('Error saving book:', error);
+      toast.error("Failed to save book");
       return;
     }
 
+    toast.success("Book saved successfully");
     navigate("/dashboard");
   };
 
@@ -86,9 +94,14 @@ export default function AddBook() {
     navigate("/dashboard");
   };
 
+  // For new books, we pass null as the book prop
   return (
-    <div className="flex-1 md:container">
-      <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
+    <div className="flex-1 md:container px-4 py-8">
+      <BookDetailView 
+        book={id ? book : null} 
+        onSave={handleSave} 
+        onClose={handleClose} 
+      />
     </div>
   );
 }
