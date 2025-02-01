@@ -5,9 +5,10 @@ import { BookDetailView } from "@/components/BookDetailView";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -138,10 +139,26 @@ const Dashboard = () => {
   return (
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
-        <BookFilters
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-        />
+        <div className="bg-white border-b sticky top-0 z-20">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-semibold text-text">My Books</h1>
+              <p className="text-sm text-text-muted">{books.length} books in your collection</p>
+            </div>
+            <Button
+              onClick={() => navigate('/add-book')}
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Book
+            </Button>
+          </div>
+          <BookFilters
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
+        </div>
         <div className="flex-1 overflow-auto pb-20">
           <BookList
             books={books}
