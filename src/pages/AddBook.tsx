@@ -1,56 +1,90 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
-import { Book, Note } from "@/components/BookList";
+import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
-type BookStatus = "Not started" | "In Progress" | "Finished";
+const GOOGLE_BOOKS_API_KEY = 'AIzaSyBUuPxP7FIfsJhYAjKPABCmtEWSSHv6J8Y';
+
+interface GoogleBook {
+  id: string;
+  volumeInfo: {
+    title: string;
+    authors?: string[];
+    categories?: string[];
+    publishedDate?: string;
+    description?: string;
+  };
+}
 
 export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchBook = async () => {
-      if (id) {
-        const { data, error } = await supabase
-          .from("books")
-          .select("*, notes(*)")
-          .eq("id", id)
-          .single();
+  const searchBooks = async () => {
+    if (!searchQuery.trim()) {
+      toast({
+        title: "Please enter a search term",
+        variant: "destructive",
+      });
+      return;
+    }
 
-        if (error) {
-          console.error('Error fetching book:', error);
-          return;
-        }
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+          searchQuery
+        )}&key=${GOOGLE_BOOKS_API_KEY}&maxResults=1`
+      );
+      const data = await response.json();
 
-        if (data) {
-          const notes: Note[] = data.notes.map((note: any) => ({
-            id: note.id,
-            content: note.content,
-            createdAt: note.created_at,
-          }));
-
-          setBook({
-            id: data.id,
-            title: data.title,
-            author: data.author,
-            genre: data.genre,
-            dateRead: data.date_read,
-            rating: Number(data.rating) || 0,
-            status: data.status as BookStatus || "Not started",
-            notes,
-            isFavorite: data.is_favorite || false,
-          });
-        }
+      if (data.items && data.items.length > 0) {
+        const googleBook: GoogleBook = data.items[0];
+        const newBook: Book = {
+          id: "",
+          title: googleBook.volumeInfo.title,
+          author: googleBook.volumeInfo.authors?.[0] || "Unknown Author",
+          genre: googleBook.volumeInfo.categories?.[0] || "Uncategorized",
+          dateRead: new Date().toISOString().split('T')[0],
+          rating: 0,
+          status: "Not started",
+          notes: [],
+          isFavorite: false,
+        };
+        setBook(newBook);
+        toast({
+          title: "Book found!",
+          description: "You can now edit the details and save.",
+        });
+      } else {
+        toast({
+          title: "No books found",
+          description: "Try a different search term",
+          variant: "destructive",
+        });
       }
-    };
-
-    fetchBook();
-  }, [id]);
+    } catch (error) {
+      console.error('Error searching books:', error);
+      toast({
+        title: "Error searching books",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const handleSave = async (updatedBook: Book) => {
     if (!session?.user?.id) {
@@ -64,7 +98,7 @@ export default function AddBook() {
       author: updatedBook.author,
       genre: updatedBook.genre,
       date_read: updatedBook.dateRead,
-      rating: Number(updatedBook.rating),
+      rating: updatedBook.rating,
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
@@ -76,9 +110,18 @@ export default function AddBook() {
 
     if (error) {
       console.error('Error saving book:', error);
+      toast({
+        title: "Error saving book",
+        description: "Please try again",
+        variant: "destructive",
+      });
       return;
     }
 
+    toast({
+      title: "Success!",
+      description: "Book saved successfully",
+    });
     navigate("/dashboard");
   };
 
@@ -88,6 +131,35 @@ export default function AddBook() {
 
   return (
     <div className="flex-1 md:container">
+      {!id && (
+        <div className="p-4 space-y-4">
+          <h2 className="text-2xl font-bold">Search for a Book</h2>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Search by title or author..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && searchBooks()}
+            />
+            <Button 
+              onClick={searchBooks}
+              disabled={isSearching}
+            >
+              {isSearching ? (
+                "Searching..."
+              ) : (
+                <>
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Search for a book to auto-fill the details, or fill them in manually below.
+          </p>
+        </div>
+      )}
       <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
