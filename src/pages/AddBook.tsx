@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Select,
   SelectContent,
@@ -13,216 +13,134 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { BookDetailView } from "@/components/BookDetailView";
-
-const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  author: z.string().min(1, "Author is required"),
-  genre: z.string().min(1, "Genre is required"),
-  status: z.enum(["Not started", "In Progress", "Finished"]),
-});
 
 export default function AddBook() {
-  const navigate = useNavigate();
-  const { session } = useAuth();
   const { id } = useParams();
-  const [book, setBook] = useState(null);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      author: "",
-      genre: "",
-      status: "Not started",
-    },
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { session } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    author: "",
+    genre: "",
+    dateRead: new Date().toISOString().split("T")[0],
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchBook();
-    }
-  }, [id]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session?.user?.id) return;
 
-  const fetchBook = async () => {
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('books')
-        .select(`
-          *,
-          notes (
-            id,
-            content,
-            created_at
-          )
-        `)
-        .eq('id', id)
-        .single();
+      const bookData = {
+        title: formData.title,
+        author: formData.author,
+        genre: formData.genre,
+        date_read: formData.dateRead,
+        user_id: session.user.id,
+        status: "Not started",
+        rating: 0,
+        is_favorite: false,
+      };
+
+      const { error } = await supabase.from("books").insert([bookData]);
 
       if (error) throw error;
 
-      if (data) {
-        setBook({
-          ...data,
-          dateRead: data.date_read,
-          isFavorite: data.is_favorite,
-          notes: data.notes.map((note: any) => ({
-            id: note.id,
-            content: note.content,
-            createdAt: note.created_at,
-          })),
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching book:', error);
-      toast.error("Failed to fetch book details");
-    }
-  };
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!session?.user?.id) {
-      toast.error("You must be logged in to add books");
-      return;
-    }
-
-    try {
-      const { error } = await supabase.from("books").insert({
-        title: values.title,
-        author: values.author,
-        genre: values.genre,
-        status: values.status,
-        date_read: new Date().toISOString().split('T')[0],
-        user_id: session.user.id,
-        rating: 0,
+      toast({
+        title: "Success",
+        description: "Book added successfully!",
       });
 
-      if (error) throw error;
-
-      toast.success("Book added successfully");
       navigate("/dashboard");
     } catch (error) {
-      console.error('Error adding book:', error);
-      toast.error("Failed to add book");
+      console.error("Error adding book:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add book. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const genres = [
-    "Fiction",
-    "Non-Fiction",
-    "Mystery",
-    "Science Fiction",
-    "Fantasy",
-    "Romance",
-    "Thriller",
-    "Horror",
-    "Biography",
-    "History",
-    "Science",
-    "Technology",
-    "Self-Help",
-    "Poetry",
-    "Drama",
-    "Other"
-  ];
-
-  // If we're in edit mode (have an ID) and have fetched the book, show BookDetailView
-  if (id && book) {
-    return <BookDetailView book={book} />;
-  }
-
-  // Otherwise show the add book form
   return (
-    <div className="flex-1 md:container px-4 py-8">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold mb-6">Add New Book</h1>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter book title" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+    <div className="container max-w-2xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-6">Add New Book</h1>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            required
+            value={formData.title}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
+          />
+        </div>
 
-            <FormField
-              control={form.control}
-              name="author"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Author</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter author name" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+        <div className="space-y-2">
+          <Label htmlFor="author">Author</Label>
+          <Input
+            id="author"
+            required
+            value={formData.author}
+            onChange={(e) =>
+              setFormData({ ...formData, author: e.target.value })
+            }
+          />
+        </div>
 
-            <FormField
-              control={form.control}
-              name="genre"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Genre</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a genre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {genres.map((genre) => (
-                        <SelectItem key={genre} value={genre}>
-                          {genre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
+        <div className="space-y-2">
+          <Label htmlFor="genre">Genre</Label>
+          <Select
+            value={formData.genre}
+            onValueChange={(value) =>
+              setFormData({ ...formData, genre: value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a genre" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Fiction">Fiction</SelectItem>
+              <SelectItem value="Non-Fiction">Non-Fiction</SelectItem>
+              <SelectItem value="Mystery">Mystery</SelectItem>
+              <SelectItem value="Science Fiction">Science Fiction</SelectItem>
+              <SelectItem value="Fantasy">Fantasy</SelectItem>
+              <SelectItem value="Romance">Romance</SelectItem>
+              <SelectItem value="Thriller">Thriller</SelectItem>
+              <SelectItem value="Horror">Horror</SelectItem>
+              <SelectItem value="Biography">Biography</SelectItem>
+              <SelectItem value="History">History</SelectItem>
+              <SelectItem value="Science">Science</SelectItem>
+              <SelectItem value="Technology">Technology</SelectItem>
+              <SelectItem value="Self-Help">Self-Help</SelectItem>
+              <SelectItem value="Other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Not started">Not started</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Finished">Finished</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
+        <div className="space-y-2">
+          <Label htmlFor="dateRead">Date Read</Label>
+          <Input
+            id="dateRead"
+            type="date"
+            required
+            value={formData.dateRead}
+            onChange={(e) =>
+              setFormData({ ...formData, dateRead: e.target.value })
+            }
+          />
+        </div>
 
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/dashboard")}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">Add Book</Button>
-            </div>
-          </form>
-        </Form>
-      </div>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Adding..." : "Add Book"}
+        </Button>
+      </form>
     </div>
   );
 }

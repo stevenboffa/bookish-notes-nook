@@ -51,45 +51,6 @@ export type Database = {
         }
         Relationships: []
       }
-      friends: {
-        Row: {
-          created_at: string
-          id: string
-          receiver_id: string
-          sender_id: string
-          status: Database["public"]["Enums"]["friendship_status"]
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          receiver_id: string
-          sender_id: string
-          status?: Database["public"]["Enums"]["friendship_status"]
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          receiver_id?: string
-          sender_id?: string
-          status?: Database["public"]["Enums"]["friendship_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friends_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "friends_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       notes: {
         Row: {
           book_id: string
@@ -145,7 +106,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      friendship_status: "pending" | "accepted"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
