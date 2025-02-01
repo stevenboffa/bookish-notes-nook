@@ -25,8 +25,20 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#9b87f5",
           foreground: "hsl(var(--primary-foreground))",
+        },
+        success: {
+          DEFAULT: "#F2FCE2",
+          foreground: "#2D3B1F",
+        },
+        accent: {
+          DEFAULT: "#D3E4FD",
+          foreground: "#1A2B3C",
+        },
+        text: {
+          DEFAULT: "#221F26",
+          muted: "#6B7280",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -39,10 +51,6 @@ export default {
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -58,14 +66,16 @@ export default {
           light: "#ECF0F1",
         },
       },
-      fontFamily: {
-        serif: ["Merriweather", "serif"],
-        sans: ["Inter", "sans-serif"],
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+      fontSize: {
+        'book-title': ['1.25rem', { lineHeight: '1.75rem' }],
+      },
+      boxShadow: {
+        'card': '0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
+        'card-hover': '0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.1)',
       },
       keyframes: {
         "page-turn": {
@@ -76,10 +86,15 @@ export default {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "slide-up": {
+          "0%": { transform: "translateY(10px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
       },
       animation: {
         "page-turn": "page-turn 0.6s ease-in-out",
         "fade-in": "fade-in 0.3s ease-out",
+        "slide-up": "slide-up 0.3s ease-out",
       },
     },
   },

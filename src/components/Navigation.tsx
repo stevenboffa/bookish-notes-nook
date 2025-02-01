@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Grid, Heart, PlusCircle, User } from "lucide-react";
+import { useEffect } from "react";
 
 export function Navigation() {
   const location = useLocation();
@@ -17,35 +18,53 @@ export function Navigation() {
     { href: "/", label: "Welcome" },
   ];
 
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "d" && e.altKey) {
+        window.location.href = "/dashboard";
+      } else if (e.key === "a" && e.altKey) {
+        window.location.href = "/add-book";
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b p-4 shadow-sm">
-      <div className="container mx-auto">
-        <div className="flex justify-around items-center">
+    <nav className="sticky bottom-0 z-50 bg-white border-t shadow-lg pb-safe-bottom">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-around items-center py-2">
           {links.map((link) => {
             const Icon = link.icon;
+            const isActive = location.pathname === link.href;
+            
             return (
               <Link
                 key={link.href}
                 to={link.href}
-                className="flex flex-col items-center group relative"
+                className="flex flex-col items-center group relative min-w-[64px] min-h-[64px] justify-center"
               >
                 <Button
-                  variant={location.pathname === link.href ? "secondary" : "ghost"}
+                  variant={isActive ? "default" : "ghost"}
                   size="icon"
                   className={cn(
-                    "rounded-full transition-all duration-200 bg-black",
-                    location.pathname === link.href 
-                      ? "text-white hover:bg-black/90" 
-                      : "text-white hover:bg-black/80"
+                    "rounded-xl transition-all duration-300",
+                    isActive 
+                      ? "bg-primary text-white shadow-lg scale-110" 
+                      : "text-text hover:text-primary hover:scale-105"
                   )}
                 >
                   {Icon && <Icon className="h-5 w-5" />}
                 </Button>
-                <span className="text-xs mt-1.5 font-medium text-black">
+                <span className={cn(
+                  "text-xs mt-1 font-medium transition-colors duration-300",
+                  isActive ? "text-primary" : "text-text-muted"
+                )}>
                   {link.label}
                 </span>
-                {location.pathname === link.href && (
-                  <div className="absolute -bottom-2 w-1.5 h-1.5 bg-black rounded-full" />
+                {isActive && (
+                  <div className="absolute -top-1 w-1.5 h-1.5 bg-primary rounded-full" />
                 )}
               </Link>
             );

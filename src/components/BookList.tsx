@@ -48,11 +48,11 @@ interface BookListProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Not started":
-      return "bg-[#E5DEFF] text-[#4C1D95]";
+      return "bg-accent text-accent-foreground";
     case "In Progress":
-      return "bg-[#FEF7CD] text-[#854D0E]";
+      return "bg-primary/20 text-primary";
     case "Finished":
-      return "bg-[#F2FCE2] text-[#3F6212]";
+      return "bg-success text-success-foreground";
     default:
       return "bg-gray-100 text-gray-700";
   }
@@ -87,42 +87,42 @@ export function BookList({
   });
 
   return (
-    <div className="space-y-3 px-4">
+    <div className="space-y-4 px-4 pb-safe-bottom">
       {filteredBooks.map((book) => (
         <Card
           key={book.id}
-          className={`transition-all duration-300 cursor-pointer transform hover:-translate-y-1 ${
+          className={`transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:shadow-card-hover animate-slide-up ${
             selectedBook?.id === book.id
-              ? "bg-[#2C3E50] text-white shadow-lg ring-2 ring-black"
-              : "hover:shadow-md bg-white"
+              ? "bg-primary text-white shadow-lg ring-2 ring-primary"
+              : "hover:shadow-md bg-white shadow-card"
           }`}
           onClick={() => onSelectBook(book)}
         >
           <CardHeader className="p-4">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <CardTitle className="font-serif text-lg mb-1">
+                <CardTitle className="font-serif text-book-title mb-1 leading-tight">
                   {book.title}
                 </CardTitle>
                 <CardDescription
                   className={
-                    selectedBook?.id === book.id ? "text-gray-300" : ""
+                    selectedBook?.id === book.id ? "text-white/80" : "text-text-muted"
                   }
                 >
                   by {book.author}
                 </CardDescription>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="text-xs px-2 py-1 bg-opacity-20 bg-gray-500 rounded">
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-text">
                     {book.genre}
                   </span>
                   <span 
-                    className={`text-xs px-2 py-1 rounded ${getStatusColor(book.status)}`}
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(book.status)}`}
                   >
                     {book.status}
                   </span>
                   {book.status === "Finished" && (
                     <span 
-                      className={`text-xs px-2 py-1 rounded ${getRatingColor(book.rating)}`}
+                      className={`text-xs px-2 py-1 rounded-full ${getRatingColor(book.rating)}`}
                     >
                       Rating: {book.rating}/10
                     </span>
@@ -139,14 +139,14 @@ export function BookList({
                     }}
                     className={
                       selectedBook?.id === book.id
-                        ? "hover:bg-[#34495E] text-white"
-                        : ""
+                        ? "hover:bg-white/20 text-white"
+                        : "hover:bg-accent/20"
                     }
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="animate-fade-in">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Book</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -162,7 +162,7 @@ export function BookList({
                         e.stopPropagation();
                         onDeleteBook(book.id);
                       }}
-                      className="bg-red-500 hover:bg-red-600"
+                      className="bg-red-500 hover:bg-red-600 text-white"
                     >
                       Delete
                     </AlertDialogAction>
@@ -174,8 +174,8 @@ export function BookList({
         </Card>
       ))}
       {filteredBooks.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No books found for this filter</p>
+        <div className="text-center py-12 animate-fade-in">
+          <p className="text-text-muted">No books found for this filter</p>
         </div>
       )}
     </div>
