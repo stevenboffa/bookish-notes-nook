@@ -17,7 +17,6 @@ export type Database = {
           genre: string
           id: string
           is_favorite: boolean | null
-          is_top_favorite: number | null
           rating: number | null
           status: string | null
           title: string
@@ -30,7 +29,6 @@ export type Database = {
           genre: string
           id?: string
           is_favorite?: boolean | null
-          is_top_favorite?: number | null
           rating?: number | null
           status?: string | null
           title: string
@@ -43,52 +41,12 @@ export type Database = {
           genre?: string
           id?: string
           is_favorite?: boolean | null
-          is_top_favorite?: number | null
           rating?: number | null
           status?: string | null
           title?: string
           user_id?: string
         }
         Relationships: []
-      }
-      friends: {
-        Row: {
-          created_at: string
-          id: string
-          receiver_id: string
-          sender_id: string
-          status: Database["public"]["Enums"]["friendship_status"]
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          receiver_id: string
-          sender_id: string
-          status?: Database["public"]["Enums"]["friendship_status"]
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          receiver_id?: string
-          sender_id?: string
-          status?: Database["public"]["Enums"]["friendship_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "friends_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "friends_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       notes: {
         Row: {
@@ -145,7 +103,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      friendship_status: "pending" | "accepted"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
