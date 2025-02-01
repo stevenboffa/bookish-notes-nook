@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
-import { BookDetailView } from "@/components/BookDetailView";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const { session } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -75,57 +76,24 @@ const Dashboard = () => {
   };
 
   const handleSelectBook = (book: Book) => {
-    setSelectedBook(book);
-  };
-
-  const handleSaveBook = async (updatedBook: Book) => {
-    try {
-      const { error } = await supabase
-        .from('books')
-        .update({
-          status: updatedBook.status,
-          rating: updatedBook.rating,
-          is_favorite: updatedBook.isFavorite,
-        })
-        .eq('id', updatedBook.id);
-
-      if (error) throw error;
-
-      setBooks(books.map(book => 
-        book.id === updatedBook.id ? updatedBook : book
-      ));
-      setSelectedBook(updatedBook);
-    } catch (error) {
-      console.error('Error updating book:', error);
-    }
+    navigate(`/edit-book/${book.id}`);
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <div className="flex-1 flex flex-col">
-        <BookFilters
+    <div className="flex-1 flex flex-col">
+      <BookFilters
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
+      />
+      <div className="flex-1 overflow-auto pb-20">
+        <BookList
+          books={books}
+          selectedBook={selectedBook}
+          onSelectBook={handleSelectBook}
+          onDeleteBook={handleDeleteBook}
           activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
         />
-        <div className="flex-1 overflow-auto pb-20">
-          <BookList
-            books={books}
-            selectedBook={selectedBook}
-            onSelectBook={handleSelectBook}
-            onDeleteBook={handleDeleteBook}
-            activeFilter={activeFilter}
-          />
-        </div>
       </div>
-      {selectedBook && (
-        <div className="w-1/3 border-l border-gray-200 h-screen overflow-y-auto">
-          <BookDetailView
-            book={selectedBook}
-            onSave={handleSaveBook}
-            onClose={() => setSelectedBook(null)}
-          />
-        </div>
-      )}
     </div>
   );
 };
