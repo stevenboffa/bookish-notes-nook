@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -48,6 +49,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [genre, setGenre] = useState(book?.genre || "");
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const [rating, setRating] = useState(book?.rating || 0);
+  const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -58,6 +60,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       setGenre(book.genre);
       setStatus(book.status as BookStatus);
       setRating(parseFloat(String(book.rating)) || 0);
+      setIsFavorite(book.isFavorite || false);
     }
   }, [book]);
 
@@ -72,7 +75,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         rating: parseFloat(rating.toFixed(1)),
         notes: [],
         dateRead: new Date().toISOString().split('T')[0],
-        isFavorite: false,
+        isFavorite,
       };
       onSave(newBook);
     } else {
@@ -83,6 +86,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         genre,
         status,
         rating: parseFloat(rating.toFixed(1)),
+        isFavorite,
       };
       onSave(updatedBook);
     }
@@ -201,6 +205,17 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
           <div className="flex gap-1 mt-2">
             {renderRatingStars(rating)}
           </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="isFavorite"
+            checked={isFavorite}
+            onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
+          />
+          <Label htmlFor="isFavorite" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Add to favorites
+          </Label>
         </div>
 
         {book && <NoteSection book={book} onUpdateBook={onSave} />}

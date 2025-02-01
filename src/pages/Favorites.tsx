@@ -10,18 +10,65 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Favorites = () => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // In the future, this will fetch from Supabase
-    const storedBooks = []; // We'll implement this with Supabase later
-    setBooks(storedBooks);
+    const fetchFavoriteBooks = async () => {
+      try {
+        const { data: booksData, error } = await supabase
+          .from('books')
+          .select(`
+            *,
+            notes (
+              id,
+              content,
+              created_at
+            )
+          `)
+          .eq('is_favorite', true)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const formattedBooks = booksData.map((book: any) => ({
+          id: book.id,
+          title: book.title,
+          author: book.author,
+          genre: book.genre,
+          dateRead: book.date_read,
+          rating: book.rating || 0,
+          status: book.status || 'Not started',
+          isFavorite: book.is_favorite,
+          notes: book.notes.map((note: any) => ({
+            id: note.id,
+            content: note.content,
+            createdAt: note.created_at,
+          })),
+        }));
+
+        setBooks(formattedBooks);
+      } catch (error) {
+        console.error('Error fetching favorite books:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFavoriteBooks();
   }, []);
 
-  const favoriteBooks = books.filter((book) => book.rating >= 8);
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col">
@@ -30,7 +77,7 @@ const Favorites = () => {
           <div>
             <h1 className="text-xl font-semibold text-text">Favorite Books</h1>
             <p className="text-sm text-text-muted">
-              {favoriteBooks.length} highly rated books
+              {books.length} favorite books
             </p>
           </div>
           <Button
@@ -46,32 +93,36 @@ const Favorites = () => {
 
       <div className="container mx-auto p-4 flex-1">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {favoriteBooks.map((book) => (
-            <Card key={book.id} className="animate-fade-in">
+          {books.map((book) => (
+            <Card key={book.id} className="animate-fade-in hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="font-serif">{book.title}</CardTitle>
-                    <CardDescription>
-                      Rating: {book.rating}/10
-                    </CardDescription>
+                    <CardDescription>by {book.author}</CardDescription>
                   </div>
                   <Star className="h-5 w-5 text-yellow-400 fill-current" />
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-600">
-                  Read on: {new Date(book.dateRead).toLocaleDateString()}
-                </p>
-                <p className="mt-2">
-                  {book.notes.length} note{book.notes.length !== 1 ? "s" : ""}
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">Genre: {book.genre}</p>
+                  <p className="text-sm text-gray-600">
+                    Rating: {book.rating}/10
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Status: {book.status}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Notes: {book.notes.length}
+                  </p>
+                </div>
               </CardContent>
             </Card>
           ))}
-          {favoriteBooks.length === 0 && (
+          {books.length === 0 && (
             <div className="col-span-full text-center text-gray-500 py-8 animate-fade-in">
-              No favorite books yet. Rate a book 8 or higher to see it here!
+              No favorite books yet. Mark some books as favorites to see them here!
             </div>
           )}
         </div>
