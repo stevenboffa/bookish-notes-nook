@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { BookDetailView } from "@/components/BookDetailView";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -28,6 +29,8 @@ const formSchema = z.object({
 export default function AddBook() {
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { id } = useParams();
+  const [book, setBook] = useState(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,6 +41,47 @@ export default function AddBook() {
       status: "Not started",
     },
   });
+
+  useEffect(() => {
+    if (id) {
+      fetchBook();
+    }
+  }, [id]);
+
+  const fetchBook = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('books')
+        .select(`
+          *,
+          notes (
+            id,
+            content,
+            created_at
+          )
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setBook({
+          ...data,
+          dateRead: data.date_read,
+          isFavorite: data.is_favorite,
+          notes: data.notes.map((note: any) => ({
+            id: note.id,
+            content: note.content,
+            createdAt: note.created_at,
+          })),
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching book:', error);
+      toast.error("Failed to fetch book details");
+    }
+  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!session?.user?.id) {
@@ -85,6 +129,12 @@ export default function AddBook() {
     "Other"
   ];
 
+  // If we're in edit mode (have an ID) and have fetched the book, show BookDetailView
+  if (id && book) {
+    return <BookDetailView book={book} />;
+  }
+
+  // Otherwise show the add book form
   return (
     <div className="flex-1 md:container px-4 py-8">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
