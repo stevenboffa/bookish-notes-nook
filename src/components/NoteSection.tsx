@@ -11,6 +11,7 @@ interface NoteSectionProps {
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [newNote, setNewNote] = useState("");
+  const [localNotes, setLocalNotes] = useState(book.notes);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
@@ -27,16 +28,19 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       if (noteError) throw noteError;
 
+      const newNoteObject = {
+        id: noteData.id,
+        content: noteData.content,
+        createdAt: noteData.created_at,
+      };
+
+      // Update local state immediately
+      setLocalNotes(prevNotes => [newNoteObject, ...prevNotes]);
+
+      // Update parent component
       const updatedBook = {
         ...book,
-        notes: [
-          ...book.notes,
-          {
-            id: noteData.id,
-            content: noteData.content,
-            createdAt: noteData.created_at,
-          },
-        ],
+        notes: [newNoteObject, ...book.notes],
       };
 
       onUpdateBook(updatedBook);
@@ -68,7 +72,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
             <Button onClick={handleAddNote}>Add Note</Button>
           </div>
           <div className="space-y-2 mt-4">
-            {[...book.notes].reverse().map((note) => (
+            {localNotes.map((note) => (
               <div
                 key={note.id}
                 className="p-3 bg-white rounded-lg shadow animate-fade-in"
