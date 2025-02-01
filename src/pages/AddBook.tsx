@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
 import { Book, Note } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
@@ -95,7 +96,6 @@ export default function AddBook() {
     navigate("/dashboard");
   };
 
-  // For new books, we pass null as the book prop
   return (
     <div className="flex-1 md:container px-4 py-8">
       <BookDetailView 
