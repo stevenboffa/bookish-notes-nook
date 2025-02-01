@@ -182,7 +182,10 @@ const Dashboard = () => {
       
       {isMobile ? (
         <Sheet open={!!selectedBook} onOpenChange={(open) => !open && setSelectedBook(null)}>
-          <SheetContent side="bottom" className="h-[85vh] p-0">
+          <SheetContent 
+            side="bottom" 
+            className="h-[100dvh] p-0 mt-0"
+          >
             {selectedBook && (
               <BookDetailView
                 book={selectedBook}

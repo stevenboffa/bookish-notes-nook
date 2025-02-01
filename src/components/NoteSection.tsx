@@ -3,6 +3,7 @@ import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface NoteSectionProps {
   book: Book;
@@ -11,6 +12,7 @@ interface NoteSectionProps {
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [newNote, setNewNote] = useState("");
+  const { toast } = useToast();
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
@@ -41,8 +43,18 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       onUpdateBook(updatedBook);
       setNewNote("");
+      
+      toast({
+        title: "Note added",
+        description: "Your note has been saved successfully",
+      });
     } catch (error) {
       console.error('Error adding note:', error);
+      toast({
+        title: "Error adding note",
+        description: "Please try again later",
+        variant: "destructive",
+      });
     }
   };
 
@@ -68,7 +80,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
             <Button onClick={handleAddNote}>Add Note</Button>
           </div>
           <div className="space-y-2 mt-4">
-            {book.notes.map((note) => (
+            {[...book.notes].reverse().map((note) => (
               <div
                 key={note.id}
                 className="p-3 bg-white rounded-lg shadow animate-fade-in"
