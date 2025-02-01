@@ -8,15 +8,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus, Check, X, User } from "lucide-react";
 
+type Profile = {
+  email: string | null;
+};
+
 type Friend = {
   id: string;
   sender_id: string;
   receiver_id: string;
   status: 'pending' | 'accepted';
   created_at: string;
-  profile?: {
-    email: string;
-  };
+  profiles: Profile;
 };
 
 const Friends = () => {
@@ -61,8 +63,7 @@ const Friends = () => {
         .from('friends')
         .select(`
           *,
-          receiver:profiles!friends_receiver_id_fkey(email),
-          sender:profiles!friends_sender_id_fkey(email)
+          profiles!friends_receiver_id_fkey (email)
         `)
         .or(`sender_id.eq.${session?.user?.id},receiver_id.eq.${session?.user?.id}`);
 
@@ -93,7 +94,7 @@ const Friends = () => {
         .from('profiles')
         .select('id')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (userError || !userProfile) {
         toast({
@@ -205,8 +206,8 @@ const Friends = () => {
                   <User className="h-5 w-5" />
                   <span>
                     {friend.sender_id === session?.user?.id
-                      ? friend.receiver?.email
-                      : friend.sender?.email}
+                      ? friend.profiles?.email
+                      : friend.profiles?.email}
                   </span>
                 </div>
               </Card>
@@ -220,7 +221,7 @@ const Friends = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  <span>{request.sender?.email}</span>
+                  <span>{request.profiles?.email}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button
