@@ -1,115 +1,149 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { BookDetailView } from "@/components/BookDetailView";
-import { Book } from "@/components/BookList";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { Database } from "@/integrations/supabase/types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-type BookStatus = "Not started" | "In Progress" | "Finished";
-type BookData = Database['public']['Tables']['books']['Insert'];
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  author: z.string().min(1, "Author is required"),
+  genre: z.string().min(1, "Genre is required"),
+  status: z.enum(["Not started", "In Progress", "Finished"]),
+});
 
 export default function AddBook() {
-  const [book, setBook] = useState<Book | null>(null);
-  const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
 
-  useEffect(() => {
-    if (id) {
-      const fetchBook = async () => {
-        const { data, error } = await supabase
-          .from("books")
-          .select("*, notes(*)")
-          .eq("id", id)
-          .single();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      author: "",
+      genre: "",
+      status: "Not started",
+    },
+  });
 
-        if (error) {
-          console.error('Error fetching book:', error);
-          toast.error("Failed to fetch book details");
-          return;
-        }
-
-        if (data) {
-          setBook({
-            id: data.id,
-            title: data.title,
-            author: data.author,
-            genre: data.genre,
-            dateRead: data.date_read,
-            rating: Number(data.rating) || 0,
-            status: data.status as BookStatus || "Not started",
-            notes: data.notes.map((note: any) => ({
-              id: note.id,
-              content: note.content,
-              createdAt: note.created_at,
-            })),
-            isFavorite: data.is_favorite || false,
-          });
-        }
-      };
-
-      fetchBook();
-    } else {
-      // Initialize with empty book for new entries
-      setBook({
-        id: '',
-        title: '',
-        author: '',
-        genre: '',
-        dateRead: new Date().toISOString().split('T')[0],
-        rating: 0,
-        status: "Not started",
-        notes: [],
-        isFavorite: false,
-      });
-    }
-  }, [id]);
-
-  const handleSave = async (updatedBook: Book) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!session?.user?.id) {
-      toast.error('You must be logged in to save books');
+      toast.error("You must be logged in to add books");
       return;
     }
-
-    const bookData: BookData = {
-      title: updatedBook.title,
-      author: updatedBook.author,
-      genre: updatedBook.genre,
-      date_read: updatedBook.dateRead,
-      rating: updatedBook.rating,
-      status: updatedBook.status,
-      is_favorite: updatedBook.isFavorite,
-      user_id: session.user.id,
-    };
 
     try {
       const { error } = await supabase
         .from("books")
-        .upsert({ ...bookData, id: id || undefined });
+        .insert({
+          ...values,
+          date_read: new Date().toISOString().split('T')[0],
+          user_id: session.user.id,
+          rating: 0,
+        });
 
       if (error) throw error;
 
-      toast.success("Book saved successfully");
+      toast.success("Book added successfully");
       navigate("/dashboard");
     } catch (error) {
-      console.error('Error saving book:', error);
-      toast.error("Failed to save book");
+      console.error('Error adding book:', error);
+      toast.error("Failed to add book");
     }
-  };
-
-  const handleClose = () => {
-    navigate("/dashboard");
   };
 
   return (
     <div className="flex-1 md:container px-4 py-8">
-      <BookDetailView 
-        book={book} 
-        onSave={handleSave} 
-        onClose={handleClose} 
-      />
+      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
+        <h1 className="text-2xl font-bold mb-6">Add New Book</h1>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter book title" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="author"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Author</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter author name" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="genre"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Genre</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter book genre" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Not started">Not started</SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="Finished">Finished</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/dashboard")}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Add Book</Button>
+            </div>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }
