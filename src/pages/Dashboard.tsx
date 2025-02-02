@@ -52,6 +52,8 @@ const Dashboard = () => {
         rating: Number(book.rating) || 0,
         status: book.status || 'Not started',
         isFavorite: book.is_favorite || false,
+        imageUrl: book.image_url || null,
+        thumbnailUrl: book.thumbnail_url || null,
         notes: book.notes.map((note: any) => ({
           id: note.id,
           content: note.content,
