@@ -49,36 +49,64 @@ export default function AddBook() {
 
       if (secretError) {
         console.error('Error fetching API key:', secretError);
+        toast({
+          title: "Error fetching API key",
+          description: "Please check your Supabase configuration",
+          variant: "destructive",
+        });
         throw new Error('Could not retrieve API key from secrets');
       }
 
       if (!secretData?.value) {
         console.error('API key not found in Supabase');
+        toast({
+          title: "API key not found",
+          description: "Please add your Google Books API key to Supabase secrets",
+          variant: "destructive",
+        });
         throw new Error('API key not found in secrets');
       }
 
-      const apiKey = secretData.value.trim(); // Ensure no whitespace
-      console.log('API Key length:', apiKey.length); // Log key length for debugging
+      const apiKey = secretData.value.trim();
+      console.log('API Key retrieved, length:', apiKey.length);
 
-      const apiUrl = new URL('https://www.googleapis.com/books/v1/volumes');
-      apiUrl.searchParams.append('q', searchQuery);
-      apiUrl.searchParams.append('key', apiKey);
-      apiUrl.searchParams.append('maxResults', '1');
+      // Construct the request URL properly
+      const baseUrl = 'https://www.googleapis.com/books/v1/volumes';
+      const params = new URLSearchParams({
+        q: searchQuery.trim(),
+        key: apiKey,
+        maxResults: '1'
+      });
 
-      console.log('Making request to:', apiUrl.toString().replace(apiKey, '[REDACTED]'));
+      const requestUrl = `${baseUrl}?${params.toString()}`;
+      console.log('Request URL (redacted):', requestUrl.replace(apiKey, '[REDACTED]'));
 
-      const response = await fetch(apiUrl.toString());
-      const data = await response.json();
+      const response = await fetch(requestUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      });
 
       if (!response.ok) {
+        const errorData = await response.json();
         console.error('Google Books API Error:', {
           status: response.status,
           statusText: response.statusText,
-          data
+          error: errorData
         });
         
-        throw new Error(data.error?.message || 'Failed to fetch book data');
+        toast({
+          title: "API Error",
+          description: errorData.error?.message || "Failed to fetch book data. Please check your API key configuration.",
+          variant: "destructive",
+        });
+        
+        throw new Error(errorData.error?.message || 'Failed to fetch book data');
       }
+
+      const data = await response.json();
 
       if (data.items && data.items.length > 0) {
         const googleBook: GoogleBook = data.items[0];
