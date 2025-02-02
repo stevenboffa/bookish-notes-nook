@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserX, BookOpen } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -30,18 +29,17 @@ export default function Friends() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { session } = useAuth();
-  const navigate = useNavigate();
 
   const fetchFriends = async () => {
     try {
       const { data: friendsData, error: friendsError } = await supabase
         .from('friends')
         .select(`
-          receiver:receiver_id(
+          receiver:profiles!friends_receiver_id_fkey(
             id,
             email
           ),
-          sender:sender_id(
+          sender:profiles!friends_sender_id_fkey(
             id,
             email
           )
@@ -62,13 +60,17 @@ export default function Friends() {
             .select('id, title, author, genre, rating')
             .eq('user_id', friendId);
 
+          const friendData = friendsData.find(f => 
+            f.sender.id === friendId || f.receiver.id === friendId
+          );
+          
+          const friendEmail = friendData?.sender.id === friendId 
+            ? friendData.sender.email 
+            : friendData?.receiver.email;
+
           return {
             id: friendId,
-            email: friendsData.find(f => 
-              f.sender.id === friendId || f.receiver.id === friendId
-            )?.sender.id === friendId 
-              ? friendsData.find(f => f.sender.id === friendId)?.sender.email
-              : friendsData.find(f => f.receiver.id === friendId)?.receiver.email,
+            email: friendEmail || '',
             books: booksData || [],
           };
         })
@@ -89,7 +91,7 @@ export default function Friends() {
         .from('profiles')
         .select('id')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (userError || !userData) {
         console.error('User not found');
@@ -131,8 +133,7 @@ export default function Friends() {
     }
   };
 
-  // Fetch friends on mount
-  useState(() => {
+  useEffect(() => {
     if (session?.user.id) {
       fetchFriends();
     }
