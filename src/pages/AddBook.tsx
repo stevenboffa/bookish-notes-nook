@@ -40,43 +40,22 @@ export default function AddBook() {
 
     setIsSearching(true);
     try {
-      // Get the API key from Supabase secrets
-      const { data: secretData, error: secretError } = await supabase
-        .from('secrets')
-        .select('value')
-        .eq('name', 'GOOGLE_BOOKS_API_KEY')
-        .single();
+      const response = await fetch(
+        'https://cotmtwabbkxrvbjygnwk.supabase.co/functions/v1/search-books',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ searchQuery: searchQuery.trim() }),
+        }
+      );
 
-      if (secretError || !secretData?.value) {
-        toast({
-          title: "Configuration Error",
-          description: "Unable to access Google Books at this time. Please try again later.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const apiKey = secretData.value.trim();
-      
-      // Construct the request URL
-      const baseUrl = 'https://www.googleapis.com/books/v1/volumes';
-      const params = new URLSearchParams({
-        q: searchQuery.trim(),
-        key: apiKey,
-        maxResults: '1'
-      });
-
-      const response = await fetch(`${baseUrl}?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Google Books API Error:', data.error);
-        toast({
-          title: "Search Error",
-          description: "Unable to search for books at this time. Please try again later.",
-          variant: "destructive",
-        });
-        return;
+        throw new Error(data.error || 'Failed to search books');
       }
 
       if (data.items && data.items.length > 0) {
@@ -108,7 +87,7 @@ export default function AddBook() {
       console.error('Error searching books:', error);
       toast({
         title: "Error searching books",
-        description: "Please try again later",
+        description: error.message || "Please try again later",
         variant: "destructive",
       });
     } finally {
@@ -193,4 +172,3 @@ export default function AddBook() {
       <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
-}
