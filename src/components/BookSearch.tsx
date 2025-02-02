@@ -50,7 +50,8 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
 
       if (error) throw error;
 
-      setSearchResults(data?.items || []);
+      // Ensure data.items is an array before setting it
+      setSearchResults(Array.isArray(data?.items) ? data.items : []);
     } catch (error) {
       console.error('Error searching books:', error);
       toast({

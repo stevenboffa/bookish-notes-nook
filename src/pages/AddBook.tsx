@@ -21,9 +21,15 @@ export default function AddBook() {
 
   const handleSave = async (bookToSave: Book) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       const { error } = await supabase
         .from('books')
-        .insert([{
+        .insert({
           title: bookToSave.title,
           author: bookToSave.author,
           genre: bookToSave.genre,
@@ -33,7 +39,8 @@ export default function AddBook() {
           is_favorite: bookToSave.isFavorite,
           image_url: bookToSave.imageUrl,
           thumbnail_url: bookToSave.thumbnailUrl,
-        }]);
+          user_id: user.id
+        });
 
       if (error) throw error;
 
