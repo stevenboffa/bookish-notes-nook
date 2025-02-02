@@ -40,8 +40,6 @@ export default function AddBook() {
 
     setIsSearching(true);
     try {
-      console.log('Starting API key retrieval from Supabase...');
-      
       // First, get the API key from Supabase
       const { data: secretData, error: secretError } = await supabase
         .from('secrets')
@@ -51,60 +49,36 @@ export default function AddBook() {
 
       if (secretError) {
         console.error('Error fetching API key:', secretError);
-        toast({
-          title: "Error fetching API key",
-          description: "Please ensure the Google Books API key is properly configured",
-          variant: "destructive",
-        });
         throw new Error('Could not retrieve API key from secrets');
       }
 
       if (!secretData?.value) {
         console.error('API key not found in Supabase');
-        toast({
-          title: "API key not found",
-          description: "Please configure the Google Books API key in Supabase",
-          variant: "destructive",
-        });
         throw new Error('API key not found in secrets');
       }
 
-      console.log('Successfully retrieved API key from Supabase');
-      console.log('Building API URL and headers...');
+      const apiKey = secretData.value.trim(); // Ensure no whitespace
+      console.log('API Key length:', apiKey.length); // Log key length for debugging
 
-      const headers = new Headers({
-        'Accept': 'application/json',
-      });
+      const apiUrl = new URL('https://www.googleapis.com/books/v1/volumes');
+      apiUrl.searchParams.append('q', searchQuery);
+      apiUrl.searchParams.append('key', apiKey);
+      apiUrl.searchParams.append('maxResults', '1');
 
-      const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
-        searchQuery
-      )}&key=${secretData.value}&maxResults=1`;
+      console.log('Making request to:', apiUrl.toString().replace(apiKey, '[REDACTED]'));
 
-      console.log('Making request to Google Books API...');
-      console.log('API URL (without key):', apiUrl.replace(secretData.value, '[REDACTED]'));
-
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: headers,
-      });
-
-      console.log('Received response from Google Books API');
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
+      const response = await fetch(apiUrl.toString());
       const data = await response.json();
-      
+
       if (!response.ok) {
-        console.error('Google Books API Error:', data.error);
-        toast({
-          title: "API Error",
-          description: data.error?.message || "Failed to fetch book data",
-          variant: "destructive",
+        console.error('Google Books API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          data
         });
+        
         throw new Error(data.error?.message || 'Failed to fetch book data');
       }
-
-      console.log('Successfully parsed response data');
 
       if (data.items && data.items.length > 0) {
         const googleBook: GoogleBook = data.items[0];
