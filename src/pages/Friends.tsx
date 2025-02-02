@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserX, BookOpen } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { UserX, BookOpen, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { FriendBooks } from "@/components/FriendBooks";
 import {
   Card,
   CardContent,
@@ -12,23 +13,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Book } from "@/components/BookList";
 
 interface Friend {
   id: string;
   email: string;
-  books: {
-    id: string;
-    title: string;
-    author: string;
-    genre: string;
-    rating: number;
-  }[];
+  books: Book[];
 }
 
 export default function Friends() {
   const [email, setEmail] = useState("");
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const { session } = useAuth();
   const { toast } = useToast();
 
@@ -54,12 +51,11 @@ export default function Friends() {
         f.sender.id === session?.user.id ? f.receiver.id : f.sender.id
       );
 
-      // Fetch books for each friend
       const friendsWithBooks = await Promise.all(
         friendIds.map(async (friendId) => {
           const { data: booksData } = await supabase
             .from('books')
-            .select('id, title, author, genre, rating')
+            .select('id, title, author, genre, rating, status, imageUrl:image_url, thumbnailUrl:thumbnail_url')
             .eq('user_id', friendId);
 
           const friendData = friendsData.find(f => 
@@ -106,7 +102,8 @@ export default function Friends() {
         toast({
           variant: "destructive",
           title: "User not found",
-          description: "No user found with this email address"
+          description: "No user found with this email address",
+          icon: <AlertCircle className="h-5 w-5" />
         });
         return;
       }
@@ -171,6 +168,9 @@ export default function Friends() {
         description: "Friend removed successfully"
       });
 
+      if (selectedFriend?.id === friendId) {
+        setSelectedFriend(null);
+      }
       setFriends(friends.filter(f => f.id !== friendId));
     } catch (error) {
       console.error('Error removing friend:', error);
@@ -190,69 +190,64 @@ export default function Friends() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Friends</h1>
-      
-      <div className="flex gap-4 mb-8">
-        <Input
-          type="email"
-          placeholder="Enter friend's email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <Button 
-          onClick={addFriend}
-          disabled={isLoading || !email}
-        >
-          Add Friend
-        </Button>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-6">Friends</h1>
+        
+        <div className="flex gap-4 mb-8">
+          <Input
+            type="email"
+            placeholder="Enter friend's email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Button 
+            onClick={addFriend}
+            disabled={isLoading || !email}
+          >
+            Add Friend
+          </Button>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {friends.map((friend) => (
+            <Card 
+              key={friend.id}
+              className={`cursor-pointer transition-all duration-300 ${
+                selectedFriend?.id === friend.id ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => setSelectedFriend(friend)}
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {friend.email}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFriend(friend.id);
+                  }}
+                >
+                  <UserX className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  {friend.books.length} books in collection
+                </CardDescription>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {friends.map((friend) => (
-          <Card key={friend.id}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {friend.email}
-              </CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeFriend(friend.id)}
-              >
-                <UserX className="h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>
-                {friend.books.length} books in collection
-              </CardDescription>
-              <div className="mt-4 space-y-2">
-                {friend.books.map((book) => (
-                  <div
-                    key={book.id}
-                    className="flex items-center justify-between p-2 bg-accent/10 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4" />
-                      <div>
-                        <p className="text-sm font-medium">{book.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          by {book.author}
-                        </p>
-                      </div>
-                    </div>
-                    {book.rating > 0 && (
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                        {book.rating}/10
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {selectedFriend && (
+        <div className="mt-8">
+          <FriendBooks books={selectedFriend.books} email={selectedFriend.email} />
+        </div>
+      )}
     </div>
   );
 }
