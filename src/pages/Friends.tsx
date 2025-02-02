@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserX, BookOpen } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ export default function Friends() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { session } = useAuth();
+  const { toast } = useToast();
 
   const fetchFriends = async () => {
     try {
@@ -79,6 +81,11 @@ export default function Friends() {
       setFriends(friendsWithBooks);
     } catch (error) {
       console.error('Error fetching friends:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch friends list"
+      });
     }
   };
 
@@ -93,8 +100,30 @@ export default function Friends() {
         .eq('email', email)
         .maybeSingle();
 
-      if (userError || !userData) {
-        console.error('User not found');
+      if (userError) throw userError;
+
+      if (!userData) {
+        toast({
+          variant: "destructive",
+          title: "User not found",
+          description: "No user found with this email address"
+        });
+        return;
+      }
+
+      // Check if friendship already exists
+      const { data: existingFriend } = await supabase
+        .from('friends')
+        .select()
+        .or(`and(sender_id.eq.${session?.user.id},receiver_id.eq.${userData.id}),and(sender_id.eq.${userData.id},receiver_id.eq.${session?.user.id})`)
+        .maybeSingle();
+
+      if (existingFriend) {
+        toast({
+          variant: "destructive",
+          title: "Already friends",
+          description: "You are already friends with this user"
+        });
         return;
       }
 
@@ -109,10 +138,20 @@ export default function Friends() {
 
       if (friendError) throw friendError;
 
+      toast({
+        title: "Success",
+        description: "Friend added successfully"
+      });
+
       setEmail("");
       fetchFriends();
     } catch (error) {
       console.error('Error adding friend:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add friend"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -127,9 +166,19 @@ export default function Friends() {
 
       if (error) throw error;
 
+      toast({
+        title: "Success",
+        description: "Friend removed successfully"
+      });
+
       setFriends(friends.filter(f => f.id !== friendId));
     } catch (error) {
       console.error('Error removing friend:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to remove friend"
+      });
     }
   };
 
