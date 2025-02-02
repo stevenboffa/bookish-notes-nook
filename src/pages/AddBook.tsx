@@ -172,3 +172,4 @@ export default function AddBook() {
       <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
+}
