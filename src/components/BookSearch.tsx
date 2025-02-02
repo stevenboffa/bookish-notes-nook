@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Book } from "./BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,9 +34,10 @@ interface BookSearchProps {
 export function BookSearch({ onBookSelect }: BookSearchProps) {
   const [searchResults, setSearchResults] = useState<GoogleBook[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const { toast } = useToast();
 
-  const searchBooks = async (searchQuery: string) => {
+  const searchBooks = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
@@ -50,7 +51,6 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
 
       if (error) throw error;
 
-      // Ensure data.items is an array before setting it
       setSearchResults(Array.isArray(data?.items) ? data.items : []);
     } catch (error) {
       console.error('Error searching books:', error);
@@ -63,7 +63,7 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [toast]);
 
   const handleBookSelect = (googleBook: GoogleBook) => {
     const imageUrl = googleBook.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:');
@@ -85,13 +85,18 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
     
     onBookSelect(newBook);
     setSearchResults([]);
+    setInputValue("");
   };
 
   return (
     <Command className="rounded-lg border shadow-md">
       <CommandInput 
-        placeholder="Search books by title or author..." 
-        onValueChange={searchBooks}
+        placeholder="Search books by title or author..."
+        value={inputValue}
+        onValueChange={(value) => {
+          setInputValue(value);
+          searchBooks(value);
+        }}
       />
       {isSearching ? (
         <div className="p-4 text-center">
