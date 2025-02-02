@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Grid, Heart, PlusCircle, User } from "lucide-react";
+import { Grid, Heart, PlusCircle, User, Users } from "lucide-react";
 import { useEffect } from "react";
 
 export function Navigation() {
@@ -13,6 +13,7 @@ export function Navigation() {
     { href: "/dashboard", label: "Dashboard", icon: Grid },
     { href: "/favorites", label: "Favorites", icon: Heart },
     { href: "/add-book", label: "Add Book", icon: PlusCircle },
+    { href: "/friends", label: "Friends", icon: Users },
     { href: "/profile", label: "Profile", icon: User },
   ] : [
     { href: "/", label: "Welcome" },
