@@ -50,11 +50,7 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
 
       if (error) throw error;
 
-      if (data.items && data.items.length > 0) {
-        setSearchResults(data.items);
-      } else {
-        setSearchResults([]);
-      }
+      setSearchResults(data?.items || []);
     } catch (error) {
       console.error('Error searching books:', error);
       toast({
@@ -62,6 +58,7 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
         description: error.message || "Please try again later",
         variant: "destructive",
       });
+      setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
@@ -103,7 +100,7 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
       ) : (
         <>
           <CommandEmpty>No books found.</CommandEmpty>
-          <CommandGroup heading="Search Results">
+          <CommandGroup>
             {searchResults.map((book) => (
               <CommandItem
                 key={book.id}
