@@ -23,19 +23,30 @@ export function FriendBooks({ books, email, onBack }: FriendBooksProps) {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex items-center gap-4 mb-6">
-        {isMobile && onBack && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onBack}
-            className="flex-shrink-0"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-        )}
-        <h2 className="text-2xl font-bold truncate">{email}'s Books</h2>
-      </div>
+      <Card className="mb-6 bg-accent/10">
+        <CardHeader className="py-3">
+          <div className="flex items-center gap-2">
+            {isMobile && onBack && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onBack}
+                className="flex-shrink-0 -ml-2"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            )}
+            <div className="min-w-0 flex-1">
+              <CardDescription className="text-sm font-medium text-muted-foreground mb-0.5">
+                Viewing Collection
+              </CardDescription>
+              <CardTitle className="text-lg font-semibold truncate">
+                {email}
+              </CardTitle>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
       
       <div className={cn(
         "grid gap-4",
