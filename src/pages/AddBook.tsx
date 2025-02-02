@@ -3,11 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
 import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { BookCover } from "@/components/BookCover";
 import {
   Card,
@@ -39,15 +37,9 @@ export default function AddBook() {
   const [isSearching, setIsSearching] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
-  const { session } = useAuth();
-  const { toast } = useToast();
 
   const searchBooks = async () => {
     if (!searchQuery.trim()) {
-      toast({
-        title: "Please enter a search term",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -62,26 +54,16 @@ export default function AddBook() {
         throw error;
       }
 
-      if (data.items && data.items.length > 0) {
-        setSearchResults(data.items);
-        toast({
-          title: `Found ${data.items.length} books`,
-          description: "Select a book from the results below.",
-        });
-      } else {
-        toast({
-          title: "No books found",
-          description: "Try a different search term",
-          variant: "destructive",
-        });
+      if (data?.items && Array.isArray(data.items)) {
+        // Remove duplicates based on book ID
+        const uniqueBooks = Array.from(
+          new Map(data.items.map(book => [book.id, book])).values()
+        );
+        setSearchResults(uniqueBooks);
+        console.log('Search results:', uniqueBooks);
       }
     } catch (error) {
       console.error('Error searching books:', error);
-      toast({
-        title: "Error searching books",
-        description: error.message || "Please try again later",
-        variant: "destructive",
-      });
     } finally {
       setIsSearching(false);
     }
@@ -106,10 +88,6 @@ export default function AddBook() {
     };
     setBook(newBook);
     setSearchResults([]);
-    toast({
-      title: "Book selected!",
-      description: "You can now edit the details and save.",
-    });
   };
 
   const handleSave = async (updatedBook: Book) => {
@@ -141,18 +119,9 @@ export default function AddBook() {
 
     if (error) {
       console.error('Error saving book:', error);
-      toast({
-        title: "Error saving book",
-        description: "Please try again",
-        variant: "destructive",
-      });
       return;
     }
 
-    toast({
-      title: "Success!",
-      description: "Book saved successfully",
-    });
     navigate("/dashboard");
   };
 
