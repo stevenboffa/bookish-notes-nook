@@ -26,12 +26,13 @@ Deno.serve(async (req) => {
       throw new Error('Google Books API key not configured')
     }
 
-    // Construct the request URL
+    // Construct the request URL with increased maxResults
     const baseUrl = 'https://www.googleapis.com/books/v1/volumes'
     const params = new URLSearchParams({
       q: searchQuery.trim(),
       key: apiKey,
-      maxResults: '1'
+      maxResults: '10', // Return up to 10 results
+      orderBy: 'relevance', // Sort by relevance to get best matches first
     })
 
     const response = await fetch(`${baseUrl}?${params.toString()}`)
