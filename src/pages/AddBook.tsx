@@ -54,7 +54,7 @@ export default function AddBook() {
           description: "Please check your Supabase configuration",
           variant: "destructive",
         });
-        throw new Error('Could not retrieve API key from secrets');
+        return;
       }
 
       if (!secretData?.value) {
@@ -64,11 +64,11 @@ export default function AddBook() {
           description: "Please add your Google Books API key to Supabase secrets",
           variant: "destructive",
         });
-        throw new Error('API key not found in secrets');
+        return;
       }
 
       const apiKey = secretData.value.trim();
-      console.log('API Key retrieved, length:', apiKey.length);
+      console.log('API Key retrieved successfully');
 
       // Construct the request URL properly
       const baseUrl = 'https://www.googleapis.com/books/v1/volumes';
@@ -79,34 +79,32 @@ export default function AddBook() {
       });
 
       const requestUrl = `${baseUrl}?${params.toString()}`;
-      console.log('Request URL (redacted):', requestUrl.replace(apiKey, '[REDACTED]'));
+      console.log('Making request to Google Books API...');
 
-      const response = await fetch(requestUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        }
-      });
+      const response = await fetch(requestUrl);
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
         console.error('Google Books API Error:', {
           status: response.status,
           statusText: response.statusText,
-          error: errorData
+          error: data.error
         });
+        
+        let errorMessage = "Failed to fetch book data.";
+        if (data.error?.message) {
+          errorMessage = data.error.message;
+        }
         
         toast({
           title: "API Error",
-          description: errorData.error?.message || "Failed to fetch book data. Please check your API key configuration.",
+          description: errorMessage,
           variant: "destructive",
         });
-        
-        throw new Error(errorData.error?.message || 'Failed to fetch book data');
+        return;
       }
 
-      const data = await response.json();
+      console.log('API Response:', data);
 
       if (data.items && data.items.length > 0) {
         const googleBook: GoogleBook = data.items[0];
@@ -222,4 +220,4 @@ export default function AddBook() {
       <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
-};
+}
