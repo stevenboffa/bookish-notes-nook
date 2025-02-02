@@ -40,22 +40,12 @@ export default function AddBook() {
 
     setIsSearching(true);
     try {
-      const response = await fetch(
-        'https://cotmtwabbkxrvbjygnwk.supabase.co/functions/v1/search-books',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({ searchQuery: searchQuery.trim() }),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('search-books', {
+        body: { searchQuery: searchQuery.trim() }
+      });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to search books');
+      if (error) {
+        throw error;
       }
 
       if (data.items && data.items.length > 0) {
