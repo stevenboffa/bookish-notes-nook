@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { BookCover } from "@/components/BookCover";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Card,
   CardContent,
@@ -30,6 +31,10 @@ interface GoogleBook {
   };
 }
 
+interface GoogleBooksResponse {
+  items?: GoogleBook[];
+}
+
 export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
   const [searchResults, setSearchResults] = useState<GoogleBook[]>([]);
@@ -37,6 +42,7 @@ export default function AddBook() {
   const [isSearching, setIsSearching] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   const searchBooks = async () => {
     if (!searchQuery.trim()) {
@@ -46,7 +52,7 @@ export default function AddBook() {
     setIsSearching(true);
     setSearchResults([]);
     try {
-      const { data, error } = await supabase.functions.invoke('search-books', {
+      const { data, error } = await supabase.functions.invoke<GoogleBooksResponse>('search-books', {
         body: { searchQuery: searchQuery.trim() }
       });
 
@@ -58,7 +64,7 @@ export default function AddBook() {
         // Remove duplicates based on book ID
         const uniqueBooks = Array.from(
           new Map(data.items.map(book => [book.id, book])).values()
-        );
+        ) as GoogleBook[];
         setSearchResults(uniqueBooks);
         console.log('Search results:', uniqueBooks);
       }
