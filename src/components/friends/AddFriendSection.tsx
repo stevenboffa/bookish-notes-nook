@@ -9,6 +9,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AddFriendSectionProps {
   onAddFriend: (email: string) => Promise<void>;
@@ -17,17 +18,25 @@ interface AddFriendSectionProps {
 
 export function AddFriendSection({ onAddFriend, isLoading }: AddFriendSectionProps) {
   const [email, setEmail] = useState("");
+  const isMobile = useIsMobile();
 
   return (
     <Card className="mb-8 animate-fade-in">
-      <CardHeader>
+      <CardHeader className={cn(isMobile ? "p-4" : "")}>
         <CardTitle className="text-xl">Add a Friend</CardTitle>
         <CardDescription>
           Enter your friend's email to send them a friend request
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex gap-4">
+      <CardContent className={cn(isMobile ? "p-4" : "")}>
+        <form 
+          className="flex flex-col sm:flex-row gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onAddFriend(email);
+            setEmail("");
+          }}
+        >
           <Input
             type="email"
             placeholder="friend@example.com"
@@ -36,17 +45,17 @@ export function AddFriendSection({ onAddFriend, isLoading }: AddFriendSectionPro
             className="flex-1"
           />
           <Button 
-            onClick={() => {
-              onAddFriend(email);
-              setEmail("");
-            }}
+            type="submit"
             disabled={isLoading || !email}
-            className="min-w-[100px]"
+            className={cn(
+              "min-w-[100px]",
+              isMobile ? "w-full" : ""
+            )}
           >
             <UserPlus className="w-4 h-4 mr-2" />
             Add
           </Button>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );

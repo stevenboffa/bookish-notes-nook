@@ -6,6 +6,7 @@ import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { FriendCard } from "@/components/friends/FriendCard";
 import { AddFriendSection } from "@/components/friends/AddFriendSection";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface Friend {
   id: string;
@@ -14,12 +15,12 @@ export interface Friend {
 }
 
 export default function Friends() {
-  const [email, setEmail] = useState("");
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const { session } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const fetchFriends = async () => {
     try {
@@ -207,13 +208,32 @@ export default function Friends() {
     }
   }, [session?.user.id]);
 
+  const handleBack = () => {
+    setSelectedFriend(null);
+  };
+
+  if (isMobile && selectedFriend) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <FriendBooks 
+          books={selectedFriend.books} 
+          email={selectedFriend.email}
+          onBack={handleBack}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <h1 className="text-3xl font-bold mb-8 animate-fade-in">Friends</h1>
       
       <AddFriendSection onAddFriend={addFriend} isLoading={isLoading} />
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in">
+      <div className={cn(
+        "grid gap-6 animate-fade-in",
+        isMobile ? "grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3"
+      )}>
         {friends.map((friend) => (
           <FriendCard
             key={friend.id}
@@ -230,7 +250,7 @@ export default function Friends() {
         )}
       </div>
 
-      {selectedFriend && (
+      {!isMobile && selectedFriend && (
         <div className="mt-8 animate-fade-in">
           <FriendBooks books={selectedFriend.books} email={selectedFriend.email} />
         </div>
