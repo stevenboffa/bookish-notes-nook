@@ -9,6 +9,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { Loader2 } from "lucide-react";
 
@@ -98,44 +99,46 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
           searchBooks(value);
         }}
       />
-      {isSearching ? (
-        <div className="p-4 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-          <p className="text-sm text-muted-foreground mt-2">Searching books...</p>
-        </div>
-      ) : (
-        <>
-          <CommandEmpty>No books found.</CommandEmpty>
-          <CommandGroup>
-            {searchResults.map((book) => (
-              <CommandItem
-                key={book.id}
-                onSelect={() => handleBookSelect(book)}
-                className="flex items-center gap-3 p-2"
-              >
-                <BookCover
-                  imageUrl={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:')}
-                  thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:')}
-                  genre={book.volumeInfo.categories?.[0] || "Uncategorized"}
-                  title={book.volumeInfo.title}
-                  size="sm"
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium">{book.volumeInfo.title}</span>
-                  <span className="text-sm text-muted-foreground">
-                    by {book.volumeInfo.authors?.[0] || "Unknown Author"}
-                  </span>
-                  {book.volumeInfo.categories?.[0] && (
-                    <span className="text-xs text-muted-foreground">
-                      {book.volumeInfo.categories[0]}
+      <CommandList>
+        {isSearching ? (
+          <div className="p-4 text-center">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+            <p className="text-sm text-muted-foreground mt-2">Searching books...</p>
+          </div>
+        ) : (
+          <>
+            <CommandEmpty>No books found.</CommandEmpty>
+            <CommandGroup>
+              {searchResults.map((book) => (
+                <CommandItem
+                  key={book.id}
+                  onSelect={() => handleBookSelect(book)}
+                  className="flex items-center gap-3 p-2"
+                >
+                  <BookCover
+                    imageUrl={book.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:')}
+                    thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:')}
+                    genre={book.volumeInfo.categories?.[0] || "Uncategorized"}
+                    title={book.volumeInfo.title}
+                    size="sm"
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-medium">{book.volumeInfo.title}</span>
+                    <span className="text-sm text-muted-foreground">
+                      by {book.volumeInfo.authors?.[0] || "Unknown Author"}
                     </span>
-                  )}
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </>
-      )}
+                    {book.volumeInfo.categories?.[0] && (
+                      <span className="text-xs text-muted-foreground">
+                        {book.volumeInfo.categories[0]}
+                      </span>
+                    )}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
+        )}
+      </CommandList>
     </Command>
   );
 }
