@@ -46,13 +46,21 @@ export function BookSearch({ onBookSelect }: BookSearchProps) {
 
     setIsSearching(true);
     try {
+      console.log('Searching for:', searchQuery.trim());
       const { data, error } = await supabase.functions.invoke('search-books', {
         body: { searchQuery: searchQuery.trim() }
       });
 
       if (error) throw error;
 
-      setSearchResults(Array.isArray(data?.items) ? data.items : []);
+      console.log('Search response:', data);
+
+      if (data?.items && Array.isArray(data.items)) {
+        setSearchResults(data.items);
+      } else {
+        console.log('No items found in response');
+        setSearchResults([]);
+      }
     } catch (error) {
       console.error('Error searching books:', error);
       toast({
