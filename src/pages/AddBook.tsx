@@ -51,7 +51,7 @@ export default function AddBook() {
       if (data.items && data.items.length > 0) {
         const googleBook: GoogleBook = data.items[0];
         const newBook: Book = {
-          id: "",
+          id: crypto.randomUUID(),
           title: googleBook.volumeInfo.title,
           author: googleBook.volumeInfo.authors?.[0] || "Unknown Author",
           genre: googleBook.volumeInfo.categories?.[0] || "Uncategorized",
@@ -92,7 +92,6 @@ export default function AddBook() {
     }
 
     const bookData = {
-      id: updatedBook.id,
       title: updatedBook.title,
       author: updatedBook.author,
       genre: updatedBook.genre,
@@ -102,6 +101,11 @@ export default function AddBook() {
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
     };
+
+    // If we're updating an existing book, include its ID
+    if (updatedBook.id && updatedBook.id !== "") {
+      bookData["id"] = updatedBook.id;
+    }
 
     const { error } = await supabase
       .from("books")
