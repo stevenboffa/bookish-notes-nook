@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserX, BookOpen, AlertCircle } from "lucide-react";
+import { UserX, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FriendBooks } from "@/components/FriendBooks";
 import {
@@ -55,7 +55,7 @@ export default function Friends() {
         friendIds.map(async (friendId) => {
           const { data: booksData } = await supabase
             .from('books')
-            .select('id, title, author, genre, rating, status, imageUrl:image_url, thumbnailUrl:thumbnail_url')
+            .select('id, title, author, genre, rating, status, date_read, notes, image_url, thumbnail_url')
             .eq('user_id', friendId);
 
           const friendData = friendsData.find(f => 
@@ -69,7 +69,13 @@ export default function Friends() {
           return {
             id: friendId,
             email: friendEmail || '',
-            books: booksData || [],
+            books: (booksData || []).map(book => ({
+              ...book,
+              imageUrl: book.image_url,
+              thumbnailUrl: book.thumbnail_url,
+              dateRead: book.date_read,
+              notes: book.notes || [],
+            })),
           };
         })
       );
@@ -102,8 +108,7 @@ export default function Friends() {
         toast({
           variant: "destructive",
           title: "User not found",
-          description: "No user found with this email address",
-          icon: <AlertCircle className="h-5 w-5" />
+          description: "No user found with this email address"
         });
         return;
       }
