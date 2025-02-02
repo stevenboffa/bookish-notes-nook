@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Book } from "@/components/BookList";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Friend {
   id: string;
@@ -53,10 +53,27 @@ export default function Friends() {
 
       const friendsWithBooks = await Promise.all(
         friendIds.map(async (friendId) => {
-          const { data: booksData } = await supabase
+          const { data: booksData, error: booksError } = await supabase
             .from('books')
-            .select('id, title, author, genre, rating, status, date_read, notes, image_url, thumbnail_url')
+            .select(`
+              id,
+              title,
+              author,
+              genre,
+              rating,
+              status,
+              date_read,
+              image_url,
+              thumbnail_url,
+              notes (
+                id,
+                content,
+                created_at
+              )
+            `)
             .eq('user_id', friendId);
+
+          if (booksError) throw booksError;
 
           const friendData = friendsData.find(f => 
             f.sender.id === friendId || f.receiver.id === friendId
@@ -70,11 +87,20 @@ export default function Friends() {
             id: friendId,
             email: friendEmail || '',
             books: (booksData || []).map(book => ({
-              ...book,
+              id: book.id,
+              title: book.title,
+              author: book.author,
+              genre: book.genre,
+              rating: book.rating || 0,
+              status: book.status || 'Not started',
+              dateRead: book.date_read,
               imageUrl: book.image_url,
               thumbnailUrl: book.thumbnail_url,
-              dateRead: book.date_read,
-              notes: book.notes || [],
+              notes: book.notes.map(note => ({
+                id: note.id,
+                content: note.content,
+                createdAt: note.created_at,
+              })),
             })),
           };
         })
