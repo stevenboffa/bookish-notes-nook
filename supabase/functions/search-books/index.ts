@@ -9,6 +9,10 @@ interface GoogleBook {
     categories?: string[];
     publishedDate?: string;
     description?: string;
+    imageLinks?: {
+      thumbnail?: string;
+      smallThumbnail?: string;
+    };
   };
 }
 
@@ -31,8 +35,9 @@ Deno.serve(async (req) => {
     const params = new URLSearchParams({
       q: searchQuery.trim(),
       key: apiKey,
-      maxResults: '10', // Return up to 10 results
-      orderBy: 'relevance', // Sort by relevance to get best matches first
+      maxResults: '10',
+      orderBy: 'relevance',
+      fields: 'items(id,volumeInfo(title,authors,categories,publishedDate,description,imageLinks))'
     })
 
     const response = await fetch(`${baseUrl}?${params.toString()}`)

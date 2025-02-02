@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BookCover } from "@/components/BookCover";
 import {
   Card,
   CardContent,
@@ -24,6 +25,10 @@ interface GoogleBook {
     categories?: string[];
     publishedDate?: string;
     description?: string;
+    imageLinks?: {
+      thumbnail?: string;
+      smallThumbnail?: string;
+    };
   };
 }
 
@@ -83,6 +88,9 @@ export default function AddBook() {
   };
 
   const selectBook = (googleBook: GoogleBook) => {
+    const imageUrl = googleBook.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:');
+    const thumbnailUrl = googleBook.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:');
+    
     const newBook: Book = {
       id: crypto.randomUUID(),
       title: googleBook.volumeInfo.title,
@@ -93,6 +101,8 @@ export default function AddBook() {
       status: "Not started",
       notes: [],
       isFavorite: false,
+      imageUrl,
+      thumbnailUrl,
     };
     setBook(newBook);
     setSearchResults([]);
@@ -117,9 +127,10 @@ export default function AddBook() {
       status: updatedBook.status,
       is_favorite: updatedBook.isFavorite,
       user_id: session.user.id,
+      image_url: updatedBook.imageUrl,
+      thumbnail_url: updatedBook.thumbnailUrl,
     };
 
-    // If we're updating an existing book, include its ID
     if (updatedBook.id && updatedBook.id !== "") {
       bookData["id"] = updatedBook.id;
     }
@@ -189,22 +200,29 @@ export default function AddBook() {
                     className="cursor-pointer hover:shadow-md transition-shadow"
                     onClick={() => selectBook(result)}
                   >
-                    <CardHeader>
-                      <CardTitle className="text-lg">{result.volumeInfo.title}</CardTitle>
-                      <CardDescription>
-                        by {result.volumeInfo.authors?.[0] || "Unknown Author"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        {result.volumeInfo.categories?.[0] || "Uncategorized"}
-                      </p>
-                      {result.volumeInfo.publishedDate && (
-                        <p className="text-sm text-muted-foreground">
-                          Published: {result.volumeInfo.publishedDate}
+                    <CardHeader className="flex flex-row gap-4">
+                      <BookCover
+                        imageUrl={result.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:')}
+                        thumbnailUrl={result.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:')}
+                        genre={result.volumeInfo.categories?.[0] || "Uncategorized"}
+                        title={result.volumeInfo.title}
+                        size="sm"
+                      />
+                      <div>
+                        <CardTitle className="text-lg">{result.volumeInfo.title}</CardTitle>
+                        <CardDescription>
+                          by {result.volumeInfo.authors?.[0] || "Unknown Author"}
+                        </CardDescription>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {result.volumeInfo.categories?.[0] || "Uncategorized"}
                         </p>
-                      )}
-                    </CardContent>
+                        {result.volumeInfo.publishedDate && (
+                          <p className="text-sm text-muted-foreground">
+                            Published: {result.volumeInfo.publishedDate}
+                          </p>
+                        )}
+                      </div>
+                    </CardHeader>
                   </Card>
                 ))}
               </div>
