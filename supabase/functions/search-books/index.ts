@@ -23,7 +23,6 @@ Deno.serve(async (req) => {
 
   try {
     const { searchQuery } = await req.json()
-    console.log('Received search query:', searchQuery)
     
     // Get the API key from environment variables
     const apiKey = Deno.env.get('GOOGLE_BOOKS_API_KEY')
@@ -41,13 +40,8 @@ Deno.serve(async (req) => {
       fields: 'items(id,volumeInfo(title,authors,categories,publishedDate,description,imageLinks))'
     })
 
-    const url = `${baseUrl}?${params.toString()}`
-    console.log('Making request to Google Books API:', url)
-
-    const response = await fetch(url)
+    const response = await fetch(`${baseUrl}?${params.toString()}`)
     const data = await response.json()
-
-    console.log('Google Books API response:', data)
 
     if (!response.ok) {
       throw new Error(data.error?.message || 'Failed to search books')
@@ -58,7 +52,6 @@ Deno.serve(async (req) => {
       status: 200,
     })
   } catch (error) {
-    console.error('Error in search-books function:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
