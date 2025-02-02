@@ -10,6 +10,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface AddFriendSectionProps {
   onAddFriend: (email: string) => Promise<void>;

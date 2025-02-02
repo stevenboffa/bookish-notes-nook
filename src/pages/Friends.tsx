@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { FriendCard } from "@/components/friends/FriendCard";
 import { AddFriendSection } from "@/components/friends/AddFriendSection";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export interface Friend {
   id: string;

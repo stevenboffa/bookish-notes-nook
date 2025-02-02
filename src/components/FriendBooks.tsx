@@ -10,6 +10,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 interface FriendBooksProps {
   books: Book[];
