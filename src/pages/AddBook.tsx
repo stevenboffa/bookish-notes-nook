@@ -49,25 +49,48 @@ export default function AddBook() {
 
       if (secretError) {
         console.error('Error fetching API key:', secretError);
+        toast({
+          title: "Error fetching API key",
+          description: "Please ensure the Google Books API key is properly configured",
+          variant: "destructive",
+        });
         throw new Error('Could not retrieve API key from secrets');
       }
 
       if (!secretData?.value) {
+        toast({
+          title: "API key not found",
+          description: "Please configure the Google Books API key in Supabase",
+          variant: "destructive",
+        });
         throw new Error('API key not found in secrets');
       }
+
+      const headers = new Headers({
+        'Accept': 'application/json',
+      });
 
       const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
         searchQuery
       )}&key=${secretData.value}&maxResults=1`;
 
-      const response = await fetch(apiUrl);
-      const data = await response.json();
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: headers,
+      });
 
       if (!response.ok) {
-        const errorMessage = data.error?.message || 'Failed to fetch book data';
+        const data = await response.json();
         console.error('Google Books API Error:', data.error);
-        throw new Error(errorMessage);
+        toast({
+          title: "API Error",
+          description: data.error?.message || "Failed to fetch book data",
+          variant: "destructive",
+        });
+        throw new Error(data.error?.message || 'Failed to fetch book data');
       }
+
+      const data = await response.json();
 
       if (data.items && data.items.length > 0) {
         const googleBook: GoogleBook = data.items[0];
