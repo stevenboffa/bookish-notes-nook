@@ -40,6 +40,8 @@ export default function AddBook() {
 
     setIsSearching(true);
     try {
+      console.log('Starting API key retrieval from Supabase...');
+      
       // First, get the API key from Supabase
       const { data: secretData, error: secretError } = await supabase
         .from('secrets')
@@ -58,6 +60,7 @@ export default function AddBook() {
       }
 
       if (!secretData?.value) {
+        console.error('API key not found in Supabase');
         toast({
           title: "API key not found",
           description: "Please configure the Google Books API key in Supabase",
@@ -65,6 +68,9 @@ export default function AddBook() {
         });
         throw new Error('API key not found in secrets');
       }
+
+      console.log('Successfully retrieved API key from Supabase');
+      console.log('Building API URL and headers...');
 
       const headers = new Headers({
         'Accept': 'application/json',
@@ -74,13 +80,21 @@ export default function AddBook() {
         searchQuery
       )}&key=${secretData.value}&maxResults=1`;
 
+      console.log('Making request to Google Books API...');
+      console.log('API URL (without key):', apiUrl.replace(secretData.value, '[REDACTED]'));
+
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: headers,
       });
 
+      console.log('Received response from Google Books API');
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
+      const data = await response.json();
+      
       if (!response.ok) {
-        const data = await response.json();
         console.error('Google Books API Error:', data.error);
         toast({
           title: "API Error",
@@ -90,7 +104,7 @@ export default function AddBook() {
         throw new Error(data.error?.message || 'Failed to fetch book data');
       }
 
-      const data = await response.json();
+      console.log('Successfully parsed response data');
 
       if (data.items && data.items.length > 0) {
         const googleBook: GoogleBook = data.items[0];
@@ -206,4 +220,4 @@ export default function AddBook() {
       <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
-}
+};
