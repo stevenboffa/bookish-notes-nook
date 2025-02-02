@@ -16,10 +16,12 @@ export type Database = {
           date_read: string
           genre: string
           id: string
+          image_url: string | null
           is_favorite: boolean | null
           is_top_favorite: number | null
           rating: number | null
           status: string | null
+          thumbnail_url: string | null
           title: string
           user_id: string
         }
@@ -29,10 +31,12 @@ export type Database = {
           date_read: string
           genre: string
           id?: string
+          image_url?: string | null
           is_favorite?: boolean | null
           is_top_favorite?: number | null
           rating?: number | null
           status?: string | null
+          thumbnail_url?: string | null
           title: string
           user_id: string
         }
@@ -42,10 +46,12 @@ export type Database = {
           date_read?: string
           genre?: string
           id?: string
+          image_url?: string | null
           is_favorite?: boolean | null
           is_top_favorite?: number | null
           rating?: number | null
           status?: string | null
+          thumbnail_url?: string | null
           title?: string
           user_id?: string
         }

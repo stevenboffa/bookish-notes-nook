@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
+import { BookCover } from "./BookCover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -134,6 +135,17 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       </div>
 
       <div className={`flex-1 overflow-y-auto p-4 space-y-6 ${isMobile ? 'pb-20' : ''}`}>
+        <div className="flex justify-center mb-6">
+          <BookCover
+            imageUrl={book?.imageUrl}
+            thumbnailUrl={book?.thumbnailUrl}
+            genre={book?.genre || ""}
+            title={book?.title || ""}
+            size="lg"
+            className="mx-auto"
+          />
+        </div>
+
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
