@@ -1,21 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { UserX, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FriendBooks } from "@/components/FriendBooks";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
+import { FriendCard } from "@/components/friends/FriendCard";
+import { AddFriendSection } from "@/components/friends/AddFriendSection";
 
-interface Friend {
+export interface Friend {
   id: string;
   email: string;
   books: Book[];
@@ -117,11 +109,10 @@ export default function Friends() {
     }
   };
 
-  const addFriend = async () => {
+  const addFriend = async (email: string) => {
     try {
       setIsLoading(true);
       
-      // First find the user by email
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('id')
@@ -139,7 +130,6 @@ export default function Friends() {
         return;
       }
 
-      // Check if friendship already exists
       const { data: existingFriend } = await supabase
         .from('friends')
         .select()
@@ -155,7 +145,6 @@ export default function Friends() {
         return;
       }
 
-      // Add friend relationship
       const { error: friendError } = await supabase
         .from('friends')
         .insert({
@@ -171,7 +160,6 @@ export default function Friends() {
         description: "Friend added successfully"
       });
 
-      setEmail("");
       fetchFriends();
     } catch (error) {
       console.error('Error adding friend:', error);
@@ -220,62 +208,30 @@ export default function Friends() {
   }, [session?.user.id]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-6">Friends</h1>
-        
-        <div className="flex gap-4 mb-8">
-          <Input
-            type="email"
-            placeholder="Enter friend's email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Button 
-            onClick={addFriend}
-            disabled={isLoading || !email}
-          >
-            Add Friend
-          </Button>
-        </div>
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      <h1 className="text-3xl font-bold mb-8 animate-fade-in">Friends</h1>
+      
+      <AddFriendSection onAddFriend={addFriend} isLoading={isLoading} />
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {friends.map((friend) => (
-            <Card 
-              key={friend.id}
-              className={`cursor-pointer transition-all duration-300 ${
-                selectedFriend?.id === friend.id ? 'ring-2 ring-primary' : ''
-              }`}
-              onClick={() => setSelectedFriend(friend)}
-            >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {friend.email}
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFriend(friend.id);
-                  }}
-                >
-                  <UserX className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  {friend.books.length} books in collection
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-fade-in">
+        {friends.map((friend) => (
+          <FriendCard
+            key={friend.id}
+            friend={friend}
+            isSelected={selectedFriend?.id === friend.id}
+            onSelect={setSelectedFriend}
+            onRemove={removeFriend}
+          />
+        ))}
+        {friends.length === 0 && (
+          <div className="col-span-full text-center py-12 text-muted-foreground">
+            No friends added yet. Add your first friend above!
+          </div>
+        )}
       </div>
 
       {selectedFriend && (
-        <div className="mt-8">
+        <div className="mt-8 animate-fade-in">
           <FriendBooks books={selectedFriend.books} email={selectedFriend.email} />
         </div>
       )}
