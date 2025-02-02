@@ -24,6 +24,8 @@ export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -40,71 +42,60 @@ export default function AddBook() {
 
     setIsSearching(true);
     try {
-      // First, get the API key from Supabase
-      const { data: secretData, error: secretError } = await supabase
-        .from('secrets')
-        .select('value')
-        .eq('name', 'GOOGLE_BOOKS_API_KEY')
-        .single();
+      let currentApiKey = apiKey;
 
-      if (secretError) {
-        console.error('Error fetching API key:', secretError);
-        toast({
-          title: "Error fetching API key",
-          description: "Please check your Supabase configuration",
-          variant: "destructive",
-        });
-        return;
+      if (!currentApiKey) {
+        // Try to get the API key from Supabase first
+        const { data: secretData } = await supabase
+          .from('secrets')
+          .select('value')
+          .eq('name', 'GOOGLE_BOOKS_API_KEY')
+          .single();
+
+        if (secretData?.value) {
+          currentApiKey = secretData.value.trim();
+        } else {
+          setShowApiKeyInput(true);
+          toast({
+            title: "API Key Required",
+            description: "Please enter your Google Books API key",
+          });
+          return;
+        }
       }
 
-      if (!secretData?.value) {
-        console.error('API key not found in Supabase');
-        toast({
-          title: "API key not found",
-          description: "Please add your Google Books API key to Supabase secrets",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const apiKey = secretData.value.trim();
-      console.log('API Key retrieved successfully');
-
-      // Construct the request URL properly
+      // Construct the request URL
       const baseUrl = 'https://www.googleapis.com/books/v1/volumes';
       const params = new URLSearchParams({
         q: searchQuery.trim(),
-        key: apiKey,
+        key: currentApiKey,
         maxResults: '1'
       });
 
       const requestUrl = `${baseUrl}?${params.toString()}`;
-      console.log('Making request to Google Books API...');
-
       const response = await fetch(requestUrl);
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Google Books API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: data.error
-        });
+        console.error('Google Books API Error:', data.error);
         
-        let errorMessage = "Failed to fetch book data.";
-        if (data.error?.message) {
-          errorMessage = data.error.message;
+        if (data.error?.message?.includes('API key not valid')) {
+          setShowApiKeyInput(true);
+          toast({
+            title: "Invalid API Key",
+            description: "Please enter a valid Google Books API key",
+            variant: "destructive",
+          });
+          return;
         }
         
         toast({
           title: "API Error",
-          description: errorMessage,
+          description: data.error?.message || "Failed to fetch book data",
           variant: "destructive",
         });
         return;
       }
-
-      console.log('API Response:', data);
 
       if (data.items && data.items.length > 0) {
         const googleBook: GoogleBook = data.items[0];
@@ -120,6 +111,7 @@ export default function AddBook() {
           isFavorite: false,
         };
         setBook(newBook);
+        setShowApiKeyInput(false);
         toast({
           title: "Book found!",
           description: "You can now edit the details and save.",
@@ -191,6 +183,20 @@ export default function AddBook() {
       {!id && (
         <div className="p-4 space-y-4">
           <h2 className="text-2xl font-bold">Search for a Book</h2>
+          {showApiKeyInput && (
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Enter your Google Books API key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="max-w-md"
+              />
+              <p className="text-sm text-muted-foreground">
+                You can get your API key from the Google Cloud Console
+              </p>
+            </div>
+          )}
           <div className="flex gap-2">
             <Input
               placeholder="Search by title or author..."
