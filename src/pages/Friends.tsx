@@ -92,7 +92,7 @@ export default function Friends() {
               author: book.author,
               genre: book.genre,
               rating: book.rating || 0,
-              status: book.status || 'Not started',
+              status: (book.status || 'Not started') as "Not started" | "In Progress" | "Finished",
               dateRead: book.date_read,
               imageUrl: book.image_url,
               thumbnailUrl: book.thumbnail_url,
