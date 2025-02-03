@@ -46,41 +46,43 @@ export default function BuyBooks() {
   const { data: books = [], isLoading, error } = useQuery({
     queryKey: ['google-books', searchQuery],
     queryFn: async ({ signal }) => {
-      console.log("Starting Google Books search...");
-      
-      const { data: secretData, error: secretError } = await supabase
-        .from('secrets')
-        .select('value')
-        .eq('name', 'GOOGLE_BOOKS_API_KEY')
-        .maybeSingle();
-
-      if (secretError) {
-        console.error('Error fetching Google Books API key:', secretError);
-        throw new Error('Failed to fetch Google Books API key');
-      }
-
-      if (!secretData?.value) {
-        console.error('Google Books API key not found in secrets table');
-        throw new Error('Google Books API key not found');
-      }
-
-      const apiKey = secretData.value;
-      // If no search query, show trending books in the "Fiction" category
-      // ordered by newest and most popular
-      const query = searchQuery.trim() 
-        ? encodeURIComponent(searchQuery)
-        : 'subject:fiction&orderBy=newest&maxResults=40';
-      
-      const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${query}&key=${apiKey}&maxResults=40`;
-      
-      console.log("Fetching from Google Books API URL:", apiUrl);
-      
       try {
+        console.log("Starting Google Books search...");
+        
+        // Fetch the API key from Supabase secrets
+        const { data: secretData, error: secretError } = await supabase
+          .from('secrets')
+          .select('value')
+          .eq('name', 'GOOGLE_BOOKS_API_KEY')
+          .single();
+
+        if (secretError) {
+          console.error('Error fetching Google Books API key:', secretError);
+          throw new Error('Failed to fetch Google Books API key');
+        }
+
+        if (!secretData?.value) {
+          console.error('Google Books API key not found in secrets table');
+          throw new Error('Google Books API key not found');
+        }
+
+        const apiKey = secretData.value;
+        
+        // If no search query, show trending books in the "Fiction" category
+        // ordered by newest and most popular
+        const query = searchQuery.trim() 
+          ? encodeURIComponent(searchQuery)
+          : 'subject:fiction&orderBy=newest';
+        
+        const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${query}&key=${apiKey}&maxResults=40`;
+        
+        console.log("Fetching from Google Books API...");
+        
         const response = await fetch(apiUrl, { signal });
         
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Google Books API error response:', errorText);
+          const errorData = await response.json();
+          console.error('Google Books API error response:', errorData);
           throw new Error(`Google Books API error: ${response.status}`);
         }
 
@@ -102,17 +104,20 @@ export default function BuyBooks() {
     },
     enabled: !!session,
     staleTime: 60 * 1000, // Consider data fresh for 1 minute
+    retry: 1, // Only retry once to avoid excessive API calls
   });
 
   useEffect(() => {
     if (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Failed to fetch books. Please try again later.';
+      
       toast({
         variant: "destructive",
         title: "Error",
         description: errorMessage
       });
-      console.error('Google Books Error details:', error);
     }
   }, [error, toast]);
 
@@ -147,7 +152,7 @@ export default function BuyBooks() {
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">
-          {searchQuery ? 'Search Results' : 'Popular Books'}
+          {searchQuery ? 'Search Results' : 'Popular Fiction Books'}
         </h2>
         {isLoading ? (
           <div className="flex justify-center">
@@ -155,7 +160,7 @@ export default function BuyBooks() {
           </div>
         ) : error ? (
           <div className="text-center text-red-500 py-8">
-            Failed to load books. Please try again later.
+            Failed to load books. Please check if the Google Books API key is properly configured.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
