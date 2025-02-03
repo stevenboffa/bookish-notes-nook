@@ -5,11 +5,11 @@ import { Navigation } from "@/components/Navigation";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
-import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 import AddBook from "./pages/AddBook";
 import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
+import BuyBooks from "./pages/BuyBooks";
 
 const queryClient = new QueryClient();
 
@@ -22,7 +22,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Welcome />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/buy-books" element={<BuyBooks />} />
               <Route path="/add-book" element={<AddBook />} />
               <Route path="/edit-book/:id" element={<AddBook />} />
               <Route path="/profile" element={<Profile />} />
