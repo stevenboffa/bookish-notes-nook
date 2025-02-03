@@ -49,54 +49,19 @@ export default function BuyBooks() {
       try {
         console.log("Starting Google Books search...");
         
-        const { data: secretData, error: secretError } = await supabase
-          .from('secrets')
-          .select('value')
-          .eq('name', 'GOOGLE_BOOKS_API_KEY')
-          .maybeSingle();
-
-        if (secretError) {
-          console.error('Error fetching Google Books API key:', secretError);
-          throw new Error('Failed to fetch Google Books API key');
-        }
-
-        if (!secretData?.value) {
-          console.error('Google Books API key not found in secrets table');
-          throw new Error('Google Books API key not found');
-        }
-
-        const apiKey = secretData.value;
-        
-        // Construct the base query parameters
-        const params = new URLSearchParams({
-          key: apiKey,
-          maxResults: '40'
+        const { data, error } = await supabase.functions.invoke<{ items: GoogleBook[] }>('search-books', {
+          body: { 
+            searchQuery: searchQuery.trim() || 'subject:fiction orderBy:newest'
+          }
         });
 
-        // Add search-specific parameters
-        if (searchQuery.trim()) {
-          params.append('q', searchQuery.trim());
-        } else {
-          params.append('q', 'subject:fiction');
-          params.append('orderBy', 'newest');
+        if (error) {
+          console.error('Error fetching books:', error);
+          throw error;
         }
 
-        const apiUrl = `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
-        console.log("Fetching from Google Books API...");
-        
-        const response = await fetch(apiUrl, { signal });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Google Books API error response:', errorData);
-          throw new Error(`Google Books API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Successfully fetched", data.items?.length || 0, "books");
-        
         // Filter out books without thumbnails or essential info
-        const filteredBooks = (data.items || []).filter((book: GoogleBook) => 
+        const filteredBooks = (data?.items || []).filter((book: GoogleBook) => 
           book.volumeInfo.imageLinks && 
           book.volumeInfo.title &&
           book.volumeInfo.authors
@@ -166,7 +131,7 @@ export default function BuyBooks() {
           </div>
         ) : error ? (
           <div className="text-center text-red-500 py-8">
-            Failed to load books. Please check if the Google Books API key is properly configured.
+            Failed to load books. Please try again later.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
