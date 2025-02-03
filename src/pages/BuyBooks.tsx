@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -39,6 +39,8 @@ interface BookWithUser {
   image_url: string | null;
   thumbnail_url: string | null;
   is_favorite: boolean | null;
+  status: string | null;
+  user_id: string;
   user: {
     email: string | null;
   } | null;
@@ -51,11 +53,11 @@ export default function BuyBooks() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect to login if not authenticated
-  if (!session) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (!session) {
+      navigate("/");
+    }
+  }, [session, navigate]);
 
   const { data: nytBooks = [], isLoading: isLoadingNYT } = useQuery({
     queryKey: ['nyt-bestsellers'],
@@ -90,11 +92,14 @@ export default function BuyBooks() {
       const jsonData = await response.json();
       return jsonData.results.books.slice(0, 10) as NYTBook[];
     },
+    enabled: !!session
   });
 
   const { data: friendBooks = [], isLoading: isLoadingFriends } = useQuery({
     queryKey: ['friend-top-books'],
     queryFn: async () => {
+      if (!session?.user.id) return [];
+
       // First get friend IDs
       const { data: friendships } = await supabase
         .from('friends')
@@ -108,10 +113,15 @@ export default function BuyBooks() {
         f.sender_id === session.user.id ? f.receiver_id : f.sender_id
       );
 
-      // Then get books from friends
+      // Then get books from friends with their profile information
       const { data: books, error } = await supabase
         .from('books')
-        .select('*, user:profiles!books_user_id_fkey(email)')
+        .select(`
+          *,
+          profiles!books_user_id_fkey (
+            email
+          )
+        `)
         .in('user_id', friendIds)
         .order('rating', { ascending: false })
         .limit(10);
@@ -127,14 +137,16 @@ export default function BuyBooks() {
 
       if (!books) return [];
 
-      return (books as BookWithUser[]).map(book => ({
+      return books.map(book => ({
         ...book,
-        userEmail: book.user?.email || '',
+        userEmail: (book.profiles as { email: string | null })?.email || '',
         dateRead: book.date_read,
-        isFavorite: book.is_favorite,
+        isFavorite: book.is_favorite || false,
+        status: book.status || 'Not started',
         notes: [],
       })) as FriendBook[];
     },
+    enabled: !!session
   });
 
   const handleSearch = () => {
@@ -143,6 +155,10 @@ export default function BuyBooks() {
     // Search functionality will be implemented later
     setIsSearching(false);
   };
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="flex-1 container mx-auto p-4 space-y-8">
@@ -236,4 +252,4 @@ export default function BuyBooks() {
       </div>
     </div>
   );
-};
+}
