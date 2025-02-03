@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { NYTListFilters } from "@/components/NYTListFilters";
 import {
   Card,
   CardContent,
@@ -26,6 +27,7 @@ interface NYTBook {
 
 export default function BuyBooks() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedList, setSelectedList] = useState("hardcover-fiction");
   const [isSearching, setIsSearching] = useState(false);
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -38,7 +40,7 @@ export default function BuyBooks() {
   }, [session, navigate]);
 
   const { data: nytBooks = [], isLoading: isLoadingNYT, error: nytError } = useQuery({
-    queryKey: ['nyt-bestsellers'],
+    queryKey: ['nyt-bestsellers', selectedList],
     queryFn: async () => {
       console.log("Starting NYT bestsellers fetch...");
       
@@ -61,7 +63,7 @@ export default function BuyBooks() {
       const apiKey = secretData.value;
       console.log("Successfully retrieved NYT API key from secrets");
       
-      const apiUrl = `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${apiKey}`;
+      const apiUrl = `https://api.nytimes.com/svc/books/v3/lists/current/${selectedList}.json?api-key=${apiKey}`;
       console.log("Fetching from NYT API URL:", apiUrl);
       
       try {
@@ -114,15 +116,26 @@ export default function BuyBooks() {
     return null;
   }
 
+  const filteredBooks = searchQuery.trim()
+    ? nytBooks.filter(book => 
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : nytBooks;
+
   return (
     <div className="flex-1 container mx-auto p-4 space-y-8">
       <h1 className="text-2xl font-bold">Buy Books</h1>
       
-      {/* Search Section */}
-      <div className="space-y-2">
+      {/* Search and Filter Section */}
+      <div className="space-y-4">
+        <NYTListFilters 
+          selectedList={selectedList}
+          onListChange={setSelectedList}
+        />
         <div className="flex gap-2">
           <Input
-            placeholder="Search for books to buy..."
+            placeholder="Search in results..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -147,7 +160,7 @@ export default function BuyBooks() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {nytBooks.map((book) => (
+            {filteredBooks.map((book) => (
               <Card key={book.primary_isbn13} className="flex flex-col">
                 <CardHeader className="flex-1">
                   <div className="aspect-w-2 aspect-h-3 mb-4">
@@ -168,9 +181,9 @@ export default function BuyBooks() {
                 </CardContent>
               </Card>
             ))}
-            {nytBooks.length === 0 && !nytError && (
+            {filteredBooks.length === 0 && !nytError && (
               <p className="col-span-full text-center text-muted-foreground py-8">
-                No bestsellers available at the moment
+                No books found matching your search
               </p>
             )}
           </div>
