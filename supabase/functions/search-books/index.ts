@@ -27,7 +27,7 @@ function isbn13To10(isbn13: string): string {
     return isbn13;
   }
 
-  // Remove the 978 prefix
+  // Remove the 978 prefix and check digit
   const isbn9 = isbn13.slice(3, 12);
 
   // Calculate the ISBN-10 check digit
@@ -38,8 +38,30 @@ function isbn13To10(isbn13: string): string {
   const checkDigit = (11 - (sum % 11)) % 11;
   const checkChar = checkDigit === 10 ? 'X' : checkDigit.toString();
 
-  // Return the complete ISBN-10
   return isbn9 + checkChar;
+}
+
+async function getAmazonASIN(title: string, author: string): Promise<string | null> {
+  try {
+    // Construct a search URL that's likely to find the book
+    const searchQuery = `${title} ${author} book`.replace(/\s+/g, '+');
+    const url = `https://www.amazon.com/s?k=${searchQuery}&i=stripbooks`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+
+    const html = await response.text();
+    
+    // Look for ASIN in the response using regex
+    const asinMatch = html.match(/data-asin="([A-Z0-9]{10})"/);
+    return asinMatch ? asinMatch[1] : null;
+  } catch (error) {
+    console.error('Error fetching Amazon ASIN:', error);
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -86,19 +108,25 @@ Deno.serve(async (req) => {
 
     // Generate affiliate links
     const book = bookId ? data : data.items?.[0]
-    if (book?.volumeInfo?.industryIdentifiers) {
-      const isbn13 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_13')?.identifier
-      const isbn10 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_10')?.identifier
+    if (book?.volumeInfo) {
+      const isbn13 = book.volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_13')?.identifier;
+      const isbn10 = book.volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_10')?.identifier;
       
-      // Use ISBN-10 if available, otherwise convert ISBN-13 to ISBN-10
-      const isbn = isbn10 || (isbn13 ? isbn13To10(isbn13) : null) || book.volumeInfo.industryIdentifiers[0]?.identifier
+      // Try to get ASIN from Amazon search
+      const asin = await getAmazonASIN(
+        book.volumeInfo.title,
+        book.volumeInfo.authors?.[0] || ''
+      );
 
-      if (isbn) {
-        console.log('Using ISBN for affiliate links:', isbn);
+      // Use ASIN if found, otherwise fallback to ISBN-10
+      const amazonId = asin || isbn10 || (isbn13 ? isbn13To10(isbn13) : null);
+
+      if (amazonId) {
+        console.log('Using Amazon ID:', amazonId);
         
         const affiliateLinks = {
-          amazon: `https://www.amazon.com/dp/${isbn}?tag=ps4fans06-20`,
-          goodreads: `https://www.goodreads.com/book/isbn/${isbn13 || isbn}`
+          amazon: `https://www.amazon.com/dp/${amazonId}?tag=ps4fans06-20`,
+          goodreads: `https://www.goodreads.com/book/isbn/${isbn13 || isbn10 || amazonId}`
         }
         
         if (bookId) {
