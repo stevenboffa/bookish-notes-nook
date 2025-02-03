@@ -69,8 +69,12 @@ Deno.serve(async (req) => {
                   book.volumeInfo.industryIdentifiers[0]?.identifier
 
       if (isbn) {
+        // Clean up ISBN by removing leading '9' if present and it's longer than 10 chars
+        const cleanIsbn = isbn.length > 10 ? isbn.replace(/^9/, '') : isbn;
+        console.log('Using ISBN for affiliate links:', cleanIsbn);
+
         const affiliateLinks = {
-          amazon: `https://www.amazon.com/dp/${isbn}?tag=ps4fans06-20`,
+          amazon: `https://www.amazon.com/dp/${cleanIsbn}?tag=ps4fans06-20`,
           goodreads: `https://www.goodreads.com/book/isbn/${isbn}`
         }
         
