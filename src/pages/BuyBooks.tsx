@@ -69,6 +69,10 @@ export default function BuyBooks() {
       try {
         const response = await fetch(apiUrl);
         
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again in a few minutes.');
+        }
+        
         if (!response.ok) {
           const errorText = await response.text();
           console.error('NYT API error response:', errorText);
@@ -91,15 +95,26 @@ export default function BuyBooks() {
       }
     },
     enabled: !!session,
-    retry: 1
+    retry: (failureCount, error) => {
+      // Don't retry on rate limit errors
+      if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    cacheTime: 30 * 60 * 1000, // Keep data in cache for 30 minutes
   });
 
   useEffect(() => {
     if (nytError) {
+      const errorMessage = nytError instanceof Error ? nytError.message : 'Failed to fetch bestsellers';
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch bestsellers. Please try again later."
+        description: errorMessage.includes('Rate limit exceeded') 
+          ? "We've hit the NYT API rate limit. Please wait a few minutes before trying again."
+          : errorMessage
       });
       console.error('NYT Error details:', nytError);
     }
@@ -156,7 +171,9 @@ export default function BuyBooks() {
           </div>
         ) : nytError ? (
           <div className="text-center text-red-500 py-8">
-            Failed to load bestsellers. Please try again later.
+            {nytError instanceof Error && nytError.message.includes('Rate limit exceeded')
+              ? "We've hit the API rate limit. Please wait a few minutes before trying again."
+              : "Failed to load bestsellers. Please try again later."}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
