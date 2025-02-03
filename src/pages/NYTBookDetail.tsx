@@ -19,6 +19,13 @@ interface NYTBookDetail {
   weeks_on_list: number;
 }
 
+const CURRENT_LISTS = [
+  'combined-print-and-e-book-fiction',
+  'combined-print-and-e-book-nonfiction',
+  'hardcover-fiction',
+  'hardcover-nonfiction',
+];
+
 export default function NYTBookDetail() {
   const { isbn } = useParams();
   const navigate = useNavigate();
@@ -27,6 +34,8 @@ export default function NYTBookDetail() {
   const { data: book, isLoading, error } = useQuery({
     queryKey: ['nyt-book-detail', isbn],
     queryFn: async ({ signal }) => {
+      console.log("Fetching book details for ISBN:", isbn);
+      
       const { data: secretData } = await supabase
         .from('secrets')
         .select('value')
@@ -37,26 +46,37 @@ export default function NYTBookDetail() {
         throw new Error('NYT API key not found');
       }
 
-      // First try to get the book from the current bestseller lists
-      const currentListsResponse = await fetch(
-        `https://api.nytimes.com/svc/books/v3/lists/current/combined-print-and-e-book-fiction.json?api-key=${secretData.value}`,
-        { signal }
-      );
+      // Try to find the book in any of the current lists
+      for (const list of CURRENT_LISTS) {
+        console.log("Checking list:", list);
+        try {
+          const response = await fetch(
+            `https://api.nytimes.com/svc/books/v3/lists/current/${list}.json?api-key=${secretData.value}`,
+            { signal }
+          );
 
-      if (!currentListsResponse.ok) {
-        throw new Error('Failed to fetch current bestsellers');
+          if (!response.ok) {
+            console.log(`Failed to fetch ${list} list:`, response.status);
+            continue;
+          }
+
+          const data = await response.json();
+          const foundBook = data.results?.books?.find(
+            (book: NYTBookDetail) => book.primary_isbn13 === isbn
+          );
+
+          if (foundBook) {
+            console.log("Found book in list:", list);
+            return foundBook;
+          }
+        } catch (err) {
+          console.error(`Error fetching ${list} list:`, err);
+          continue;
+        }
       }
 
-      const currentListsData = await currentListsResponse.json();
-      const bookFromCurrentList = currentListsData.results.books?.find(
-        (book: NYTBookDetail) => book.primary_isbn13 === isbn
-      );
-
-      if (bookFromCurrentList) {
-        return bookFromCurrentList;
-      }
-
-      // If not found in current list, try the books API
+      // If not found in current lists, try the books API
+      console.log("Book not found in current lists, trying reviews API");
       const response = await fetch(
         `https://api.nytimes.com/svc/books/v3/reviews.json?isbn=${isbn}&api-key=${secretData.value}`,
         { signal }
@@ -71,13 +91,16 @@ export default function NYTBookDetail() {
         throw new Error('Book not found');
       }
 
+      // Create a book object from reviews data
       return {
         ...data.results[0],
         book_image: data.results[0].book_image || '/placeholder.svg',
         amazon_product_url: `https://www.amazon.com/s?k=${isbn}`,
         rank: 'N/A',
         rank_last_week: 'N/A',
-        weeks_on_list: 'N/A'
+        weeks_on_list: 'N/A',
+        publisher: data.results[0].publisher || 'Unknown Publisher',
+        description: data.results[0].summary || 'No description available'
       };
     },
     retry: (failureCount, error) => {
