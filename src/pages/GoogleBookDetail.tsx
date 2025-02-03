@@ -173,3 +173,4 @@ export default function GoogleBookDetail() {
       </div>
     </div>
   );
+}
