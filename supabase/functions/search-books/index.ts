@@ -20,6 +20,28 @@ interface GoogleBook {
   };
 }
 
+// Function to convert ISBN-13 to ISBN-10
+function isbn13To10(isbn13: string): string {
+  // Check if it's a valid ISBN-13 starting with 978
+  if (!isbn13.startsWith('978')) {
+    return isbn13;
+  }
+
+  // Remove the 978 prefix
+  const isbn9 = isbn13.slice(3, 12);
+
+  // Calculate the ISBN-10 check digit
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += (10 - i) * parseInt(isbn9[i]);
+  }
+  const checkDigit = (11 - (sum % 11)) % 11;
+  const checkChar = checkDigit === 10 ? 'X' : checkDigit.toString();
+
+  // Return the complete ISBN-10
+  return isbn9 + checkChar;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -65,17 +87,18 @@ Deno.serve(async (req) => {
     // Generate affiliate links
     const book = bookId ? data : data.items?.[0]
     if (book?.volumeInfo?.industryIdentifiers) {
-      const isbn = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_13')?.identifier ||
-                  book.volumeInfo.industryIdentifiers[0]?.identifier
+      const isbn13 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_13')?.identifier
+      const isbn10 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_10')?.identifier
+      
+      // Use ISBN-10 if available, otherwise convert ISBN-13 to ISBN-10
+      const isbn = isbn10 || (isbn13 ? isbn13To10(isbn13) : null) || book.volumeInfo.industryIdentifiers[0]?.identifier
 
       if (isbn) {
-        // Clean up ISBN by removing leading '9' if present and it's longer than 10 chars
-        const cleanIsbn = isbn.length > 10 ? isbn.replace(/^9/, '') : isbn;
-        console.log('Using ISBN for affiliate links:', cleanIsbn);
-
+        console.log('Using ISBN for affiliate links:', isbn);
+        
         const affiliateLinks = {
-          amazon: `https://www.amazon.com/dp/${cleanIsbn}?tag=ps4fans06-20`,
-          goodreads: `https://www.goodreads.com/book/isbn/${isbn}`
+          amazon: `https://www.amazon.com/dp/${isbn}?tag=ps4fans06-20`,
+          goodreads: `https://www.goodreads.com/book/isbn/${isbn13 || isbn}`
         }
         
         if (bookId) {
