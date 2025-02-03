@@ -29,6 +29,21 @@ interface FriendBook extends Book {
   userEmail: string;
 }
 
+interface BookWithUser {
+  id: string;
+  title: string;
+  author: string;
+  genre: string;
+  date_read: string;
+  rating: number | null;
+  image_url: string | null;
+  thumbnail_url: string | null;
+  is_favorite: boolean | null;
+  user: {
+    email: string | null;
+  } | null;
+}
+
 export default function BuyBooks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -96,7 +111,7 @@ export default function BuyBooks() {
       // Then get books from friends
       const { data: books, error } = await supabase
         .from('books')
-        .select('*, user:user_id(email)')
+        .select('*, user:profiles!books_user_id_fkey(email)')
         .in('user_id', friendIds)
         .order('rating', { ascending: false })
         .limit(10);
@@ -112,7 +127,7 @@ export default function BuyBooks() {
 
       if (!books) return [];
 
-      return books.map(book => ({
+      return (books as BookWithUser[]).map(book => ({
         ...book,
         userEmail: book.user?.email || '',
         dateRead: book.date_read,
