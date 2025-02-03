@@ -13,6 +13,10 @@ interface GoogleBook {
       thumbnail?: string;
       smallThumbnail?: string;
     };
+    industryIdentifiers?: Array<{
+      type: string;
+      identifier: string;
+    }>;
   };
 }
 
@@ -24,7 +28,6 @@ Deno.serve(async (req) => {
   try {
     const { searchQuery, bookId } = await req.json()
     
-    // Get the API key from environment variables
     const apiKey = Deno.env.get('GOOGLE_BOOKS_API_KEY')
     if (!apiKey) {
       throw new Error('Google Books API key not configured')
@@ -34,12 +37,10 @@ Deno.serve(async (req) => {
     let params: URLSearchParams
 
     if (bookId) {
-      // Single book retrieval
       console.log('Fetching single book with ID:', bookId)
       url = `https://www.googleapis.com/books/v1/volumes/${bookId}`
       params = new URLSearchParams({ key: apiKey })
     } else if (searchQuery) {
-      // Search functionality
       console.log('Searching books with query:', searchQuery)
       url = 'https://www.googleapis.com/books/v1/volumes'
       params = new URLSearchParams({
@@ -47,7 +48,7 @@ Deno.serve(async (req) => {
         key: apiKey,
         maxResults: '10',
         orderBy: 'relevance',
-        fields: 'items(id,volumeInfo(title,authors,categories,publishedDate,description,imageLinks))'
+        fields: 'items(id,volumeInfo(title,authors,categories,publishedDate,description,imageLinks,industryIdentifiers))'
       })
     } else {
       throw new Error('Either searchQuery or bookId must be provided')
@@ -59,6 +60,30 @@ Deno.serve(async (req) => {
     if (!response.ok) {
       console.error('Google Books API error:', data)
       throw new Error(data.error?.message || 'Failed to fetch books')
+    }
+
+    // Generate affiliate links
+    const book = bookId ? data : data.items?.[0]
+    if (book?.volumeInfo?.industryIdentifiers) {
+      const isbn = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_13')?.identifier ||
+                  book.volumeInfo.industryIdentifiers[0]?.identifier
+
+      if (isbn) {
+        // Note: Replace YOURAFFILIATEID with your actual Amazon Associate ID
+        const affiliateLinks = {
+          amazon: `https://www.amazon.com/dp/${isbn}?tag=YOURAFFILIATEID`,
+          goodreads: `https://www.goodreads.com/book/isbn/${isbn}`
+        }
+        
+        if (bookId) {
+          data.affiliateLinks = affiliateLinks
+        } else {
+          data.items = data.items.map((item: any) => ({
+            ...item,
+            affiliateLinks
+          }))
+        }
+      }
     }
 
     return new Response(JSON.stringify(data), {

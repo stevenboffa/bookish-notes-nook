@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
-import { ArrowLeft, Loader } from "lucide-react";
+import { ArrowLeft, Loader, ShoppingCart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +35,10 @@ interface GoogleBook {
       currencyCode: string;
     };
   };
+  affiliateLinks?: {
+    amazon: string;
+    goodreads: string;
+  };
 }
 
 export default function GoogleBookDetail() {
@@ -42,7 +46,7 @@ export default function GoogleBookDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { data: book, isLoading, error } = useQuery({
+  const { data: book, isLoading } = useQuery({
     queryKey: ['google-book', id],
     queryFn: async () => {
       try {
@@ -65,13 +69,6 @@ export default function GoogleBookDetail() {
     },
     retry: false,
     staleTime: 60 * 60 * 1000, // 1 hour
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load book details"
-      });
-    }
   });
 
   if (isLoading) {
@@ -157,18 +154,48 @@ export default function GoogleBookDetail() {
             </div>
           </div>
 
-          {book.saleInfo.buyLink && (
-            <a
-              href={book.saleInfo.buyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block w-full"
-            >
-              <Button className="w-full">
-                Buy Now {book.saleInfo.listPrice && `($${book.saleInfo.listPrice.amount})`}
-              </Button>
-            </a>
-          )}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Buy this Book</h2>
+            <div className="flex flex-col gap-3">
+              {book.affiliateLinks?.amazon && (
+                <a
+                  href={book.affiliateLinks.amazon}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button className="w-full" variant="default">
+                    <ShoppingCart className="mr-2" />
+                    Buy on Amazon
+                  </Button>
+                </a>
+              )}
+              {book.affiliateLinks?.goodreads && (
+                <a
+                  href={book.affiliateLinks.goodreads}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button className="w-full" variant="outline">
+                    View on Goodreads
+                  </Button>
+                </a>
+              )}
+              {book.saleInfo.buyLink && (
+                <a
+                  href={book.saleInfo.buyLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button className="w-full" variant="secondary">
+                    Buy on Google Books {book.saleInfo.listPrice && `($${book.saleInfo.listPrice.amount})`}
+                  </Button>
+                </a>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
