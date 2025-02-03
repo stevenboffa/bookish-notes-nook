@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { BookCover } from "@/components/BookCover";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -29,6 +31,14 @@ interface FriendBook extends Book {
 export default function BuyBooks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to login if not authenticated
+  if (!session) {
+    navigate("/");
+    return null;
+  }
 
   const { data: nytBooks = [], isLoading: isLoadingNYT } = useQuery({
     queryKey: ['nyt-bestsellers'],
@@ -50,22 +60,37 @@ export default function BuyBooks() {
   const { data: friendBooks = [], isLoading: isLoadingFriends } = useQuery({
     queryKey: ['friend-top-books'],
     queryFn: async () => {
-      const { data: books, error } = await supabase
+      // First get friend IDs
+      const { data: friendships } = await supabase
+        .from('friends')
+        .select('sender_id, receiver_id')
+        .or(`sender_id.eq.${session.user.id},receiver_id.eq.${session.user.id}`)
+        .eq('status', 'accepted');
+
+      if (!friendships?.length) return [];
+
+      const friendIds = friendships.map(f => 
+        f.sender_id === session.user.id ? f.receiver_id : f.sender_id
+      );
+
+      // Then get books from friends with their profiles
+      const { data: books } = await supabase
         .from('books')
         .select(`
           *,
-          profiles!books_user_id_fkey (
+          profiles:user_id (
             email
           )
         `)
+        .in('user_id', friendIds)
         .order('rating', { ascending: false })
         .limit(10);
 
-      if (error) throw error;
+      if (!books) return [];
 
       return books.map(book => ({
         ...book,
-        userEmail: book.profiles.email,
+        userEmail: book.profiles?.email || '',
         dateRead: book.date_read,
         isFavorite: book.is_favorite,
         notes: [],
