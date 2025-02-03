@@ -14,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Book } from "@/components/BookList";
 import { useToast } from "@/hooks/use-toast";
 
 interface NYTBook {
@@ -23,27 +22,6 @@ interface NYTBook {
   book_image: string;
   description: string;
   primary_isbn13: string;
-}
-
-interface FriendBook extends Book {
-  userEmail: string;
-}
-
-interface BookWithUser {
-  id: string;
-  title: string;
-  author: string;
-  genre: string;
-  date_read: string;
-  rating: number | null;
-  image_url: string | null;
-  thumbnail_url: string | null;
-  is_favorite: boolean | null;
-  status: string | null;
-  user_id: string;
-  user: {
-    email: string | null;
-  } | null;
 }
 
 export default function BuyBooks() {
@@ -62,22 +40,13 @@ export default function BuyBooks() {
   const { data: nytBooks = [], isLoading: isLoadingNYT } = useQuery({
     queryKey: ['nyt-bestsellers'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('secrets')
         .select('value')
         .eq('name', 'NYT_API_KEY')
         .maybeSingle();
 
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch NYT API key"
-        });
-        throw error;
-      }
-
-      if (!data) {
+      if (!data?.value) {
         toast({
           variant: "destructive",
           title: "Error",
@@ -86,65 +55,21 @@ export default function BuyBooks() {
         return [];
       }
 
-      const response = await fetch(
-        `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${data.value}`
-      );
-      const jsonData = await response.json();
-      return jsonData.results.books.slice(0, 10) as NYTBook[];
-    },
-    enabled: !!session
-  });
-
-  const { data: friendBooks = [], isLoading: isLoadingFriends } = useQuery({
-    queryKey: ['friend-top-books'],
-    queryFn: async () => {
-      if (!session?.user.id) return [];
-
-      // First get friend IDs
-      const { data: friendships } = await supabase
-        .from('friends')
-        .select('sender_id, receiver_id')
-        .or(`sender_id.eq.${session.user.id},receiver_id.eq.${session.user.id}`)
-        .eq('status', 'accepted');
-
-      if (!friendships?.length) return [];
-
-      const friendIds = friendships.map(f => 
-        f.sender_id === session.user.id ? f.receiver_id : f.sender_id
-      );
-
-      // Then get books from friends with their profile information
-      const { data: books, error } = await supabase
-        .from('books')
-        .select(`
-          *,
-          profiles!books_user_id_fkey (
-            email
-          )
-        `)
-        .in('user_id', friendIds)
-        .order('rating', { ascending: false })
-        .limit(10);
-
-      if (error) {
+      try {
+        const response = await fetch(
+          `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${data.value}`
+        );
+        const jsonData = await response.json();
+        return jsonData.results.books.slice(0, 10) as NYTBook[];
+      } catch (error) {
+        console.error('Error fetching NYT books:', error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to fetch friend books"
+          description: "Failed to fetch bestsellers"
         });
-        throw error;
+        return [];
       }
-
-      if (!books) return [];
-
-      return books.map(book => ({
-        ...book,
-        userEmail: (book.profiles as { email: string | null })?.email || '',
-        dateRead: book.date_read,
-        isFavorite: book.is_favorite || false,
-        status: book.status || 'Not started',
-        notes: [],
-      })) as FriendBook[];
     },
     enabled: !!session
   });
@@ -188,7 +113,7 @@ export default function BuyBooks() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {nytBooks.map((book) => (
               <Card key={book.primary_isbn13} className="flex flex-col">
                 <CardHeader className="flex-1">
@@ -210,43 +135,11 @@ export default function BuyBooks() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        )}
-      </div>
-
-      {/* Friends' Top Rated Books Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Friends' Top Rated Books</h2>
-        {isLoadingFriends ? (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {friendBooks.map((book) => (
-              <Card key={book.id} className="flex flex-col">
-                <CardHeader className="flex-1">
-                  <div className="aspect-w-2 aspect-h-3 mb-4">
-                    <BookCover
-                      imageUrl={book.imageUrl}
-                      thumbnailUrl={book.thumbnailUrl}
-                      genre={book.genre}
-                      title={book.title}
-                    />
-                  </div>
-                  <CardTitle className="text-lg">{book.title}</CardTitle>
-                  <CardDescription>by {book.author}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm">Rating: {book.rating}/10</p>
-                    <p className="text-sm text-muted-foreground">
-                      Recommended by: {book.userEmail}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {nytBooks.length === 0 && (
+              <p className="col-span-full text-center text-muted-foreground py-8">
+                No bestsellers available at the moment
+              </p>
+            )}
           </div>
         )}
       </div>
