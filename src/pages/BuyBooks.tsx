@@ -41,7 +41,7 @@ export default function BuyBooks() {
 
   const { data: nytBooks = [], isLoading: isLoadingNYT, error: nytError } = useQuery({
     queryKey: ['nyt-bestsellers', selectedList],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       console.log("Starting NYT bestsellers fetch...");
       
       const { data: secretData, error: secretError } = await supabase
@@ -76,7 +76,7 @@ export default function BuyBooks() {
       console.log("Fetching from NYT API URL:", apiUrl);
       
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, { signal });
         
         if (response.status === 429) {
           throw new Error('Rate limit exceeded. Please try again in a few minutes.');
@@ -105,13 +105,19 @@ export default function BuyBooks() {
     },
     enabled: !!session,
     retry: (failureCount, error) => {
-      if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
+      // Don't retry on 404s
+      if (error instanceof Error && error.message.includes('NYT API error: 404')) {
         return false;
+      }
+      // Retry up to 3 times with exponential backoff for rate limits
+      if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
+        return failureCount < 3;
       }
       return failureCount < 2;
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff up to 30 seconds
+    staleTime: 60 * 60 * 1000, // Consider data fresh for 1 hour
+    gcTime: 2 * 60 * 60 * 1000, // Keep unused data in cache for 2 hours
   });
 
   useEffect(() => {
