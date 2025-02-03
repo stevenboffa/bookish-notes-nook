@@ -49,9 +49,7 @@ export default function GoogleBookDetail() {
         console.log("Fetching book details for ID:", id);
         
         const { data, error } = await supabase.functions.invoke<GoogleBook>('search-books', {
-          body: { 
-            bookId: id
-          }
+          body: { bookId: id }
         });
 
         if (error) {
@@ -67,15 +65,14 @@ export default function GoogleBookDetail() {
     },
     retry: false,
     staleTime: 60 * 60 * 1000, // 1 hour
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load book details"
+      });
+    }
   });
-
-  if (error) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: error instanceof Error ? error.message : "Failed to load book details"
-    });
-  }
 
   if (isLoading) {
     return (
@@ -176,4 +173,3 @@ export default function GoogleBookDetail() {
       </div>
     </div>
   );
-}

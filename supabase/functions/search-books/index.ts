@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { searchQuery } = await req.json()
+    const { searchQuery, bookId } = await req.json()
     
     // Get the API key from environment variables
     const apiKey = Deno.env.get('GOOGLE_BOOKS_API_KEY')
@@ -30,21 +30,35 @@ Deno.serve(async (req) => {
       throw new Error('Google Books API key not configured')
     }
 
-    // Construct the request URL with increased maxResults
-    const baseUrl = 'https://www.googleapis.com/books/v1/volumes'
-    const params = new URLSearchParams({
-      q: searchQuery.trim(),
-      key: apiKey,
-      maxResults: '10',
-      orderBy: 'relevance',
-      fields: 'items(id,volumeInfo(title,authors,categories,publishedDate,description,imageLinks))'
-    })
+    let url: string
+    let params: URLSearchParams
 
-    const response = await fetch(`${baseUrl}?${params.toString()}`)
+    if (bookId) {
+      // Single book retrieval
+      console.log('Fetching single book with ID:', bookId)
+      url = `https://www.googleapis.com/books/v1/volumes/${bookId}`
+      params = new URLSearchParams({ key: apiKey })
+    } else if (searchQuery) {
+      // Search functionality
+      console.log('Searching books with query:', searchQuery)
+      url = 'https://www.googleapis.com/books/v1/volumes'
+      params = new URLSearchParams({
+        q: searchQuery.trim(),
+        key: apiKey,
+        maxResults: '10',
+        orderBy: 'relevance',
+        fields: 'items(id,volumeInfo(title,authors,categories,publishedDate,description,imageLinks))'
+      })
+    } else {
+      throw new Error('Either searchQuery or bookId must be provided')
+    }
+
+    const response = await fetch(`${url}?${params.toString()}`)
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to search books')
+      console.error('Google Books API error:', data)
+      throw new Error(data.error?.message || 'Failed to fetch books')
     }
 
     return new Response(JSON.stringify(data), {
@@ -52,6 +66,7 @@ Deno.serve(async (req) => {
       status: 200,
     })
   } catch (error) {
+    console.error('Error in search-books function:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
