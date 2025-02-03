@@ -40,7 +40,7 @@ export default function BuyBooks() {
   const { data: nytBooks = [], isLoading: isLoadingNYT, error: nytError } = useQuery({
     queryKey: ['nyt-bestsellers'],
     queryFn: async () => {
-      console.log("Fetching NYT bestsellers...");
+      console.log("Starting NYT bestsellers fetch...");
       
       const { data: secretData, error: secretError } = await supabase
         .from('secrets')
@@ -55,16 +55,17 @@ export default function BuyBooks() {
 
       if (!secretData?.value) {
         console.error('NYT API key not found in secrets table');
-        throw new Error('NYT API key not found in secrets table');
+        throw new Error('NYT API key not found');
       }
 
       const apiKey = secretData.value;
-      console.log("Got NYT API key, fetching bestsellers...");
+      console.log("Successfully retrieved NYT API key from secrets");
+      
+      const apiUrl = `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${apiKey}`;
+      console.log("Fetching from NYT API URL:", apiUrl);
       
       try {
-        const response = await fetch(
-          `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${apiKey}`
-        );
+        const response = await fetch(apiUrl);
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -73,13 +74,14 @@ export default function BuyBooks() {
         }
 
         const jsonData = await response.json();
-        console.log("NYT API response received:", jsonData.status);
+        console.log("NYT API response status:", jsonData.status);
         
         if (!jsonData.results?.books) {
           console.error('Unexpected NYT API response format:', jsonData);
           throw new Error('Unexpected NYT API response format');
         }
 
+        console.log("Successfully fetched", jsonData.results.books.length, "books");
         return jsonData.results.books as NYTBook[];
       } catch (error) {
         console.error('Error fetching NYT books:', error);
