@@ -63,7 +63,19 @@ export default function BuyBooks() {
       const apiKey = secretData.value;
       console.log("Successfully retrieved NYT API key from secrets");
       
-      const apiUrl = `https://api.nytimes.com/svc/books/v3/lists/current/${selectedList}.json?api-key=${apiKey}`;
+      // Parse the selected list to handle historical and best of year formats
+      const [listName, date] = selectedList.split('/');
+      let apiUrl = `https://api.nytimes.com/svc/books/v3/lists`;
+      
+      if (date) {
+        // Historical or best of year list
+        apiUrl += `/${date}/${listName}.json`;
+      } else {
+        // Current list
+        apiUrl += `/current/${listName}.json`;
+      }
+      apiUrl += `?api-key=${apiKey}`;
+      
       console.log("Fetching from NYT API URL:", apiUrl);
       
       try {
@@ -96,14 +108,13 @@ export default function BuyBooks() {
     },
     enabled: !!session,
     retry: (failureCount, error) => {
-      // Don't retry on rate limit errors
       if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
         return false;
       }
       return failureCount < 2;
     },
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    cacheTime: 30 * 60 * 1000, // Keep data in cache for 30 minutes
+    gcTime: 30 * 60 * 1000, // Keep data in cache for 30 minutes (renamed from cacheTime)
   });
 
   useEffect(() => {
