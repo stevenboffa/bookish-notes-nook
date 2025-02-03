@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { NYTListFilters } from "@/components/NYTListFilters";
 import {
   Card,
   CardContent,
@@ -17,17 +16,22 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-interface NYTBook {
-  title: string;
-  author: string;
-  book_image: string;
-  description: string;
-  primary_isbn13: string;
+interface GoogleBook {
+  id: string;
+  volumeInfo: {
+    title: string;
+    authors: string[];
+    description: string;
+    imageLinks?: {
+      thumbnail: string;
+      smallThumbnail: string;
+    };
+    categories: string[];
+  };
 }
 
 export default function BuyBooks() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedList, setSelectedList] = useState("hardcover-fiction");
   const [isSearching, setIsSearching] = useState(false);
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -39,100 +43,65 @@ export default function BuyBooks() {
     }
   }, [session, navigate]);
 
-  const { data: nytBooks = [], isLoading: isLoadingNYT, error: nytError } = useQuery({
-    queryKey: ['nyt-bestsellers', selectedList],
+  const { data: books = [], isLoading, error } = useQuery({
+    queryKey: ['google-books', searchQuery],
     queryFn: async ({ signal }) => {
-      console.log("Starting NYT bestsellers fetch...");
+      console.log("Starting Google Books search...");
       
       const { data: secretData, error: secretError } = await supabase
         .from('secrets')
         .select('value')
-        .eq('name', 'NYT_API_KEY')
+        .eq('name', 'GOOGLE_BOOKS_API_KEY')
         .maybeSingle();
 
       if (secretError) {
-        console.error('Error fetching NYT API key:', secretError);
-        throw new Error('Failed to fetch NYT API key');
+        console.error('Error fetching Google Books API key:', secretError);
+        throw new Error('Failed to fetch Google Books API key');
       }
 
       if (!secretData?.value) {
-        console.error('NYT API key not found in secrets table');
-        throw new Error('NYT API key not found');
+        console.error('Google Books API key not found in secrets table');
+        throw new Error('Google Books API key not found');
       }
 
       const apiKey = secretData.value;
-      console.log("Successfully retrieved NYT API key from secrets");
+      const query = searchQuery.trim() || 'subject:fiction';
+      const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${apiKey}&maxResults=40`;
       
-      const [listName, date] = selectedList.split('/');
-      let apiUrl = `https://api.nytimes.com/svc/books/v3/lists`;
-      
-      if (date) {
-        apiUrl += `/${date}/${listName}.json`;
-      } else {
-        apiUrl += `/current/${listName}.json`;
-      }
-      apiUrl += `?api-key=${apiKey}`;
-      
-      console.log("Fetching from NYT API URL:", apiUrl);
+      console.log("Fetching from Google Books API URL:", apiUrl);
       
       try {
         const response = await fetch(apiUrl, { signal });
         
-        if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please try again in a few minutes.');
-        }
-        
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('NYT API error response:', errorText);
-          throw new Error(`NYT API error: ${response.status}`);
+          console.error('Google Books API error response:', errorText);
+          throw new Error(`Google Books API error: ${response.status}`);
         }
 
-        const jsonData = await response.json();
-        console.log("NYT API response status:", jsonData.status);
-        
-        if (!jsonData.results?.books) {
-          console.error('Unexpected NYT API response format:', jsonData);
-          throw new Error('Unexpected NYT API response format');
-        }
-
-        console.log("Successfully fetched", jsonData.results.books.length, "books");
-        return jsonData.results.books as NYTBook[];
+        const data = await response.json();
+        console.log("Successfully fetched", data.items?.length || 0, "books");
+        return (data.items || []) as GoogleBook[];
       } catch (error) {
-        console.error('Error fetching NYT books:', error);
+        console.error('Error fetching Google books:', error);
         throw error;
       }
     },
     enabled: !!session,
-    retry: (failureCount, error) => {
-      // Don't retry on 404s
-      if (error instanceof Error && error.message.includes('NYT API error: 404')) {
-        return false;
-      }
-      // Retry up to 3 times with exponential backoff for rate limits
-      if (error instanceof Error && error.message.includes('Rate limit exceeded')) {
-        return failureCount < 3;
-      }
-      return failureCount < 2;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff up to 30 seconds
-    staleTime: 60 * 60 * 1000, // Consider data fresh for 1 hour
-    gcTime: 2 * 60 * 60 * 1000, // Keep unused data in cache for 2 hours
+    staleTime: 60 * 1000, // Consider data fresh for 1 minute
   });
 
   useEffect(() => {
-    if (nytError) {
-      const errorMessage = nytError instanceof Error ? nytError.message : 'Failed to fetch bestsellers';
+    if (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
       toast({
         variant: "destructive",
         title: "Error",
-        description: errorMessage.includes('Rate limit exceeded') 
-          ? "We've hit the NYT API rate limit. Please wait a few minutes before trying again."
-          : errorMessage
+        description: errorMessage
       });
-      console.error('NYT Error details:', nytError);
+      console.error('Google Books Error details:', error);
     }
-  }, [nytError, toast]);
+  }, [error, toast]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
@@ -144,25 +113,14 @@ export default function BuyBooks() {
     return null;
   }
 
-  const filteredBooks = searchQuery.trim()
-    ? nytBooks.filter(book => 
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : nytBooks;
-
   return (
     <div className="flex-1 container mx-auto p-4 space-y-8">
       <h1 className="text-2xl font-bold">Buy Books</h1>
       
       <div className="space-y-4">
-        <NYTListFilters 
-          selectedList={selectedList}
-          onListChange={setSelectedList}
-        />
         <div className="flex gap-2">
           <Input
-            placeholder="Search in results..."
+            placeholder="Search by title, author, or subject..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -175,45 +133,45 @@ export default function BuyBooks() {
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">NYT Bestsellers</h2>
-        {isLoadingNYT ? (
+        <h2 className="text-xl font-semibold">Search Results</h2>
+        {isLoading ? (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
-        ) : nytError ? (
+        ) : error ? (
           <div className="text-center text-red-500 py-8">
-            {nytError instanceof Error && nytError.message.includes('Rate limit exceeded')
-              ? "We've hit the API rate limit. Please wait a few minutes before trying again."
-              : "Failed to load bestsellers. Please try again later."}
+            Failed to load books. Please try again later.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredBooks.map((book) => (
+            {books.map((book) => (
               <Card 
-                key={book.primary_isbn13} 
+                key={book.id} 
                 className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate(`/nyt-book/${book.primary_isbn13}`)}
+                onClick={() => navigate(`/book/${book.id}`)}
               >
                 <CardHeader className="flex-1">
                   <div className="aspect-w-2 aspect-h-3 mb-4">
                     <BookCover
-                      imageUrl={book.book_image}
-                      thumbnailUrl={book.book_image}
-                      genre="Fiction"
-                      title={book.title}
+                      imageUrl={book.volumeInfo.imageLinks?.thumbnail || '/placeholder.svg'}
+                      thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail || '/placeholder.svg'}
+                      genre={book.volumeInfo.categories?.[0] || 'Unknown'}
+                      title={book.volumeInfo.title}
                     />
                   </div>
-                  <CardTitle className="text-lg">{book.title}</CardTitle>
-                  <CardDescription>by {book.author}</CardDescription>
+                  <CardTitle className="text-lg">{book.volumeInfo.title}</CardTitle>
+                  <CardDescription>
+                    by {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground line-clamp-3">
-                    {book.description}
+                    {book.volumeInfo.description || 'No description available'}
                   </p>
                 </CardContent>
               </Card>
             ))}
-            {filteredBooks.length === 0 && !nytError && (
+            {books.length === 0 && !error && (
               <p className="col-span-full text-center text-muted-foreground py-8">
                 No books found matching your search
               </p>

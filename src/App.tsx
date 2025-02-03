@@ -10,6 +10,7 @@ import AddBook from "./pages/AddBook";
 import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
 import BuyBooks from "./pages/BuyBooks";
+import GoogleBookDetail from "./pages/GoogleBookDetail";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
               <Route path="/" element={<Welcome />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/buy-books" element={<BuyBooks />} />
+              <Route path="/book/:id" element={<GoogleBookDetail />} />
               <Route path="/add-book" element={<AddBook />} />
               <Route path="/edit-book/:id" element={<AddBook />} />
               <Route path="/profile" element={<Profile />} />
