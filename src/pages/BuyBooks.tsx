@@ -65,8 +65,13 @@ export default function BuyBooks() {
       }
 
       const apiKey = secretData.value;
-      const query = searchQuery.trim() || 'subject:fiction';
-      const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&key=${apiKey}&maxResults=40`;
+      // If no search query, show trending books in the "Fiction" category
+      // ordered by newest and most popular
+      const query = searchQuery.trim() 
+        ? encodeURIComponent(searchQuery)
+        : 'subject:fiction&orderBy=newest&maxResults=40';
+      
+      const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${query}&key=${apiKey}&maxResults=40`;
       
       console.log("Fetching from Google Books API URL:", apiUrl);
       
@@ -81,7 +86,15 @@ export default function BuyBooks() {
 
         const data = await response.json();
         console.log("Successfully fetched", data.items?.length || 0, "books");
-        return (data.items || []) as GoogleBook[];
+        
+        // Filter out books without thumbnails or essential info
+        const filteredBooks = (data.items || []).filter((book: GoogleBook) => 
+          book.volumeInfo.imageLinks && 
+          book.volumeInfo.title &&
+          book.volumeInfo.authors
+        );
+
+        return filteredBooks;
       } catch (error) {
         console.error('Error fetching Google books:', error);
         throw error;
@@ -133,7 +146,9 @@ export default function BuyBooks() {
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Search Results</h2>
+        <h2 className="text-xl font-semibold">
+          {searchQuery ? 'Search Results' : 'Popular Books'}
+        </h2>
         {isLoading ? (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -153,8 +168,8 @@ export default function BuyBooks() {
                 <CardHeader className="flex-1">
                   <div className="aspect-w-2 aspect-h-3 mb-4">
                     <BookCover
-                      imageUrl={book.volumeInfo.imageLinks?.thumbnail || '/placeholder.svg'}
-                      thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail || '/placeholder.svg'}
+                      imageUrl={book.volumeInfo.imageLinks?.thumbnail}
+                      thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail}
                       genre={book.volumeInfo.categories?.[0] || 'Unknown'}
                       title={book.volumeInfo.title}
                     />
