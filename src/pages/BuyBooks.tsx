@@ -49,12 +49,11 @@ export default function BuyBooks() {
       try {
         console.log("Starting Google Books search...");
         
-        // Fetch the API key from Supabase secrets
         const { data: secretData, error: secretError } = await supabase
           .from('secrets')
           .select('value')
           .eq('name', 'GOOGLE_BOOKS_API_KEY')
-          .single();
+          .maybeSingle();
 
         if (secretError) {
           console.error('Error fetching Google Books API key:', secretError);
@@ -68,14 +67,21 @@ export default function BuyBooks() {
 
         const apiKey = secretData.value;
         
-        // If no search query, show trending books in the "Fiction" category
-        // ordered by newest and most popular
-        const query = searchQuery.trim() 
-          ? encodeURIComponent(searchQuery)
-          : 'subject:fiction&orderBy=newest';
-        
-        const apiUrl = `https://www.googleapis.com/books/v1/volumes?q=${query}&key=${apiKey}&maxResults=40`;
-        
+        // Construct the base query parameters
+        const params = new URLSearchParams({
+          key: apiKey,
+          maxResults: '40'
+        });
+
+        // Add search-specific parameters
+        if (searchQuery.trim()) {
+          params.append('q', searchQuery.trim());
+        } else {
+          params.append('q', 'subject:fiction');
+          params.append('orderBy', 'newest');
+        }
+
+        const apiUrl = `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
         console.log("Fetching from Google Books API...");
         
         const response = await fetch(apiUrl, { signal });
