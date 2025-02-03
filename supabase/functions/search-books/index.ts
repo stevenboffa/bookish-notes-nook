@@ -69,9 +69,8 @@ Deno.serve(async (req) => {
                   book.volumeInfo.industryIdentifiers[0]?.identifier
 
       if (isbn) {
-        // Note: Replace YOURAFFILIATEID with your actual Amazon Associate ID
         const affiliateLinks = {
-          amazon: `https://www.amazon.com/dp/${isbn}?tag=YOURAFFILIATEID`,
+          amazon: `https://www.amazon.com/dp/${isbn}?tag=ps4fans06-20`,
           goodreads: `https://www.goodreads.com/book/isbn/${isbn}`
         }
         
