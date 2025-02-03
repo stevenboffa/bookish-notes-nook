@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Book } from "@/components/BookList";
+import { useToast } from "@/hooks/use-toast";
 
 interface NYTBook {
   title: string;
@@ -33,6 +34,7 @@ export default function BuyBooks() {
   const [isSearching, setIsSearching] = useState(false);
   const { session } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Redirect to login if not authenticated
   if (!session) {
@@ -43,17 +45,35 @@ export default function BuyBooks() {
   const { data: nytBooks = [], isLoading: isLoadingNYT } = useQuery({
     queryKey: ['nyt-bestsellers'],
     queryFn: async () => {
-      const { data: { value: apiKey } } = await supabase
+      const { data, error } = await supabase
         .from('secrets')
         .select('value')
         .eq('name', 'NYT_API_KEY')
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch NYT API key"
+        });
+        throw error;
+      }
+
+      if (!data) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "NYT API key not found"
+        });
+        return [];
+      }
 
       const response = await fetch(
-        `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${apiKey}`
+        `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${data.value}`
       );
-      const data = await response.json();
-      return data.results.books.slice(0, 10) as NYTBook[];
+      const jsonData = await response.json();
+      return jsonData.results.books.slice(0, 10) as NYTBook[];
     },
   });
 
@@ -73,24 +93,28 @@ export default function BuyBooks() {
         f.sender_id === session.user.id ? f.receiver_id : f.sender_id
       );
 
-      // Then get books from friends with their profiles
-      const { data: books } = await supabase
+      // Then get books from friends
+      const { data: books, error } = await supabase
         .from('books')
-        .select(`
-          *,
-          profiles:user_id (
-            email
-          )
-        `)
+        .select('*, user:user_id(email)')
         .in('user_id', friendIds)
         .order('rating', { ascending: false })
         .limit(10);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch friend books"
+        });
+        throw error;
+      }
 
       if (!books) return [];
 
       return books.map(book => ({
         ...book,
-        userEmail: book.profiles?.email || '',
+        userEmail: book.user?.email || '',
         dateRead: book.date_read,
         isFavorite: book.is_favorite,
         notes: [],
@@ -197,4 +221,4 @@ export default function BuyBooks() {
       </div>
     </div>
   );
-}
+};
