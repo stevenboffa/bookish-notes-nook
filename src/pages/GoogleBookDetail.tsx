@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -44,30 +44,26 @@ export default function GoogleBookDetail() {
 
   const { data: book, isLoading, error } = useQuery({
     queryKey: ['google-book', id],
-    queryFn: async ({ signal }) => {
-      console.log("Fetching book details for ID:", id);
-      
-      const { data: secretData } = await supabase
-        .from('secrets')
-        .select('value')
-        .eq('name', 'GOOGLE_BOOKS_API_KEY')
-        .maybeSingle();
+    queryFn: async () => {
+      try {
+        console.log("Fetching book details for ID:", id);
+        
+        const { data, error } = await supabase.functions.invoke<GoogleBook>('search-books', {
+          body: { 
+            bookId: id
+          }
+        });
 
-      if (!secretData?.value) {
-        throw new Error('Google Books API key not found');
+        if (error) {
+          console.error('Error fetching book details:', error);
+          throw error;
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Error fetching Google book:', error);
+        throw error;
       }
-
-      const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes/${id}?key=${secretData.value}`,
-        { signal }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch book details');
-      }
-
-      const data = await response.json();
-      return data as GoogleBook;
     },
     retry: false,
     staleTime: 60 * 60 * 1000, // 1 hour
@@ -84,7 +80,7 @@ export default function GoogleBookDetail() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <Loader className="h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -111,8 +107,8 @@ export default function GoogleBookDetail() {
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <BookCover
-            imageUrl={book.volumeInfo.imageLinks?.thumbnail || '/placeholder.svg'}
-            thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail || '/placeholder.svg'}
+            imageUrl={book.volumeInfo.imageLinks?.thumbnail}
+            thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail}
             genre={book.volumeInfo.categories?.[0] || 'Unknown'}
             title={book.volumeInfo.title}
             size="lg"
