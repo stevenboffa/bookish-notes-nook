@@ -21,13 +21,13 @@ export function NYTListFilters({ selectedList, onListChange }: NYTListFiltersPro
   ];
 
   const bestOfYearLists = [
-    { id: "notable-books/2023", name: "Notable Books of 2023" },
-    { id: "best-sellers/2023", name: "Bestsellers of 2023" },
+    { id: "full-overview/2023-12-31", name: "Notable Books of 2023" },
+    { id: "combined-print-and-e-book-fiction/2023-12-31", name: "Bestsellers of 2023" },
   ];
 
   const getListType = (listId: string) => {
     if (listId.includes('/')) {
-      return listId.includes('2023-01-01') ? 'historical' : 'best-of-year';
+      return listId.includes('full-overview') || listId.includes('combined-print') ? 'best-of-year' : 'historical';
     }
     return 'current';
   };
