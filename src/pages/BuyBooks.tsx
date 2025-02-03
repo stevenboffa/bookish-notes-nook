@@ -37,42 +37,67 @@ export default function BuyBooks() {
     }
   }, [session, navigate]);
 
-  const { data: nytBooks = [], isLoading: isLoadingNYT } = useQuery({
+  const { data: nytBooks = [], isLoading: isLoadingNYT, error: nytError } = useQuery({
     queryKey: ['nyt-bestsellers'],
     queryFn: async () => {
-      const { data } = await supabase
+      console.log("Fetching NYT bestsellers...");
+      
+      const { data: secretData, error: secretError } = await supabase
         .from('secrets')
         .select('value')
         .eq('name', 'NYT_API_KEY')
         .maybeSingle();
 
-      if (!data?.value) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "NYT API key not found"
-        });
-        return [];
+      if (secretError) {
+        console.error('Error fetching NYT API key:', secretError);
+        throw new Error('Failed to fetch NYT API key');
       }
 
+      if (!secretData?.value) {
+        console.error('NYT API key not found');
+        throw new Error('NYT API key not found');
+      }
+
+      console.log("Got NYT API key, fetching bestsellers...");
+      
       try {
         const response = await fetch(
-          `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${data.value}`
+          `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${secretData.value}`
         );
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('NYT API error:', errorText);
+          throw new Error(`NYT API error: ${response.status}`);
+        }
+
         const jsonData = await response.json();
-        return jsonData.results.books.slice(0, 10) as NYTBook[];
+        console.log("NYT API response:", jsonData);
+        
+        if (!jsonData.results?.books) {
+          console.error('Unexpected NYT API response format:', jsonData);
+          throw new Error('Unexpected NYT API response format');
+        }
+
+        return jsonData.results.books as NYTBook[];
       } catch (error) {
         console.error('Error fetching NYT books:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch bestsellers"
-        });
-        return [];
+        throw error;
       }
     },
-    enabled: !!session
+    enabled: !!session,
+    retry: 1
   });
+
+  useEffect(() => {
+    if (nytError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch bestsellers. Please try again later."
+      });
+    }
+  }, [nytError, toast]);
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
@@ -112,6 +137,10 @@ export default function BuyBooks() {
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
+        ) : nytError ? (
+          <div className="text-center text-red-500 py-8">
+            Failed to load bestsellers. Please try again later.
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {nytBooks.map((book) => (
@@ -135,7 +164,7 @@ export default function BuyBooks() {
                 </CardContent>
               </Card>
             ))}
-            {nytBooks.length === 0 && (
+            {nytBooks.length === 0 && !nytError && (
               <p className="col-span-full text-center text-muted-foreground py-8">
                 No bestsellers available at the moment
               </p>
