@@ -4,6 +4,7 @@ import { BookCover } from "@/components/BookCover";
 import { ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface NYTBookDetail {
   title: string;
@@ -21,10 +22,11 @@ interface NYTBookDetail {
 export default function NYTBookDetail() {
   const { isbn } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const { data: book, isLoading } = useQuery({
+  const { data: book, isLoading, error } = useQuery({
     queryKey: ['nyt-book-detail', isbn],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data: secretData } = await supabase
         .from('secrets')
         .select('value')
@@ -35,8 +37,29 @@ export default function NYTBookDetail() {
         throw new Error('NYT API key not found');
       }
 
+      // First try to get the book from the current bestseller lists
+      const currentListsResponse = await fetch(
+        `https://api.nytimes.com/svc/books/v3/lists/current/combined-print-and-e-book-fiction.json?api-key=${secretData.value}`,
+        { signal }
+      );
+
+      if (!currentListsResponse.ok) {
+        throw new Error('Failed to fetch current bestsellers');
+      }
+
+      const currentListsData = await currentListsResponse.json();
+      const bookFromCurrentList = currentListsData.results.books?.find(
+        (book: NYTBookDetail) => book.primary_isbn13 === isbn
+      );
+
+      if (bookFromCurrentList) {
+        return bookFromCurrentList;
+      }
+
+      // If not found in current list, try the books API
       const response = await fetch(
-        `https://api.nytimes.com/svc/books/v3/lists/best-sellers/history.json?isbn=${isbn}&api-key=${secretData.value}`
+        `https://api.nytimes.com/svc/books/v3/reviews.json?isbn=${isbn}&api-key=${secretData.value}`,
+        { signal }
       );
 
       if (!response.ok) {
@@ -44,10 +67,35 @@ export default function NYTBookDetail() {
       }
 
       const data = await response.json();
-      return data.results[0] as NYTBookDetail;
+      if (!data.results?.[0]) {
+        throw new Error('Book not found');
+      }
+
+      return {
+        ...data.results[0],
+        book_image: data.results[0].book_image || '/placeholder.svg',
+        amazon_product_url: `https://www.amazon.com/s?k=${isbn}`,
+        rank: 'N/A',
+        rank_last_week: 'N/A',
+        weeks_on_list: 'N/A'
+      };
     },
-    enabled: !!isbn,
+    retry: (failureCount, error) => {
+      if (error instanceof Error && error.message.includes('Book not found')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    staleTime: 60 * 60 * 1000, // 1 hour
   });
+
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to load book details"
+    });
+  }
 
   if (isLoading) {
     return (
@@ -112,7 +160,7 @@ export default function NYTBookDetail() {
                 <p className="text-sm text-muted-foreground">Current Rank</p>
               </div>
               <div className="p-4 bg-accent rounded-lg text-center">
-                <p className="text-2xl font-bold">{book.rank_last_week || "N/A"}</p>
+                <p className="text-2xl font-bold">{book.rank_last_week}</p>
                 <p className="text-sm text-muted-foreground">Last Week</p>
               </div>
               <div className="p-4 bg-accent rounded-lg text-center">
