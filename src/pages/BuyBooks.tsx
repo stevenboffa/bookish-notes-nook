@@ -63,15 +63,12 @@ export default function BuyBooks() {
       const apiKey = secretData.value;
       console.log("Successfully retrieved NYT API key from secrets");
       
-      // Parse the selected list to handle historical and best of year formats
       const [listName, date] = selectedList.split('/');
       let apiUrl = `https://api.nytimes.com/svc/books/v3/lists`;
       
       if (date) {
-        // Historical or best of year list
         apiUrl += `/${date}/${listName}.json`;
       } else {
-        // Current list
         apiUrl += `/current/${listName}.json`;
       }
       apiUrl += `?api-key=${apiKey}`;
@@ -113,8 +110,8 @@ export default function BuyBooks() {
       }
       return failureCount < 2;
     },
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    gcTime: 30 * 60 * 1000, // Keep data in cache for 30 minutes (renamed from cacheTime)
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   useEffect(() => {
@@ -134,7 +131,6 @@ export default function BuyBooks() {
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
     setIsSearching(true);
-    // Search functionality will be implemented later
     setIsSearching(false);
   };
 
@@ -153,7 +149,6 @@ export default function BuyBooks() {
     <div className="flex-1 container mx-auto p-4 space-y-8">
       <h1 className="text-2xl font-bold">Buy Books</h1>
       
-      {/* Search and Filter Section */}
       <div className="space-y-4">
         <NYTListFilters 
           selectedList={selectedList}
@@ -173,7 +168,6 @@ export default function BuyBooks() {
         </div>
       </div>
 
-      {/* NYT Bestsellers Section */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">NYT Bestsellers</h2>
         {isLoadingNYT ? (
@@ -189,7 +183,11 @@ export default function BuyBooks() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredBooks.map((book) => (
-              <Card key={book.primary_isbn13} className="flex flex-col">
+              <Card 
+                key={book.primary_isbn13} 
+                className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/nyt-book/${book.primary_isbn13}`)}
+              >
                 <CardHeader className="flex-1">
                   <div className="aspect-w-2 aspect-h-3 mb-4">
                     <BookCover
