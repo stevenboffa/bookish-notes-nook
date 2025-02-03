@@ -54,25 +54,26 @@ export default function BuyBooks() {
       }
 
       if (!secretData?.value) {
-        console.error('NYT API key not found');
-        throw new Error('NYT API key not found');
+        console.error('NYT API key not found in secrets table');
+        throw new Error('NYT API key not found in secrets table');
       }
 
+      const apiKey = secretData.value;
       console.log("Got NYT API key, fetching bestsellers...");
       
       try {
         const response = await fetch(
-          `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${secretData.value}`
+          `https://api.nytimes.com/svc/books/v3/lists/current/hardcover-fiction.json?api-key=${apiKey}`
         );
         
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('NYT API error:', errorText);
+          console.error('NYT API error response:', errorText);
           throw new Error(`NYT API error: ${response.status}`);
         }
 
         const jsonData = await response.json();
-        console.log("NYT API response:", jsonData);
+        console.log("NYT API response received:", jsonData.status);
         
         if (!jsonData.results?.books) {
           console.error('Unexpected NYT API response format:', jsonData);
@@ -96,6 +97,7 @@ export default function BuyBooks() {
         title: "Error",
         description: "Failed to fetch bestsellers. Please try again later."
       });
+      console.error('NYT Error details:', nytError);
     }
   }, [nytError, toast]);
 
