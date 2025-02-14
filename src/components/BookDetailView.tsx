@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -13,7 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Save, Star, StarHalf } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { X, Save, Star, StarHalf, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -51,6 +57,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const [rating, setRating] = useState(book?.rating || 0);
   const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -99,11 +106,11 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     const hasHalfStar = rating % 2 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={`star-${i}`} className="w-5 h-5 fill-current text-yellow-400" />);
+      stars.push(<Star key={`star-${i}`} className="w-4 h-4 fill-current text-yellow-400" />);
     }
 
     if (hasHalfStar) {
-      stars.push(<StarHalf key="half-star" className="w-5 h-5 fill-current text-yellow-400" />);
+      stars.push(<StarHalf key="half-star" className="w-4 h-4 fill-current text-yellow-400" />);
     }
 
     return stars;
@@ -111,125 +118,143 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="flex justify-between items-center p-4 border-b bg-gray-100 sticky top-0 z-10">
+      {/* Header */}
+      <div className="flex justify-between items-center p-3 border-b bg-gray-100 sticky top-0 z-10">
         <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-semibold truncate">{title}</h2>
-          <p className="text-gray-600 truncate">by {author}</p>
+          <h2 className="text-lg font-semibold truncate">{title}</h2>
+          <p className="text-sm text-gray-600 truncate">by {author}</p>
         </div>
-        <div className="flex gap-2 ml-2">
+        <div className="flex gap-1 ml-2">
           <Button 
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={handleSave}
+            className="h-8 w-8"
           >
-            <Save className="h-5 w-5" />
+            <Save className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={onClose}
+            className="h-8 w-8"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto p-4 space-y-6 ${isMobile ? 'pb-20' : ''}`}>
-        <div className="flex justify-center mb-6">
+      <div className={`flex-1 overflow-y-auto p-3 space-y-4 ${isMobile ? 'pb-20' : ''}`}>
+        {/* Book Cover and Quick Info */}
+        <div className="flex gap-4 items-start">
           <BookCover
             imageUrl={book?.imageUrl}
             thumbnailUrl={book?.thumbnailUrl}
             genre={book?.genre || ""}
             title={book?.title || ""}
-            size="lg"
-            className="mx-auto"
+            size="sm"
           />
-        </div>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter book title"
-              className="border-book-DEFAULT/20 focus:border-book-DEFAULT"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="author">Author</Label>
-            <Input
-              id="author"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              placeholder="Enter author name"
-              className="border-book-DEFAULT/20 focus:border-book-DEFAULT"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="genre">Genre</Label>
-            <Select value={genre} onValueChange={setGenre}>
-              <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
-                <SelectValue placeholder="Select genre" />
+          <div className="flex-1 space-y-2">
+            <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue>{status}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {genres.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
-                  </SelectItem>
-                ))}
+                <SelectItem value="Not started">Not started</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Finished">Finished</SelectItem>
               </SelectContent>
             </Select>
+            
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1">
+                {renderRatingStars(rating)}
+              </div>
+              <span className="text-sm text-gray-500">{rating.toFixed(1)}/10</span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isFavorite"
+                checked={isFavorite}
+                onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
+                className="h-4 w-4"
+              />
+              <Label htmlFor="isFavorite" className="text-sm">
+                Favorite
+              </Label>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-            <SelectTrigger className="border-book-DEFAULT/20 focus:border-book-DEFAULT">
-              <SelectValue>{status}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Not started">Not started</SelectItem>
-              <SelectItem value="In Progress">In Progress</SelectItem>
-              <SelectItem value="Finished">Finished</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Collapsible Details Section */}
+        <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-2 bg-gray-50 rounded-lg">
+            <span className="text-sm font-medium">Book Details</span>
+            {isDetailsOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-3">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm">Title</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter book title"
+                className="h-8 text-sm"
+              />
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="rating">Rating</Label>
-          <div className="flex items-center gap-4">
-            <Slider
-              id="rating"
-              min={0}
-              max={10}
-              step={0.5}
-              value={[rating]}
-              onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
-              className="flex-1"
-            />
-            <span className="min-w-[60px] text-right">{rating.toFixed(1)}/10</span>
-          </div>
-          <div className="flex gap-1 mt-2">
-            {renderRatingStars(rating)}
-          </div>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="author" className="text-sm">Author</Label>
+              <Input
+                id="author"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Enter author name"
+                className="h-8 text-sm"
+              />
+            </div>
 
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="isFavorite"
-            checked={isFavorite}
-            onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
-          />
-          <Label htmlFor="isFavorite" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Add to favorites
-          </Label>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="genre" className="text-sm">Genre</Label>
+              <Select value={genre} onValueChange={setGenre}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Select genre" />
+                </SelectTrigger>
+                <SelectContent>
+                  {genres.map((g) => (
+                    <SelectItem key={g} value={g} className="text-sm">
+                      {g}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="rating" className="text-sm">Rating</Label>
+              <div className="flex items-center gap-4">
+                <Slider
+                  id="rating"
+                  min={0}
+                  max={10}
+                  step={0.5}
+                  value={[rating]}
+                  onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
+                  className="flex-1"
+                />
+                <span className="min-w-[60px] text-right text-sm">{rating.toFixed(1)}/10</span>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Notes Section */}
         {book && <NoteSection book={book} onUpdateBook={onSave} />}
       </div>
     </div>
