@@ -87,14 +87,33 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     const fullStars = Math.floor(rating / 2);
     const hasHalfStar = rating % 2 !== 0;
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={`star-${i}`} className="w-4 h-4 fill-current text-yellow-400" />);
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(
+          <Star 
+            key={`star-${i}`} 
+            className="w-5 h-5 fill-current text-yellow-400 cursor-pointer hover:scale-110 transition-transform" 
+            onClick={() => setRating((i + 1) * 2)}
+          />
+        );
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(
+          <StarHalf 
+            key={`half-star-${i}`} 
+            className="w-5 h-5 fill-current text-yellow-400 cursor-pointer hover:scale-110 transition-transform" 
+            onClick={() => setRating(i * 2 + 1)}
+          />
+        );
+      } else {
+        stars.push(
+          <Star 
+            key={`empty-star-${i}`} 
+            className="w-5 h-5 text-gray-300 cursor-pointer hover:scale-110 transition-transform" 
+            onClick={() => setRating((i + 1) * 2)}
+          />
+        );
+      }
     }
-
-    if (hasHalfStar) {
-      stars.push(<StarHalf key="half-star" className="w-4 h-4 fill-current text-yellow-400" />);
-    }
-
     return stars;
   };
 
@@ -130,18 +149,21 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       <div className={`flex-1 overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
         {/* Book Cover and Quick Info Card */}
         <div className="p-4 bg-white border-b">
-          <div className="flex gap-4">
-            <BookCover
-              imageUrl={book?.imageUrl}
-              thumbnailUrl={book?.thumbnailUrl}
-              genre={book?.genre || ""}
-              title={book?.title || ""}
-              size="sm"
-            />
-            <div className="flex-1 space-y-3">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex justify-center">
+              <BookCover
+                imageUrl={book?.imageUrl}
+                thumbnailUrl={book?.thumbnailUrl}
+                genre={book?.genre || ""}
+                title={book?.title || ""}
+                size="md"
+                className="w-40 h-56"
+              />
+            </div>
+            <div className="flex-1 space-y-4">
               <div className="flex items-center gap-2">
                 <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-                  <SelectTrigger className="h-8 text-sm bg-accent text-accent-foreground">
+                  <SelectTrigger className="h-9 text-sm bg-accent text-accent-foreground">
                     <SelectValue>{status}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -163,24 +185,26 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                 </div>
               </div>
               
-              <div className="space-y-1">
-                <Label htmlFor="rating" className="text-sm text-text-muted">Rating</Label>
-                <div className="flex items-center gap-3">
+              <div className="space-y-3 pt-2">
+                <Label className="text-sm font-medium text-text-muted">Rating</Label>
+                <div className="space-y-2">
                   <div className="flex gap-1">
                     {renderRatingStars(rating)}
                   </div>
-                  <Slider
-                    id="rating"
-                    min={0}
-                    max={10}
-                    step={0.5}
-                    value={[rating]}
-                    onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
-                    className="flex-1 max-w-[120px]"
-                  />
-                  <span className="text-sm text-text-muted min-w-[45px]">
-                    {rating.toFixed(1)}/10
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <Slider
+                      id="rating"
+                      min={0}
+                      max={10}
+                      step={0.5}
+                      value={[rating]}
+                      onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
+                      className="flex-1"
+                    />
+                    <span className="text-sm font-medium text-text-muted min-w-[45px]">
+                      {rating.toFixed(1)}/10
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
