@@ -118,19 +118,19 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-white to-gray-50">
+    <div className="flex flex-col h-full bg-gradient-to-b from-white via-gray-50 to-white">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b bg-white sticky top-0 z-10 shadow-sm">
+      <div className="flex justify-between items-center p-4 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold truncate text-text">{title}</h2>
-          <p className="text-sm text-text-muted truncate">by {author}</p>
+          <h2 className="text-xl font-serif font-semibold truncate text-text animate-fade-in">{title}</h2>
+          <p className="text-sm text-text-muted truncate italic">{author}</p>
         </div>
         <div className="flex gap-2 ml-2">
           <Button 
             variant="ghost"
             size="sm"
             onClick={handleSave}
-            className="h-9 px-4 bg-success hover:bg-success/90 text-success-foreground"
+            className="h-9 px-4 bg-gradient-to-r from-success to-success/90 text-success-foreground hover:opacity-90 transition-opacity"
           >
             <Save className="h-4 w-4 mr-1" />
             Save
@@ -139,7 +139,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-9 w-9"
+            className="h-9 w-9 hover:bg-gray-100 transition-colors"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -148,22 +148,27 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
       <div className={`flex-1 overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
         {/* Book Cover and Quick Info Card */}
-        <div className="p-4 bg-white border-b">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex justify-center">
-              <BookCover
-                imageUrl={book?.imageUrl}
-                thumbnailUrl={book?.thumbnailUrl}
-                genre={book?.genre || ""}
-                title={book?.title || ""}
-                size="md"
-                className="w-40 h-56"
-              />
+        <div className="p-6 bg-white border-b shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-6 items-start">
+            <div className="flex justify-center sm:justify-start">
+              <div className="relative group">
+                <BookCover
+                  imageUrl={book?.imageUrl}
+                  thumbnailUrl={book?.thumbnailUrl}
+                  genre={book?.genre || ""}
+                  title={book?.title || ""}
+                  size="md"
+                  className="w-48 h-64 transition-transform duration-300 group-hover:scale-105 shadow-lg"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md flex items-center justify-center">
+                  <p className="text-white text-sm font-medium">{genre || "No genre selected"}</p>
+                </div>
+              </div>
             </div>
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center gap-2">
+            <div className="flex-1 space-y-6">
+              <div className="flex flex-wrap items-center gap-3">
                 <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-                  <SelectTrigger className="h-9 text-sm bg-accent text-accent-foreground">
+                  <SelectTrigger className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors">
                     <SelectValue>{status}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -172,39 +177,37 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                     <SelectItem value="Finished">Finished</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="flex items-center space-x-2 ml-2">
+                <div className="flex items-center space-x-2">
                   <Checkbox
                     id="isFavorite"
                     checked={isFavorite}
                     onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
-                    className="h-4 w-4"
+                    className="h-4 w-4 text-primary"
                   />
-                  <Label htmlFor="isFavorite" className="text-sm cursor-pointer">
+                  <Label htmlFor="isFavorite" className="text-sm cursor-pointer hover:text-primary transition-colors">
                     Favorite
                   </Label>
                 </div>
               </div>
               
-              <div className="space-y-3 pt-2">
+              <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
                 <Label className="text-sm font-medium text-text-muted">Rating</Label>
-                <div className="space-y-2">
-                  <div className="flex gap-1">
+                <div className="space-y-3">
+                  <div className="flex gap-2">
                     {renderRatingStars(rating)}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Slider
-                      id="rating"
-                      min={0}
-                      max={10}
-                      step={0.5}
-                      value={[rating]}
-                      onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
-                      className="flex-1"
-                    />
-                    <span className="text-sm font-medium text-text-muted min-w-[45px]">
+                    <span className="text-sm font-medium text-text-muted ml-2">
                       {rating.toFixed(1)}/10
                     </span>
                   </div>
+                  <Slider
+                    id="rating"
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    value={[rating]}
+                    onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
+                    className="flex-1"
+                  />
                 </div>
               </div>
             </div>
@@ -212,34 +215,34 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         </div>
 
         {/* Book Details Section */}
-        <div className="p-4 space-y-4 bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-6 space-y-6 bg-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm text-text-muted">Title</Label>
+              <Label htmlFor="title" className="text-sm font-medium text-text-muted">Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter book title"
-                className="h-9 text-sm bg-gray-50 border-gray-200"
+                className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="author" className="text-sm text-text-muted">Author</Label>
+              <Label htmlFor="author" className="text-sm font-medium text-text-muted">Author</Label>
               <Input
                 id="author"
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Enter author name"
-                className="h-9 text-sm bg-gray-50 border-gray-200"
+                className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="genre" className="text-sm text-text-muted">Genre</Label>
+              <Label htmlFor="genre" className="text-sm font-medium text-text-muted">Genre</Label>
               <Select value={genre} onValueChange={setGenre}>
-                <SelectTrigger className="h-9 text-sm bg-gray-50 border-gray-200">
+                <SelectTrigger className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors">
                   <SelectValue placeholder="Select genre" />
                 </SelectTrigger>
                 <SelectContent>
