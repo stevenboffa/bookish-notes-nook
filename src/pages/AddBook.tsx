@@ -7,7 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -33,8 +32,6 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Edit,
-  Plus,
   Save,
   Star,
   Tags,
@@ -98,11 +95,13 @@ const AddBook = () => {
       return data;
     },
     enabled: !!id,
-    onSuccess: (data) => {
-      if (data) {
-        setFormData(data);
-        setSelectedDate(new Date(data.date_read));
-      }
+    meta: {
+      onSuccess: (data: typeof formData | null) => {
+        if (data) {
+          setFormData(data);
+          setSelectedDate(new Date(data.date_read));
+        }
+      },
     },
   });
 
@@ -197,10 +196,16 @@ const AddBook = () => {
           <TabsContent value="overview" className="space-y-6">
             <div className="flex flex-col md:flex-row gap-6">
               <BookDetailView
-                imageUrl={formData.image_url || "/placeholder.svg"}
-                thumbnailUrl={formData.thumbnail_url}
-                rating={formData.rating}
-                onRatingChange={handleRatingChange}
+                book={book || {
+                  ...formData,
+                  id: "",
+                  created_at: "",
+                  user_id: "",
+                  is_top_favorite: 0,
+                }}
+                onUpdateBook={(updatedBook) => {
+                  setFormData(updatedBook);
+                }}
               />
               
               <div className="flex-1 space-y-4">
@@ -275,7 +280,7 @@ const AddBook = () => {
           </TabsContent>
 
           <TabsContent value="notes">
-            <NoteSection bookId={id} />
+            {book && <NoteSection book={book} onUpdateBook={(updatedBook) => setFormData(updatedBook)} />}
           </TabsContent>
 
           <TabsContent value="details" className="space-y-6">
