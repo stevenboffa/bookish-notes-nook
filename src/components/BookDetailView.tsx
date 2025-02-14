@@ -134,12 +134,12 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
             variant="ghost"
             size="sm"
             onClick={handleSave}
-            className="h-9 px-4 bg-gradient-to-r from-success to-success/90 text-success-foreground hover:opacity-90 transition-opacity relative overflow-hidden"
+            className="h-9 px-4 bg-gradient-to-r from-success to-success/90 text-success-foreground hover:opacity-90 transition-opacity relative"
           >
-            <div className={`absolute inset-0 flex items-center justify-center transition-transform duration-300 ${showSaveConfirmation ? 'translate-y-0' : '-translate-y-full'}`}>
+            <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-100' : 'opacity-0'}`}>
               <Check className="h-4 w-4" />
             </div>
-            <div className={`flex items-center transition-transform duration-300 ${showSaveConfirmation ? 'translate-y-full' : 'translate-y-0'}`}>
+            <div className={`flex items-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-0' : 'opacity-100'}`}>
               <Save className="h-4 w-4 mr-1" />
               Save
             </div>
