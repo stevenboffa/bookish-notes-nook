@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,73 +64,81 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Section - Hero/Features */}
-      <div className="hidden lg:flex lg:w-1/2 bg-book-DEFAULT items-center justify-center p-12">
-        <div className="max-w-lg text-white space-y-8">
-          <h1 className="text-5xl font-serif font-bold">
-            Your Reading Journey Starts Here
-          </h1>
-          <div className="space-y-6">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Header for mobile */}
+      <div className="md:hidden bg-primary p-6 text-center">
+        <BookOpen className="h-12 w-12 mx-auto mb-4 text-white" />
+        <h1 className="text-2xl font-bold text-white mb-2">BookNotes</h1>
+        <p className="text-white/80">Your reading journey starts here</p>
+      </div>
+
+      {/* Features Section */}
+      <div className="bg-accent flex-1 p-6 md:p-12 lg:p-16">
+        <div className="max-w-md mx-auto md:max-w-lg lg:max-w-xl">
+          {/* Desktop Logo */}
+          <div className="hidden md:flex items-center gap-4 mb-12">
+            <BookOpen className="h-10 w-10 text-accent-foreground" />
+            <h1 className="text-3xl font-bold text-accent-foreground">BookNotes</h1>
+          </div>
+
+          <div className="space-y-8 mt-8 md:mt-0">
             <Feature
-              title="Track Your Books"
-              description="Keep a digital record of all your reads, from page-turners to classics."
+              icon={<Check className="h-5 w-5" />}
+              title="Track Your Reading Journey"
+              description="Keep a digital record of your books, from bestsellers to hidden gems."
             />
             <Feature
+              icon={<Check className="h-5 w-5" />}
               title="Capture Your Thoughts"
-              description="Write and organize your reading notes, quotes, and reflections."
+              description="Write and organize your reading notes and favorite quotes."
             />
             <Feature
+              icon={<Check className="h-5 w-5" />}
               title="Connect with Readers"
-              description="Share your reading list and discover what others are reading."
+              description="Share your reading list and discover new books through friends."
             />
           </div>
         </div>
       </div>
 
-      {/* Right Section - Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gradient-to-b from-book-light to-white p-6">
-        <div className="w-full max-w-md space-y-8">
+      {/* Auth Form Section */}
+      <div className="flex-1 p-6 md:p-12 lg:p-16 bg-background">
+        <div className="max-w-md mx-auto space-y-8">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <BookOpen className="h-16 w-16 text-book-DEFAULT" />
-            </div>
-            <h2 className="text-3xl font-serif font-bold text-book-DEFAULT mb-2">
-              Welcome to BookNotes
+            <h2 className="text-2xl font-bold text-foreground">
+              {isSignUp ? "Create Your Account" : "Welcome Back"}
             </h2>
-            <p className="text-gray-600 mb-8">
-              Your personal space for meaningful reading reflections
+            <p className="text-muted-foreground mt-2">
+              {isSignUp
+                ? "Start your reading journey today"
+                : "Sign in to continue your reading journey"}
             </p>
           </div>
 
           <form onSubmit={handleAuth} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1"
+                  className="mt-1.5"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1"
+                  className="mt-1.5"
                   required
                 />
               </div>
@@ -138,18 +146,18 @@ const Welcome = () => {
 
             <Button
               type="submit"
-              className="w-full bg-book-DEFAULT hover:bg-book-accent transition-colors"
+              className="w-full"
               disabled={isLoading}
             >
               {isLoading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
             </Button>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-muted-foreground">
               {isSignUp ? "Already have an account? " : "Don't have an account? "}
               <button
                 type="button"
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="text-book-DEFAULT hover:underline font-medium"
+                className="text-primary hover:underline font-medium"
               >
                 {isSignUp ? "Sign In" : "Create Account"}
               </button>
@@ -161,14 +169,22 @@ const Welcome = () => {
   );
 };
 
-const Feature = ({ title, description }: { title: string; description: string }) => (
-  <div className="flex items-start space-x-3">
-    <div className="flex-shrink-0 mt-1">
-      <div className="w-1.5 h-1.5 bg-white rounded-full" />
+const Feature = ({ 
+  icon, 
+  title, 
+  description 
+}: { 
+  icon: React.ReactNode;
+  title: string; 
+  description: string;
+}) => (
+  <div className="flex items-start space-x-4">
+    <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+      {icon}
     </div>
     <div>
-      <h3 className="font-medium text-lg">{title}</h3>
-      <p className="text-white/80 text-sm">{description}</p>
+      <h3 className="font-medium text-lg text-accent-foreground">{title}</h3>
+      <p className="text-muted-foreground mt-1">{description}</p>
     </div>
   </div>
 );
