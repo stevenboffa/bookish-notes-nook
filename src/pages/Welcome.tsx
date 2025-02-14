@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,60 +64,113 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-book-light to-white">
-        <div className="text-center space-y-6 p-8 w-full max-w-md">
-          <div className="flex justify-center">
-            <BookOpen className="h-20 w-20 text-book-DEFAULT" />
-          </div>
-          <h1 className="text-4xl font-serif font-bold text-book-DEFAULT">
-            Welcome to BookNotes
+    <div className="min-h-screen flex">
+      {/* Left Section - Hero/Features */}
+      <div className="hidden lg:flex lg:w-1/2 bg-book-DEFAULT items-center justify-center p-12">
+        <div className="max-w-lg text-white space-y-8">
+          <h1 className="text-5xl font-serif font-bold">
+            Your Reading Journey Starts Here
           </h1>
-          <p className="text-xl text-gray-600">
-            Your personal space to capture thoughts and reflections from your reading journey.
-          </p>
+          <div className="space-y-6">
+            <Feature
+              title="Track Your Books"
+              description="Keep a digital record of all your reads, from page-turners to classics."
+            />
+            <Feature
+              title="Capture Your Thoughts"
+              description="Write and organize your reading notes, quotes, and reflections."
+            />
+            <Feature
+              title="Connect with Readers"
+              description="Share your reading list and discover what others are reading."
+            />
+          </div>
+        </div>
+      </div>
 
-          <form onSubmit={handleAuth} className="space-y-4 mt-8">
-            <div className="space-y-2 text-left">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+      {/* Right Section - Auth Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gradient-to-b from-book-light to-white p-6">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <div className="flex justify-center mb-6">
+              <BookOpen className="h-16 w-16 text-book-DEFAULT" />
             </div>
-            <div className="space-y-2 text-left">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? "Loading..." : isSignUp ? "Sign Up" : "Login"}
-            </Button>
-          </form>
+            <h2 className="text-3xl font-serif font-bold text-book-DEFAULT mb-2">
+              Welcome to BookNotes
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Your personal space for meaningful reading reflections
+            </p>
+          </div>
 
-          <p className="text-sm text-gray-600">
-            {isSignUp ? "Already have an account? " : "Don't have an account? "}
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-book-DEFAULT hover:underline"
+          <form onSubmit={handleAuth} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1"
+                  required
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-book-DEFAULT hover:bg-book-accent transition-colors"
+              disabled={isLoading}
             >
-              {isSignUp ? "Login" : "Sign Up"}
-            </button>
-          </p>
+              {isLoading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
+            </Button>
+
+            <p className="text-sm text-center text-gray-600">
+              {isSignUp ? "Already have an account? " : "Don't have an account? "}
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-book-DEFAULT hover:underline font-medium"
+              >
+                {isSignUp ? "Sign In" : "Create Account"}
+              </button>
+            </p>
+          </form>
         </div>
       </div>
     </div>
   );
 };
+
+const Feature = ({ title, description }: { title: string; description: string }) => (
+  <div className="flex items-start space-x-3">
+    <div className="flex-shrink-0 mt-1">
+      <div className="w-1.5 h-1.5 bg-white rounded-full" />
+    </div>
+    <div>
+      <h3 className="font-medium text-lg">{title}</h3>
+      <p className="text-white/80 text-sm">{description}</p>
+    </div>
+  </div>
+);
 
 export default Welcome;
