@@ -64,91 +64,55 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Header for mobile */}
-      <div className="md:hidden bg-primary p-6 text-center">
-        <BookOpen className="h-12 w-12 mx-auto mb-4 text-white" />
-        <h1 className="text-2xl font-bold text-white mb-2">BookNotes</h1>
-        <p className="text-white/80">Your reading journey starts here</p>
-      </div>
-
-      {/* Features Section */}
-      <div className="bg-accent flex-1 p-6 md:p-12 lg:p-16">
-        <div className="max-w-md mx-auto md:max-w-lg lg:max-w-xl">
-          {/* Desktop Logo */}
-          <div className="hidden md:flex items-center gap-4 mb-12">
-            <BookOpen className="h-10 w-10 text-accent-foreground" />
-            <h1 className="text-3xl font-bold text-accent-foreground">BookNotes</h1>
-          </div>
-
-          <div className="space-y-8 mt-8 md:mt-0">
-            <Feature
-              icon={<Check className="h-5 w-5" />}
-              title="Track Your Reading Journey"
-              description="Keep a digital record of your books, from bestsellers to hidden gems."
-            />
-            <Feature
-              icon={<Check className="h-5 w-5" />}
-              title="Capture Your Thoughts"
-              description="Write and organize your reading notes and favorite quotes."
-            />
-            <Feature
-              icon={<Check className="h-5 w-5" />}
-              title="Connect with Readers"
-              description="Share your reading list and discover new books through friends."
-            />
-          </div>
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <div className="w-full bg-primary text-white py-8 px-4 md:py-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <BookOpen className="h-16 w-16 mx-auto mb-6" />
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            Welcome to BookNotes
+          </h1>
+          <p className="text-lg text-white/90 max-w-xl mx-auto">
+            Your personal space for capturing thoughts, quotes, and memories from every book you read.
+          </p>
         </div>
       </div>
 
       {/* Auth Form Section */}
-      <div className="flex-1 p-6 md:p-12 lg:p-16 bg-background">
-        <div className="max-w-md mx-auto space-y-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">
-              {isSignUp ? "Create Your Account" : "Welcome Back"}
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              {isSignUp
-                ? "Start your reading journey today"
-                : "Sign in to continue your reading journey"}
-            </p>
-          </div>
+      <div className="max-w-md mx-auto px-4 py-8 -mt-6 md:-mt-8 relative z-10">
+        <div className="bg-background border rounded-xl shadow-lg p-6 md:p-8">
+          <h2 className="text-2xl font-bold text-center mb-6">
+            {isSignUp ? "Create Your Account" : "Sign In"}
+          </h2>
 
-          <form onSubmit={handleAuth} className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1.5"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1.5"
-                  required
-                />
-              </div>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1.5"
+                required
+              />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1.5"
+                required
+              />
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
             </Button>
 
@@ -165,6 +129,30 @@ const Welcome = () => {
           </form>
         </div>
       </div>
+
+      {/* Features Section */}
+      <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+          Your Reading Journey Awaits
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          <Feature
+            icon={<Check className="h-5 w-5" />}
+            title="Track Your Books"
+            description="Keep a digital record of every book you read, from bestsellers to hidden gems."
+          />
+          <Feature
+            icon={<Check className="h-5 w-5" />}
+            title="Save Your Thoughts"
+            description="Capture meaningful quotes, write detailed notes, and preserve your reflections."
+          />
+          <Feature
+            icon={<Check className="h-5 w-5" />}
+            title="Connect & Share"
+            description="Join a community of readers, share recommendations, and discover new books."
+          />
+        </div>
+      </div>
     </div>
   );
 };
@@ -178,14 +166,12 @@ const Feature = ({
   title: string; 
   description: string;
 }) => (
-  <div className="flex items-start space-x-4">
-    <div className="flex-shrink-0 p-2 bg-primary/10 rounded-lg">
+  <div className="text-center">
+    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
       {icon}
     </div>
-    <div>
-      <h3 className="font-medium text-lg text-accent-foreground">{title}</h3>
-      <p className="text-muted-foreground mt-1">{description}</p>
-    </div>
+    <h3 className="font-medium text-lg mb-2">{title}</h3>
+    <p className="text-muted-foreground">{description}</p>
   </div>
 );
 
