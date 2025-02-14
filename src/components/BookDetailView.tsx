@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -14,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Save, Star, StarHalf } from "lucide-react";
+import { X, Save, Star, StarHalf, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -40,6 +39,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const [rating, setRating] = useState(book?.rating || 0);
   const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -80,6 +80,11 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       };
       onSave(updatedBook);
     }
+    
+    setShowSaveConfirmation(true);
+    setTimeout(() => {
+      setShowSaveConfirmation(false);
+    }, 2000);
   };
 
   const renderRatingStars = (rating: number) => {
@@ -119,7 +124,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-white via-gray-50 to-white">
-      {/* Header */}
       <div className="flex justify-between items-center p-4 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
         <div className="flex-1 min-w-0">
           <h2 className="text-xl font-serif font-semibold truncate text-text animate-fade-in">{title}</h2>
@@ -130,10 +134,15 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
             variant="ghost"
             size="sm"
             onClick={handleSave}
-            className="h-9 px-4 bg-gradient-to-r from-success to-success/90 text-success-foreground hover:opacity-90 transition-opacity"
+            className="h-9 px-4 bg-gradient-to-r from-success to-success/90 text-success-foreground hover:opacity-90 transition-opacity relative overflow-hidden"
           >
-            <Save className="h-4 w-4 mr-1" />
-            Save
+            <div className={`absolute inset-0 flex items-center justify-center transition-transform duration-300 ${showSaveConfirmation ? 'translate-y-0' : '-translate-y-full'}`}>
+              <Check className="h-4 w-4" />
+            </div>
+            <div className={`flex items-center transition-transform duration-300 ${showSaveConfirmation ? 'translate-y-full' : 'translate-y-0'}`}>
+              <Save className="h-4 w-4 mr-1" />
+              Save
+            </div>
           </Button>
           <Button 
             variant="ghost"
@@ -147,7 +156,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       </div>
 
       <div className={`flex-1 overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
-        {/* Book Cover and Quick Info Card */}
         <div className="p-6 bg-white border-b shadow-sm">
           <div className="flex flex-col sm:flex-row gap-8">
             <div className="flex justify-center sm:justify-start">
@@ -217,7 +225,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
           </div>
         </div>
 
-        {/* Book Details Section */}
         <div className="p-6 space-y-6 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -260,7 +267,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
           </div>
         </div>
 
-        {/* Notes Section */}
         <div className="mt-2">
           {book && <NoteSection book={book} onUpdateBook={onSave} />}
         </div>
