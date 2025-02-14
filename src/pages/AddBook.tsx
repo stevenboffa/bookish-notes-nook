@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -86,20 +85,51 @@ const AddBook = () => {
     queryKey: ["book", id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
+      const { data: bookData, error } = await supabase
         .from("books")
-        .select("*")
+        .select(`
+          *,
+          notes (
+            id,
+            content,
+            created_at
+          )
+        `)
         .eq("id", id)
         .single();
+
       if (error) throw error;
-      return data;
+
+      // Transform the data to match the Book type
+      if (bookData) {
+        return {
+          ...bookData,
+          dateRead: bookData.date_read,
+          notes: (bookData.notes || []).map((note: any) => ({
+            id: note.id,
+            content: note.content,
+            createdAt: note.created_at,
+          })),
+        };
+      }
+      return null;
     },
     enabled: !!id,
     meta: {
-      onSuccess: (data: typeof formData | null) => {
+      onSuccess: (data: Book | null) => {
         if (data) {
-          setFormData(data);
-          setSelectedDate(new Date(data.date_read));
+          setFormData({
+            title: data.title,
+            author: data.author,
+            genre: data.genre,
+            date_read: data.dateRead,
+            status: data.status || "Not started",
+            rating: data.rating || 0,
+            image_url: data.image_url || "",
+            thumbnail_url: data.thumbnail_url || "",
+            is_favorite: data.is_favorite || false,
+          });
+          setSelectedDate(data.dateRead ? new Date(data.dateRead) : undefined);
         }
       },
     },
@@ -170,7 +200,6 @@ const AddBook = () => {
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Sticky Header */}
         <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm pb-4 border-b">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold">
@@ -202,9 +231,21 @@ const AddBook = () => {
                   created_at: "",
                   user_id: "",
                   is_top_favorite: 0,
+                  dateRead: formData.date_read,
+                  notes: [],
                 }}
                 onUpdateBook={(updatedBook) => {
-                  setFormData(updatedBook);
+                  setFormData({
+                    title: updatedBook.title,
+                    author: updatedBook.author,
+                    genre: updatedBook.genre,
+                    date_read: updatedBook.dateRead,
+                    status: updatedBook.status || "Not started",
+                    rating: updatedBook.rating || 0,
+                    image_url: updatedBook.image_url || "",
+                    thumbnail_url: updatedBook.thumbnail_url || "",
+                    is_favorite: updatedBook.is_favorite || false,
+                  });
                 }}
               />
               
@@ -280,7 +321,19 @@ const AddBook = () => {
           </TabsContent>
 
           <TabsContent value="notes">
-            {book && <NoteSection book={book} onUpdateBook={(updatedBook) => setFormData(updatedBook)} />}
+            {book && <NoteSection book={book} onUpdateBook={(updatedBook) => {
+              setFormData({
+                title: updatedBook.title,
+                author: updatedBook.author,
+                genre: updatedBook.genre,
+                date_read: updatedBook.dateRead,
+                status: updatedBook.status || "Not started",
+                rating: updatedBook.rating || 0,
+                image_url: updatedBook.image_url || "",
+                thumbnail_url: updatedBook.thumbnail_url || "",
+                is_favorite: updatedBook.is_favorite || false,
+              });
+            }} />}
           </TabsContent>
 
           <TabsContent value="details" className="space-y-6">
