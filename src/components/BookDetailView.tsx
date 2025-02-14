@@ -14,32 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { X, Save, Star, StarHalf, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Save, Star, StarHalf } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const genres = [
-  "Fiction",
-  "Non-Fiction",
-  "Mystery",
-  "Science Fiction",
-  "Fantasy",
-  "Romance",
-  "Thriller",
-  "Horror",
-  "Biography",
-  "History",
-  "Self-Help",
-  "Poetry",
-  "Drama",
-  "Adventure",
-  "Children's",
+  "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
+  "Romance", "Thriller", "Horror", "Biography", "History", 
+  "Self-Help", "Poetry", "Drama", "Adventure", "Children's",
 ];
 
 interface BookDetailViewProps {
@@ -57,7 +40,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const [rating, setRating] = useState(book?.rating || 0);
   const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -117,113 +99,123 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-gradient-to-b from-white to-gray-50">
       {/* Header */}
-      <div className="flex justify-between items-center p-3 border-b bg-gray-100 sticky top-0 z-10">
+      <div className="flex justify-between items-center p-4 border-b bg-white sticky top-0 z-10 shadow-sm">
         <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold truncate">{title}</h2>
-          <p className="text-sm text-gray-600 truncate">by {author}</p>
+          <h2 className="text-lg font-semibold truncate text-text">{title}</h2>
+          <p className="text-sm text-text-muted truncate">by {author}</p>
         </div>
-        <div className="flex gap-1 ml-2">
+        <div className="flex gap-2 ml-2">
           <Button 
             variant="ghost"
             size="sm"
             onClick={handleSave}
-            className="h-8 w-8"
+            className="h-9 px-4 bg-success hover:bg-success/90 text-success-foreground"
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-4 w-4 mr-1" />
+            Save
           </Button>
           <Button 
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8"
+            className="h-9 w-9"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto p-3 space-y-4 ${isMobile ? 'pb-20' : ''}`}>
-        {/* Book Cover and Quick Info */}
-        <div className="flex gap-4 items-start">
-          <BookCover
-            imageUrl={book?.imageUrl}
-            thumbnailUrl={book?.thumbnailUrl}
-            genre={book?.genre || ""}
-            title={book?.title || ""}
-            size="sm"
-          />
-          <div className="flex-1 space-y-2">
-            <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue>{status}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Not started">Not started</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Finished">Finished</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1">
-                {renderRatingStars(rating)}
+      <div className={`flex-1 overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
+        {/* Book Cover and Quick Info Card */}
+        <div className="p-4 bg-white border-b">
+          <div className="flex gap-4">
+            <BookCover
+              imageUrl={book?.imageUrl}
+              thumbnailUrl={book?.thumbnailUrl}
+              genre={book?.genre || ""}
+              title={book?.title || ""}
+              size="sm"
+            />
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-2">
+                <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
+                  <SelectTrigger className="h-8 text-sm bg-accent text-accent-foreground">
+                    <SelectValue>{status}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Not started">Not started</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Finished">Finished</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center space-x-2 ml-2">
+                  <Checkbox
+                    id="isFavorite"
+                    checked={isFavorite}
+                    onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="isFavorite" className="text-sm cursor-pointer">
+                    Favorite
+                  </Label>
+                </div>
               </div>
-              <span className="text-sm text-gray-500">{rating.toFixed(1)}/10</span>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isFavorite"
-                checked={isFavorite}
-                onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
-                className="h-4 w-4"
-              />
-              <Label htmlFor="isFavorite" className="text-sm">
-                Favorite
-              </Label>
+              
+              <div className="space-y-1">
+                <Label htmlFor="rating" className="text-sm text-text-muted">Rating</Label>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1">
+                    {renderRatingStars(rating)}
+                  </div>
+                  <Slider
+                    id="rating"
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    value={[rating]}
+                    onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
+                    className="flex-1 max-w-[120px]"
+                  />
+                  <span className="text-sm text-text-muted min-w-[45px]">
+                    {rating.toFixed(1)}/10
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Collapsible Details Section */}
-        <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <CollapsibleTrigger className="flex items-center justify-between w-full p-2 bg-gray-50 rounded-lg">
-            <span className="text-sm font-medium">Book Details</span>
-            {isDetailsOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-3 pt-3">
+        {/* Book Details Section */}
+        <div className="p-4 space-y-4 bg-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm">Title</Label>
+              <Label htmlFor="title" className="text-sm text-text-muted">Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter book title"
-                className="h-8 text-sm"
+                className="h-9 text-sm bg-gray-50 border-gray-200"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="author" className="text-sm">Author</Label>
+              <Label htmlFor="author" className="text-sm text-text-muted">Author</Label>
               <Input
                 id="author"
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Enter author name"
-                className="h-8 text-sm"
+                className="h-9 text-sm bg-gray-50 border-gray-200"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="genre" className="text-sm">Genre</Label>
+              <Label htmlFor="genre" className="text-sm text-text-muted">Genre</Label>
               <Select value={genre} onValueChange={setGenre}>
-                <SelectTrigger className="h-8 text-sm">
+                <SelectTrigger className="h-9 text-sm bg-gray-50 border-gray-200">
                   <SelectValue placeholder="Select genre" />
                 </SelectTrigger>
                 <SelectContent>
@@ -235,27 +227,13 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="rating" className="text-sm">Rating</Label>
-              <div className="flex items-center gap-4">
-                <Slider
-                  id="rating"
-                  min={0}
-                  max={10}
-                  step={0.5}
-                  value={[rating]}
-                  onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
-                  className="flex-1"
-                />
-                <span className="min-w-[60px] text-right text-sm">{rating.toFixed(1)}/10</span>
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+          </div>
+        </div>
 
         {/* Notes Section */}
-        {book && <NoteSection book={book} onUpdateBook={onSave} />}
+        <div className="mt-2">
+          {book && <NoteSection book={book} onUpdateBook={onSave} />}
+        </div>
       </div>
     </div>
   );
