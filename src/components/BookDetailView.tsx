@@ -149,19 +149,22 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       <div className={`flex-1 overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
         {/* Book Cover and Quick Info Card */}
         <div className="p-6 bg-white border-b shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
+          <div className="flex flex-col sm:flex-row gap-8">
             <div className="flex justify-center sm:justify-start">
               <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-accent to-success/20 rounded-lg blur opacity-30 group-hover:opacity-70 transition duration-1000"></div>
                 <BookCover
                   imageUrl={book?.imageUrl}
                   thumbnailUrl={book?.thumbnailUrl}
                   genre={book?.genre || ""}
                   title={book?.title || ""}
                   size="md"
-                  className="w-48 h-64 transition-transform duration-300 group-hover:scale-105 shadow-lg"
+                  className="relative w-48 h-64 transition-all duration-300 group-hover:scale-105 shadow-lg rounded-lg"
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md flex items-center justify-center">
-                  <p className="text-white text-sm font-medium">{genre || "No genre selected"}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-end justify-center pb-4">
+                  <p className="text-white text-sm font-medium px-3 py-1 bg-black/40 rounded-full backdrop-blur-sm">
+                    {genre || "No genre selected"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -190,7 +193,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                 </div>
               </div>
               
-              <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+              <div className="space-y-4 bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
                 <Label className="text-sm font-medium text-text-muted">Rating</Label>
                 <div className="space-y-3">
                   <div className="flex gap-2">
@@ -224,7 +227,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter book title"
-                className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors"
+                className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
@@ -235,7 +238,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="Enter author name"
-                className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors"
+                className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
