@@ -1,3 +1,4 @@
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -11,15 +12,27 @@ import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
 import BuyBooks from "./pages/BuyBooks";
 import GoogleBookDetail from "./pages/GoogleBookDetail";
+import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
+
+// Create a layout component that only shows Navigation for authenticated routes
+const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
+  const { session } = useAuth();
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {children}
+      {session && <Navigation />}
+    </div>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col bg-gray-50 pb-[80px]">
+          <AuthenticatedLayout>
             <Routes>
               <Route path="/" element={<Welcome />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -31,8 +44,7 @@ const App = () => (
               <Route path="/friends" element={<Friends />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <Navigation />
-          </div>
+          </AuthenticatedLayout>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
