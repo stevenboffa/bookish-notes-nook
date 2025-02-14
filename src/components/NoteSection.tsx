@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ interface NoteSectionProps {
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [newNote, setNewNote] = useState("");
-  const [localNotes, setLocalNotes] = useState(book.notes || []);
+  const [localNotes, setLocalNotes] = useState(book.notes);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
@@ -36,13 +35,12 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       };
 
       // Update local state immediately
-      const updatedNotes = [newNoteObject, ...localNotes];
-      setLocalNotes(updatedNotes);
+      setLocalNotes(prevNotes => [newNoteObject, ...prevNotes]);
 
       // Update parent component
       const updatedBook = {
         ...book,
-        notes: updatedNotes,
+        notes: [newNoteObject, ...book.notes],
       };
 
       onUpdateBook(updatedBook);

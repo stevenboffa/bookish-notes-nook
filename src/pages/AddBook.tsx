@@ -1,458 +1,211 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookDetailView } from "@/components/BookDetailView";
-import { NoteSection } from "@/components/NoteSection";
+import { Book } from "@/components/BookList";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import { BookCover } from "@/components/BookCover";
+import { useAuth } from "@/contexts/AuthContext";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import {
-  BookOpen,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Save,
-  Star,
-  Tags,
-} from "lucide-react";
-import { format } from "date-fns";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-const statusOptions = [
-  { value: "Not started", icon: Clock },
-  { value: "Reading", icon: BookOpen },
-  { value: "Completed", icon: Save },
-];
+interface GoogleBook {
+  id: string;
+  volumeInfo: {
+    title: string;
+    authors?: string[];
+    categories?: string[];
+    publishedDate?: string;
+    description?: string;
+    imageLinks?: {
+      thumbnail?: string;
+      smallThumbnail?: string;
+    };
+  };
+}
 
-const genreOptions = [
-  "Fiction",
-  "Non-Fiction",
-  "Mystery",
-  "Science Fiction",
-  "Fantasy",
-  "Romance",
-  "Thriller",
-  "Biography",
-  "History",
-  "Science",
-  "Self-Help",
-  "Other",
-];
+interface GoogleBooksResponse {
+  items?: GoogleBook[];
+}
 
-const AddBook = () => {
+export default function AddBook() {
+  const [book, setBook] = useState<Book | null>(null);
+  const [searchResults, setSearchResults] = useState<GoogleBook[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const { id } = useParams();
-  const { session } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const { session } = useAuth();
 
-  const [formData, setFormData] = useState({
-    title: "",
-    author: "",
-    genre: "",
-    date_read: "",
-    status: "Not started",
-    rating: 0,
-    image_url: "",
-    thumbnail_url: "",
-    is_favorite: false,
-  });
+  const searchBooks = async () => {
+    if (!searchQuery.trim()) {
+      return;
+    }
 
-  const { data: book, isLoading } = useQuery({
-    queryKey: ["book", id],
-    queryFn: async () => {
-      if (!id) return null;
-      const { data: bookData, error } = await supabase
-        .from("books")
-        .select(`
-          *,
-          notes (
-            id,
-            content,
-            created_at
-          )
-        `)
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
-
-      // Transform the data to match the Book type
-      if (bookData) {
-        return {
-          ...bookData,
-          dateRead: bookData.date_read,
-          notes: (bookData.notes || []).map((note: any) => ({
-            id: note.id,
-            content: note.content,
-            createdAt: note.created_at,
-          })),
-        };
-      }
-      return null;
-    },
-    enabled: !!id,
-    meta: {
-      onSuccess: (data: Book | null) => {
-        if (data) {
-          setFormData({
-            title: data.title,
-            author: data.author,
-            genre: data.genre,
-            date_read: data.dateRead,
-            status: data.status || "Not started",
-            rating: data.rating || 0,
-            image_url: data.image_url || "",
-            thumbnail_url: data.thumbnail_url || "",
-            is_favorite: data.is_favorite || false,
-          });
-          setSelectedDate(data.dateRead ? new Date(data.dateRead) : undefined);
-        }
-      },
-    },
-  });
-
-  const mutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      if (!session?.user?.id) throw new Error("No user ID");
-
-      const bookData = {
-        ...data,
-        user_id: session.user.id,
-      };
-
-      if (id) {
-        const { error } = await supabase
-          .from("books")
-          .update(bookData)
-          .eq("id", id);
-        if (error) throw error;
-        return bookData;
-      } else {
-        const { data: newBook, error } = await supabase
-          .from("books")
-          .insert([bookData])
-          .select()
-          .single();
-        if (error) throw error;
-        return newBook;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["books"] });
-      toast({
-        title: id ? "Book updated!" : "Book added!",
-        description: id
-          ? "Your book has been updated successfully."
-          : "Your book has been added to your library.",
+    setIsSearching(true);
+    setSearchResults([]);
+    try {
+      const { data, error } = await supabase.functions.invoke<GoogleBooksResponse>('search-books', {
+        body: { searchQuery: searchQuery.trim() }
       });
-      navigate("/dashboard");
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    },
-  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    mutation.mutate(formData);
+      if (error) {
+        throw error;
+      }
+
+      if (data?.items && Array.isArray(data.items)) {
+        // Remove duplicates based on book ID
+        const uniqueBooks = Array.from(
+          new Map(data.items.map(book => [book.id, book])).values()
+        ) as GoogleBook[];
+        setSearchResults(uniqueBooks);
+        console.log('Search results:', uniqueBooks);
+      }
+    } catch (error) {
+      console.error('Error searching books:', error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  const handleRatingChange = (newRating: number) => {
-    setFormData((prev) => ({ ...prev, rating: newRating }));
+  const selectBook = (googleBook: GoogleBook) => {
+    const imageUrl = googleBook.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:');
+    const thumbnailUrl = googleBook.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:');
+    
+    const newBook: Book = {
+      id: crypto.randomUUID(),
+      title: googleBook.volumeInfo.title,
+      author: googleBook.volumeInfo.authors?.[0] || "Unknown Author",
+      genre: googleBook.volumeInfo.categories?.[0] || "Uncategorized",
+      dateRead: new Date().toISOString().split('T')[0],
+      rating: 0,
+      status: "Not started",
+      notes: [],
+      isFavorite: false,
+      imageUrl,
+      thumbnailUrl,
+    };
+    setBook(newBook);
+    setSearchResults([]);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const handleSave = async (updatedBook: Book) => {
+    if (!session?.user?.id) {
+      console.error('User must be logged in to save books');
+      return;
+    }
+
+    const bookData = {
+      title: updatedBook.title,
+      author: updatedBook.author,
+      genre: updatedBook.genre,
+      date_read: updatedBook.dateRead,
+      rating: updatedBook.rating,
+      status: updatedBook.status,
+      is_favorite: updatedBook.isFavorite,
+      user_id: session.user.id,
+      image_url: updatedBook.imageUrl,
+      thumbnail_url: updatedBook.thumbnailUrl,
+    };
+
+    if (updatedBook.id && updatedBook.id !== "") {
+      bookData["id"] = updatedBook.id;
+    }
+
+    const { error } = await supabase
+      .from("books")
+      .upsert(bookData);
+
+    if (error) {
+      console.error('Error saving book:', error);
+      return;
+    }
+
+    navigate("/dashboard");
+  };
+
+  const handleClose = () => {
+    navigate("/dashboard");
+  };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8">
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm pb-4 border-b">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">
-              {id ? "Edit Book" : "Add New Book"}
-            </h1>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+    <div className="flex-1 md:container">
+      {!id && (
+        <div className="p-4 space-y-4">
+          <h2 className="text-2xl font-bold">Search for a Book</h2>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Search by title or author..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && searchBooks()}
+            />
+            <Button 
+              onClick={searchBooks}
+              disabled={isSearching}
+            >
+              {isSearching ? (
+                "Searching..."
               ) : (
-                "Save"
+                <>
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </>
               )}
             </Button>
           </div>
-        </div>
+          <p className="text-sm text-muted-foreground">
+            Search for a book to auto-fill the details, or fill them in manually below.
+          </p>
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full justify-start mb-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="notes">Notes</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              <BookDetailView
-                book={book || {
-                  ...formData,
-                  id: "",
-                  created_at: "",
-                  user_id: "",
-                  is_top_favorite: 0,
-                  dateRead: formData.date_read,
-                  notes: [],
-                }}
-                onUpdateBook={(updatedBook) => {
-                  setFormData({
-                    title: updatedBook.title,
-                    author: updatedBook.author,
-                    genre: updatedBook.genre,
-                    date_read: updatedBook.dateRead,
-                    status: updatedBook.status || "Not started",
-                    rating: updatedBook.rating || 0,
-                    image_url: updatedBook.image_url || "",
-                    thumbnail_url: updatedBook.thumbnail_url || "",
-                    is_favorite: updatedBook.is_favorite || false,
-                  });
-                }}
-              />
-              
-              <div className="flex-1 space-y-4">
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="author">Author</Label>
-                  <Input
-                    id="author"
-                    value={formData.author}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        author: e.target.value,
-                      }))
-                    }
-                    className="mt-1"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {statusOptions.map((status) => {
-                    const Icon = status.icon;
-                    return (
-                      <Badge
-                        key={status.value}
-                        variant={
-                          formData.status === status.value
-                            ? "default"
-                            : "outline"
-                        }
-                        className="cursor-pointer"
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            status: status.value,
-                          }))
-                        }
-                      >
-                        <Icon className="w-4 h-4 mr-1" />
-                        {status.value}
-                      </Badge>
-                    );
-                  })}
-                </div>
-
-                <Progress
-                  value={
-                    formData.status === "Not started"
-                      ? 0
-                      : formData.status === "Reading"
-                      ? 50
-                      : 100
-                  }
-                  className="h-2"
-                />
+          {searchResults.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Search Results</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {searchResults.map((result) => (
+                  <Card 
+                    key={result.id}
+                    className="cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => selectBook(result)}
+                  >
+                    <CardHeader className="flex flex-row gap-4">
+                      <BookCover
+                        imageUrl={result.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:')}
+                        thumbnailUrl={result.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:')}
+                        genre={result.volumeInfo.categories?.[0] || "Uncategorized"}
+                        title={result.volumeInfo.title}
+                        size="sm"
+                      />
+                      <div>
+                        <CardTitle className="text-lg">{result.volumeInfo.title}</CardTitle>
+                        <CardDescription>
+                          by {result.volumeInfo.authors?.[0] || "Unknown Author"}
+                        </CardDescription>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {result.volumeInfo.categories?.[0] || "Uncategorized"}
+                        </p>
+                        {result.volumeInfo.publishedDate && (
+                          <p className="text-sm text-muted-foreground">
+                            Published: {result.volumeInfo.publishedDate}
+                          </p>
+                        )}
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="notes">
-            {book && <NoteSection book={book} onUpdateBook={(updatedBook) => {
-              setFormData({
-                title: updatedBook.title,
-                author: updatedBook.author,
-                genre: updatedBook.genre,
-                date_read: updatedBook.dateRead,
-                status: updatedBook.status || "Not started",
-                rating: updatedBook.rating || 0,
-                image_url: updatedBook.image_url || "",
-                thumbnail_url: updatedBook.thumbnail_url || "",
-                is_favorite: updatedBook.is_favorite || false,
-              });
-            }} />}
-          </TabsContent>
-
-          <TabsContent value="details" className="space-y-6">
-            <Collapsible
-              open={isDetailsOpen}
-              onOpenChange={setIsDetailsOpen}
-              className="space-y-2"
-            >
-              <CollapsibleTrigger className="flex items-center justify-between w-full">
-                <span className="text-sm font-medium">Additional Details</span>
-                {isDetailsOpen ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-4">
-                <div>
-                  <Label className="flex items-center gap-2">
-                    <Tags className="w-4 h-4" />
-                    Genre
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {genreOptions.map((genre) => (
-                      <Badge
-                        key={genre}
-                        variant={
-                          formData.genre === genre ? "default" : "outline"
-                        }
-                        className="cursor-pointer text-center"
-                        onClick={() =>
-                          setFormData((prev) => ({ ...prev, genre }))
-                        }
-                      >
-                        {genre}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Date Read
-                  </Label>
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal mt-2",
-                          !selectedDate && "text-muted-foreground"
-                        )}
-                      >
-                        {selectedDate ? (
-                          format(selectedDate, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent>
-                      <SheetHeader>
-                        <SheetTitle>Select Date</SheetTitle>
-                        <SheetDescription>
-                          Choose when you read this book
-                        </SheetDescription>
-                      </SheetHeader>
-                      <div className="py-4">
-                        <CalendarComponent
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            setSelectedDate(date);
-                            if (date) {
-                              setFormData((prev) => ({
-                                ...prev,
-                                date_read: format(date, "yyyy-MM-dd"),
-                              }));
-                            }
-                          }}
-                          initialFocus
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        is_favorite: !prev.is_favorite,
-                      }))
-                    }
-                    className={cn(
-                      formData.is_favorite &&
-                        "bg-primary text-primary-foreground hover:bg-primary/90"
-                    )}
-                  >
-                    <Star className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    {formData.is_favorite
-                      ? "Remove from favorites"
-                      : "Add to favorites"}
-                  </span>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </TabsContent>
-        </Tabs>
-      </form>
+          )}
+        </div>
+      )}
+      <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
-};
-
-export default AddBook;
+}
