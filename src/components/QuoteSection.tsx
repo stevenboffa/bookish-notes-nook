@@ -61,7 +61,7 @@ export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
     <div className="p-4 h-full flex flex-col">
       <div className="space-y-4">
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground italic">Save those words that struck a chord and resonated with your soul.</p>
+          <p className="text-sm text-muted-foreground italic">Save the words that stood out to you.</p>
           <div className="flex flex-col space-y-2">
             <Textarea
               value={newQuote}

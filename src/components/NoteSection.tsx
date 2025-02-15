@@ -55,7 +55,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     <div className="p-4 h-full flex flex-col">
       <div className="space-y-4">
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground italic">Capture your thoughts and reflections as you journey through these pages.</p>
+          <p className="text-sm text-muted-foreground italic">Organize your thoughts and notes for easy reference.</p>
           <div className="flex flex-col space-y-2">
             <Textarea
               value={newNote}
