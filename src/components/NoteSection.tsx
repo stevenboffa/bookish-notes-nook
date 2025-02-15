@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
@@ -53,8 +54,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   return (
     <div className="p-4 h-full flex flex-col">
       <div className="space-y-4">
-        <h2 className="text-2xl font-serif font-semibold">{book.title}</h2>
-
         <div className="space-y-2">
           <h3 className="text-lg font-medium">Notes</h3>
           <div className="flex flex-col space-y-2">
