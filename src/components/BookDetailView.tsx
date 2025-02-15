@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -66,6 +67,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         status,
         rating: parseFloat(rating.toFixed(1)),
         notes: [],
+        quotes: [], // Add this line to include the quotes array
         dateRead: new Date().toISOString().split('T')[0],
         isFavorite,
       };
