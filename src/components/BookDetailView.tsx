@@ -232,51 +232,55 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
         <div className="p-6 space-y-6 bg-white">
           <Collapsible>
-            <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-text-muted hover:text-primary transition-colors">
-              <ChevronDown className="h-4 w-4 transition-transform duration-200" />
-              Edit book details
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-medium text-text-muted">Title</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter book title"
-                    className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
+            {(open) => (
+              <>
+                <CollapsibleTrigger className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium text-text-muted hover:text-primary transition-all group w-full">
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-180' : ''} group-hover:text-primary`} />
+                  <span className="group-hover:translate-x-0.5 transition-transform duration-200">Edit book details</span>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-6 px-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-sm font-medium text-text-muted">Title</Label>
+                      <Input
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Enter book title"
+                        className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="author" className="text-sm font-medium text-text-muted">Author</Label>
-                  <Input
-                    id="author"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    placeholder="Enter author name"
-                    className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="author" className="text-sm font-medium text-text-muted">Author</Label>
+                      <Input
+                        id="author"
+                        value={author}
+                        onChange={(e) => setAuthor(e.target.value)}
+                        placeholder="Enter author name"
+                        className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="genre" className="text-sm font-medium text-text-muted">Genre</Label>
-                  <Select value={genre} onValueChange={setGenre}>
-                    <SelectTrigger className="h-9 text-sm bg-gray-50/50 border-gray-200 hover:border-primary/30 transition-colors">
-                      <SelectValue placeholder="Select genre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {genres.map((g) => (
-                        <SelectItem key={g} value={g} className="text-sm">
-                          {g}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CollapsibleContent>
+                    <div className="space-y-2">
+                      <Label htmlFor="genre" className="text-sm font-medium text-text-muted">Genre</Label>
+                      <Select value={genre} onValueChange={setGenre}>
+                        <SelectTrigger className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors">
+                          <SelectValue placeholder="Select genre" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {genres.map((g) => (
+                            <SelectItem key={g} value={g} className="text-sm">
+                              {g}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </>
+            )}
           </Collapsible>
         </div>
 
