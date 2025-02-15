@@ -1,3 +1,4 @@
+
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -28,6 +29,7 @@ export interface Book {
   dateRead: string;
   rating: number;
   notes: Note[];
+  quotes: Quote[];  // Add this line
   isFavorite?: boolean;
   status: 'Not started' | 'In Progress' | 'Finished';
   imageUrl?: string | null;
@@ -35,6 +37,12 @@ export interface Book {
 }
 
 export interface Note {
+  id: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface Quote {  // Add this interface
   id: string;
   content: string;
   createdAt: string;
