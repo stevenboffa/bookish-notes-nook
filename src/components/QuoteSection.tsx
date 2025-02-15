@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,11 @@ interface QuoteSectionProps {
 export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
   const [newQuote, setNewQuote] = useState("");
   const [localQuotes, setLocalQuotes] = useState(book.quotes || []);
+
+  // Sync local quotes with book quotes when they change
+  useEffect(() => {
+    setLocalQuotes(book.quotes || []);
+  }, [book.quotes]);
 
   const handleAddQuote = async () => {
     if (!newQuote.trim()) return;
@@ -35,13 +40,14 @@ export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
         createdAt: quoteData.created_at,
       };
 
-      // Update local state immediately
-      setLocalQuotes(prevQuotes => [newQuoteObject, ...prevQuotes]);
+      // Update local state
+      const updatedQuotes = [newQuoteObject, ...localQuotes];
+      setLocalQuotes(updatedQuotes);
 
-      // Update parent component
+      // Update parent component with new quotes array
       const updatedBook = {
         ...book,
-        quotes: [newQuoteObject, ...book.quotes],
+        quotes: updatedQuotes,
       };
 
       onUpdateBook(updatedBook);
