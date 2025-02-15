@@ -88,6 +88,7 @@ export default function AddBook() {
       rating: 0,
       status: "Not started",
       notes: [],
+      quotes: [], // Add this line
       isFavorite: false,
       imageUrl,
       thumbnailUrl,

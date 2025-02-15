@@ -63,6 +63,11 @@ export default function Friends() {
                 id,
                 content,
                 created_at
+              ),
+              quotes (
+                id,
+                content,
+                created_at
               )
             `)
             .eq('user_id', friendId);
@@ -90,10 +95,15 @@ export default function Friends() {
               dateRead: book.date_read,
               imageUrl: book.image_url,
               thumbnailUrl: book.thumbnail_url,
-              notes: book.notes.map(note => ({
+              notes: (book.notes || []).map(note => ({
                 id: note.id,
                 content: note.content,
                 createdAt: note.created_at,
+              })),
+              quotes: (book.quotes || []).map(quote => ({
+                id: quote.id,
+                content: quote.content,
+                createdAt: quote.created_at,
               })),
             })),
           };

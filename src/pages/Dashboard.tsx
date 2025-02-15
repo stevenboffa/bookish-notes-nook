@@ -36,6 +36,11 @@ const Dashboard = () => {
             id,
             content,
             created_at
+          ),
+          quotes (
+            id,
+            content,
+            created_at
           )
         `)
         .eq('user_id', session?.user?.id)
@@ -59,6 +64,11 @@ const Dashboard = () => {
           content: note.content,
           createdAt: note.created_at,
         })),
+        quotes: book.quotes.map((quote: any) => ({
+          id: quote.id,
+          content: quote.content,
+          createdAt: quote.created_at,
+        })) || [],
       }));
 
       setBooks(formattedBooks);

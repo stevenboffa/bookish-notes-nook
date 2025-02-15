@@ -28,6 +28,11 @@ const Favorites = () => {
               id,
               content,
               created_at
+            ),
+            quotes (
+              id,
+              content,
+              created_at
             )
           `)
           .eq('is_favorite', true)
@@ -49,6 +54,11 @@ const Favorites = () => {
             content: note.content,
             createdAt: note.created_at,
           })),
+          quotes: book.quotes.map((quote: any) => ({
+            id: quote.id,
+            content: quote.content,
+            createdAt: quote.created_at,
+          })) || [],
         }));
 
         setBooks(formattedBooks);
