@@ -16,7 +16,9 @@ import {
 import { X, Save, Star, StarHalf, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
+import { QuoteSection } from "./QuoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -268,7 +270,22 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         </div>
 
         <div className="mt-2">
-          {book && <NoteSection book={book} onUpdateBook={onSave} />}
+          {book && (
+            <Tabs defaultValue="notes" className="w-full">
+              <div className="px-6 border-b">
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="notes" className="flex-1 sm:flex-none">Notes</TabsTrigger>
+                  <TabsTrigger value="quotes" className="flex-1 sm:flex-none">Quotes</TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="notes">
+                <NoteSection book={book} onUpdateBook={onSave} />
+              </TabsContent>
+              <TabsContent value="quotes">
+                <QuoteSection book={book} onUpdateBook={onSave} />
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </div>
     </div>
