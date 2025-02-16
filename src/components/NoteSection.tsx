@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,11 @@ interface NoteSectionProps {
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [newNote, setNewNote] = useState("");
   const [localNotes, setLocalNotes] = useState(book.notes);
+
+  // Sync local notes with book notes when they change
+  useEffect(() => {
+    setLocalNotes(book.notes);
+  }, [book.notes]);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
@@ -36,12 +41,13 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       };
 
       // Update local state immediately
-      setLocalNotes(prevNotes => [newNoteObject, ...prevNotes]);
+      const updatedNotes = [newNoteObject, ...localNotes];
+      setLocalNotes(updatedNotes);
 
       // Update parent component
       const updatedBook = {
         ...book,
-        notes: [newNoteObject, ...book.notes],
+        notes: updatedNotes,
       };
 
       onUpdateBook(updatedBook);
