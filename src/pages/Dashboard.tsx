@@ -126,8 +126,13 @@ const Dashboard = () => {
 
       if (error) throw error;
 
-      // Fetch fresh data to ensure we have the latest notes and quotes
-      await fetchBooks();
+      // Update books state immediately
+      setBooks(books.map(book => 
+        book.id === updatedBook.id ? updatedBook : book
+      ));
+      
+      // Update selected book
+      setSelectedBook(updatedBook);
     } catch (error) {
       console.error('Error updating book:', error);
     }
