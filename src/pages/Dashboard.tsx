@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -72,6 +73,14 @@ const Dashboard = () => {
       }));
 
       setBooks(formattedBooks);
+      
+      // Update selected book if it exists
+      if (selectedBook) {
+        const updatedSelectedBook = formattedBooks.find(book => book.id === selectedBook.id);
+        if (updatedSelectedBook) {
+          setSelectedBook(updatedSelectedBook);
+        }
+      }
     } catch (error) {
       console.error('Error fetching books:', error);
     } finally {
@@ -117,9 +126,8 @@ const Dashboard = () => {
 
       if (error) throw error;
 
-      setBooks(books.map(book => 
-        book.id === updatedBook.id ? updatedBook : book
-      ));
+      // Fetch fresh data to ensure we have the latest notes and quotes
+      await fetchBooks();
     } catch (error) {
       console.error('Error updating book:', error);
     }
