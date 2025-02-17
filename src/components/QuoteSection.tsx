@@ -4,6 +4,7 @@ import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { Trash2 } from "lucide-react";
 
 interface QuoteSectionProps {
   book: Book;
@@ -57,6 +58,31 @@ export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
     }
   };
 
+  const handleDeleteQuote = async (quoteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('quotes')
+        .delete()
+        .eq('id', quoteId);
+
+      if (error) throw error;
+
+      // Update local state immediately
+      const updatedQuotes = localQuotes.filter(quote => quote.id !== quoteId);
+      setLocalQuotes(updatedQuotes);
+
+      // Update parent component
+      const updatedBook = {
+        ...book,
+        quotes: updatedQuotes,
+      };
+
+      onUpdateBook(updatedBook);
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+    }
+  };
+
   return (
     <div className="p-4 h-full flex flex-col">
       <div className="space-y-4">
@@ -80,9 +106,17 @@ export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
             {localQuotes.map((quote) => (
               <div
                 key={quote.id}
-                className="p-3 bg-white rounded-lg shadow animate-fade-in"
+                className="p-3 bg-white rounded-lg shadow animate-fade-in group relative"
               >
-                <p className="text-sm whitespace-pre-wrap">{quote.content}</p>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => handleDeleteQuote(quote.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+                <p className="text-sm whitespace-pre-wrap pr-8">{quote.content}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {new Date(quote.createdAt).toLocaleDateString()}
                 </p>
