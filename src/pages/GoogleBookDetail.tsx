@@ -18,7 +18,7 @@ interface GoogleBook {
       thumbnail: string;
       smallThumbnail: string;
     };
-    industryIdentifiers: Array<{
+    industryIdentifiers?: Array<{
       type: string;
       identifier: string;
     }>;
@@ -41,16 +41,19 @@ interface GoogleBook {
   };
 }
 
-function createAmazonLink(book: GoogleBook): string | null {
-  // Try to find ISBN-13 first, then ISBN-10, then ASIN
-  const isbn13 = book.volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_13')?.identifier;
-  const isbn10 = book.volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_10')?.identifier;
-  const identifier = isbn10 || isbn13;
+function createAmazonLink(book: GoogleBook | undefined): string | null {
+  if (!book?.volumeInfo?.industryIdentifiers?.length) {
+    return null;
+  }
+
+  // Try to find ISBN-13 first, then ISBN-10
+  const isbn13 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_13')?.identifier;
+  const isbn10 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_10')?.identifier;
+  const identifier = isbn13 || isbn10;
 
   if (!identifier) return null;
 
-  // Create a search URL instead of direct product URL
-  // This is more reliable as Amazon will redirect to the best matching product
+  // Create a search URL with the book title and author
   const searchQuery = `${book.volumeInfo.title} ${book.volumeInfo.authors?.[0] || ''}`.trim();
   const encodedQuery = encodeURIComponent(searchQuery);
   
