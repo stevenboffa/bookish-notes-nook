@@ -41,6 +41,22 @@ interface GoogleBook {
   };
 }
 
+function createAmazonLink(book: GoogleBook): string | null {
+  // Try to find ISBN-13 first, then ISBN-10, then ASIN
+  const isbn13 = book.volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_13')?.identifier;
+  const isbn10 = book.volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_10')?.identifier;
+  const identifier = isbn10 || isbn13;
+
+  if (!identifier) return null;
+
+  // Create a search URL instead of direct product URL
+  // This is more reliable as Amazon will redirect to the best matching product
+  const searchQuery = `${book.volumeInfo.title} ${book.volumeInfo.authors?.[0] || ''}`.trim();
+  const encodedQuery = encodeURIComponent(searchQuery);
+  
+  return `https://www.amazon.com/s?k=${encodedQuery}&i=stripbooks&rh=p_66:${identifier}`;
+}
+
 export default function GoogleBookDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -91,6 +107,8 @@ export default function GoogleBookDetail() {
       </div>
     );
   }
+
+  const amazonLink = createAmazonLink(book);
 
   return (
     <div className="container mx-auto p-4">
@@ -157,16 +175,16 @@ export default function GoogleBookDetail() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Buy this Book</h2>
             <div className="flex flex-col gap-3">
-              {book.affiliateLinks?.amazon && (
+              {amazonLink && (
                 <a
-                  href={book.affiliateLinks.amazon}
+                  href={amazonLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full"
                 >
                   <Button className="w-full" variant="default">
                     <ShoppingCart className="mr-2" />
-                    Buy on Amazon
+                    Find on Amazon
                   </Button>
                 </a>
               )}
