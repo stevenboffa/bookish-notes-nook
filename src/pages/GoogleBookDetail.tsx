@@ -123,10 +123,10 @@ export default function GoogleBookDetail() {
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <BookCover
-            imageUrl={book.volumeInfo.imageLinks?.thumbnail}
-            thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail}
-            genre={book.volumeInfo.categories?.[0] || 'Unknown'}
-            title={book.volumeInfo.title}
+            imageUrl={book.volumeInfo?.imageLinks?.thumbnail}
+            thumbnailUrl={book.volumeInfo?.imageLinks?.smallThumbnail}
+            genre={book.volumeInfo?.categories?.[0] || 'Unknown'}
+            title={book.volumeInfo?.title || 'Unknown Title'}
             size="lg"
             className="mx-auto"
           />
@@ -134,20 +134,20 @@ export default function GoogleBookDetail() {
 
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{book.volumeInfo.title}</h1>
+            <h1 className="text-3xl font-bold mb-2">{book.volumeInfo?.title}</h1>
             <p className="text-xl text-muted-foreground">
-              by {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}
+              by {book.volumeInfo?.authors?.join(', ') || 'Unknown Author'}
             </p>
           </div>
 
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              Published by {book.volumeInfo.publisher || 'Unknown Publisher'} ({book.volumeInfo.publishedDate})
+              Published by {book.volumeInfo?.publisher || 'Unknown Publisher'} ({book.volumeInfo?.publishedDate})
             </p>
             <p className="text-sm">
               ISBN: {
-                book.volumeInfo.industryIdentifiers?.find(id => id.type === 'ISBN_13')?.identifier ||
-                book.volumeInfo.industryIdentifiers?.[0]?.identifier ||
+                book.volumeInfo?.industryIdentifiers?.find(id => id.type === 'ISBN_13')?.identifier ||
+                book.volumeInfo?.industryIdentifiers?.[0]?.identifier ||
                 'N/A'
               }
             </p>
@@ -155,22 +155,22 @@ export default function GoogleBookDetail() {
 
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">About this Book</h2>
-            <p className="text-muted-foreground">{book.volumeInfo.description || 'No description available'}</p>
+            <p className="text-muted-foreground">{book.volumeInfo?.description || 'No description available'}</p>
           </div>
 
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Details</h2>
             <div className="grid grid-cols-3 gap-4">
               <div className="p-4 bg-accent rounded-lg text-center">
-                <p className="text-2xl font-bold">{book.volumeInfo.pageCount || 'N/A'}</p>
+                <p className="text-2xl font-bold">{book.volumeInfo?.pageCount || 'N/A'}</p>
                 <p className="text-sm text-muted-foreground">Pages</p>
               </div>
               <div className="p-4 bg-accent rounded-lg text-center">
-                <p className="text-2xl font-bold">{book.volumeInfo.averageRating || 'N/A'}</p>
+                <p className="text-2xl font-bold">{book.volumeInfo?.averageRating || 'N/A'}</p>
                 <p className="text-sm text-muted-foreground">Rating</p>
               </div>
               <div className="p-4 bg-accent rounded-lg text-center">
-                <p className="text-2xl font-bold">{book.volumeInfo.ratingsCount || 0}</p>
+                <p className="text-2xl font-bold">{book.volumeInfo?.ratingsCount || 0}</p>
                 <p className="text-sm text-muted-foreground">Reviews</p>
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function GoogleBookDetail() {
                   </Button>
                 </a>
               )}
-              {book.saleInfo.buyLink && (
+              {book.saleInfo?.buyLink && (
                 <a
                   href={book.saleInfo.buyLink}
                   target="_blank"
