@@ -1,4 +1,3 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -27,15 +26,33 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { searchQuery, maxResults = 16 } = await req.json()
+    const { searchQuery, maxResults = 16, bookId } = await req.json()
     
     const apiKey = Deno.env.get('GOOGLE_BOOKS_API_KEY')
     if (!apiKey) {
       throw new Error('Google Books API key not configured')
     }
 
-    console.log('Searching books with query:', searchQuery)
-    const url = 'https://www.googleapis.com/books/v1/volumes'
+    // If bookId is provided, fetch single book details
+    if (bookId) {
+      console.log('Fetching single book details for ID:', bookId);
+      const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}?key=${apiKey}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Google Books API error:', data);
+        throw new Error(data.error?.message || 'Failed to fetch book details');
+      }
+
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // Otherwise, perform a search
+    console.log('Searching books with query:', searchQuery);
+    const url = 'https://www.googleapis.com/books/v1/volumes';
     
     // Safely parse the query parameters
     let query = '';
@@ -74,33 +91,33 @@ Deno.serve(async (req) => {
 
     console.log('Final URL parameters:', params.toString());
 
-    const response = await fetch(`${url}?${params.toString()}`)
-    const data = await response.json()
+    const response = await fetch(`${url}?${params.toString()}`);
+    const data = await response.json();
 
     if (!response.ok) {
-      console.error('Google Books API error:', data)
-      throw new Error(data.error?.message || 'Failed to fetch books')
+      console.error('Google Books API error:', data);
+      throw new Error(data.error?.message || 'Failed to fetch books');
     }
 
     // Additional filtering on our end
     if (data.items) {
       data.items = data.items.filter((book: GoogleBook) => 
-        book.volumeInfo.description?.length > 100 && 
-        book.volumeInfo.imageLinks?.thumbnail && 
-        book.volumeInfo.authors?.length > 0 && 
-        book.volumeInfo.title?.length > 0
+        book.volumeInfo?.description?.length > 100 && 
+        book.volumeInfo?.imageLinks?.thumbnail && 
+        book.volumeInfo?.authors?.length > 0 && 
+        book.volumeInfo?.title?.length > 0
       );
     }
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    })
+    });
   } catch (error) {
-    console.error('Error in search-books function:', error)
+    console.error('Error in search-books function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
-    })
+    });
   }
-})
+});
