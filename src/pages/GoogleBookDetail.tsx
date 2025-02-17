@@ -54,7 +54,8 @@ function createAmazonLink(book: GoogleBook): string | null {
   const searchQuery = `${book.volumeInfo.title} ${book.volumeInfo.authors?.[0] || ''}`.trim();
   const encodedQuery = encodeURIComponent(searchQuery);
   
-  return `https://www.amazon.com/s?k=${encodedQuery}&i=stripbooks&rh=p_66:${identifier}`;
+  // Include the affiliate tag in the URL
+  return `https://www.amazon.com/s?k=${encodedQuery}&i=stripbooks&rh=p_66:${identifier}&tag=ps4fans06-20`;
 }
 
 export default function GoogleBookDetail() {
