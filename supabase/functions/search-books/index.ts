@@ -37,15 +37,21 @@ Deno.serve(async (req) => {
     console.log('Searching books with query:', searchQuery)
     const url = 'https://www.googleapis.com/books/v1/volumes'
     
+    // Parse existing parameters from searchQuery
+    const existingParams = new URLSearchParams(searchQuery);
+    const baseQuery = existingParams.get('q') || searchQuery.split('&')[0];
+
     // Build the query parameters
-    const params = new URLSearchParams({
-      q: searchQuery,
-      key: apiKey,
-      maxResults: maxResults.toString(),
-      langRestrict: 'en', // Restrict to English books
-      printType: 'books', // Only return books, no magazines or other content
-      fields: 'items(id,volumeInfo(title,authors,categories,publishedDate,description,imageLinks,industryIdentifiers))'
-    });
+    const params = new URLSearchParams();
+    params.append('q', baseQuery);
+    params.append('key', apiKey);
+    params.append('maxResults', maxResults.toString());
+    params.append('langRestrict', 'en');
+    params.append('printType', 'books');
+    
+    // Add any additional parameters from the original query
+    if (existingParams.has('orderBy')) params.append('orderBy', existingParams.get('orderBy')!);
+    if (existingParams.has('filter')) params.append('filter', existingParams.get('filter')!);
 
     const response = await fetch(`${url}?${params.toString()}`)
     const data = await response.json()
@@ -58,10 +64,10 @@ Deno.serve(async (req) => {
     // Additional filtering on our end
     if (data.items) {
       data.items = data.items.filter((book: GoogleBook) => 
-        book.volumeInfo.description?.length > 100 && // Ensure substantial description
-        book.volumeInfo.imageLinks?.thumbnail && // Must have cover image
-        book.volumeInfo.authors?.length > 0 && // Must have authors
-        book.volumeInfo.title?.length > 0 // Must have title
+        book.volumeInfo.description?.length > 100 && 
+        book.volumeInfo.imageLinks?.thumbnail && 
+        book.volumeInfo.authors?.length > 0 && 
+        book.volumeInfo.title?.length > 0
       );
     }
 
