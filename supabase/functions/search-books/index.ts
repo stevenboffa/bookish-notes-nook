@@ -37,21 +37,42 @@ Deno.serve(async (req) => {
     console.log('Searching books with query:', searchQuery)
     const url = 'https://www.googleapis.com/books/v1/volumes'
     
-    // Parse existing parameters from searchQuery
-    const existingParams = new URLSearchParams(searchQuery);
-    const baseQuery = existingParams.get('q') || searchQuery.split('&')[0];
+    // Safely parse the query parameters
+    let query = '';
+    let filter = '';
+    let orderBy = '';
+    
+    if (typeof searchQuery === 'string') {
+      const parts = searchQuery.split('&');
+      parts.forEach(part => {
+        if (part.startsWith('subject:')) {
+          query = part;
+        } else if (part.includes('filter=')) {
+          filter = part.split('=')[1];
+        } else if (part.includes('orderBy=')) {
+          orderBy = part.split('=')[1];
+        }
+      });
+    }
+    
+    // If no valid query was found, use a default
+    if (!query) {
+      query = searchQuery || 'subject:fiction';
+    }
 
     // Build the query parameters
     const params = new URLSearchParams();
-    params.append('q', baseQuery);
+    params.append('q', query);
     params.append('key', apiKey);
     params.append('maxResults', maxResults.toString());
     params.append('langRestrict', 'en');
     params.append('printType', 'books');
     
-    // Add any additional parameters from the original query
-    if (existingParams.has('orderBy')) params.append('orderBy', existingParams.get('orderBy')!);
-    if (existingParams.has('filter')) params.append('filter', existingParams.get('filter')!);
+    // Add optional parameters if they exist
+    if (filter) params.append('filter', filter);
+    if (orderBy) params.append('orderBy', orderBy);
+
+    console.log('Final URL parameters:', params.toString());
 
     const response = await fetch(`${url}?${params.toString()}`)
     const data = await response.json()
