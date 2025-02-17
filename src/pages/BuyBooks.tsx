@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, ArrowLeft } from "lucide-react";
 import { BookCover } from "@/components/BookCover";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { BookCategoryCard } from "@/components/BookCategoryCard";
 
 interface GoogleBook {
   id: string;
@@ -30,8 +32,54 @@ interface GoogleBook {
   };
 }
 
+const categories = [
+  {
+    id: "non-fiction",
+    title: "Non-fiction",
+    description: "Explore real-world stories and knowledge",
+    query: "subject:non-fiction",
+    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=60",
+  },
+  {
+    id: "science-fiction",
+    title: "Science Fiction",
+    description: "Journey into imaginative futures",
+    query: "subject:science-fiction",
+    imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&auto=format&fit=crop&q=60",
+  },
+  {
+    id: "biography",
+    title: "Biographies",
+    description: "Discover remarkable life stories",
+    query: "subject:biography",
+    imageUrl: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=800&auto=format&fit=crop&q=60",
+  },
+  {
+    id: "classics",
+    title: "Classics",
+    description: "Timeless literary masterpieces",
+    query: "subject:classics",
+    imageUrl: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&auto=format&fit=crop&q=60",
+  },
+  {
+    id: "new-releases",
+    title: "New Releases",
+    description: "Fresh off the press",
+    query: "orderBy=newest",
+    imageUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=60",
+  },
+  {
+    id: "mystery",
+    title: "Mystery",
+    description: "Thrilling tales of suspense",
+    query: "subject:mystery",
+    imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=60",
+  },
+];
+
 export default function BuyBooks() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -44,14 +92,21 @@ export default function BuyBooks() {
   }, [session, navigate]);
 
   const { data: books = [], isLoading, error } = useQuery({
-    queryKey: ['google-books', searchQuery],
+    queryKey: ['google-books', searchQuery, selectedCategory],
     queryFn: async ({ signal }) => {
       try {
         console.log("Starting Google Books search...");
         
+        let queryString = searchQuery.trim();
+        if (!queryString && selectedCategory) {
+          const category = categories.find(c => c.id === selectedCategory);
+          queryString = category?.query || '';
+        }
+        
         const { data, error } = await supabase.functions.invoke<{ items: GoogleBook[] }>('search-books', {
           body: { 
-            searchQuery: searchQuery.trim() || 'subject:fiction orderBy:newest'
+            searchQuery: queryString || 'subject:fiction orderBy:newest',
+            maxResults: 16
           }
         });
 
@@ -60,22 +115,21 @@ export default function BuyBooks() {
           throw error;
         }
 
-        // Filter out books without thumbnails or essential info
         const filteredBooks = (data?.items || []).filter((book: GoogleBook) => 
           book.volumeInfo.imageLinks && 
           book.volumeInfo.title &&
           book.volumeInfo.authors
         );
 
-        return filteredBooks;
+        return filteredBooks.slice(0, 16); // Limit to 16 books
       } catch (error) {
         console.error('Error fetching Google books:', error);
         throw error;
       }
     },
-    enabled: !!session,
-    staleTime: 60 * 1000, // Consider data fresh for 1 minute
-    retry: 1, // Only retry once to avoid excessive API calls
+    enabled: !!session && (!!searchQuery || !!selectedCategory),
+    staleTime: 60 * 1000,
+    retry: 1,
   });
 
   useEffect(() => {
@@ -94,8 +148,14 @@ export default function BuyBooks() {
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
+    setSelectedCategory(null);
     setIsSearching(true);
     setIsSearching(false);
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    setSearchQuery("");
+    setSelectedCategory(categoryId);
   };
 
   if (!session) {
@@ -121,55 +181,83 @@ export default function BuyBooks() {
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">
-          {searchQuery ? 'Search Results' : 'Popular Fiction Books'}
-        </h2>
-        {isLoading ? (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          </div>
-        ) : error ? (
-          <div className="text-center text-red-500 py-8">
-            Failed to load books. Please try again later.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {books.map((book) => (
-              <Card 
-                key={book.id} 
-                className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => navigate(`/book/${book.id}`)}
-              >
-                <CardHeader className="flex-1">
-                  <div className="aspect-w-2 aspect-h-3 mb-4">
-                    <BookCover
-                      imageUrl={book.volumeInfo.imageLinks?.thumbnail}
-                      thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail}
-                      genre={book.volumeInfo.categories?.[0] || 'Unknown'}
-                      title={book.volumeInfo.title}
-                    />
-                  </div>
-                  <CardTitle className="text-lg">{book.volumeInfo.title}</CardTitle>
-                  <CardDescription>
-                    by {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {book.volumeInfo.description || 'No description available'}
-                  </p>
-                </CardContent>
-              </Card>
+      {!searchQuery && !selectedCategory ? (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Browse Categories</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <BookCategoryCard
+                key={category.id}
+                title={category.title}
+                description={category.description}
+                imageUrl={category.imageUrl}
+                onClick={() => handleCategorySelect(category.id)}
+              />
             ))}
-            {books.length === 0 && !error && (
-              <p className="col-span-full text-center text-muted-foreground py-8">
-                No books found matching your search
-              </p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">
+              {selectedCategory 
+                ? categories.find(c => c.id === selectedCategory)?.title 
+                : 'Search Results'}
+            </h2>
+            {selectedCategory && (
+              <Button variant="ghost" onClick={() => setSelectedCategory(null)}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Categories
+              </Button>
             )}
           </div>
-        )}
-      </div>
+          
+          {isLoading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-500 py-8">
+              Failed to load books. Please try again later.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {books.map((book) => (
+                <Card 
+                  key={book.id} 
+                  className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => navigate(`/book/${book.id}`)}
+                >
+                  <CardHeader className="flex-1">
+                    <div className="aspect-w-2 aspect-h-3 mb-4">
+                      <BookCover
+                        imageUrl={book.volumeInfo.imageLinks?.thumbnail}
+                        thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail}
+                        genre={book.volumeInfo.categories?.[0] || 'Unknown'}
+                        title={book.volumeInfo.title}
+                      />
+                    </div>
+                    <CardTitle className="text-lg">{book.volumeInfo.title}</CardTitle>
+                    <CardDescription>
+                      by {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {book.volumeInfo.description || 'No description available'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+              {books.length === 0 && !error && (
+                <p className="col-span-full text-center text-muted-foreground py-8">
+                  No books found
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
