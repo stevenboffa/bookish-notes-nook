@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,42 +36,42 @@ const categories = [
     id: "non-fiction",
     title: "Non-fiction",
     description: "Explore real-world stories and knowledge",
-    query: "subject:non-fiction",
+    query: "subject:non-fiction&orderBy=relevance&maxResults=16&filter=paid-ebooks",
     imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=60",
   },
   {
     id: "science-fiction",
     title: "Science Fiction",
     description: "Journey into imaginative futures",
-    query: "subject:science-fiction",
+    query: "subject:science-fiction&orderBy=relevance&maxResults=16&filter=paid-ebooks",
     imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&auto=format&fit=crop&q=60",
   },
   {
     id: "biography",
     title: "Biographies",
     description: "Discover remarkable life stories",
-    query: "subject:biography",
+    query: "subject:biography+autobiography&orderBy=relevance&maxResults=16&filter=paid-ebooks",
     imageUrl: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=800&auto=format&fit=crop&q=60",
   },
   {
     id: "classics",
     title: "Classics",
     description: "Timeless literary masterpieces",
-    query: "subject:classics",
+    query: "subject:classic+literature&orderBy=relevance&maxResults=16&filter=paid-ebooks",
     imageUrl: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&auto=format&fit=crop&q=60",
   },
   {
     id: "new-releases",
     title: "New Releases",
     description: "Fresh off the press",
-    query: "orderBy=newest",
+    query: "orderBy=newest&maxResults=16&filter=paid-ebooks",
     imageUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=60",
   },
   {
     id: "mystery",
     title: "Mystery",
     description: "Thrilling tales of suspense",
-    query: "subject:mystery",
+    query: "subject:mystery+thriller&orderBy=relevance&maxResults=16&filter=paid-ebooks",
     imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=60",
   },
 ];
@@ -105,7 +104,7 @@ export default function BuyBooks() {
         
         const { data, error } = await supabase.functions.invoke<{ items: GoogleBook[] }>('search-books', {
           body: { 
-            searchQuery: queryString || 'subject:fiction orderBy:newest',
+            searchQuery: queryString || 'subject:fiction&orderBy=relevance&maxResults=16&filter=paid-ebooks',
             maxResults: 16
           }
         });
@@ -118,10 +117,11 @@ export default function BuyBooks() {
         const filteredBooks = (data?.items || []).filter((book: GoogleBook) => 
           book.volumeInfo.imageLinks && 
           book.volumeInfo.title &&
-          book.volumeInfo.authors
+          book.volumeInfo.authors &&
+          book.volumeInfo.description
         );
 
-        return filteredBooks.slice(0, 16); // Limit to 16 books
+        return filteredBooks.slice(0, 16);
       } catch (error) {
         console.error('Error fetching Google books:', error);
         throw error;
