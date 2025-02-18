@@ -21,18 +21,20 @@ const scienceFictionPrompt = `You are BN AI, a specialized book recommendation a
    - Consider books with strong reader reviews and ratings
    - Avoid obscure or poorly reviewed works
 
-For each book, provide this information in JSON format:
+IMPORTANT: Your response must be a valid JSON array of book objects. Each book object must follow this exact format:
 {
   "title": "Book Title",
   "author": "Author Name",
   "publicationYear": "Year",
-  "awards": ["Award name and year", "..."] (for award-winning section),
-  "rating": "Average rating (if available)",
-  "description": "A compelling 2-3 sentence description",
-  "significance": "For award winners: why it's significant. For new books: why it's noteworthy",
+  "awards": ["Award name and year"],
+  "rating": "Average rating",
+  "description": "A compelling description",
+  "significance": "Book's significance",
   "themes": ["Theme1", "Theme2", "Theme3"],
-  "subgenre": "Specific sci-fi subgenre (e.g., Space Opera, Cyberpunk, etc.)"
-}`;
+  "subgenre": "Specific sci-fi subgenre"
+}
+
+Do not include any text before or after the JSON array. The response must be a parseable JSON array starting with [ and ending with ].`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -49,6 +51,12 @@ serve(async (req) => {
 
     console.log('Generating science fiction recommendations for section:', section);
 
+    const userPrompt = `Generate exactly 10 ${section === 'award-winning' ? 'award-winning' : 'new'} science fiction book recommendations. ${
+      section === 'new' 
+        ? 'Only include books published in the last 2-3 years that have received significant positive attention and reviews.' 
+        : 'Include a mix of classic and contemporary award winners that have shaped the genre.'
+    } Return the result as a JSON array of book objects, with no additional text.`;
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -58,34 +66,55 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { 
-            role: 'system', 
-            content: scienceFictionPrompt 
-          },
-          { 
-            role: 'user', 
-            content: `Generate 10 ${section === 'award-winning' ? 'award-winning' : 'new'} science fiction book recommendations. ${
-              section === 'new' ? 'Remember to only include books from the last 2-3 years that have received significant positive attention.' :
-              'Include a mix of classic and contemporary award winners that have shaped the genre.'
-            }`
-          }
+          { role: 'system', content: scienceFictionPrompt },
+          { role: 'user', content: userPrompt }
         ],
         temperature: 0.7,
+        max_tokens: 2000,
+        response_format: { type: "json_object" }
       }),
     });
 
-    const data = await response.json();
-    console.log('AI Response received:', data);
-
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to generate recommendations');
+      const error = await response.json();
+      console.error('OpenAI API error:', error);
+      throw new Error(error.error?.message || 'Failed to generate recommendations');
     }
+
+    const data = await response.json();
+    console.log('Raw AI Response:', data.choices[0].message.content);
 
     let recommendations;
     try {
-      recommendations = JSON.parse(data.choices[0].message.content);
+      const content = data.choices[0].message.content;
+      // Try to parse the content directly
+      recommendations = JSON.parse(content);
+      
+      // If the response is wrapped in a recommendations object, extract the array
+      if (recommendations.recommendations) {
+        recommendations = recommendations.recommendations;
+      }
+      
+      // Validate that we have an array
+      if (!Array.isArray(recommendations)) {
+        throw new Error('Response is not an array');
+      }
+      
+      // Validate each book object has required fields
+      recommendations = recommendations.map(book => ({
+        title: book.title || 'Unknown Title',
+        author: book.author || 'Unknown Author',
+        publicationYear: book.publicationYear || 'Unknown Year',
+        awards: Array.isArray(book.awards) ? book.awards : [],
+        rating: book.rating || 'Not rated',
+        description: book.description || 'No description available',
+        significance: book.significance || 'No significance provided',
+        themes: Array.isArray(book.themes) ? book.themes : [],
+        subgenre: book.subgenre || 'General Science Fiction'
+      }));
     } catch (e) {
       console.error('Failed to parse AI response:', e);
+      console.error('Raw content:', data.choices[0].message.content);
       throw new Error('Invalid response format from AI');
     }
 
