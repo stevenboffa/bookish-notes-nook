@@ -20,6 +20,18 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Test API call to verify Supabase connection
+    console.log('Testing Supabase connection...');
+    const { data: testData, error: testError } = await supabase
+      .from('secrets')
+      .select('name');
+    
+    if (testError) {
+      console.error('Supabase connection test failed:', testError);
+      throw new Error('Failed to connect to Supabase');
+    }
+    console.log('Supabase connection successful, found secrets:', testData.length);
+
     // Fetch Google Books API key from secrets table
     console.log('Fetching Google Books API key from secrets table...');
     const { data: secretData, error: secretError } = await supabase
@@ -32,7 +44,8 @@ serve(async (req) => {
       console.error('Error fetching from secrets table:', secretError);
       return new Response(
         JSON.stringify({ 
-          error: 'Database error: Could not fetch Google Books API key.' 
+          error: 'Database error: Could not fetch Google Books API key.',
+          details: secretError 
         }),
         {
           status: 500,
@@ -45,7 +58,8 @@ serve(async (req) => {
       console.error('No API key found in secrets table');
       return new Response(
         JSON.stringify({ 
-          error: 'Configuration error: Google Books API key not found in secrets.' 
+          error: 'Configuration error: Google Books API key not found in secrets.',
+          details: { secretData }
         }),
         {
           status: 500,
@@ -54,14 +68,17 @@ serve(async (req) => {
       );
     }
 
-    const apiKey = secretData.value;
+    const apiKey = secretData.value.trim(); // Trim any whitespace
+    console.log('API key length:', apiKey.length);
+    console.log('API key prefix:', apiKey.substring(0, 8) + '...');
     
     // Validate API key format (basic check)
     if (!apiKey.startsWith('AIza')) {
       console.error('Invalid API key format');
       return new Response(
         JSON.stringify({ 
-          error: 'Configuration error: Invalid Google Books API key format.' 
+          error: 'Configuration error: Invalid Google Books API key format.',
+          details: { keyPrefix: apiKey.substring(0, 4) }
         }),
         {
           status: 500,
@@ -70,12 +87,33 @@ serve(async (req) => {
       );
     }
 
-    console.log('Successfully retrieved Google Books API key');
+    // Test the API key with a simple validation request
+    console.log('Testing Google Books API key...');
+    const testResponse = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=test&key=${apiKey}&maxResults=1`
+    );
+    
+    if (!testResponse.ok) {
+      const testResponseData = await testResponse.json();
+      console.error('Google Books API key validation failed:', testResponseData);
+      return new Response(
+        JSON.stringify({ 
+          error: 'API Key Validation Failed',
+          details: testResponseData
+        }),
+        {
+          status: testResponse.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
-    // For AI books, we should return early
+    console.log('Successfully validated Google Books API key');
+
     const { searchQuery, maxResults = 16, bookId } = await req.json();
+    
+    // For AI books, return early
     if (bookId?.startsWith('ai/')) {
-      console.log('AI book detected, returning empty response');
       return new Response(
         JSON.stringify(null),
         {
@@ -115,7 +153,7 @@ serve(async (req) => {
       });
     }
 
-    // Otherwise, perform a search
+    // Perform a search
     console.log('Searching books with query:', searchQuery);
     const url = 'https://www.googleapis.com/books/v1/volumes';
     
