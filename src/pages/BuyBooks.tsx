@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -101,6 +100,12 @@ export default function BuyBooks() {
       navigate("/");
     }
   }, [session, navigate]);
+
+  const generateAmazonLink = (title: string, author: string) => {
+    const searchQuery = `${title} ${author}`.trim();
+    const encodedQuery = encodeURIComponent(searchQuery);
+    return `https://www.amazon.com/s?k=${encodedQuery}&i=stripbooks&tag=ps4fans06-20`;
+  };
 
   const { data: aiRecommendations, isLoading: isLoadingAI } = useQuery({
     queryKey: ['ai-recommendations', selectedCategory],
@@ -226,16 +231,16 @@ export default function BuyBooks() {
                       description: book.description,
                       publishedDate: book.publicationYear,
                       imageLinks: {
-                        thumbnail: book.imageUrl,
-                        smallThumbnail: book.imageUrl
+                        thumbnail: book.imageUrl || undefined,
+                        smallThumbnail: book.imageUrl || undefined
                       },
                       categories: book.themes,
-                      averageRating: parseFloat(book.rating) / 2, // Convert to 5-star scale
+                      averageRating: parseFloat(book.rating || "0") / 2,
                       ratingsCount: 1
                     },
                     saleInfo: {},
                     affiliateLinks: {
-                      amazon: book.amazonUrl,
+                      amazon: generateAmazonLink(book.title, book.author),
                       goodreads: null
                     }
                   }
