@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -142,7 +143,7 @@ export default function GoogleBookDetail() {
         throw error;
       }
     },
-    enabled: !isAIBook && !!id,
+    enabled: !isAIBook && !!id, // Only run query for non-AI books
     retry: false,
     staleTime: 60 * 60 * 1000, // 1 hour
   });
