@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,18 @@ interface GoogleBook {
     };
     categories: string[];
   };
+}
+
+interface AIBookRecommendation {
+  title: string;
+  author: string;
+  publicationYear: string;
+  awards?: string[];
+  rating?: string;
+  description: string;
+  significance: string;
+  themes: string[];
+  subgenre: string;
 }
 
 const categories = [
@@ -90,9 +103,43 @@ export default function BuyBooks() {
     }
   }, [session, navigate]);
 
+  // Query for AI book recommendations when science fiction category is selected
+  const { data: aiRecommendations = { awardWinning: [], new: [] }, isLoading: isLoadingAI } = useQuery({
+    queryKey: ['ai-recommendations', selectedCategory],
+    queryFn: async () => {
+      if (selectedCategory !== 'science-fiction') return { awardWinning: [], new: [] };
+
+      try {
+        const [awardWinningResponse, newBooksResponse] = await Promise.all([
+          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+            body: { section: 'award-winning' }
+          }),
+          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+            body: { section: 'new' }
+          })
+        ]);
+
+        if (awardWinningResponse.error) throw awardWinningResponse.error;
+        if (newBooksResponse.error) throw newBooksResponse.error;
+
+        return {
+          awardWinning: awardWinningResponse.data?.recommendations || [],
+          new: newBooksResponse.data?.recommendations || []
+        };
+      } catch (error) {
+        console.error('Error fetching AI recommendations:', error);
+        throw error;
+      }
+    },
+    enabled: selectedCategory === 'science-fiction',
+  });
+
+  // Original Google Books query for other categories
   const { data: books = [], isLoading, error } = useQuery({
     queryKey: ['google-books', searchQuery, selectedCategory],
     queryFn: async ({ signal }) => {
+      if (selectedCategory === 'science-fiction') return [];
+      
       try {
         console.log("Starting Google Books search...");
         
@@ -109,10 +156,7 @@ export default function BuyBooks() {
           }
         });
 
-        if (error) {
-          console.error('Error fetching books:', error);
-          throw error;
-        }
+        if (error) throw error;
 
         const filteredBooks = (data?.items || []).filter((book: GoogleBook) => 
           book.volumeInfo.imageLinks && 
@@ -127,21 +171,17 @@ export default function BuyBooks() {
         throw error;
       }
     },
-    enabled: !!session && (!!searchQuery || !!selectedCategory),
+    enabled: !!session && (!!searchQuery || (!!selectedCategory && selectedCategory !== 'science-fiction')),
     staleTime: 60 * 1000,
     retry: 1,
   });
 
   useEffect(() => {
     if (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Failed to fetch books. Please try again later.';
-      
       toast({
         variant: "destructive",
         title: "Error",
-        description: errorMessage
+        description: error instanceof Error ? error.message : 'Failed to fetch books.'
       });
     }
   }, [error, toast]);
@@ -158,9 +198,51 @@ export default function BuyBooks() {
     setSelectedCategory(categoryId);
   };
 
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
+
+  const renderSciFiSection = (title: string, books: AIBookRecommendation[]) => (
+    <div className="space-y-4">
+      <h3 className="text-xl font-semibold">{title}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {books.map((book, index) => (
+          <Card key={`${book.title}-${index}`} className="flex flex-col">
+            <CardHeader>
+              <CardTitle className="text-lg">{book.title}</CardTitle>
+              <CardDescription>
+                by {book.author} ({book.publicationYear})
+                {book.rating && <div className="mt-1">Rating: {book.rating}</div>}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 space-y-2">
+              <p className="text-sm text-muted-foreground">{book.description}</p>
+              <div className="space-y-2">
+                {book.awards && book.awards.length > 0 && (
+                  <div className="text-sm">
+                    <span className="font-medium">Awards:</span>{" "}
+                    {book.awards.join(", ")}
+                  </div>
+                )}
+                <div className="text-sm">
+                  <span className="font-medium">Subgenre:</span> {book.subgenre}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {book.themes.map((theme, i) => (
+                    <span
+                      key={i}
+                      className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent-foreground"
+                    >
+                      {theme}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-sm italic mt-2">{book.significance}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex-1 container mx-auto p-4 space-y-8">
@@ -197,7 +279,7 @@ export default function BuyBooks() {
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-8">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">
               {selectedCategory 
@@ -212,13 +294,14 @@ export default function BuyBooks() {
             )}
           </div>
           
-          {isLoading ? (
+          {isLoading || isLoadingAI ? (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
-          ) : error ? (
-            <div className="text-center text-red-500 py-8">
-              Failed to load books. Please try again later.
+          ) : selectedCategory === 'science-fiction' ? (
+            <div className="space-y-12">
+              {renderSciFiSection("Award-Winning Science Fiction", aiRecommendations.awardWinning)}
+              {renderSciFiSection("New Science Fiction Releases", aiRecommendations.new)}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
