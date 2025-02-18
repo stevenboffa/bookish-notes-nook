@@ -1,4 +1,6 @@
 
+import { Book } from "@/components/BookList";
+
 export interface Friend {
   id: string;
   email: string;

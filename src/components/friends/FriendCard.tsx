@@ -1,5 +1,5 @@
 
-import { User, UserMinus, BookOpen, ChevronRight } from "lucide-react";
+import { UserMinus, BookOpen, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -82,8 +82,8 @@ export function FriendCard({ friend, isSelected, onSelect, onRemove }: FriendCar
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
+              <AlertDialogAction 
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => onRemove(friend.id)}
               >
                 Remove
