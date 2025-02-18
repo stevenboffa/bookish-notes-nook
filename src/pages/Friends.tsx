@@ -46,7 +46,6 @@ export default function Friends() {
 
       if (friendsError) throw friendsError;
 
-      // Separate pending requests and accepted friends
       const requests: FriendRequest[] = [];
       const acceptedFriends: Friend[] = [];
 
@@ -304,18 +303,6 @@ export default function Friends() {
       }
     });
 
-  if (isMobile && selectedFriend) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <FriendBooks 
-          books={selectedFriend.books} 
-          email={selectedFriend.email}
-          onBack={handleBack}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <h1 className="text-3xl font-bold mb-8 animate-fade-in">Friends</h1>
@@ -348,45 +335,57 @@ export default function Friends() {
         onSortChange={setSortBy}
       />
 
-      <div className={cn(
-        "grid gap-6 animate-fade-in",
-        isMobile ? "grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3"
-      )}>
-        {isLoading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="p-4">
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-[200px]" />
-                  <Skeleton className="h-4 w-[100px]" />
+      {isMobile && selectedFriend ? (
+        <div className="container mx-auto px-4 py-8">
+          <FriendBooks 
+            books={selectedFriend.books} 
+            email={selectedFriend.email}
+            userId={selectedFriend.id}
+            onBack={handleBack}
+          />
+        </div>
+      ) : (
+        <div className="grid gap-6 animate-fade-in grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="p-4">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[200px]" />
+                    <Skeleton className="h-4 w-[100px]" />
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))
-        ) : (
-          <>
-            {filteredFriends.map((friend) => (
-              <FriendCard
-                key={friend.id}
-                friend={friend}
-                isSelected={selectedFriend?.id === friend.id}
-                onSelect={setSelectedFriend}
-                onRemove={removeFriend}
-              />
-            ))}
-            {!isLoading && filteredFriends.length === 0 && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                {searchTerm ? 'No friends match your search' : 'No friends added yet. Add your first friend above!'}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+              </Card>
+            ))
+          ) : (
+            <>
+              {filteredFriends.map((friend) => (
+                <FriendCard
+                  key={friend.id}
+                  friend={friend}
+                  isSelected={selectedFriend?.id === friend.id}
+                  onSelect={setSelectedFriend}
+                  onRemove={removeFriend}
+                />
+              ))}
+              {!isLoading && filteredFriends.length === 0 && (
+                <div className="col-span-full text-center py-12 text-muted-foreground">
+                  {searchTerm ? 'No friends match your search' : 'No friends added yet. Add your first friend above!'}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {!isMobile && selectedFriend && (
         <div className="mt-8 animate-fade-in">
-          <FriendBooks books={selectedFriend.books} email={selectedFriend.email} />
+          <FriendBooks 
+            books={selectedFriend.books} 
+            email={selectedFriend.email}
+            userId={selectedFriend.id}
+          />
         </div>
       )}
     </div>

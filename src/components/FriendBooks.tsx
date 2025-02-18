@@ -47,8 +47,15 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
     
     if (data) {
       const grouped = data.reduce((acc, reaction) => {
-        acc[reaction.book_id] = acc[reaction.book_id] || [];
-        acc[reaction.book_id].push(reaction);
+        // Ensure reaction_type is one of the allowed types
+        if (['like', 'love', 'thinking', 'celebrate'].includes(reaction.reaction_type)) {
+          const typedReaction = {
+            ...reaction,
+            reaction_type: reaction.reaction_type as BookReaction['reaction_type']
+          };
+          acc[reaction.book_id] = acc[reaction.book_id] || [];
+          acc[reaction.book_id].push(typedReaction);
+        }
         return acc;
       }, {} as Record<string, BookReaction[]>);
       setReactions(grouped);

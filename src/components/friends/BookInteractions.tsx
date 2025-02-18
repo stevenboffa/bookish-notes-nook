@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Heart, ThumbsUp, ThumbsDown, Share2, Lightbulb, PartyPopper, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,21 +53,18 @@ export function BookInteractions({
       setIsReacting(true);
 
       if (userReaction) {
-        // Remove existing reaction if clicking the same type
         if (userReaction.reaction_type === type) {
           await supabase
             .from('book_reactions')
             .delete()
             .eq('id', userReaction.id);
         } else {
-          // Update to new reaction type
           await supabase
             .from('book_reactions')
             .update({ reaction_type: type })
             .eq('id', userReaction.id);
         }
       } else {
-        // Add new reaction
         await supabase
           .from('book_reactions')
           .insert({
@@ -101,14 +97,21 @@ export function BookInteractions({
     try {
       setIsRecommending(true);
       
-      await supabase
+      if (!ownerId) {
+        throw new Error("Cannot recommend book: missing recipient");
+      }
+
+      const { error } = await supabase
         .from('book_recommendations')
         .insert({
           book_id: bookId,
           from_user_id: session.user.id,
           to_user_id: ownerId,
-          message: recommendation,
+          message: recommendation || null,
+          status: 'pending'
         });
+
+      if (error) throw error;
 
       toast({
         title: "Success",
