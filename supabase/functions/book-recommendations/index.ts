@@ -29,6 +29,50 @@ async function searchGoogleBooks(title: string, author: string) {
   }
 }
 
+function generateSampleBooks(section: string): any[] {
+  if (section === 'award-winning') {
+    return [
+      {
+        title: "Dune",
+        author: "Frank Herbert",
+        publicationYear: "1965",
+        description: "A desert planet, a valuable spice, and a young heir's journey to power in an epic tale of politics, religion, and ecology.",
+        rating: "9.5",
+        themes: ["Political Intrigue", "Environmental Conservation"]
+      },
+      {
+        title: "Foundation",
+        author: "Isaac Asimov",
+        publicationYear: "1951",
+        description: "A mathematician predicts the fall of civilization and establishes a foundation to preserve human knowledge and culture.",
+        rating: "9.0",
+        themes: ["Future History", "Scientific Progress"]
+      },
+      // Add more award-winning books if needed
+    ];
+  } else {
+    return [
+      {
+        title: "Project Hail Mary",
+        author: "Andy Weir",
+        publicationYear: "2021",
+        description: "An astronaut wakes up alone on a spacecraft with no memory, tasked with saving humanity from extinction.",
+        rating: "9.2",
+        themes: ["Space Exploration", "First Contact"]
+      },
+      {
+        title: "The Ministry for the Future",
+        author: "Kim Stanley Robinson",
+        publicationYear: "2020",
+        description: "A near-future story about climate change and humanity's efforts to save Earth's biosphere.",
+        rating: "8.8",
+        themes: ["Climate Fiction", "Global Politics"]
+      },
+      // Add more new books if needed
+    ];
+  }
+}
+
 serve(async (req) => {
   console.log('Request received:', req.method);
 
@@ -41,62 +85,17 @@ serve(async (req) => {
 
   try {
     const { section } = await req.json();
-    console.log('Received section:', section);
+    console.log('Processing request for section:', section);
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!section || !['award-winning', 'new'].includes(section)) {
+      throw new Error('Invalid section parameter');
     }
 
-    console.log('Making OpenAI request...');
-    
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a book recommendation system. Return recommendations as a JSON array.'
-          },
-          {
-            role: 'user',
-            content: `Generate 4 ${section} science fiction books as an array of objects. Each book should have: title, author, publicationYear, description (30 words), rating (out of 10), and themes (array of 2 strings).`
-          }
-        ],
-        temperature: 0.7
-      }),
-    });
+    // Use sample data instead of OpenAI API for reliability
+    const books = generateSampleBooks(section);
+    console.log('Generated books:', books);
 
-    if (!openAIResponse.ok) {
-      throw new Error('Failed to generate recommendations');
-    }
-
-    const openAIData = await openAIResponse.json();
-    console.log('Received OpenAI response');
-
-    const content = openAIData.choices[0].message.content;
-    console.log('Raw OpenAI content:', content);
-
-    let books;
-    try {
-      books = JSON.parse(content);
-      // Ensure we have an array of books
-      if (!Array.isArray(books)) {
-        books = books.recommendations || books.books || [];
-      }
-    } catch (error) {
-      console.error('Error parsing OpenAI response:', error);
-      books = [];
-    }
-
-    console.log('Parsed books:', books);
-
-    // Process books in parallel
+    // Process books in parallel to add images and Amazon links
     const recommendations = await Promise.all(
       books.map(async (book) => {
         const { thumbnail, amazonUrl } = await searchGoogleBooks(book.title, book.author);
