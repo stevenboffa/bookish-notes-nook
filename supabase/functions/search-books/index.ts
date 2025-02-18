@@ -21,17 +21,31 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Fetch Google Books API key from secrets table
+    console.log('Fetching Google Books API key from secrets table...');
     const { data: secretData, error: secretError } = await supabase
       .from('secrets')
       .select('value')
       .eq('name', 'GOOGLE_BOOKS_API_KEY')
       .single();
 
-    if (secretError || !secretData) {
-      console.error('Error fetching Google Books API key:', secretError);
+    if (secretError) {
+      console.error('Error fetching from secrets table:', secretError);
       return new Response(
         JSON.stringify({ 
-          error: 'Configuration error: Could not retrieve Google Books API key from secrets.' 
+          error: 'Database error: Could not fetch Google Books API key.' 
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!secretData || !secretData.value) {
+      console.error('No API key found in secrets table');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Configuration error: Google Books API key not found in secrets.' 
         }),
         {
           status: 500,
@@ -41,10 +55,35 @@ serve(async (req) => {
     }
 
     const apiKey = secretData.value;
-    console.log('Successfully retrieved Google Books API key from secrets');
+    
+    // Validate API key format (basic check)
+    if (!apiKey.startsWith('AIza')) {
+      console.error('Invalid API key format');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Configuration error: Invalid Google Books API key format.' 
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
+    console.log('Successfully retrieved Google Books API key');
+
+    // For AI books, we should return early
     const { searchQuery, maxResults = 16, bookId } = await req.json();
-    console.log('Request payload:', { searchQuery, maxResults, bookId });
+    if (bookId?.startsWith('ai/')) {
+      console.log('AI book detected, returning empty response');
+      return new Response(
+        JSON.stringify(null),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     // If bookId is provided, fetch single book details
     if (bookId) {
@@ -52,11 +91,22 @@ serve(async (req) => {
       const response = await fetch(
         `https://www.googleapis.com/books/v1/volumes/${bookId}?key=${apiKey}`
       );
+      
       const data = await response.json();
+      console.log('Google Books API response status:', response.status);
 
       if (!response.ok) {
         console.error('Google Books API error:', data);
-        throw new Error(data.error?.message || 'Failed to fetch book details');
+        return new Response(
+          JSON.stringify({ 
+            error: data.error?.message || 'Failed to fetch book details',
+            details: data 
+          }),
+          {
+            status: response.status,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       }
 
       return new Response(JSON.stringify(data), {
@@ -82,7 +132,16 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error('Google Books API error:', data);
-      throw new Error(data.error?.message || 'Failed to fetch books');
+      return new Response(
+        JSON.stringify({ 
+          error: data.error?.message || 'Failed to fetch books',
+          details: data 
+        }),
+        {
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     return new Response(JSON.stringify(data), {
