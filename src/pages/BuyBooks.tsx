@@ -208,10 +208,10 @@ export default function BuyBooks() {
   if (!session) return null;
 
   const renderSciFiSection = (title: string, books: AIBookRecommendation[]) => (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-12">
       <h3 className="text-xl font-semibold">{title}</h3>
       {books && books.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {books.map((book, index) => (
             <Card 
               key={`${book.title}-${index}`} 
@@ -258,7 +258,7 @@ export default function BuyBooks() {
   );
 
   return (
-    <div className="flex-1 container mx-auto p-4 space-y-8">
+    <div className="flex-1 container mx-auto p-4 space-y-8 pb-32">
       <h1 className="text-2xl font-bold">Buy Books</h1>
       
       <div className="space-y-4">
