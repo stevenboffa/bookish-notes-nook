@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -72,9 +73,14 @@ export default function GoogleBookDetail() {
   const { toast } = useToast();
   const location = useLocation();
 
-  if (id?.startsWith('ai/')) {
+  // Check if this is an AI-recommended book
+  const isAIBook = id?.startsWith('ai/');
+
+  // If it's an AI book, get the data from location state
+  if (isAIBook) {
     const bookData = location.state?.book;
     if (!bookData) {
+      console.error('No book data found in location state for AI book');
       toast({
         variant: "destructive",
         title: "Error",
@@ -94,6 +100,7 @@ export default function GoogleBookDetail() {
     return renderBookDetail(bookData);
   }
 
+  // For regular Google Books, fetch the data
   const { data: book, isLoading } = useQuery({
     queryKey: ['google-book', id],
     queryFn: async () => {
@@ -115,6 +122,7 @@ export default function GoogleBookDetail() {
         throw error;
       }
     },
+    enabled: !isAIBook && !!id,
     retry: false,
     staleTime: 60 * 60 * 1000, // 1 hour
   });
@@ -127,7 +135,7 @@ export default function GoogleBookDetail() {
     );
   }
 
-  if (!book) {
+  if (!book && !isAIBook) {
     return (
       <div className="container mx-auto p-4">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
