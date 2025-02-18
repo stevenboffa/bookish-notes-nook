@@ -9,6 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      book_reactions: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_reactions_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_recommendations: {
+        Row: {
+          book_id: string
+          created_at: string
+          from_user_id: string
+          id: string
+          message: string | null
+          status: string
+          to_user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          from_user_id: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_recommendations_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           author: string
@@ -165,6 +235,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "quotes_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_progress: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          progress: number
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          progress: number
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          progress?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_progress_book_id_fkey"
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"

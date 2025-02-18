@@ -22,3 +22,29 @@ export interface FriendRequest {
   status: 'pending' | 'accepted';
   created_at: string;
 }
+
+export interface BookReaction {
+  id: string;
+  book_id: string;
+  user_id: string;
+  reaction_type: 'like' | 'love' | 'thinking' | 'celebrate';
+  created_at: string;
+}
+
+export interface BookRecommendation {
+  id: string;
+  book_id: string;
+  from_user_id: string;
+  to_user_id: string;
+  message?: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
+}
+
+export interface ReadingProgress {
+  id: string;
+  book_id: string;
+  user_id: string;
+  progress: number;
+  created_at: string;
+}
