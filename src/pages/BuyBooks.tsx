@@ -101,12 +101,6 @@ export default function BuyBooks() {
     }
   }, [session, navigate]);
 
-  const generateAmazonLink = (title: string, author: string) => {
-    const searchQuery = `${title} ${author}`.trim();
-    const encodedQuery = encodeURIComponent(searchQuery);
-    return `https://www.amazon.com/s?k=${encodedQuery}&i=stripbooks&tag=ps4fans06-20`;
-  };
-
   const { data: aiRecommendations, isLoading: isLoadingAI } = useQuery({
     queryKey: ['ai-recommendations', selectedCategory],
     queryFn: async () => {
@@ -222,30 +216,7 @@ export default function BuyBooks() {
             <Card 
               key={`${book.title}-${index}`} 
               className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => navigate(`/book/ai/${encodeURIComponent(book.title)}`, { 
-                state: { 
-                  book: {
-                    volumeInfo: {
-                      title: book.title,
-                      authors: [book.author],
-                      description: book.description,
-                      publishedDate: book.publicationYear,
-                      imageLinks: {
-                        thumbnail: book.imageUrl || undefined,
-                        smallThumbnail: book.imageUrl || undefined
-                      },
-                      categories: book.themes,
-                      averageRating: parseFloat(book.rating || "0") / 2,
-                      ratingsCount: 1
-                    },
-                    saleInfo: {},
-                    affiliateLinks: {
-                      amazon: generateAmazonLink(book.title, book.author),
-                      goodreads: null
-                    }
-                  }
-                }
-              })}
+              onClick={() => book.amazonUrl ? window.open(book.amazonUrl, '_blank') : null}
             >
               <CardHeader>
                 <div className="aspect-w-2 aspect-h-3 mb-4">
