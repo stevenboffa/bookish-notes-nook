@@ -9,42 +9,43 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-// Ensure the function can handle preflight requests
-function handleCors(req: Request) {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
+async function searchGoogleBooks(title: string, author: string): Promise<{ thumbnail?: string, amazonUrl?: string }> {
+  try {
+    const query = encodeURIComponent(`${title} ${author}`);
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`
+    );
+    const data = await response.json();
+    const book = data.items?.[0]?.volumeInfo;
+    
+    return {
+      thumbnail: book?.imageLinks?.thumbnail,
+      // Format Amazon affiliate link (replace YOUR-AFFILIATE-ID with actual ID)
+      amazonUrl: `https://www.amazon.com/s?k=${encodeURIComponent(`${title} ${author}`)}&tag=YOUR-AFFILIATE-ID`
+    };
+  } catch (error) {
+    console.error('Error fetching Google Books data:', error);
+    return {};
   }
-  return null;
 }
 
 serve(async (req) => {
-  console.log('Received request:', req.method, req.url);
-  
-  // Handle CORS preflight
-  const corsResponse = handleCors(req);
-  if (corsResponse) return corsResponse;
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: corsHeaders,
+      status: 204,
+    });
+  }
 
   try {
-    if (req.method !== 'POST') {
-      throw new Error(`Method ${req.method} not allowed`);
-    }
-
+    const { section } = await req.json();
+    
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
-      console.error('OpenAI API key not configured');
       throw new Error('OpenAI API key not configured');
     }
 
-    const { section } = await req.json();
-    console.log('Processing request for section:', section);
-
-    if (!section || !['award-winning', 'new'].includes(section)) {
-      throw new Error('Invalid section specified');
-    }
-
+    // Simplified prompt for faster generation
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -56,11 +57,11 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a book recommendation system. Return recommendations as a JSON array.'
+            content: 'You are a book recommendation system. Return a brief, focused JSON array.'
           },
           {
             role: 'user',
-            content: `Generate 10 ${section} science fiction books as a JSON array. Each book should have: title, author, publicationYear, awards (array), rating, description, significance, themes (array), and subgenre.`
+            content: `Generate 6 ${section} science fiction books. Focus on essential details only. Return as JSON array with: title, author, year, description (50 words max), rating, themes (3 max).`
           }
         ],
         temperature: 0.7,
@@ -68,61 +69,38 @@ serve(async (req) => {
       }),
     });
 
-    console.log('OpenAI API response status:', response.status);
-
     if (!response.ok) {
-      const error = await response.json();
-      console.error('OpenAI API error:', error);
       throw new Error('Failed to generate recommendations');
     }
 
     const data = await response.json();
-    console.log('Received OpenAI response');
+    const content = data.choices[0].message.content;
+    const books = JSON.parse(content);
+    const recommendations = Array.isArray(books) ? books : books.recommendations || [];
 
-    // Initialize with a default structure
-    const defaultRecommendations = {
-      recommendations: [
-        {
-          title: "Sample Science Fiction Book",
-          author: "Default Author",
-          publicationYear: "2023",
-          awards: [],
-          rating: "Not rated",
-          description: "Default description",
-          significance: "Default significance",
-          themes: ["science fiction"],
-          subgenre: "General Science Fiction"
-        }
-      ]
-    };
+    // Fetch Google Books data for all recommendations in parallel
+    const enhancedRecommendations = await Promise.all(
+      recommendations.map(async (book) => {
+        const { thumbnail, amazonUrl } = await searchGoogleBooks(book.title, book.author);
+        return {
+          ...book,
+          imageUrl: thumbnail,
+          amazonUrl
+        };
+      })
+    );
 
-    try {
-      const content = data.choices[0].message.content;
-      console.log('Parsing AI response:', content);
-      
-      const parsedContent = JSON.parse(content);
-      const recommendations = Array.isArray(parsedContent) ? parsedContent : 
-                            parsedContent.recommendations || defaultRecommendations.recommendations;
-
-      return new Response(JSON.stringify({ recommendations }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
-    } catch (error) {
-      console.error('Error parsing AI response:', error);
-      // Return default recommendations instead of failing
-      return new Response(JSON.stringify(defaultRecommendations), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
-    }
-  } catch (error) {
-    console.error('Error in book-recommendations function:', error);
     return new Response(
-      JSON.stringify({
-        error: error.message,
-        details: error.stack || 'No stack trace available'
-      }),
+      JSON.stringify({ recommendations: enhancedRecommendations }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error('Error:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,

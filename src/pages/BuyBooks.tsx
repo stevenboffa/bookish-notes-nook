@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,9 +38,11 @@ interface AIBookRecommendation {
   awards?: string[];
   rating?: string;
   description: string;
-  significance: string;
+  significance?: string;
   themes: string[];
-  subgenre: string;
+  subgenre?: string;
+  imageUrl?: string;
+  amazonUrl?: string;
 }
 
 const categories = [
@@ -103,7 +104,6 @@ export default function BuyBooks() {
     }
   }, [session, navigate]);
 
-  // Query for AI book recommendations when science fiction category is selected
   const { data: aiRecommendations = { awardWinning: [], new: [] }, isLoading: isLoadingAI } = useQuery({
     queryKey: ['ai-recommendations', selectedCategory],
     queryFn: async () => {
@@ -134,7 +134,6 @@ export default function BuyBooks() {
     enabled: selectedCategory === 'science-fiction',
   });
 
-  // Original Google Books query for other categories
   const { data: books = [], isLoading, error } = useQuery({
     queryKey: ['google-books', searchQuery, selectedCategory],
     queryFn: async ({ signal }) => {
@@ -203,10 +202,22 @@ export default function BuyBooks() {
   const renderSciFiSection = (title: string, books: AIBookRecommendation[]) => (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">{title}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {books.map((book, index) => (
-          <Card key={`${book.title}-${index}`} className="flex flex-col">
+          <Card 
+            key={`${book.title}-${index}`} 
+            className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => window.open(book.amazonUrl, '_blank')}
+          >
             <CardHeader>
+              <div className="aspect-w-2 aspect-h-3 mb-4">
+                <BookCover
+                  imageUrl={book.imageUrl}
+                  thumbnailUrl={book.imageUrl}
+                  genre="Science Fiction"
+                  title={book.title}
+                />
+              </div>
               <CardTitle className="text-lg">{book.title}</CardTitle>
               <CardDescription>
                 by {book.author} ({book.publicationYear})
@@ -215,27 +226,15 @@ export default function BuyBooks() {
             </CardHeader>
             <CardContent className="flex-1 space-y-2">
               <p className="text-sm text-muted-foreground">{book.description}</p>
-              <div className="space-y-2">
-                {book.awards && book.awards.length > 0 && (
-                  <div className="text-sm">
-                    <span className="font-medium">Awards:</span>{" "}
-                    {book.awards.join(", ")}
-                  </div>
-                )}
-                <div className="text-sm">
-                  <span className="font-medium">Subgenre:</span> {book.subgenre}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {book.themes.map((theme, i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent-foreground"
-                    >
-                      {theme}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-sm italic mt-2">{book.significance}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {book.themes.map((theme, i) => (
+                  <span
+                    key={i}
+                    className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent-foreground"
+                  >
+                    {theme}
+                  </span>
+                ))}
               </div>
             </CardContent>
           </Card>
