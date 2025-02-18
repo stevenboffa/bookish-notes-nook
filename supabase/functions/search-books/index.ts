@@ -1,5 +1,7 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,12 +15,23 @@ serve(async (req) => {
   }
 
   try {
-    const apiKey = Deno.env.get('GOOGLE_BOOKS_API_KEY');
-    if (!apiKey) {
-      console.error('GOOGLE_BOOKS_API_KEY is not configured in Edge Function secrets');
+    // Initialize Supabase client with service role key
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch Google Books API key from secrets table
+    const { data: secretData, error: secretError } = await supabase
+      .from('secrets')
+      .select('value')
+      .eq('name', 'GOOGLE_BOOKS_API_KEY')
+      .single();
+
+    if (secretError || !secretData) {
+      console.error('Error fetching Google Books API key:', secretError);
       return new Response(
         JSON.stringify({ 
-          error: 'Configuration error: Google Books API key is not set up properly. Please check Edge Function secrets.' 
+          error: 'Configuration error: Could not retrieve Google Books API key from secrets.' 
         }),
         {
           status: 500,
@@ -26,6 +39,9 @@ serve(async (req) => {
         }
       );
     }
+
+    const apiKey = secretData.value;
+    console.log('Successfully retrieved Google Books API key from secrets');
 
     const { searchQuery, maxResults = 16, bookId } = await req.json();
     console.log('Request payload:', { searchQuery, maxResults, bookId });
