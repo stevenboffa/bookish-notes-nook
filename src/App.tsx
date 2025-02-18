@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,17 +13,17 @@ import Friends from "@/pages/Friends";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 import BuyBooks from "@/pages/BuyBooks";
-import Navigation from "@/pages/Navigation";
+import { Navigation } from "@/pages/Navigation";
 import NYTBookDetail from "@/pages/NYTBookDetail";
 import GoogleBookDetail from "@/pages/GoogleBookDetail";
 
 const queryClient = new QueryClient();
 
-function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+function AuthenticatedLayout() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      {children}
+      <Outlet />
     </div>
   );
 }
