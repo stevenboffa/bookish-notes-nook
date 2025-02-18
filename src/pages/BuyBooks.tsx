@@ -35,12 +35,9 @@ interface AIBookRecommendation {
   title: string;
   author: string;
   publicationYear: string;
-  awards?: string[];
-  rating?: string;
   description: string;
-  significance?: string;
+  rating?: string;
   themes: string[];
-  subgenre?: string;
   imageUrl?: string;
   amazonUrl?: string;
 }
@@ -104,23 +101,33 @@ export default function BuyBooks() {
     }
   }, [session, navigate]);
 
-  const { data: aiRecommendations = { awardWinning: [], new: [] }, isLoading: isLoadingAI } = useQuery({
+  const { data: aiRecommendations, isLoading: isLoadingAI } = useQuery({
     queryKey: ['ai-recommendations', selectedCategory],
     queryFn: async () => {
       if (selectedCategory !== 'science-fiction') return { awardWinning: [], new: [] };
 
       try {
-        const [awardWinningResponse, newBooksResponse] = await Promise.all([
-          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-            body: { section: 'award-winning' }
-          }),
-          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-            body: { section: 'new' }
-          })
-        ]);
+        console.log('Fetching award-winning books...');
+        const awardWinningResponse = await supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+          body: { section: 'award-winning' }
+        });
 
-        if (awardWinningResponse.error) throw awardWinningResponse.error;
-        if (newBooksResponse.error) throw newBooksResponse.error;
+        console.log('Fetching new books...');
+        const newBooksResponse = await supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+          body: { section: 'new' }
+        });
+
+        if (awardWinningResponse.error) {
+          console.error('Award-winning books error:', awardWinningResponse.error);
+          throw awardWinningResponse.error;
+        }
+        if (newBooksResponse.error) {
+          console.error('New books error:', newBooksResponse.error);
+          throw newBooksResponse.error;
+        }
+
+        console.log('Award-winning books:', awardWinningResponse.data);
+        console.log('New books:', newBooksResponse.data);
 
         return {
           awardWinning: awardWinningResponse.data?.recommendations || [],
@@ -132,6 +139,7 @@ export default function BuyBooks() {
       }
     },
     enabled: selectedCategory === 'science-fiction',
+    retry: 1
   });
 
   const { data: books = [], isLoading, error } = useQuery({
@@ -202,44 +210,50 @@ export default function BuyBooks() {
   const renderSciFiSection = (title: string, books: AIBookRecommendation[]) => (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold">{title}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {books.map((book, index) => (
-          <Card 
-            key={`${book.title}-${index}`} 
-            className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => window.open(book.amazonUrl, '_blank')}
-          >
-            <CardHeader>
-              <div className="aspect-w-2 aspect-h-3 mb-4">
-                <BookCover
-                  imageUrl={book.imageUrl}
-                  thumbnailUrl={book.imageUrl}
-                  genre="Science Fiction"
-                  title={book.title}
-                />
-              </div>
-              <CardTitle className="text-lg">{book.title}</CardTitle>
-              <CardDescription>
-                by {book.author} ({book.publicationYear})
-                {book.rating && <div className="mt-1">Rating: {book.rating}</div>}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 space-y-2">
-              <p className="text-sm text-muted-foreground">{book.description}</p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {book.themes.map((theme, i) => (
-                  <span
-                    key={i}
-                    className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent-foreground"
-                  >
-                    {theme}
-                  </span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {books && books.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {books.map((book, index) => (
+            <Card 
+              key={`${book.title}-${index}`} 
+              className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => book.amazonUrl ? window.open(book.amazonUrl, '_blank') : null}
+            >
+              <CardHeader>
+                <div className="aspect-w-2 aspect-h-3 mb-4">
+                  <BookCover
+                    imageUrl={book.imageUrl}
+                    thumbnailUrl={book.imageUrl}
+                    genre="Science Fiction"
+                    title={book.title}
+                  />
+                </div>
+                <CardTitle className="text-lg">{book.title}</CardTitle>
+                <CardDescription>
+                  by {book.author} ({book.publicationYear})
+                  {book.rating && <div className="mt-1">Rating: {book.rating}</div>}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 space-y-2">
+                <p className="text-sm text-muted-foreground">{book.description}</p>
+                {book.themes && book.themes.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {book.themes.map((theme, i) => (
+                      <span
+                        key={i}
+                        className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent-foreground"
+                      >
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-center py-4">No books found</p>
+      )}
     </div>
   );
 
