@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -76,11 +75,11 @@ export default function GoogleBookDetail() {
   // Check if this is an AI-recommended book
   const isAIBook = id?.startsWith('ai/');
 
-  // If it's an AI book, get the data from location state
+  // For AI books, handle the state data
   if (isAIBook) {
     const bookData = location.state?.book;
-    if (!bookData) {
-      console.error('No book data found in location state for AI book');
+    if (!bookData?.volumeInfo) {
+      console.error('Invalid or missing book data in location state for AI book');
       toast({
         variant: "destructive",
         title: "Error",
@@ -97,7 +96,28 @@ export default function GoogleBookDetail() {
         </div>
       );
     }
-    return renderBookDetail(bookData);
+
+    // Transform the AI book data to match GoogleBook interface if needed
+    const aiBook: GoogleBook = {
+      id: id,
+      volumeInfo: {
+        title: bookData.volumeInfo.title,
+        authors: bookData.volumeInfo.authors || [],
+        description: bookData.volumeInfo.description || '',
+        publishedDate: bookData.volumeInfo.publishedDate || '',
+        imageLinks: bookData.volumeInfo.imageLinks,
+        categories: bookData.volumeInfo.categories,
+        pageCount: bookData.volumeInfo.pageCount,
+        averageRating: bookData.volumeInfo.averageRating,
+        ratingsCount: bookData.volumeInfo.ratingsCount,
+      },
+      affiliateLinks: {
+        amazon: bookData.affiliateLinks?.amazon,
+        goodreads: bookData.affiliateLinks?.goodreads
+      }
+    };
+
+    return renderBookDetail(aiBook);
   }
 
   // For regular Google Books, fetch the data
@@ -290,5 +310,5 @@ export default function GoogleBookDetail() {
     );
   }
 
-  return renderBookDetail(book);
+  return renderBookDetail(book!);
 }
