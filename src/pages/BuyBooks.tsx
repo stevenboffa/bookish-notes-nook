@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -216,7 +217,30 @@ export default function BuyBooks() {
             <Card 
               key={`${book.title}-${index}`} 
               className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => book.amazonUrl ? window.open(book.amazonUrl, '_blank') : null}
+              onClick={() => navigate(`/book/ai/${encodeURIComponent(book.title)}`, { 
+                state: { 
+                  book: {
+                    volumeInfo: {
+                      title: book.title,
+                      authors: [book.author],
+                      description: book.description,
+                      publishedDate: book.publicationYear,
+                      imageLinks: {
+                        thumbnail: book.imageUrl,
+                        smallThumbnail: book.imageUrl
+                      },
+                      categories: book.themes,
+                      averageRating: parseFloat(book.rating) / 2, // Convert to 5-star scale
+                      ratingsCount: 1
+                    },
+                    saleInfo: {},
+                    affiliateLinks: {
+                      amazon: book.amazonUrl,
+                      goodreads: null
+                    }
+                  }
+                }
+              })}
             >
               <CardHeader>
                 <div className="aspect-w-2 aspect-h-3 mb-4">
