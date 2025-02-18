@@ -30,14 +30,8 @@ async function searchGoogleBooks(title: string, author: string) {
 }
 
 serve(async (req) => {
-  // Log incoming request details
-  console.log('Request received:', {
-    method: req.method,
-    url: req.url,
-    headers: Object.fromEntries(req.headers.entries())
-  });
+  console.log('Request received:', req.method);
 
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -46,27 +40,15 @@ serve(async (req) => {
   }
 
   try {
-    // Validate request method
-    if (req.method !== 'POST') {
-      throw new Error(`Method ${req.method} not allowed`);
-    }
+    const { section } = await req.json();
+    console.log('Received section:', section);
 
-    // Parse request body and validate
-    const body = await req.json();
-    console.log('Request body:', body);
-
-    if (!body.section || !['award-winning', 'new'].includes(body.section)) {
-      throw new Error('Invalid or missing section parameter');
-    }
-
-    // Check OpenAI API key
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
-      console.error('OpenAI API key not found');
       throw new Error('OpenAI API key not configured');
     }
 
-    console.log('Making OpenAI API request...');
+    console.log('Making OpenAI request...');
     
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -79,50 +61,55 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a book recommendation system. Provide concise, accurate book details in JSON format.'
+            content: 'You are a book recommendation system. Return recommendations as a JSON array.'
           },
           {
             role: 'user',
-            content: `Generate 4 ${body.section} science fiction books. Include only: title, author, publicationYear, description (30 words), rating, and themes (max 2).`
+            content: `Generate 4 ${section} science fiction books as an array of objects. Each book should have: title, author, publicationYear, description (30 words), rating (out of 10), and themes (array of 2 strings).`
           }
         ],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
+        temperature: 0.7
       }),
     });
 
     if (!openAIResponse.ok) {
-      const errorData = await openAIResponse.json();
-      console.error('OpenAI API error:', errorData);
       throw new Error('Failed to generate recommendations');
     }
 
     const openAIData = await openAIResponse.json();
-    console.log('OpenAI response received');
+    console.log('Received OpenAI response');
 
-    let recommendations;
+    const content = openAIData.choices[0].message.content;
+    console.log('Raw OpenAI content:', content);
+
+    let books;
     try {
-      const content = openAIData.choices[0].message.content;
-      const parsed = JSON.parse(content);
-      recommendations = Array.isArray(parsed) ? parsed : parsed.recommendations || [];
-      
-      // Fetch book covers in parallel
-      recommendations = await Promise.all(
-        recommendations.map(async (book) => {
-          const { thumbnail, amazonUrl } = await searchGoogleBooks(book.title, book.author);
-          return {
-            ...book,
-            imageUrl: thumbnail,
-            amazonUrl
-          };
-        })
-      );
-    } catch (parseError) {
-      console.error('Error parsing OpenAI response:', parseError);
-      throw new Error('Invalid AI response format');
+      books = JSON.parse(content);
+      // Ensure we have an array of books
+      if (!Array.isArray(books)) {
+        books = books.recommendations || books.books || [];
+      }
+    } catch (error) {
+      console.error('Error parsing OpenAI response:', error);
+      books = [];
     }
 
-    // Return successful response
+    console.log('Parsed books:', books);
+
+    // Process books in parallel
+    const recommendations = await Promise.all(
+      books.map(async (book) => {
+        const { thumbnail, amazonUrl } = await searchGoogleBooks(book.title, book.author);
+        return {
+          ...book,
+          imageUrl: thumbnail || undefined,
+          amazonUrl: amazonUrl || undefined
+        };
+      })
+    );
+
+    console.log('Final recommendations:', recommendations);
+
     return new Response(
       JSON.stringify({ recommendations }),
       {
@@ -133,8 +120,6 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function error:', error);
-    
-    // Return error response with CORS headers
     return new Response(
       JSON.stringify({
         error: error.message,
@@ -142,7 +127,7 @@ serve(async (req) => {
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.status || 400,
+        status: 400,
       }
     );
   }
