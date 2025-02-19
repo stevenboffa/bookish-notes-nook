@@ -46,11 +46,7 @@ export function BookInteractions({
 
     try {
       setIsReacting(true);
-      console.log('Handling reaction:', type);
-      console.log('Book ID:', bookId);
-      console.log('User ID:', session.user.id);
-      console.log('Current user reaction:', userReaction);
-
+      
       // First, check if there's an existing reaction from this user for this book
       const { data: existingReaction, error: fetchError } = await supabase
         .from('book_reactions')
@@ -59,38 +55,30 @@ export function BookInteractions({
         .eq('user_id', session.user.id)
         .maybeSingle();
 
-      console.log('Fetch error:', fetchError);
-      console.log('Existing reaction:', existingReaction);
+      if (fetchError) {
+        throw fetchError;
+      }
 
-      if (existingReaction) {
-        if (existingReaction.reaction_type === type) {
-          // Delete the reaction if clicking the same type
-          console.log('Deleting existing reaction');
+      // If clicking the same reaction type that already exists, delete it
+      if (existingReaction && existingReaction.reaction_type === type) {
+        const { error: deleteError } = await supabase
+          .from('book_reactions')
+          .delete()
+          .eq('id', existingReaction.id);
+
+        if (deleteError) throw deleteError;
+      } else {
+        // If there's an existing reaction of a different type, delete it first
+        if (existingReaction) {
           const { error: deleteError } = await supabase
             .from('book_reactions')
             .delete()
             .eq('id', existingReaction.id);
 
-          if (deleteError) {
-            console.error('Delete error:', deleteError);
-            throw deleteError;
-          }
-        } else {
-          // Update to new reaction type if different
-          console.log('Updating reaction to:', type);
-          const { error: updateError } = await supabase
-            .from('book_reactions')
-            .update({ reaction_type: type })
-            .eq('id', existingReaction.id);
-
-          if (updateError) {
-            console.error('Update error:', updateError);
-            throw updateError;
-          }
+          if (deleteError) throw deleteError;
         }
-      } else {
-        // Create new reaction
-        console.log('Creating new reaction:', type);
+
+        // Create the new reaction
         const { error: insertError } = await supabase
           .from('book_reactions')
           .insert({
@@ -99,10 +87,7 @@ export function BookInteractions({
             reaction_type: type
           });
 
-        if (insertError) {
-          console.error('Insert error:', insertError);
-          throw insertError;
-        }
+        if (insertError) throw insertError;
       }
 
       onReactionAdded();
