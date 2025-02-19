@@ -64,9 +64,9 @@ export function BookInteractions({
         throw fetchError;
       }
 
+      // If there's an existing reaction, delete it first
       if (existingReaction) {
         console.log('Deleting existing reaction');
-        // Always delete the existing reaction first
         const { error: deleteError } = await supabase
           .from('book_reactions')
           .delete()
@@ -76,25 +76,10 @@ export function BookInteractions({
           console.error('Error deleting reaction:', deleteError);
           throw deleteError;
         }
+      }
 
-        // If we're clicking a different type than what existed, create new reaction
-        if (existingReaction.reaction_type !== type) {
-          console.log('Creating new reaction of different type');
-          const { error: insertError } = await supabase
-            .from('book_reactions')
-            .insert({
-              book_id: bookId,
-              user_id: session.user.id,
-              reaction_type: type
-            });
-
-          if (insertError) {
-            console.error('Error inserting reaction:', insertError);
-            throw insertError;
-          }
-        }
-      } else {
-        // No existing reaction, create new one
+      // Only create a new reaction if we're not clicking the same type that existed
+      if (!existingReaction || existingReaction.reaction_type !== type) {
         console.log('Creating new reaction');
         const { error: insertError } = await supabase
           .from('book_reactions')
