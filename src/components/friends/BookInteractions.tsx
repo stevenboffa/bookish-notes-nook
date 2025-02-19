@@ -46,35 +46,51 @@ export function BookInteractions({
 
     try {
       setIsReacting(true);
+      console.log('Handling reaction:', type);
+      console.log('Book ID:', bookId);
+      console.log('User ID:', session.user.id);
+      console.log('Current user reaction:', userReaction);
 
       // First, check if there's an existing reaction from this user for this book
-      const { data: existingReaction } = await supabase
+      const { data: existingReaction, error: fetchError } = await supabase
         .from('book_reactions')
         .select('id, reaction_type')
         .eq('book_id', bookId)
         .eq('user_id', session.user.id)
         .maybeSingle();
 
+      console.log('Fetch error:', fetchError);
+      console.log('Existing reaction:', existingReaction);
+
       if (existingReaction) {
         if (existingReaction.reaction_type === type) {
           // Delete the reaction if clicking the same type
+          console.log('Deleting existing reaction');
           const { error: deleteError } = await supabase
             .from('book_reactions')
             .delete()
             .eq('id', existingReaction.id);
 
-          if (deleteError) throw deleteError;
+          if (deleteError) {
+            console.error('Delete error:', deleteError);
+            throw deleteError;
+          }
         } else {
           // Update to new reaction type if different
+          console.log('Updating reaction to:', type);
           const { error: updateError } = await supabase
             .from('book_reactions')
             .update({ reaction_type: type })
             .eq('id', existingReaction.id);
 
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error('Update error:', updateError);
+            throw updateError;
+          }
         }
       } else {
         // Create new reaction
+        console.log('Creating new reaction:', type);
         const { error: insertError } = await supabase
           .from('book_reactions')
           .insert({
@@ -83,7 +99,10 @@ export function BookInteractions({
             reaction_type: type
           });
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          throw insertError;
+        }
       }
 
       onReactionAdded();
