@@ -27,7 +27,8 @@ export function BookInteractions({
   const { session } = useAuth();
   const { toast } = useToast();
 
-  // Calculate reaction counts - treat 'like' and 'dislike' exactly the same way
+  console.log('Current reactions:', reactions);
+
   const reactionCounts = reactions.reduce((acc, reaction) => {
     if (reaction.reaction_type === 'like' || reaction.reaction_type === 'dislike') {
       acc[reaction.reaction_type] = (acc[reaction.reaction_type] || 0) + 1;
@@ -35,8 +36,10 @@ export function BookInteractions({
     return acc;
   }, {} as Record<string, number>);
 
-  // Find user's current reaction, if any
+  console.log('Reaction counts:', reactionCounts);
+
   const userReaction = reactions.find(r => r.user_id === session?.user.id);
+  console.log('User reaction:', userReaction);
 
   const handleReaction = async (type: 'like' | 'dislike') => {
     if (!session?.user.id) {
@@ -50,38 +53,51 @@ export function BookInteractions({
 
     try {
       setIsReacting(true);
+      console.log('Handling reaction:', type);
 
       // First, get the current reaction state
-      const { data: currentReaction } = await supabase
+      const { data: currentReaction, error: fetchError } = await supabase
         .from('book_reactions')
         .select('*')
         .eq('book_id', bookId)
         .eq('user_id', session.user.id)
         .maybeSingle();
 
+      console.log('Current reaction from DB:', currentReaction);
+      if (fetchError) console.error('Fetch error:', fetchError);
+
       // If clicking the same type as current reaction, just delete it
       if (currentReaction?.reaction_type === type) {
-        await supabase
+        const { error: deleteError } = await supabase
           .from('book_reactions')
           .delete()
           .eq('id', currentReaction.id);
+
+        console.log('Deleting reaction:', deleteError ? 'failed' : 'succeeded');
+        if (deleteError) console.error('Delete error:', deleteError);
       } else {
         // If there's any existing reaction, delete it
         if (currentReaction) {
-          await supabase
+          const { error: deleteError } = await supabase
             .from('book_reactions')
             .delete()
             .eq('id', currentReaction.id);
+
+          console.log('Deleting old reaction:', deleteError ? 'failed' : 'succeeded');
+          if (deleteError) console.error('Delete error:', deleteError);
         }
         
         // Create the new reaction
-        await supabase
+        const { error: insertError } = await supabase
           .from('book_reactions')
           .insert({
             book_id: bookId,
             user_id: session.user.id,
             reaction_type: type
           });
+
+        console.log('Inserting new reaction:', insertError ? 'failed' : 'succeeded');
+        if (insertError) console.error('Insert error:', insertError);
       }
 
       // Refresh the reactions list
