@@ -27,12 +27,16 @@ export function BookInteractions({
   const { session } = useAuth();
   const { toast } = useToast();
 
+  console.log('BookInteractions rendered with reactions:', reactions);
+  console.log('Current user:', session?.user.id);
+
   const reactionCounts = {
     like: reactions.filter(r => r.reaction_type === 'like').length,
     dislike: reactions.filter(r => r.reaction_type === 'dislike').length
   };
 
   const userReaction = reactions.find(r => r.user_id === session?.user.id);
+  console.log('Current user reaction:', userReaction);
 
   const handleReaction = async (type: 'like' | 'dislike') => {
     if (!session?.user.id) {
@@ -46,30 +50,48 @@ export function BookInteractions({
 
     try {
       setIsReacting(true);
+      console.log('Handling reaction:', type);
+      console.log('BookId:', bookId);
+      console.log('UserId:', session.user.id);
 
-      // If user has same reaction, remove it
       if (userReaction?.reaction_type === type) {
-        await supabase
+        console.log('Removing existing reaction:', userReaction.id);
+        const { error: deleteError } = await supabase
           .from('book_reactions')
           .delete()
           .eq('id', userReaction.id);
+
+        if (deleteError) {
+          console.error('Delete error:', deleteError);
+          throw deleteError;
+        }
       } else {
-        // Remove any existing reaction first
         if (userReaction) {
-          await supabase
+          console.log('Removing different reaction type first:', userReaction.id);
+          const { error: deleteError } = await supabase
             .from('book_reactions')
             .delete()
             .eq('id', userReaction.id);
+
+          if (deleteError) {
+            console.error('Delete error:', deleteError);
+            throw deleteError;
+          }
         }
         
-        // Add new reaction
-        await supabase
+        console.log('Adding new reaction:', type);
+        const { error: insertError } = await supabase
           .from('book_reactions')
           .insert({
             book_id: bookId,
             user_id: session.user.id,
             reaction_type: type
           });
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          throw insertError;
+        }
       }
 
       onReactionAdded();
