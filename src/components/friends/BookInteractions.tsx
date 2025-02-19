@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -27,18 +27,14 @@ export function BookInteractions({
   const { session } = useAuth();
   const { toast } = useToast();
 
-  console.log('BookInteractions rendered with reactions:', reactions);
-  console.log('Current user:', session?.user.id);
-
   const reactionCounts = {
     like: reactions.filter(r => r.reaction_type === 'like').length,
     dislike: reactions.filter(r => r.reaction_type === 'dislike').length
   };
 
   const userReaction = reactions.find(r => r.user_id === session?.user.id);
-  console.log('Current user reaction:', userReaction);
 
-  const handleReaction = async (type: 'like' | 'dislike') => {
+  const handleReaction = useCallback(async (type: 'like' | 'dislike') => {
     if (!session?.user.id) {
       toast({
         title: "Error",
@@ -48,58 +44,49 @@ export function BookInteractions({
       return;
     }
 
+    if (isReacting) return;
+
     try {
       setIsReacting(true);
-      console.log('Handling reaction:', type);
-      console.log('BookId:', bookId);
-      console.log('UserId:', session.user.id);
 
+      // If we have an existing reaction of the same type, delete it
       if (userReaction?.reaction_type === type) {
-        console.log('Removing existing reaction:', userReaction.id);
         const { error: deleteError } = await supabase
           .from('book_reactions')
           .delete()
-          .eq('id', userReaction.id);
+          .match({ id: userReaction.id });
 
-        if (deleteError) {
-          console.error('Delete error:', deleteError);
-          throw deleteError;
-        }
+        if (deleteError) throw deleteError;
+
       } else {
+        // If we have a different reaction, delete it first
         if (userReaction) {
-          console.log('Removing different reaction type first:', userReaction.id);
           const { error: deleteError } = await supabase
             .from('book_reactions')
             .delete()
-            .eq('id', userReaction.id);
+            .match({ id: userReaction.id });
 
-          if (deleteError) {
-            console.error('Delete error:', deleteError);
-            throw deleteError;
-          }
+          if (deleteError) throw deleteError;
         }
-        
-        console.log('Adding new reaction:', type);
+
+        // Then insert the new reaction
         const { error: insertError } = await supabase
           .from('book_reactions')
-          .insert({
+          .upsert({
             book_id: bookId,
             user_id: session.user.id,
             reaction_type: type
+          }, {
+            onConflict: 'book_id,user_id',
+            ignoreDuplicates: false
           });
 
-        if (insertError) {
-          console.error('Insert error:', insertError);
-          throw insertError;
-        }
+        if (insertError) throw insertError;
       }
 
-      onReactionAdded();
-      
-      toast({
-        title: "Success",
-        description: "Your reaction has been saved",
-      });
+      // Force refresh of reactions
+      await onReactionAdded();
+
     } catch (error) {
       console.error('Error handling reaction:', error);
       toast({
@@ -110,7 +97,7 @@ export function BookInteractions({
     } finally {
       setIsReacting(false);
     }
-  };
+  }, [bookId, session?.user.id, userReaction, isReacting, toast, onReactionAdded]);
 
   return (
     <div className="space-y-4">
