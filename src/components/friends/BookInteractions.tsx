@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,41 +45,29 @@ export function BookInteractions({
 
     try {
       setIsReacting(true);
-      console.log('Starting reaction:', type);
-      console.log('Current user reaction:', userReaction);
       
-      // First, check if there's an existing reaction from this user for this book
-      const { data: existingReaction, error: fetchError } = await supabase
-        .from('book_reactions')
-        .select('id, reaction_type')
-        .eq('book_id', bookId)
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-
-      console.log('Existing reaction found:', existingReaction);
-
-      if (fetchError) {
-        console.error('Error fetching reaction:', fetchError);
-        throw fetchError;
-      }
-
-      // If there's an existing reaction, delete it first
-      if (existingReaction) {
-        console.log('Deleting existing reaction');
+      // If user already has this exact reaction, delete it (toggle off)
+      if (userReaction && userReaction.reaction_type === type) {
         const { error: deleteError } = await supabase
           .from('book_reactions')
           .delete()
-          .eq('id', existingReaction.id);
+          .eq('id', userReaction.id);
 
-        if (deleteError) {
-          console.error('Error deleting reaction:', deleteError);
-          throw deleteError;
+        if (deleteError) throw deleteError;
+      } 
+      // Otherwise, remove any existing reaction and create the new one
+      else {
+        // First remove any existing reaction
+        if (userReaction) {
+          const { error: deleteError } = await supabase
+            .from('book_reactions')
+            .delete()
+            .eq('id', userReaction.id);
+
+          if (deleteError) throw deleteError;
         }
-      }
 
-      // Only create a new reaction if we're not clicking the same type that existed
-      if (!existingReaction || existingReaction.reaction_type !== type) {
-        console.log('Creating new reaction');
+        // Then create the new reaction
         const { error: insertError } = await supabase
           .from('book_reactions')
           .insert({
@@ -89,10 +76,7 @@ export function BookInteractions({
             reaction_type: type
           });
 
-        if (insertError) {
-          console.error('Error inserting reaction:', insertError);
-          throw insertError;
-        }
+        if (insertError) throw insertError;
       }
 
       onReactionAdded();
