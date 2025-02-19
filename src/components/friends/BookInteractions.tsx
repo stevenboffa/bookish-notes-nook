@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,41 +46,43 @@ export function BookInteractions({
 
     try {
       setIsReacting(true);
-      
-      // If user already has this exact reaction, delete it (toggle off)
-      if (userReaction && userReaction.reaction_type === type) {
-        const { error: deleteError } = await supabase
+
+      // First, get the current reaction state
+      const { data: currentReaction } = await supabase
+        .from('book_reactions')
+        .select('*')
+        .eq('book_id', bookId)
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      // If clicking the same type as current reaction, just delete it
+      if (currentReaction?.reaction_type === type) {
+        await supabase
           .from('book_reactions')
           .delete()
-          .eq('id', userReaction.id);
-
-        if (deleteError) throw deleteError;
-      } 
-      // Otherwise, remove any existing reaction and create the new one
-      else {
-        // First remove any existing reaction
-        if (userReaction) {
-          const { error: deleteError } = await supabase
+          .eq('id', currentReaction.id);
+      } else {
+        // If there's any existing reaction, delete it
+        if (currentReaction) {
+          await supabase
             .from('book_reactions')
             .delete()
-            .eq('id', userReaction.id);
-
-          if (deleteError) throw deleteError;
+            .eq('id', currentReaction.id);
         }
-
-        // Then create the new reaction
-        const { error: insertError } = await supabase
+        
+        // Create the new reaction
+        await supabase
           .from('book_reactions')
           .insert({
             book_id: bookId,
             user_id: session.user.id,
             reaction_type: type
           });
-
-        if (insertError) throw insertError;
       }
 
+      // Refresh the reactions list
       onReactionAdded();
+      
       toast({
         title: "Success",
         description: "Your reaction has been saved",
