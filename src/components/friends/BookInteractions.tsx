@@ -27,11 +27,15 @@ export function BookInteractions({
   const { session } = useAuth();
   const { toast } = useToast();
 
+  // Calculate reaction counts - treat 'like' and 'dislike' exactly the same way
   const reactionCounts = reactions.reduce((acc, reaction) => {
-    acc[reaction.reaction_type] = (acc[reaction.reaction_type] || 0) + 1;
+    if (reaction.reaction_type === 'like' || reaction.reaction_type === 'dislike') {
+      acc[reaction.reaction_type] = (acc[reaction.reaction_type] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
+  // Find user's current reaction, if any
   const userReaction = reactions.find(r => r.user_id === session?.user.id);
 
   const handleReaction = async (type: 'like' | 'dislike') => {
