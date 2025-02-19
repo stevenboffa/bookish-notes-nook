@@ -22,50 +22,62 @@ export function BookInteractions({
   reactions,
   progress,
   onReactionAdded,
-  onProgressUpdated,
 }: BookInteractionsProps) {
   const [isReacting, setIsReacting] = useState(false);
   const { session } = useAuth();
   const { toast } = useToast();
 
   const reactionCounts = reactions.reduce((acc, reaction) => {
-    if (reaction.reaction_type === 'like' || reaction.reaction_type === 'dislike') {
-      acc[reaction.reaction_type] = (acc[reaction.reaction_type] || 0) + 1;
-    }
+    acc[reaction.reaction_type] = (acc[reaction.reaction_type] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
   const userReaction = reactions.find(r => r.user_id === session?.user.id);
 
   const handleReaction = async (type: 'like' | 'dislike') => {
-    if (!session?.user.id) return;
+    if (!session?.user.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to react to books",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       setIsReacting(true);
+      console.log('Current user reaction:', userReaction);
+      console.log('Attempting reaction:', type);
 
       if (userReaction) {
-        // If clicking the same reaction type, remove it
         if (userReaction.reaction_type === type) {
-          await supabase
+          // Delete existing reaction if clicking the same type
+          const { error: deleteError } = await supabase
             .from('book_reactions')
             .delete()
             .eq('id', userReaction.id);
+
+          if (deleteError) throw deleteError;
         } else {
-          // If clicking a different reaction type, update it
-          await supabase
+          // Update to new reaction type if different
+          const { error: updateError } = await supabase
             .from('book_reactions')
             .update({ reaction_type: type })
             .eq('id', userReaction.id);
+
+          if (updateError) throw updateError;
         }
       } else {
-        // If no reaction exists, create a new one
-        await supabase
+        // Create new reaction
+        const { error: insertError } = await supabase
           .from('book_reactions')
           .insert({
             book_id: bookId,
             user_id: session.user.id,
             reaction_type: type,
           });
+
+        if (insertError) throw insertError;
       }
 
       onReactionAdded();
@@ -111,8 +123,14 @@ export function BookInteractions({
           onClick={() => handleReaction('dislike')}
           disabled={isReacting}
         >
-          <ThumbsDown className="h-4 w-4 mr-1" />
-          {reactionCounts['dislike'] || 0}
+          {isReacting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <ThumbsDown className="h-4 w-4 mr-1" />
+              {reactionCounts['dislike'] || 0}
+            </>
+          )}
         </Button>
       </div>
 
