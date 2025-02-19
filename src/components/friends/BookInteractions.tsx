@@ -44,18 +44,21 @@ export function BookInteractions({
       setIsReacting(true);
 
       if (userReaction) {
+        // If clicking the same reaction type, remove it
         if (userReaction.reaction_type === type) {
           await supabase
             .from('book_reactions')
             .delete()
             .eq('id', userReaction.id);
         } else {
+          // If clicking a different reaction type, update it
           await supabase
             .from('book_reactions')
             .update({ reaction_type: type })
             .eq('id', userReaction.id);
         }
       } else {
+        // If no reaction exists, create a new one
         await supabase
           .from('book_reactions')
           .insert({
