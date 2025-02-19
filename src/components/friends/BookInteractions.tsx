@@ -46,16 +46,22 @@ export function BookInteractions({
 
     try {
       setIsReacting(true);
-      console.log('Current user reaction:', userReaction);
-      console.log('Attempting reaction:', type);
 
-      if (userReaction) {
-        if (userReaction.reaction_type === type) {
-          // Delete existing reaction if clicking the same type
+      // First, check if there's an existing reaction from this user for this book
+      const { data: existingReaction } = await supabase
+        .from('book_reactions')
+        .select('id, reaction_type')
+        .eq('book_id', bookId)
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (existingReaction) {
+        if (existingReaction.reaction_type === type) {
+          // Delete the reaction if clicking the same type
           const { error: deleteError } = await supabase
             .from('book_reactions')
             .delete()
-            .eq('id', userReaction.id);
+            .eq('id', existingReaction.id);
 
           if (deleteError) throw deleteError;
         } else {
@@ -63,7 +69,7 @@ export function BookInteractions({
           const { error: updateError } = await supabase
             .from('book_reactions')
             .update({ reaction_type: type })
-            .eq('id', userReaction.id);
+            .eq('id', existingReaction.id);
 
           if (updateError) throw updateError;
         }
@@ -74,7 +80,7 @@ export function BookInteractions({
           .insert({
             book_id: bookId,
             user_id: session.user.id,
-            reaction_type: type,
+            reaction_type: type
           });
 
         if (insertError) throw insertError;
@@ -90,7 +96,7 @@ export function BookInteractions({
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save your reaction",
+        description: "Failed to save your reaction"
       });
     } finally {
       setIsReacting(false);
