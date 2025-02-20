@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -21,6 +22,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
+
+const genres = [
+  "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
+  "Romance", "Thriller", "Horror", "Biography", "History", 
+  "Self-Help", "Poetry", "Drama", "Adventure", "Children's",
+];
 
 interface BookDetailViewProps {
   book: Book | null;
