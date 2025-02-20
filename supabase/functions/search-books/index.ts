@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { searchQuery, maxResults = 16, bookId } = await req.json()
+    const { searchQuery, page = 1, maxResults = 20, bookId } = await req.json()
     
     const apiKey = Deno.env.get('GOOGLE_BOOKS_API_KEY')
     if (!apiKey) {
@@ -51,43 +51,35 @@ Deno.serve(async (req) => {
     }
 
     // Otherwise, perform a search
-    console.log('Searching books with query:', searchQuery);
+    console.log('Searching books with query:', searchQuery, 'page:', page);
     const url = 'https://www.googleapis.com/books/v1/volumes';
     
-    // Safely parse the query parameters
-    let query = '';
-    let filter = '';
-    let orderBy = '';
+    // Calculate startIndex for pagination
+    const startIndex = (page - 1) * maxResults;
     
-    if (typeof searchQuery === 'string') {
-      const parts = searchQuery.split('&');
-      parts.forEach(part => {
-        if (part.startsWith('subject:')) {
-          query = part;
-        } else if (part.includes('filter=')) {
-          filter = part.split('=')[1];
-        } else if (part.includes('orderBy=')) {
-          orderBy = part.split('=')[1];
-        }
-      });
+    // Build advanced query parameters
+    const queryParts = [];
+    if (searchQuery.includes(':')) {
+      // Keep explicit search operators (like inauthor:, intitle:)
+      queryParts.push(searchQuery);
+    } else {
+      // Add relevance boosters for general searches
+      queryParts.push(`intitle:"${searchQuery}"`); // Exact title match gets priority
+      queryParts.push(searchQuery); // General search terms
     }
     
-    // If no valid query was found, use a default
-    if (!query) {
-      query = searchQuery || 'subject:fiction';
-    }
+    const finalQuery = queryParts.join(' OR ');
+    console.log('Final query:', finalQuery);
 
     // Build the query parameters
     const params = new URLSearchParams();
-    params.append('q', query);
+    params.append('q', finalQuery);
     params.append('key', apiKey);
     params.append('maxResults', maxResults.toString());
+    params.append('startIndex', startIndex.toString());
     params.append('langRestrict', 'en');
     params.append('printType', 'books');
-    
-    // Add optional parameters if they exist
-    if (filter) params.append('filter', filter);
-    if (orderBy) params.append('orderBy', orderBy);
+    params.append('orderBy', 'relevance');
 
     console.log('Final URL parameters:', params.toString());
 
@@ -99,17 +91,31 @@ Deno.serve(async (req) => {
       throw new Error(data.error?.message || 'Failed to fetch books');
     }
 
-    // Additional filtering on our end
+    // Additional filtering and sorting
     if (data.items) {
-      data.items = data.items.filter((book: GoogleBook) => 
-        book.volumeInfo?.description?.length > 100 && 
-        book.volumeInfo?.imageLinks?.thumbnail && 
-        book.volumeInfo?.authors?.length > 0 && 
-        book.volumeInfo?.title?.length > 0
-      );
+      data.items = data.items
+        .filter((book: GoogleBook) => 
+          // Filter out books without essential information
+          book.volumeInfo?.title?.length > 0 &&
+          book.volumeInfo?.authors?.length > 0
+        )
+        .sort((a: GoogleBook, b: GoogleBook) => {
+          // Prioritize books with more complete information
+          const scoreA = getBookCompletionScore(a);
+          const scoreB = getBookCompletionScore(b);
+          return scoreB - scoreA;
+        });
     }
 
-    return new Response(JSON.stringify(data), {
+    // Add pagination metadata
+    const result = {
+      items: data.items || [],
+      totalItems: data.totalItems || 0,
+      currentPage: page,
+      hasMore: data.items?.length === maxResults,
+    };
+
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
@@ -121,3 +127,17 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+// Helper function to score book completeness
+function getBookCompletionScore(book: GoogleBook): number {
+  let score = 0;
+  const info = book.volumeInfo;
+  
+  if (info.imageLinks?.thumbnail) score += 3;
+  if (info.authors?.length > 0) score += 2;
+  if (info.description?.length > 100) score += 2;
+  if (info.categories?.length > 0) score += 1;
+  if (info.publishedDate) score += 1;
+  
+  return score;
+}

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -5,7 +6,7 @@ import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { BookCover } from "@/components/BookCover";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -33,6 +34,9 @@ interface GoogleBook {
 
 interface GoogleBooksResponse {
   items?: GoogleBook[];
+  totalItems: number;
+  currentPage: number;
+  hasMore: boolean;
 }
 
 export default function AddBook() {
@@ -40,20 +44,29 @@ export default function AddBook() {
   const [searchResults, setSearchResults] = useState<GoogleBook[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
 
-  const searchBooks = async () => {
+  const searchBooks = async (page = 1) => {
     if (!searchQuery.trim()) {
       return;
     }
 
     setIsSearching(true);
-    setSearchResults([]);
+    if (page === 1) {
+      setSearchResults([]);
+    }
+    
     try {
       const { data, error } = await supabase.functions.invoke<GoogleBooksResponse>('search-books', {
-        body: { searchQuery: searchQuery.trim() }
+        body: { 
+          searchQuery: searchQuery.trim(),
+          page,
+          maxResults: 20
+        }
       });
 
       if (error) {
@@ -61,17 +74,24 @@ export default function AddBook() {
       }
 
       if (data?.items && Array.isArray(data.items)) {
-        const uniqueBooks = Array.from(
-          new Map(data.items.map(book => [book.id, book])).values()
-        ) as GoogleBook[];
-        setSearchResults(uniqueBooks);
-        console.log('Search results:', uniqueBooks);
+        if (page === 1) {
+          setSearchResults(data.items);
+        } else {
+          setSearchResults(prev => [...prev, ...data.items]);
+        }
+        setHasMore(data.hasMore);
+        setCurrentPage(data.currentPage);
+        console.log('Search results:', data);
       }
     } catch (error) {
       console.error('Error searching books:', error);
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const loadMore = () => {
+    searchBooks(currentPage + 1);
   };
 
   const selectBook = (googleBook: GoogleBook) => {
@@ -146,14 +166,17 @@ export default function AddBook() {
               placeholder="Search by title or author..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && searchBooks()}
+              onKeyDown={(e) => e.key === 'Enter' && searchBooks(1)}
             />
             <Button 
-              onClick={searchBooks}
+              onClick={() => searchBooks(1)}
               disabled={isSearching}
             >
               {isSearching ? (
-                "Searching..."
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Searching...
+                </>
               ) : (
                 <>
                   <Search className="w-4 h-4 mr-2" />
@@ -163,7 +186,7 @@ export default function AddBook() {
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">
-            Search for a book to auto-fill the details, or fill them in manually below.
+            Search by title, author, or use advanced operators like 'intitle:' for more specific results.
           </p>
 
           {searchResults.length > 0 && (
@@ -202,6 +225,24 @@ export default function AddBook() {
                   </Card>
                 ))}
               </div>
+              {hasMore && (
+                <div className="flex justify-center mt-4">
+                  <Button
+                    onClick={loadMore}
+                    disabled={isSearching}
+                    variant="outline"
+                  >
+                    {isSearching ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Loading more...
+                      </>
+                    ) : (
+                      'Load More Results'
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
