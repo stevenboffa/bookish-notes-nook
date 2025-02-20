@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Book } from "./BookList";
+import { Mic, MicOff } from "lucide-react";
+import { toast } from "sonner";
 
 interface AddNoteFormProps {
   book: Book;
@@ -37,16 +39,67 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const [timestamp, setTimestamp] = useState<string>("");
   const [chapter, setChapter] = useState("");
   const [category, setCategory] = useState<string>("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.webkitSpeechRecognition;
+      const newRecognition = new SpeechRecognition();
+      newRecognition.continuous = true;
+      newRecognition.interimResults = true;
+
+      newRecognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0].transcript)
+          .join('');
+        setContent(transcript);
+      };
+
+      newRecognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        toast.error('Error recording voice. Please try again.');
+        setIsRecording(false);
+      };
+
+      newRecognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      setRecognition(newRecognition);
+    }
+  }, []);
+
+  const toggleRecording = () => {
+    if (!recognition) {
+      toast.error('Speech recognition is not supported in your browser');
+      return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+      toast.success('Voice recording stopped');
+    } else {
+      setContent(''); // Clear existing content when starting new recording
+      recognition.start();
+      setIsRecording(true);
+      toast.success('Voice recording started');
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isRecording) {
+      recognition?.stop();
+    }
     
     const note: any = { content };
     
     if (book.format === "physical_book" && pageNumber) {
       note.pageNumber = parseInt(pageNumber);
     } else if (book.format === "audiobook" && timestamp) {
-      // Convert MM:SS to seconds
       const [minutes, seconds] = timestamp.split(":").map(Number);
       note.timestampSeconds = minutes * 60 + seconds;
     }
@@ -67,12 +120,23 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Add a note..."
-          className="min-h-[100px]"
-        />
+        <div className="relative">
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Add a note..."
+            className="min-h-[100px] pr-12"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={`absolute right-2 top-2 ${isRecording ? 'text-red-500' : ''}`}
+            onClick={toggleRecording}
+          >
+            {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
