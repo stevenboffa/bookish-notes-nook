@@ -75,50 +75,55 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {book.format === "physical_book" && (
-          <div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {book.format === "physical_book" ? (
+          <div className="space-y-2">
             <Input
               type="number"
               placeholder="Page number"
               value={pageNumber}
               onChange={(e) => setPageNumber(e.target.value)}
               min="1"
+              className="w-full"
             />
           </div>
-        )}
-
-        {book.format === "audiobook" && (
-          <div>
+        ) : book.format === "audiobook" ? (
+          <div className="space-y-2">
             <Input
               type="text"
-              placeholder="Timestamp (MM:SS)"
+              placeholder="Time (MM:SS)"
               value={timestamp}
               onChange={(e) => setTimestamp(e.target.value)}
               pattern="[0-9]{1,2}:[0-9]{2}"
               title="Format: MM:SS (eg: 12:34)"
+              className="w-full"
             />
           </div>
-        )}
+        ) : null}
 
-        <Input
-          placeholder="Chapter"
-          value={chapter}
-          onChange={(e) => setChapter(e.target.value)}
-        />
+        <div className="space-y-2">
+          <Input
+            placeholder="Chapter"
+            value={chapter}
+            onChange={(e) => setChapter(e.target.value)}
+            className="w-full"
+          />
+        </div>
 
-        <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger>
-            <SelectValue placeholder="Note type" />
-          </SelectTrigger>
-          <SelectContent>
-            {NOTE_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Note type" />
+            </SelectTrigger>
+            <SelectContent>
+              {NOTE_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Button type="submit" disabled={!content.trim()}>Add Note</Button>
