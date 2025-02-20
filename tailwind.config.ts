@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -60,11 +61,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        book: {
-          DEFAULT: "#2C3E50",
-          accent: "#34495E",
-          light: "#ECF0F1",
-        },
       },
       spacing: {
         'safe-top': 'env(safe-area-inset-top)',
@@ -76,6 +72,42 @@ export default {
       boxShadow: {
         'card': '0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)',
         'card-hover': '0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.1)',
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: 'inherit',
+            a: {
+              color: 'inherit',
+              textDecoration: 'none',
+              fontWeight: '500',
+            },
+            'h1, h2, h3, h4, h5, h6': {
+              color: 'inherit',
+              marginTop: '2em',
+              marginBottom: '1em',
+            },
+            hr: {
+              marginTop: '3em',
+              marginBottom: '3em',
+            },
+            'ul, ol': {
+              marginLeft: '2em',
+            },
+            code: {
+              color: 'inherit',
+              fontWeight: '500',
+            },
+            'pre code': {
+              fontWeight: 'inherit',
+            },
+            blockquote: {
+              color: 'inherit',
+              opacity: 0.8,
+            },
+          },
+        },
       },
       keyframes: {
         "page-turn": {
@@ -98,5 +130,8 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require('@tailwindcss/typography'),
+  ],
 } satisfies Config;
