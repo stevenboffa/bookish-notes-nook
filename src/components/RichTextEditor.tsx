@@ -1,6 +1,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import TextAlign from '@tiptap/extension-text-align';
 import { Button } from './ui/button';
 import {
   Bold,
@@ -20,7 +21,6 @@ import {
   UnderlineIcon,
   Strikethrough,
   RemoveFormatting,
-  Separator,
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,13 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right'],
+      }),
+    ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
