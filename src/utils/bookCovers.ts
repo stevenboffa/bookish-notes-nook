@@ -17,5 +17,11 @@ const genreFallbackImages: Record<string, string> = {
 };
 
 export const getBookCoverFallback = (genre: string) => {
-  return genreFallbackImages[genre] || "/placeholder.svg";
+  // If we have a genre-specific fallback, use it
+  if (genreFallbackImages[genre]) {
+    return genreFallbackImages[genre];
+  }
+  
+  // Otherwise return null to trigger the CSS fallback
+  return null;
 };
