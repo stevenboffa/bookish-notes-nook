@@ -30,7 +30,7 @@ export default function Blog() {
   return (
     <>
       <Helmet>
-        <title>Blog - BookNotes</title>
+        <title>Blog - BookishNotes</title>
         <meta
           name="description"
           content="Explore our latest articles about books, reading, and personal growth."
@@ -39,25 +39,34 @@ export default function Blog() {
       
       {!session && <Header />}
       
-      <div className={`container max-w-6xl mx-auto px-4 ${!session ? 'pt-24' : 'pt-8'} pb-8`}>
-        <h1 className="text-4xl font-bold mb-8">Blog</h1>
-        
-        {isLoading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="h-[300px] rounded-lg bg-muted animate-pulse"
-              />
-            ))}
+      <div className={`min-h-screen bg-gradient-to-b from-purple-50 to-white dark:from-purple-950/10 dark:to-background ${!session ? 'pt-24' : 'pt-8'}`}>
+        <div className="container max-w-6xl mx-auto px-4 pb-16">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              BookishNotes Blog
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Discover insights about books, reading habits, and personal growth
+            </p>
           </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {posts?.map((post) => (
-              <BlogCard key={post.id} post={post} />
-            ))}
-          </div>
-        )}
+          
+          {isLoading ? (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-[400px] rounded-xl bg-card border shadow-sm animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {posts?.map((post) => (
+                <BlogCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

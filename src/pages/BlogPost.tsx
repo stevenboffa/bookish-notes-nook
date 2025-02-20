@@ -63,7 +63,7 @@ export default function BlogPost() {
   return (
     <>
       <Helmet>
-        <title>{post.title} - BookNotes Blog</title>
+        <title>{post.title} - BookishNotes Blog</title>
         <meta name="description" content={post.meta_description || post.excerpt} />
         {post.meta_keywords?.length > 0 && (
           <meta name="keywords" content={post.meta_keywords.join(", ")} />
@@ -73,7 +73,7 @@ export default function BlogPost() {
         {post.cover_image && <meta property="og:image" content={post.cover_image} />}
       </Helmet>
 
-      <article className="min-h-screen flex flex-col">
+      <article className="min-h-screen flex flex-col bg-gradient-to-b from-purple-50 to-white dark:from-purple-950/10 dark:to-background">
         {!session && <Header />}
         
         <BlogHeader
@@ -88,7 +88,7 @@ export default function BlogPost() {
         <main className="flex-1 py-12 px-4 md:px-8">
           <div className="max-w-4xl mx-auto">
             {post.excerpt && (
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-xl text-muted-foreground mb-12 leading-relaxed font-serif">
                 {post.excerpt}
               </p>
             )}
@@ -96,13 +96,15 @@ export default function BlogPost() {
             <div 
               className="prose prose-lg max-w-none dark:prose-invert
                 prose-headings:font-bold prose-headings:tracking-tight
-                prose-h2:text-3xl prose-h3:text-2xl
-                prose-p:leading-relaxed
+                prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8
+                prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
+                prose-p:leading-relaxed prose-p:mb-8
                 prose-a:text-primary hover:prose-a:text-primary/80
-                prose-blockquote:border-l-primary
+                prose-blockquote:border-l-primary prose-blockquote:bg-muted/50 prose-blockquote:py-2 prose-blockquote:px-6
                 prose-img:rounded-lg prose-img:shadow-lg
-                prose-code:text-primary prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-                prose-pre:bg-muted prose-pre:text-primary-foreground"
+                prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
+                prose-pre:bg-muted prose-pre:text-primary-foreground
+                prose-li:mb-2"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
           </div>
