@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -150,6 +149,95 @@ export default function Friends() {
     }
   };
 
+  const addFriend = async (email: string) => {
+    try {
+      setIsLoading(true);
+      
+      if (email === session?.user.email) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "You cannot add yourself as a friend"
+        });
+        return;
+      }
+
+      // First check if the user exists
+      const { data: userData, error: userError } = await supabase
+        .from('profiles')
+        .select('id, username, email')
+        .eq('email', email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (userError) throw userError;
+
+      if (!userData) {
+        toast({
+          variant: "destructive",
+          title: "User not found",
+          description: "No user found with this email address"
+        });
+        return;
+      }
+
+      // Check if a friend request already exists in either direction
+      const { data: existingFriend, error: existingError } = await supabase
+        .from('friends')
+        .select('*, sender:profiles!friends_sender_id_fkey(username, email), receiver:profiles!friends_receiver_id_fkey(username, email)')
+        .or(`and(sender_id.eq.${session?.user.id},receiver_id.eq.${userData.id}),and(sender_id.eq.${userData.id},receiver_id.eq.${session?.user.id})`)
+        .maybeSingle();
+
+      if (existingError) throw existingError;
+
+      if (existingFriend) {
+        if (existingFriend.status === 'pending') {
+          const isPendingSent = existingFriend.sender_id === session?.user.id;
+          const otherUser = isPendingSent ? existingFriend.receiver : existingFriend.sender;
+          toast({
+            title: "Pending Request",
+            description: isPendingSent 
+              ? `You already sent a friend request to ${otherUser.username || otherUser.email}. Waiting for their approval.`
+              : `${otherUser.username || otherUser.email} has already sent you a friend request. Check your pending requests above.`
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Already Friends",
+            description: `You are already friends with ${userData.username || userData.email}`
+          });
+        }
+        return;
+      }
+
+      // If no existing request, create a new one
+      const { error: friendError } = await supabase
+        .from('friends')
+        .insert({
+          sender_id: session?.user.id,
+          receiver_id: userData.id,
+          status: 'pending'
+        });
+
+      if (friendError) throw friendError;
+
+      toast({
+        title: "Success",
+        description: `Friend request sent to ${userData.username || userData.email}`
+      });
+
+      fetchFriends();
+    } catch (error) {
+      console.error('Error adding friend:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to send friend request"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleAcceptRequest = async (requestId: string) => {
     try {
       const { error } = await supabase
@@ -157,7 +245,10 @@ export default function Friends() {
         .update({ status: 'accepted' })
         .eq('id', requestId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error accepting request:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -170,7 +261,7 @@ export default function Friends() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to accept friend request"
+        description: "Failed to accept friend request. Please try again."
       });
     }
   };
@@ -197,84 +288,6 @@ export default function Friends() {
         title: "Error",
         description: "Failed to reject friend request"
       });
-    }
-  };
-
-  const addFriend = async (email: string) => {
-    try {
-      setIsLoading(true);
-      
-      if (email === session?.user.email) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "You cannot add yourself as a friend"
-        });
-        return;
-      }
-
-      // First check if the user exists
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', email.toLowerCase().trim())
-        .maybeSingle();
-
-      if (userError) throw userError;
-
-      if (!userData) {
-        toast({
-          variant: "destructive",
-          title: "User not found",
-          description: "No user found with this email address"
-        });
-        return;
-      }
-
-      // Check if a friend request already exists in either direction
-      const { data: existingFriend, error: existingError } = await supabase
-        .from('friends')
-        .select('*')
-        .or(`and(sender_id.eq.${session?.user.id},receiver_id.eq.${userData.id}),and(sender_id.eq.${userData.id},receiver_id.eq.${session?.user.id})`)
-        .maybeSingle();
-
-      if (existingError) throw existingError;
-
-      if (existingFriend) {
-        toast({
-          variant: "destructive",
-          title: "Request exists",
-          description: "A friend request already exists with this user"
-        });
-        return;
-      }
-
-      // If no existing request, create a new one
-      const { error: friendError } = await supabase
-        .from('friends')
-        .insert({
-          sender_id: session?.user.id,
-          receiver_id: userData.id,
-          status: 'pending'
-        });
-
-      if (friendError) throw friendError;
-
-      toast({
-        title: "Success",
-        description: "Friend request sent"
-      });
-
-      fetchFriends();
-    } catch (error) {
-      console.error('Error adding friend:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to send friend request"
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
