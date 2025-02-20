@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -154,23 +155,25 @@ export default function Friends() {
       setIsLoading(true);
       console.log('Accepting request:', requestId);
 
-      const { error } = await supabase
+      const { data: request, error: requestError } = await supabase
         .from('friends')
-        .update({ 
-          status: 'accepted',
-        })
+        .select('*, sender:profiles!friends_sender_id_fkey(username, email)')
         .eq('id', requestId)
-        .select()
         .single();
 
-      if (error) {
-        console.error('Error accepting request:', error);
-        throw error;
-      }
+      if (requestError) throw requestError;
+
+      const { error: updateError } = await supabase
+        .from('friends')
+        .update({ status: 'accepted' })
+        .eq('id', requestId);
+
+      if (updateError) throw updateError;
 
       toast({
-        title: "Success",
-        description: "Friend request accepted successfully!"
+        title: "Friend Request Accepted",
+        description: `You are now friends with ${request.sender.username || request.sender.email}!`,
+        duration: 5000,
       });
 
       await fetchFriends();
@@ -256,15 +259,13 @@ export default function Friends() {
       }
 
       // If no existing request, create a new one
-      const { data: newRequest, error: friendError } = await supabase
+      const { error: friendError } = await supabase
         .from('friends')
         .insert({
           sender_id: session?.user.id,
           receiver_id: userData.id,
           status: 'pending'
-        })
-        .select()
-        .single();
+        });
 
       if (friendError) throw friendError;
 
