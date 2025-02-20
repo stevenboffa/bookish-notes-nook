@@ -12,22 +12,36 @@ import {
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navigation() {
   const location = useLocation();
+  const { session } = useAuth();
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
+      if (!session?.user) return null;
+      
       const { data, error } = await supabase
         .from("profiles")
-        .select("is_admin")
+        .select("is_admin, email")
+        .eq("id", session.user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      console.log("Profile data:", data); // This will help us debug
       return data;
     },
+    enabled: !!session?.user,
   });
+
+  // Debug log to see profile status
+  console.log("Current profile:", profile);
 
   return (
     <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
