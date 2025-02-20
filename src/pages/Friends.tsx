@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -212,10 +213,11 @@ export default function Friends() {
         return;
       }
 
+      // First check if the user exists
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', email)
+        .eq('email', email.toLowerCase().trim())
         .maybeSingle();
 
       if (userError) throw userError;
@@ -229,11 +231,14 @@ export default function Friends() {
         return;
       }
 
-      const { data: existingFriend } = await supabase
+      // Check if a friend request already exists in either direction
+      const { data: existingFriend, error: existingError } = await supabase
         .from('friends')
-        .select()
+        .select('*')
         .or(`and(sender_id.eq.${session?.user.id},receiver_id.eq.${userData.id}),and(sender_id.eq.${userData.id},receiver_id.eq.${session?.user.id})`)
         .maybeSingle();
+
+      if (existingError) throw existingError;
 
       if (existingFriend) {
         toast({
@@ -244,6 +249,7 @@ export default function Friends() {
         return;
       }
 
+      // If no existing request, create a new one
       const { error: friendError } = await supabase
         .from('friends')
         .insert({
@@ -312,7 +318,7 @@ export default function Friends() {
 
   const filteredFriends = friends
     .filter(friend => {
-      const searchLower = searchTerm.toLowerCase();
+      const searchLower = searchTerm.toLowerCase().trim();
       return (
         friend.email.toLowerCase().includes(searchLower) ||
         (friend.username?.toLowerCase() || '').includes(searchLower)
@@ -328,7 +334,7 @@ export default function Friends() {
           return b.books.length - a.books.length;
         case 'recent':
         default:
-          return 0; // Keep original order
+          return 0;
       }
     });
 
