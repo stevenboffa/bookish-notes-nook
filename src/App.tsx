@@ -12,6 +12,8 @@ import Profile from "./pages/Profile";
 import Friends from "./pages/Friends";
 import BuyBooks from "./pages/BuyBooks";
 import GoogleBookDetail from "./pages/GoogleBookDetail";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => (
               <Route path="/edit-book/:id" element={<AddBook />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/friends" element={<Friends />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthenticatedLayout>
