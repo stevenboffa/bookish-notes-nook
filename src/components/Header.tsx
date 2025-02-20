@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { Menu, X } from "lucide-react";
+import { Menu, X, BookOpen, Users, ChevronRight, MessageCircle, Info } from "lucide-react";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,8 +52,8 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full p-0">
-              <div className="flex flex-col h-full bg-[#403E43] text-white">
-                <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <div className="flex flex-col h-full bg-gradient-to-br from-[#2B2930] to-[#403E43] text-white">
+                <div className="p-6 border-b border-white/10 flex items-center justify-between">
                   <Link 
                     to="/" 
                     className="text-xl font-bold text-white"
@@ -70,28 +70,54 @@ export function Header() {
                     <X className="h-6 w-6" />
                   </Button>
                 </div>
-                <nav className="flex-1 p-6">
+                <nav className="flex-1 px-6 py-8">
                   <div className="space-y-6">
                     <Link
                       to="/blog"
-                      className="flex items-center text-lg font-medium text-white/90 hover:text-white transition-colors"
+                      className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
                       onClick={() => setIsOpen(false)}
                     >
+                      <BookOpen className="h-5 w-5 mr-3" />
                       Blog
+                      <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
                     </Link>
                     <Link
-                      to="/auth/sign-in"
-                      className="flex items-center text-lg font-medium text-white/90 hover:text-white transition-colors"
+                      to="/about"
+                      className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
                       onClick={() => setIsOpen(false)}
                     >
+                      <Info className="h-5 w-5 mr-3" />
+                      About
+                      <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
+                    </Link>
+                    <Link
+                      to="/contact"
+                      className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <MessageCircle className="h-5 w-5 mr-3" />
+                      Contact
+                      <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
+                    </Link>
+
+                    <div className="h-px bg-white/10 my-8" />
+
+                    <Link
+                      to="/auth/sign-in"
+                      className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Users className="h-5 w-5 mr-3" />
                       Sign In
+                      <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
                     </Link>
                     <Link
                       to="/auth/sign-up"
-                      className="flex items-center text-lg font-medium text-white/90 hover:text-white transition-colors"
+                      className="flex items-center px-4 py-3 text-lg font-medium text-white rounded-lg bg-white/20 hover:bg-white/30 transition-colors group"
                       onClick={() => setIsOpen(false)}
                     >
                       Create Account
+                      <ChevronRight className="ml-auto h-5 w-5" />
                     </Link>
                   </div>
                 </nav>

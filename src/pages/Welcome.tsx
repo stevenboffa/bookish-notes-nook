@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Bookmark, PenLine, Users, ArrowRight, Star } from "lucide-react";
@@ -81,8 +80,7 @@ const Welcome = () => {
             </p>
 
             {/* CTA Button */}
-            <div className="animate-fade-in [animation-delay:400ms] relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-white/80 via-white to-white/80 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-all duration-500"></div>
+            <div className="animate-fade-in [animation-delay:400ms]">
               <Button 
                 size="lg" 
                 className="relative h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
