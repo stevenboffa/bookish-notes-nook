@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Bookmark, PenLine, Users, ArrowRight, Star } from "lucide-react";
@@ -21,14 +22,14 @@ const Welcome = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         {/* Gradient Background */}
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-indigo-700"
+          className="absolute inset-0"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 20% 150%, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0) 50%),
-              radial-gradient(circle at 80% -50%, rgba(64, 76, 234, 0.15) 0%, rgba(64, 76, 234, 0) 50%),
+              radial-gradient(circle at 20% 150%, rgba(156, 39, 176, 0.15) 0%, rgba(156, 39, 176, 0) 50%),
+              radial-gradient(circle at 80% -50%, rgba(64, 76, 234, 0.2) 0%, rgba(64, 76, 234, 0) 50%),
               linear-gradient(135deg, #9b87f5 0%, #7c6ad6 100%)
             `
           }}
@@ -39,6 +40,19 @@ const Welcome = () => {
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
             }}
           />
+        </div>
+
+        {/* Floating shapes */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Top left shape */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+          {/* Bottom right shape */}
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse [animation-delay:1000ms]" />
+          
+          {/* Floating circles */}
+          <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-white/20 rounded-full animate-bounce-slow" />
+          <div className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-white/20 rounded-full animate-bounce-slow [animation-delay:500ms]" />
+          <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white/20 rounded-full animate-bounce-slow [animation-delay:1000ms]" />
         </div>
 
         {/* Content */}
@@ -67,10 +81,11 @@ const Welcome = () => {
             </p>
 
             {/* CTA Button */}
-            <div className="animate-fade-in [animation-delay:400ms]">
+            <div className="animate-fade-in [animation-delay:400ms] relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-white/80 via-white to-white/80 rounded-full blur-lg opacity-70 group-hover:opacity-100 transition-all duration-500"></div>
               <Button 
                 size="lg" 
-                className="h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
+                className="relative h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
                 asChild
               >
                 <Link to="/auth/sign-up">
@@ -78,6 +93,22 @@ const Welcome = () => {
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </Button>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-3 gap-8 max-w-3xl mx-auto animate-fade-in [animation-delay:600ms]">
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">10k+</div>
+                <div className="text-white/70 text-sm">Active Readers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold mb-1">100k+</div>
+                <div className="text-white/70 text-sm">Books Tracked</div>
+              </div>
+              <div className="text-center md:col-span-1 col-span-2">
+                <div className="text-3xl font-bold mb-1">50k+</div>
+                <div className="text-white/70 text-sm">Notes Created</div>
+              </div>
             </div>
 
             {/* Decorative elements */}
