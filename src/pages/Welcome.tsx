@@ -1,310 +1,203 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { BookOpen, Bookmark, PenLine, Users, Lock } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { BookOpen, Bookmark, PenLine, Users, ArrowRight, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 
-// Site configuration
 const SITE_CONFIG = {
   name: "BookNotes",
-  description: "Your personal space for capturing thoughts, quotes, and memories from every book you read.",
-  tagline: "Welcome to BookNotes"
+  description: "Your personal reading companion",
 };
 
 const Welcome = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const { session } = useAuth();
 
-  useEffect(() => {
-    // Update document title with site name
-    document.title = SITE_CONFIG.name;
-    
-    if (session) {
-      navigate("/dashboard");
-    }
-  }, [session, navigate]);
-
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = isSignUp
-        ? await supabase.auth.signUp({
-            email,
-            password,
-          })
-        : await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-      if (error) throw error;
-
-      toast({
-        title: isSignUp ? `Welcome to ${SITE_CONFIG.name}!` : "Welcome back!",
-        description: isSignUp
-          ? "Please check your email to verify your account."
-          : "You have successfully logged in.",
-      });
-
-      if (!isSignUp) {
-        navigate("/dashboard");
-      }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      });
-
-      if (error) throw error;
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    }
-  };
+  if (session) {
+    return <Link to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       {/* Hero Section */}
-      <div 
-        className="w-full text-white pt-32 md:pt-40 pb-20 md:pb-32 relative overflow-hidden"
+      <section 
+        className="relative pt-32 pb-24 overflow-hidden"
         style={{
           background: "linear-gradient(135deg, #9b87f5 0%, #7c6ad6 100%)"
         }}
       >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOGMxMC4zODcgMCAxOC04LjA1OSAxOC0xOHMtOC4wNTktMTgtMTgtMTh6bTAgMzJjLTcuNzMyIDAtMTQtNi4yNjgtMTQtMTRzNi4yNjgtMTQgMTQtMTQgMTQgNi4yNjggMTQgMTQtNi4yNjggMTQtMTQgMTR6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-10" />
-        <div className="max-w-3xl mx-auto text-center px-4 relative">
-          <div className="animate-bounce-slow mb-8">
-            <BookOpen className="h-20 w-20 mx-auto mb-6 transform transition-transform hover:scale-110 duration-300" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            {SITE_CONFIG.tagline}
-          </h1>
-          <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            {SITE_CONFIG.description}
-          </p>
+        {/* Decorative background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" 
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
         </div>
-      </div>
 
-      {/* Auth Form Section */}
-      <div className="max-w-md mx-auto px-4 py-12 -mt-8 relative z-10">
-        <div className="bg-background border rounded-2xl shadow-2xl p-8 transition-all duration-300 hover:shadow-xl">
-          <h2 className="text-2xl font-bold text-center mb-8">
-            {isSignUp ? `Join ${SITE_CONFIG.name}` : `Sign In to ${SITE_CONFIG.name}`}
-          </h2>
-
-          <div className="mb-6">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-12 text-lg relative flex items-center justify-center gap-2"
-              onClick={handleGoogleSignIn}
-            >
-              <svg viewBox="0 0 24 24" className="h-6 w-6">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
-              Continue with Google
-            </Button>
-          </div>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with email
-              </span>
-            </div>
-          </div>
-
-          <form onSubmit={handleAuth} className="space-y-6">
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-2 transition-all duration-200 hover:border-primary/50 focus:border-primary"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 transition-all duration-200 hover:border-primary/50 focus:border-primary"
-                required
-              />
-              {isSignUp && (
-                <p className="text-xs text-muted-foreground mt-2 flex items-center">
-                  <Lock className="h-3 w-3 mr-1" />
-                  Minimum 8 characters required
-                </p>
-              )}
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-lg relative overflow-hidden transition-all duration-300 transform hover:scale-[1.02]" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                </div>
-              ) : (
-                isSignUp ? "Create Account" : "Sign In"
-              )}
-            </Button>
-
-            <p className="text-sm text-center text-muted-foreground">
-              {isSignUp ? "Already have an account? " : "Don't have an account? "}
-              <button
-                type="button"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-primary hover:underline font-medium transition-colors duration-200"
-              >
-                {isSignUp ? "Sign In" : "Create Account"}
-              </button>
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
+              Your Digital Reading Journal
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 mb-12 animate-fade-in [animation-delay:200ms]">
+              Track your books, capture your thoughts, and connect with fellow readers - all in one place.
             </p>
-          </form>
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className="bg-gray-50 py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { number: "10,000+", label: "Active Readers" },
-              { number: "50,000+", label: "Books Tracked" },
-              { number: "100,000+", label: "Notes Created" },
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">{stat.number}</div>
-                <div className="text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in [animation-delay:400ms]">
+              <Button 
+                size="lg" 
+                className="w-full sm:w-auto h-12 bg-white text-primary hover:bg-white/90 text-base"
+                asChild
+              >
+                <Link to="/auth/sign-up">
+                  Start Your Reading Journey
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto h-12 border-white text-white hover:bg-white/10 text-base"
+                asChild
+              >
+                <Link to="/blog">
+                  Explore Our Blog
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Features Section */}
-      <div className="max-w-6xl mx-auto px-4 py-16 md:py-24">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-          Your Reading Journey Awaits
-        </h2>
-        <div className="grid md:grid-cols-3 gap-12">
-          <Feature
-            icon={<Bookmark className="h-6 w-6" />}
-            title="Track Your Books"
-            description="Keep a digital record of every book you read, from bestsellers to hidden gems."
-          />
-          <Feature
-            icon={<PenLine className="h-6 w-6" />}
-            title="Save Your Thoughts"
-            description="Capture meaningful quotes, write detailed notes, and preserve your reflections."
-          />
-          <Feature
-            icon={<Users className="h-6 w-6" />}
-            title="Connect & Share"
-            description="Join a community of readers, share recommendations, and discover new books."
-          />
-        </div>
-      </div>
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Everything You Need to Track Your Reading</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Powerful features to help you organize your books, capture your thoughts, and connect with other readers.
+            </p>
+          </div>
 
-      {/* Getting Started Section */}
-      <div className="bg-gradient-to-b from-gray-50 to-white py-16 md:py-24">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">Start Your Reading Journey Today</h2>
-          <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Join thousands of readers who are already tracking their reading journey, sharing insights, and discovering new books.
-          </p>
-          <Button
-            onClick={() => setIsSignUp(true)}
-            className="h-12 px-8 text-lg"
-            variant="default"
-          >
-            Create Your Free Account
-          </Button>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Feature
+              icon={<BookOpen className="h-6 w-6" />}
+              title="Track Your Books"
+              description="Keep a detailed record of every book you read, want to read, and are currently reading."
+            />
+            <Feature
+              icon={<PenLine className="h-6 w-6" />}
+              title="Take Notes"
+              description="Capture your thoughts, favorite quotes, and insights as you read."
+            />
+            <Feature
+              icon={<Bookmark className="h-6 w-6" />}
+              title="Organize Collections"
+              description="Create custom collections to organize your books by genre, theme, or any way you like."
+            />
+            <Feature
+              icon={<Users className="h-6 w-6" />}
+              title="Connect with Readers"
+              description="Find and follow other readers who share your literary interests."
+            />
+            <Feature
+              icon={<Star className="h-6 w-6" />}
+              title="Rate & Review"
+              description="Share your opinions and read reviews from other members of the community."
+            />
+            <Feature
+              icon={<BookOpen className="h-6 w-6" />}
+              title="Reading Goals"
+              description="Set and track your reading goals to stay motivated throughout the year."
+            />
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="py-24 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center p-6">
+                <div className="text-4xl font-bold text-primary mb-2">10k+</div>
+                <div className="text-muted-foreground">Active Readers</div>
+              </div>
+              <div className="text-center p-6">
+                <div className="text-4xl font-bold text-primary mb-2">100k+</div>
+                <div className="text-muted-foreground">Books Tracked</div>
+              </div>
+              <div className="text-center p-6">
+                <div className="text-4xl font-bold text-primary mb-2">50k+</div>
+                <div className="text-muted-foreground">Notes Created</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Ready to Start Your Reading Journey?
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Join thousands of readers who use BookNotes to track their reading journey.
+              Sign up now and get started for free!
+            </p>
+            <Button 
+              size="lg"
+              className="h-12 px-8 text-base"
+              asChild
+            >
+              <Link to="/auth/sign-up">
+                Create Your Free Account
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 border-t">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
+            </div>
+            <div className="flex items-center gap-6">
+              <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground">
+                Terms of Service
+              </Link>
+              <a 
+                href="mailto:support@booknotes.com" 
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                Contact
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
 
-const Feature = ({ 
-  icon, 
-  title, 
-  description 
-}: { 
-  icon: React.ReactNode;
-  title: string; 
-  description: string;
-}) => (
-  <div className="text-center group transition-all duration-300 hover:transform hover:-translate-y-1">
-    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors duration-300">
+const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => (
+  <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
+    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
       {icon}
     </div>
-    <h3 className="font-bold text-xl mb-4">{title}</h3>
-    <p className="text-muted-foreground leading-relaxed">{description}</p>
+    <h3 className="text-xl font-semibold mb-2">{title}</h3>
+    <p className="text-muted-foreground">{description}</p>
   </div>
 );
 
