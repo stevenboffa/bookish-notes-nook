@@ -46,14 +46,14 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
       const SpeechRecognition = window.webkitSpeechRecognition;
       const newRecognition = new SpeechRecognition();
-      newRecognition.continuous = true;
+      newRecognition.continuous = false; // Changed to false to prevent continuous recognition
       newRecognition.interimResults = true;
 
       newRecognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
-        setContent(transcript);
+        const lastResult = event.results[event.results.length - 1];
+        if (lastResult.isFinal) {
+          setContent(prev => prev + (prev ? ' ' : '') + lastResult[0].transcript);
+        }
       };
 
       newRecognition.onerror = (event) => {
@@ -64,11 +64,15 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
 
       newRecognition.onend = () => {
         setIsRecording(false);
+        // Automatically restart recognition if still in recording mode
+        if (isRecording) {
+          newRecognition.start();
+        }
       };
 
       setRecognition(newRecognition);
     }
-  }, []);
+  }, [isRecording]);
 
   const toggleRecording = () => {
     if (!recognition) {
