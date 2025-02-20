@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -36,7 +35,7 @@ interface BookDetailViewProps {
 }
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
-type BookFormat = "physical_book" | "audiobook";
+type BookFormat = "physical_book" | "audiobook" | "ebook";
 
 export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
@@ -205,11 +204,14 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
                 <Select value={format} onValueChange={(value: BookFormat) => setFormat(value)}>
                   <SelectTrigger className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors">
-                    <SelectValue>{format === "physical_book" ? "Book" : "Audiobook"}</SelectValue>
+                    <SelectValue>
+                      {format === "physical_book" ? "Book" : format === "audiobook" ? "Audiobook" : "E-book"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="physical_book">Book</SelectItem>
                     <SelectItem value="audiobook">Audiobook</SelectItem>
+                    <SelectItem value="ebook">E-book</SelectItem>
                   </SelectContent>
                 </Select>
 
