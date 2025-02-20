@@ -10,6 +10,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 
+// Site configuration
+const SITE_CONFIG = {
+  name: "BookNotes",
+  description: "Your personal space for capturing thoughts, quotes, and memories from every book you read.",
+  tagline: "Welcome to BookNotes"
+};
+
 const Welcome = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +27,9 @@ const Welcome = () => {
   const { session } = useAuth();
 
   useEffect(() => {
+    // Update document title with site name
+    document.title = SITE_CONFIG.name;
+    
     if (session) {
       navigate("/dashboard");
     }
@@ -43,7 +53,7 @@ const Welcome = () => {
       if (error) throw error;
 
       toast({
-        title: isSignUp ? "Account created!" : "Welcome back!",
+        title: isSignUp ? `Welcome to ${SITE_CONFIG.name}!` : "Welcome back!",
         description: isSignUp
           ? "Please check your email to verify your account."
           : "You have successfully logged in.",
@@ -101,10 +111,10 @@ const Welcome = () => {
             <BookOpen className="h-20 w-20 mx-auto mb-6 transform transition-transform hover:scale-110 duration-300" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            Welcome to BookNotes
+            {SITE_CONFIG.tagline}
           </h1>
           <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Your personal space for capturing thoughts, quotes, and memories from every book you read.
+            {SITE_CONFIG.description}
           </p>
         </div>
       </div>
@@ -113,7 +123,7 @@ const Welcome = () => {
       <div className="max-w-md mx-auto px-4 py-12 -mt-8 relative z-10">
         <div className="bg-background border rounded-2xl shadow-2xl p-8 transition-all duration-300 hover:shadow-xl">
           <h2 className="text-2xl font-bold text-center mb-8">
-            {isSignUp ? "Create Your Account" : "Sign In"}
+            {isSignUp ? `Join ${SITE_CONFIG.name}` : `Sign In to ${SITE_CONFIG.name}`}
           </h2>
 
           <div className="mb-6">
