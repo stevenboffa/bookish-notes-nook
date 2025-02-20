@@ -22,12 +22,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 
-const genres = [
-  "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
-  "Romance", "Thriller", "Horror", "Biography", "History", 
-  "Self-Help", "Poetry", "Drama", "Adventure", "Children's",
-];
-
 interface BookDetailViewProps {
   book: Book | null;
   onSave: (book: Book) => void;
@@ -61,7 +55,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
   const handleSave = () => {
     if (!book) {
-      const newBook = {
+      const newBook: Book = {
         id: crypto.randomUUID(),
         title,
         author,
@@ -69,9 +63,12 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         status,
         rating: parseFloat(rating.toFixed(1)),
         notes: [],
-        quotes: [], // Add this line to include the quotes array
+        quotes: [],
         dateRead: new Date().toISOString().split('T')[0],
         isFavorite,
+        imageUrl: null,
+        thumbnailUrl: null,
+        format: 'physical_book'
       };
       onSave(newBook);
     } else {

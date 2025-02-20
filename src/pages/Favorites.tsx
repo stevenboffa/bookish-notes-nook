@@ -11,11 +11,13 @@ import {
 } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Favorites = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   useEffect(() => {
     const fetchFavoriteBooks = async () => {
@@ -53,8 +55,10 @@ const Favorites = () => {
       }
     };
 
-    fetchFavoriteBooks();
-  }, []);
+    if (session?.user?.id) {
+      fetchFavoriteBooks();
+    }
+  }, [session?.user?.id]);
 
   if (isLoading) {
     return (
