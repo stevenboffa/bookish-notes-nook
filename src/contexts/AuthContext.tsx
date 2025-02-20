@@ -18,43 +18,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
+      console.log("Initial session check:", initialSession ? "Found session" : "No session");
       if (error) {
         console.error("Error getting session:", error);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "There was a problem with your session. Please try logging in again.",
+        });
         // Clear any stale session data
         supabase.auth.signOut().catch(console.error);
       }
-      setSession(session);
+      setSession(initialSession);
       setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("Auth state changed:", _event);
-      if (_event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed successfully');
-      }
-      if (_event === 'SIGNED_OUT') {
-        // Clear any local session data
-        setSession(null);
-      }
-      setSession(session);
-      setLoading(false);
-    });
-
-    // Error handling for token refresh failures
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'TOKEN_REFRESHED' && !session) {
-        console.log('Token refresh failed, signing out...');
-        await supabase.auth.signOut();
+    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log("Auth state changed:", event, currentSession ? "Session exists" : "No session");
+      
+      if (event === 'SIGNED_IN') {
+        console.log("User signed in successfully");
+        setSession(currentSession);
         toast({
-          title: "Session Expired",
-          description: "Please sign in again to continue.",
-          variant: "destructive",
+          title: "Welcome!",
+          description: "You have successfully signed in.",
         });
       }
+      
+      if (event === 'SIGNED_OUT') {
+        console.log("User signed out");
+        setSession(null);
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        });
+      }
+
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+        setSession(currentSession);
+      }
+
+      setLoading(false);
     });
 
     return () => {
