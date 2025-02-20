@@ -27,6 +27,7 @@ import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RichTextEditorProps {
   content: string;
@@ -71,6 +72,33 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     }
   };
 
+  const formatHtml = (html: string) => {
+    let formatted = html;
+    // Add newlines after closing tags of block elements
+    formatted = formatted.replace(/<\/(div|p|h[1-6]|ul|ol|li|blockquote)>/g, '</$1>\n');
+    // Add newlines before opening tags of block elements
+    formatted = formatted.replace(/<(div|p|h[1-6]|ul|ol|li|blockquote)[^>]*>/g, '\n<$1>');
+    // Add newlines around img tags
+    formatted = formatted.replace(/<img[^>]*>/g, '\n<$&>\n');
+    // Remove multiple consecutive newlines
+    formatted = formatted.replace(/\n\s*\n/g, '\n');
+    // Add some basic indentation
+    const lines = formatted.split('\n');
+    let indent = 0;
+    formatted = lines
+      .map(line => {
+        line = line.trim();
+        if (!line) return '';
+        if (line.startsWith('</')) indent = Math.max(0, indent - 1);
+        const indented = '  '.repeat(indent) + line;
+        if (!line.startsWith('</') && !line.endsWith('/>') && line.startsWith('<')) indent++;
+        return indented;
+      })
+      .filter(Boolean)
+      .join('\n');
+    return formatted;
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -102,6 +130,9 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       console.error('Error uploading image:', error);
       toast.error('Failed to upload image');
     }
+
+    // Reset the file input
+    e.target.value = '';
   };
 
   if (!editor) {
@@ -311,9 +342,10 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       <div className="min-h-[300px] max-h-[600px] overflow-y-auto">
         {isHtmlView ? (
           <textarea
-            value={htmlContent}
+            value={formatHtml(htmlContent)}
             onChange={handleHtmlChange}
             className="w-full h-full min-h-[300px] p-4 font-mono text-sm resize-none focus:outline-none"
+            style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}
           />
         ) : (
           <EditorContent 
