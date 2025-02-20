@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { Friend, FriendRequest } from "@/components/friends/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Clock } from "lucide-react";
 
 const formatBooks = (books: any[]): Book[] => {
   return books.map(book => ({
@@ -40,6 +41,7 @@ export default function Friends() {
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("recent");
+  const [lastSentRequest, setLastSentRequest] = useState<{ email: string; timestamp: number } | null>(null);
   const { session } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -269,6 +271,12 @@ export default function Friends() {
 
       if (friendError) throw friendError;
 
+      // Set the last sent request
+      setLastSentRequest({
+        email: userData.email,
+        timestamp: Date.now()
+      });
+
       toast({
         title: "Friend Request Sent",
         description: `Your friend request has been sent to ${userData.username || userData.email}. They will need to approve it.`,
@@ -378,6 +386,15 @@ export default function Friends() {
       <h1 className="text-3xl font-bold mb-8 animate-fade-in">Friends</h1>
       
       <AddFriendSection onAddFriend={addFriend} isLoading={isLoading} />
+
+      {lastSentRequest && (
+        <Alert className="mt-4 bg-muted">
+          <Clock className="h-4 w-4" />
+          <AlertDescription>
+            You sent a friend request to <span className="font-medium">{lastSentRequest.email}</span>. They will need to approve it.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {pendingRequests.length > 0 && (
         <div className="space-y-4">
