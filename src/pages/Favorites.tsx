@@ -20,45 +20,29 @@ const Favorites = () => {
   useEffect(() => {
     const fetchFavoriteBooks = async () => {
       try {
-        const { data: booksData, error } = await supabase
+        const { data, error } = await supabase
           .from('books')
-          .select(`
-            *,
-            notes (
-              id,
-              content,
-              created_at
-            ),
-            quotes (
-              id,
-              content,
-              created_at
-            )
-          `)
+          .select('*')
+          .eq('user_id', session?.user?.id)
           .eq('is_favorite', true)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        const formattedBooks = booksData.map((book: any) => ({
+        const formattedBooks = data.map((book: any) => ({
           id: book.id,
           title: book.title,
           author: book.author,
           genre: book.genre,
           dateRead: book.date_read,
-          rating: book.rating || 0,
-          status: book.status || 'Not started',
+          rating: book.rating,
+          status: book.status,
           isFavorite: book.is_favorite,
-          notes: book.notes.map((note: any) => ({
-            id: note.id,
-            content: note.content,
-            createdAt: note.created_at,
-          })),
-          quotes: book.quotes.map((quote: any) => ({
-            id: quote.id,
-            content: quote.content,
-            createdAt: quote.created_at,
-          })) || [],
+          imageUrl: book.image_url || null,
+          thumbnailUrl: book.thumbnail_url || null,
+          format: book.format || 'physical_book',
+          notes: [],
+          quotes: [],
         }));
 
         setBooks(formattedBooks);

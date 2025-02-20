@@ -36,7 +36,13 @@ const Dashboard = () => {
           notes (
             id,
             content,
-            created_at
+            created_at,
+            page_number,
+            timestamp_seconds,
+            chapter,
+            category,
+            is_pinned,
+            reading_progress
           ),
           quotes (
             id,
@@ -60,10 +66,17 @@ const Dashboard = () => {
         isFavorite: book.is_favorite || false,
         imageUrl: book.image_url || null,
         thumbnailUrl: book.thumbnail_url || null,
+        format: book.format || 'physical_book',
         notes: book.notes.map((note: any) => ({
           id: note.id,
           content: note.content,
           createdAt: note.created_at,
+          pageNumber: note.page_number,
+          timestampSeconds: note.timestamp_seconds,
+          chapter: note.chapter,
+          category: note.category,
+          isPinned: note.is_pinned,
+          readingProgress: note.reading_progress,
         })),
         quotes: book.quotes.map((quote: any) => ({
           id: quote.id,

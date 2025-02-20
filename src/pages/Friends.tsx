@@ -14,6 +14,24 @@ import { Friend, FriendRequest } from "@/components/friends/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 
+const formatBooks = (books: any[]): Book[] => {
+  return books.map(book => ({
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    genre: book.genre,
+    dateRead: book.date_read,
+    rating: book.rating,
+    status: book.status,
+    isFavorite: book.is_favorite || false,
+    imageUrl: book.image_url || null,
+    thumbnailUrl: book.thumbnail_url || null,
+    format: book.format || 'physical_book',
+    notes: book.notes || [],
+    quotes: book.quotes || [],
+  }));
+};
+
 export default function Friends() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
@@ -87,7 +105,7 @@ export default function Friends() {
             email: friendEmail || '',
             status: friendship.status,
             type: isSender ? 'sent' : 'received',
-            books: (booksData || []).map(book => ({
+            books: formatBooks((booksData || []).map(book => ({
               id: book.id,
               title: book.title,
               author: book.author,
@@ -107,7 +125,7 @@ export default function Friends() {
                 content: quote.content,
                 createdAt: quote.created_at,
               })),
-            })),
+            }))),
           });
         }
       }

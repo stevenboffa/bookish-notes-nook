@@ -61,7 +61,6 @@ export default function AddBook() {
       }
 
       if (data?.items && Array.isArray(data.items)) {
-        // Remove duplicates based on book ID
         const uniqueBooks = Array.from(
           new Map(data.items.map(book => [book.id, book])).values()
         ) as GoogleBook[];
@@ -88,10 +87,11 @@ export default function AddBook() {
       rating: 0,
       status: "Not started",
       notes: [],
-      quotes: [], // Add this line
+      quotes: [],
       isFavorite: false,
       imageUrl,
       thumbnailUrl,
+      format: "physical_book",
     };
     setBook(newBook);
     setSearchResults([]);

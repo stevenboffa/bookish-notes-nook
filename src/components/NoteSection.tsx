@@ -1,10 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
 import { Trash2, Pin, Clock, BookOpen } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface NoteSectionProps {
   book: Book;
@@ -15,7 +21,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const [localNotes, setLocalNotes] = useState(book.notes);
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'page' | 'chapter'>('newest');
 
-  // Sync local notes with book notes when they change
   useEffect(() => {
     setLocalNotes(book.notes);
   }, [book.notes]);
@@ -37,7 +42,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
           timestamp_seconds: noteData.timestampSeconds,
           chapter: noteData.chapter,
           category: noteData.category,
-          reading_progress: 0, // TODO: Add actual reading progress
+          reading_progress: 0,
         })
         .select()
         .single();
@@ -56,11 +61,9 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         readingProgress: noteRecord.reading_progress,
       };
 
-      // Update local state immediately
       const updatedNotes = [newNoteObject, ...localNotes];
       setLocalNotes(updatedNotes);
 
-      // Update parent component
       onUpdateBook({
         ...book,
         notes: updatedNotes,
@@ -79,11 +82,9 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       if (error) throw error;
 
-      // Update local state immediately
       const updatedNotes = localNotes.filter(note => note.id !== noteId);
       setLocalNotes(updatedNotes);
 
-      // Update parent component
       onUpdateBook({
         ...book,
         notes: updatedNotes,
