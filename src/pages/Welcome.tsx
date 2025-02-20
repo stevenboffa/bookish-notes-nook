@@ -80,10 +80,10 @@ const Welcome = () => {
             </p>
 
             {/* CTA Button */}
-            <div className="animate-fade-in [animation-delay:400ms]">
+            <div className="animate-fade-in [animation-delay:400ms] relative z-10">
               <Button 
                 size="lg" 
-                className="relative h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
+                className="h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
                 asChild
               >
                 <Link to="/auth/sign-up">

@@ -18,6 +18,9 @@ import BlogPosts from "./pages/admin/BlogPosts";
 import EditBlogPost from "./pages/admin/EditBlogPost";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
+import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -46,6 +49,9 @@ const App = () => (
               <Route path="/auth/sign-up" element={<SignUp />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
             </Route>
 
             {/* Protected routes */}
