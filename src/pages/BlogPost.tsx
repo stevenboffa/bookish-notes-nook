@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Helmet } from "react-helmet";
-import { NotFound } from "./NotFound";
+import NotFound from "./NotFound";
 
 export default function BlogPost() {
   const { slug } = useParams();
