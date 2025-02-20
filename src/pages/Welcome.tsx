@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Bookmark, PenLine, Users, ArrowRight, Star } from "lucide-react";
@@ -22,50 +21,71 @@ const Welcome = () => {
       <Header />
       
       {/* Hero Section */}
-      <section 
-        className="relative pt-32 pb-24 overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, #9b87f5 0%, #7c6ad6 100%)"
-        }}
-      >
-        {/* Decorative background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" 
+      <section className="relative min-h-[90vh] flex items-center justify-center">
+        {/* Gradient Background */}
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-purple-600 via-indigo-600 to-indigo-700"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 20% 150%, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0) 50%),
+              radial-gradient(circle at 80% -50%, rgba(64, 76, 234, 0.15) 0%, rgba(64, 76, 234, 0) 50%),
+              linear-gradient(135deg, #9b87f5 0%, #7c6ad6 100%)
+            `
+          }}
+        >
+          {/* Decorative pattern */}
+          <div className="absolute inset-0 opacity-10" 
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
             }}
           />
         </div>
 
-        <div className="container mx-auto px-4">
+        {/* Content */}
+        <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
-              Your Digital Reading Journal
+            {/* Animated badge */}
+            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm mb-8 animate-fade-in">
+              <span className="flex h-2 w-2 mr-2">
+                <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
+              </span>
+              Join 10,000+ readers today
+            </div>
+
+            {/* Main heading */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in [text-wrap:balance]">
+              Your Digital
+              <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                Reading Journey
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 animate-fade-in [animation-delay:200ms]">
-              Track your books, capture your thoughts, and connect with fellow readers - all in one place.
+
+            {/* Subheading */}
+            <p className="text-xl md:text-2xl text-white/90 mb-12 animate-fade-in [animation-delay:200ms] max-w-2xl mx-auto leading-relaxed">
+              Track your books, capture your thoughts, and connect with fellow readers - all in one beautifully designed space.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in [animation-delay:400ms]">
+
+            {/* CTA Button */}
+            <div className="animate-fade-in [animation-delay:400ms]">
               <Button 
                 size="lg" 
-                className="w-full sm:w-auto h-12 bg-white text-primary hover:bg-white/90 text-base"
+                className="h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
                 asChild
               >
                 <Link to="/auth/sign-up">
                   Start Your Reading Journey
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto h-12 border-white text-white hover:bg-white/10 text-base"
-                asChild
-              >
-                <Link to="/blog">
-                  Explore Our Blog
-                </Link>
-              </Button>
+            </div>
+
+            {/* Decorative elements */}
+            <div className="hidden md:block absolute -bottom-24 left-1/2 transform -translate-x-1/2 opacity-10">
+              <div className="relative w-[500px] h-[500px] rotate-45 border border-white/20 rounded-full">
+                <div className="absolute inset-4 border border-white/20 rounded-full" />
+                <div className="absolute inset-8 border border-white/20 rounded-full" />
+              </div>
             </div>
           </div>
         </div>
