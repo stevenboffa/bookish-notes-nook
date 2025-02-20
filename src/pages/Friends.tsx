@@ -149,10 +149,56 @@ export default function Friends() {
     }
   };
 
+  const handleAcceptRequest = async (requestId: string) => {
+    try {
+      setIsLoading(true);
+      console.log('Accepting request:', requestId);
+
+      const { error } = await supabase
+        .from('friends')
+        .update({ 
+          status: 'accepted',
+        })
+        .eq('id', requestId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error accepting request:', error);
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Friend request accepted successfully!"
+      });
+
+      await fetchFriends();
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to accept friend request. Please try again."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const addFriend = async (email: string) => {
     try {
       setIsLoading(true);
       
+      if (!email || !email.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Please enter a valid email address"
+        });
+        return;
+      }
+
       if (email === session?.user.email) {
         toast({
           variant: "destructive",
@@ -196,7 +242,7 @@ export default function Friends() {
           toast({
             title: "Pending Request",
             description: isPendingSent 
-              ? `You already sent a friend request to ${otherUser.username || otherUser.email}. Waiting for their approval.`
+              ? `Your friend request to ${otherUser.username || otherUser.email} is still pending their approval.`
               : `${otherUser.username || otherUser.email} has already sent you a friend request. Check your pending requests above.`
           });
         } else {
@@ -210,59 +256,34 @@ export default function Friends() {
       }
 
       // If no existing request, create a new one
-      const { error: friendError } = await supabase
+      const { data: newRequest, error: friendError } = await supabase
         .from('friends')
         .insert({
           sender_id: session?.user.id,
           receiver_id: userData.id,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
       if (friendError) throw friendError;
 
       toast({
-        title: "Success",
-        description: `Friend request sent to ${userData.username || userData.email}`
+        title: "Friend Request Sent",
+        description: `Your friend request has been sent to ${userData.username || userData.email}. They will need to approve it.`,
+        duration: 5000,
       });
 
-      fetchFriends();
+      await fetchFriends();
     } catch (error) {
       console.error('Error adding friend:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to send friend request"
+        description: "Failed to send friend request. Please try again."
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleAcceptRequest = async (requestId: string) => {
-    try {
-      const { error } = await supabase
-        .from('friends')
-        .update({ status: 'accepted' })
-        .eq('id', requestId);
-
-      if (error) {
-        console.error('Error accepting request:', error);
-        throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: "Friend request accepted"
-      });
-
-      fetchFriends();
-    } catch (error) {
-      console.error('Error accepting friend request:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to accept friend request. Please try again."
-      });
     }
   };
 
