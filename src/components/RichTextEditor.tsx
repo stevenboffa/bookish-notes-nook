@@ -27,7 +27,6 @@ import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 interface RichTextEditorProps {
   content: string;
@@ -70,17 +69,6 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     if (editor) {
       editor.commands.setContent(e.target.value);
     }
-  };
-
-  const formatHtml = (html: string) => {
-    // Simple HTML formatting with line breaks and indentation
-    return html
-      .replace(/></g, '>\n<') // Add line breaks between tags
-      .replace(/<\/(div|p|h[1-6]|ul|ol|li|blockquote)>/g, '</$1>\n') // Add line breaks after block elements
-      .split('\n')
-      .map(line => line.trim()) // Remove extra spaces
-      .filter(line => line) // Remove empty lines
-      .join('\n');
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -323,10 +311,9 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       <div className="min-h-[300px] max-h-[600px] overflow-y-auto">
         {isHtmlView ? (
           <textarea
-            value={formatHtml(htmlContent)}
+            value={htmlContent}
             onChange={handleHtmlChange}
             className="w-full h-full min-h-[300px] p-4 font-mono text-sm resize-none focus:outline-none"
-            style={{ whiteSpace: 'pre-wrap' }}
           />
         ) : (
           <EditorContent 
