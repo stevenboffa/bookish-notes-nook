@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
@@ -56,19 +57,26 @@ Deno.serve(async (req) => {
     
     // Calculate startIndex for pagination
     const startIndex = (page - 1) * maxResults;
+
+    // Helper function to check if query looks like an author name
+    const isLikelyAuthorName = (query: string) => {
+      return query.split(' ').length >= 2 && // Has at least first and last name
+             !query.includes(':') && // Doesn't contain special search operators
+             !/\d/.test(query); // Doesn't contain numbers
+    };
     
     // Build advanced query parameters
-    const queryParts = [];
-    if (searchQuery.includes(':')) {
-      // Keep explicit search operators (like inauthor:, intitle:)
-      queryParts.push(searchQuery);
-    } else {
-      // Add relevance boosters for general searches
-      queryParts.push(`intitle:"${searchQuery}"`); // Exact title match gets priority
-      queryParts.push(searchQuery); // General search terms
+    let finalQuery = searchQuery;
+    if (!searchQuery.includes(':')) {
+      if (isLikelyAuthorName(searchQuery.trim())) {
+        // If it looks like an author name, prioritize author search
+        finalQuery = `inauthor:"${searchQuery.trim()}"`;
+      } else {
+        // For general searches, try both title and author with different weights
+        finalQuery = `intitle:"${searchQuery}" OR inauthor:"${searchQuery}" OR "${searchQuery}"`;
+      }
     }
     
-    const finalQuery = queryParts.join(' OR ');
     console.log('Final query:', finalQuery);
 
     // Build the query parameters
@@ -100,9 +108,8 @@ Deno.serve(async (req) => {
           book.volumeInfo?.authors?.length > 0
         )
         .sort((a: GoogleBook, b: GoogleBook) => {
-          // Prioritize books with more complete information
-          const scoreA = getBookCompletionScore(a);
-          const scoreB = getBookCompletionScore(b);
+          const scoreA = getBookCompletionScore(a, searchQuery);
+          const scoreB = getBookCompletionScore(b, searchQuery);
           return scoreB - scoreA;
         });
     }
@@ -128,16 +135,31 @@ Deno.serve(async (req) => {
   }
 });
 
-// Helper function to score book completeness
-function getBookCompletionScore(book: GoogleBook): number {
+// Helper function to score book completeness and relevance
+function getBookCompletionScore(book: GoogleBook, searchQuery: string): number {
   let score = 0;
   const info = book.volumeInfo;
+  const query = searchQuery.toLowerCase();
   
+  // Basic completion score
   if (info.imageLinks?.thumbnail) score += 3;
-  if (info.authors?.length > 0) score += 2;
   if (info.description?.length > 100) score += 2;
   if (info.categories?.length > 0) score += 1;
   if (info.publishedDate) score += 1;
+  
+  // Author matching score (weighted heavily)
+  if (info.authors) {
+    const authorMatch = info.authors.some(author => 
+      author.toLowerCase().includes(query) || 
+      query.includes(author.toLowerCase())
+    );
+    if (authorMatch) score += 10;
+  }
+  
+  // Exact author match gets highest priority
+  if (info.authors?.some(author => author.toLowerCase() === query)) {
+    score += 20;
+  }
   
   return score;
 }
