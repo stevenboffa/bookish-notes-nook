@@ -67,8 +67,11 @@ export default function Profile() {
         .single();
 
       if (error) throw error;
+      
       setProfile(data);
       setNewUsername(data.username || "");
+      
+      console.log("Fetched profile:", data); // Debug log
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
@@ -194,6 +197,7 @@ export default function Profile() {
 
     try {
       setIsUpdating(true);
+      console.log("Starting avatar upload..."); // Debug log
 
       // First, try to delete the old avatar if it exists
       if (profile.avatar_url) {
@@ -213,7 +217,9 @@ export default function Profile() {
       const fileExt = file.name.split('.').pop();
       const fileName = `${session?.user.id}-${Date.now()}.${fileExt}`;
       
-      const { error: uploadError } = await supabase.storage
+      console.log("Uploading new avatar with filename:", fileName); // Debug log
+
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('avatars')
         .upload(fileName, file, {
           cacheControl: '3600',
@@ -221,11 +227,14 @@ export default function Profile() {
         });
 
       if (uploadError) throw uploadError;
+      console.log("Upload successful:", uploadData); // Debug log
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
+
+      console.log("Generated public URL:", publicUrl); // Debug log
 
       // Update profile with new avatar URL
       const { error: updateError } = await supabase
@@ -240,6 +249,8 @@ export default function Profile() {
       
       // Force refresh profile data
       await fetchProfile();
+
+      console.log("Profile updated with new avatar URL"); // Debug log
 
       toast({
         title: "Success",
