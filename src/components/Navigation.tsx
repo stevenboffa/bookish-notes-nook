@@ -6,7 +6,6 @@ import {
   UserCircleIcon,
   UsersIcon,
   ShoppingCartIcon,
-  BookmarkIcon,
   FileTextIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,9 +39,6 @@ export function Navigation() {
     enabled: !!session?.user,
   });
 
-  // Debug log to see profile status
-  console.log("Current profile:", profile);
-
   return (
     <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
       <div className="container max-w-lg mx-auto px-4">
@@ -67,17 +63,6 @@ export function Navigation() {
           >
             <ShoppingCartIcon className="h-6 w-6" />
             <span>Buy</span>
-          </Link>
-
-          <Link
-            to="/blog"
-            className={cn(
-              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-              location.pathname === "/blog" && "text-primary"
-            )}
-          >
-            <BookmarkIcon className="h-6 w-6" />
-            <span>Blog</span>
           </Link>
 
           {profile?.is_admin && (

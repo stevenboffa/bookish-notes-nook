@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, Pencil, Trash2 } from "lucide-react";
+import { PlusIcon, Pencil, Trash2, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useEffect } from "react";
@@ -117,6 +117,15 @@ export default function BlogPosts() {
                 : "—"}
             </div>
             <div className="col-span-2 flex gap-2">
+              {post.status === "published" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
