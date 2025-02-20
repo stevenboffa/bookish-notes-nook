@@ -45,10 +45,14 @@ export function FriendCard({ friend, isSelected, onSelect, onRemove }: FriendCar
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <FriendAvatar email={friend.email} />
+          <FriendAvatar 
+            email={friend.email}
+            username={friend.username}
+            avatarUrl={friend.avatar_url}
+          />
           <div className="flex-1 min-w-0">
             <CardTitle className="text-sm font-medium truncate">
-              {friend.email}
+              {friend.username || friend.email}
             </CardTitle>
             <CardDescription className="flex items-center gap-2 mt-1">
               <BookOpen className="h-4 w-4 flex-shrink-0" />
@@ -77,7 +81,7 @@ export function FriendCard({ friend, isSelected, onSelect, onRemove }: FriendCar
             <AlertDialogHeader>
               <AlertDialogTitle>Remove Friend</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove {friend.email} from your friends? This action cannot be undone.
+                Are you sure you want to remove {friend.username || friend.email} from your friends? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

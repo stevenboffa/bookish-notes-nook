@@ -1,15 +1,17 @@
 
 import { User } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface FriendAvatarProps {
   email: string;
+  username?: string | null;
+  avatarUrl?: string | null;
   size?: "sm" | "md" | "lg";
 }
 
-export function FriendAvatar({ email, size = "md" }: FriendAvatarProps) {
-  const getInitials = (email: string) => {
-    return email.split('@')[0].slice(0, 2).toUpperCase();
+export function FriendAvatar({ email, username, avatarUrl, size = "md" }: FriendAvatarProps) {
+  const getInitials = (text: string) => {
+    return text.slice(0, 2).toUpperCase();
   };
 
   const sizeClass = {
@@ -20,8 +22,9 @@ export function FriendAvatar({ email, size = "md" }: FriendAvatarProps) {
 
   return (
     <Avatar className={sizeClass}>
+      <AvatarImage src={avatarUrl || undefined} />
       <AvatarFallback className="bg-primary/10">
-        {getInitials(email)}
+        {username ? getInitials(username) : getInitials(email)}
       </AvatarFallback>
     </Avatar>
   );
