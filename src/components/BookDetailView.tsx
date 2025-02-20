@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -194,29 +195,51 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
               </div>
             </div>
             <div className="flex-1 space-y-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
-                  <SelectTrigger className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors">
-                    <SelectValue>{status}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Not started">Not started</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Finished">Finished</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label 
+                    htmlFor="status" 
+                    className="text-sm font-medium text-gray-700 block mb-1 tracking-wide"
+                  >
+                    Reading Status
+                  </Label>
+                  <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
+                    <SelectTrigger 
+                      id="status"
+                      className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors"
+                    >
+                      <SelectValue>{status}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Not started">Not started</SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="Finished">Finished</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Select value={format} onValueChange={(value: BookFormat) => setFormat(value)}>
-                  <SelectTrigger className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors">
-                    <SelectValue placeholder="Book type">
-                      {format === "physical_book" ? "Book" : format === "audiobook" ? "Audiobook" : "Book type"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="physical_book">Book</SelectItem>
-                    <SelectItem value="audiobook">Audiobook</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label 
+                    htmlFor="format" 
+                    className="text-sm font-medium text-gray-700 block mb-1 tracking-wide"
+                  >
+                    Book Type
+                  </Label>
+                  <Select value={format} onValueChange={(value: BookFormat) => setFormat(value)}>
+                    <SelectTrigger 
+                      id="format"
+                      className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors"
+                    >
+                      <SelectValue placeholder="Select type">
+                        {format === "physical_book" ? "Book" : format === "audiobook" ? "Audiobook" : "Select type"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="physical_book">Book</SelectItem>
+                      <SelectItem value="audiobook">Audiobook</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <div className="flex items-center space-x-2">
                   <Checkbox
