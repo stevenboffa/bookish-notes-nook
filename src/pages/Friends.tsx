@@ -311,13 +311,19 @@ export default function Friends() {
   };
 
   const filteredFriends = friends
-    .filter(friend => 
-      friend.email.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter(friend => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        friend.email.toLowerCase().includes(searchLower) ||
+        (friend.username?.toLowerCase() || '').includes(searchLower)
+      );
+    })
     .sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          return a.email.localeCompare(b.email);
+          const aName = a.username?.toLowerCase() || a.email.toLowerCase();
+          const bName = b.username?.toLowerCase() || b.email.toLowerCase();
+          return aName.localeCompare(bName);
         case 'books':
           return b.books.length - a.books.length;
         case 'recent':

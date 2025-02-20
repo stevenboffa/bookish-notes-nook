@@ -27,7 +27,7 @@ export function FriendSearch({
       <div className="relative flex-1">
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search friends..."
+          placeholder="Search by email or username..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9"
