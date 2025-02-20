@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -16,6 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface GoogleBook {
   id: string;
@@ -39,10 +40,13 @@ interface GoogleBooksResponse {
   hasMore: boolean;
 }
 
+type SearchType = "title" | "author";
+
 export default function AddBook() {
   const [book, setBook] = useState<Book | null>(null);
   const [searchResults, setSearchResults] = useState<GoogleBook[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState<SearchType>("title");
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -61,9 +65,13 @@ export default function AddBook() {
     }
     
     try {
+      const queryString = searchType === "author" 
+        ? `inauthor:"${searchQuery.trim()}"` 
+        : `intitle:"${searchQuery.trim()}"`;
+
       const { data, error } = await supabase.functions.invoke<GoogleBooksResponse>('search-books', {
         body: { 
-          searchQuery: searchQuery.trim(),
+          searchQuery: queryString,
           page,
           maxResults: 20
         }
@@ -161,33 +169,48 @@ export default function AddBook() {
       {!id && (
         <div className="p-4 space-y-4">
           <h2 className="text-2xl font-bold">Search for a Book</h2>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Search by title or author..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && searchBooks(1)}
-            />
-            <Button 
-              onClick={() => searchBooks(1)}
-              disabled={isSearching}
+          <div className="space-y-4">
+            <RadioGroup
+              defaultValue="title"
+              value={searchType}
+              onValueChange={(value) => setSearchType(value as SearchType)}
+              className="flex space-x-4"
             >
-              {isSearching ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Searching...
-                </>
-              ) : (
-                <>
-                  <Search className="w-4 h-4 mr-2" />
-                  Search
-                </>
-              )}
-            </Button>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="title" id="title" />
+                <Label htmlFor="title">Search by Title</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="author" id="author" />
+                <Label htmlFor="author">Search by Author</Label>
+              </div>
+            </RadioGroup>
+
+            <div className="flex gap-2">
+              <Input
+                placeholder={searchType === "author" ? "Enter author name..." : "Enter book title..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && searchBooks(1)}
+              />
+              <Button 
+                onClick={() => searchBooks(1)}
+                disabled={isSearching}
+              >
+                {isSearching ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4 mr-2" />
+                    Search
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Search by title, author, or use advanced operators like 'intitle:' for more specific results.
-          </p>
 
           {searchResults.length > 0 && (
             <div className="space-y-4">
