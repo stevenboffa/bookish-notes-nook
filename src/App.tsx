@@ -16,6 +16,8 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogPosts from "./pages/admin/BlogPosts";
 import EditBlogPost from "./pages/admin/EditBlogPost";
+import SignIn from "./pages/auth/SignIn";
+import SignUp from "./pages/auth/SignUp";
 import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -37,9 +39,17 @@ const App = () => (
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
-            {/* Routes that should show navigation */}
+            {/* Public routes */}
             <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
               <Route path="/" element={<Welcome />} />
+              <Route path="/auth/sign-in" element={<SignIn />} />
+              <Route path="/auth/sign-up" element={<SignUp />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+            </Route>
+
+            {/* Protected routes */}
+            <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/buy-books" element={<BuyBooks />} />
               <Route path="/book/:id" element={<GoogleBookDetail />} />
@@ -47,14 +57,8 @@ const App = () => (
               <Route path="/edit-book/:id" element={<AddBook />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/friends" element={<Friends />} />
-              <Route path="/blog" element={<Blog />} />
               <Route path="/admin/posts" element={<BlogPosts />} />
               <Route path="/admin/posts/:id" element={<EditBlogPost />} />
-            </Route>
-            
-            {/* Routes that should not show navigation */}
-            <Route element={<AuthenticatedLayout hideNav><Outlet /></AuthenticatedLayout>}>
-              <Route path="/blog/:slug" element={<BlogPost />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />

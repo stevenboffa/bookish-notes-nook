@@ -28,13 +28,13 @@ export function Header() {
                 className="text-sm font-medium"
                 asChild
               >
-                <Link to="/?action=signin">Sign In</Link>
+                <Link to="/auth/sign-in">Sign In</Link>
               </Button>
               <Button 
                 className="text-sm font-medium"
                 asChild
               >
-                <Link to="/?action=signup">Create Account</Link>
+                <Link to="/auth/sign-up">Create Account</Link>
               </Button>
             </div>
           </nav>
