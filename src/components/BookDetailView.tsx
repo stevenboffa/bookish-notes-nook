@@ -35,14 +35,14 @@ interface BookDetailViewProps {
 }
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
-type BookFormat = "physical_book" | "audiobook" | "ebook";
+type BookFormat = "physical_book" | "audiobook";
 
 export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
-  const [format, setFormat] = useState<BookFormat>(book?.format || "physical_book");
+  const [format, setFormat] = useState<BookFormat | "">("");
   const [rating, setRating] = useState(book?.rating || 0);
   const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
@@ -56,13 +56,17 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       setAuthor(book.author);
       setGenre(book.genre);
       setStatus(book.status as BookStatus);
-      setFormat(book.format as BookFormat);
+      setFormat(book.format as BookFormat || "");
       setRating(parseFloat(String(book.rating)) || 0);
       setIsFavorite(book.isFavorite || false);
     }
   }, [book]);
 
   const handleSave = () => {
+    if (!format) {
+      return;
+    }
+
     if (!book) {
       const newBook: Book = {
         id: crypto.randomUUID(),
@@ -204,14 +208,13 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
                 <Select value={format} onValueChange={(value: BookFormat) => setFormat(value)}>
                   <SelectTrigger className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors">
-                    <SelectValue>
-                      {format === "physical_book" ? "Book" : format === "audiobook" ? "Audiobook" : "E-book"}
+                    <SelectValue placeholder="Book type">
+                      {format === "physical_book" ? "Book" : format === "audiobook" ? "Audiobook" : "Book type"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="physical_book">Book</SelectItem>
                     <SelectItem value="audiobook">Audiobook</SelectItem>
-                    <SelectItem value="ebook">E-book</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -303,7 +306,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         </div>
 
         <div className="mt-2">
-          {book && (
+          {book && format && (
             <Tabs defaultValue="notes" className="w-full">
               <div className="px-6 border-b">
                 <TabsList className="w-full sm:w-auto">
@@ -312,7 +315,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                 </TabsList>
               </div>
               <TabsContent value="notes">
-                <NoteSection book={book} onUpdateBook={onSave} />
+                <NoteSection book={{...book, format}} onUpdateBook={onSave} />
               </TabsContent>
               <TabsContent value="quotes">
                 <QuoteSection book={book} onUpdateBook={onSave} />
