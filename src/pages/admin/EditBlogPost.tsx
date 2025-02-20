@@ -1,6 +1,6 @@
 
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function EditBlogPost() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
   const isNew = id === "new";
 
   const [formData, setFormData] = useState({
@@ -23,24 +26,36 @@ export default function EditBlogPost() {
     status: "draft",
     meta_description: "",
     meta_keywords: "",
-    reading_time: "5"
+    reading_time: "5",
+    custom_slug: ""
+  });
+
+  // First, check if user is admin
+  const { data: adminCheck, isLoading: isLoadingAdmin } = useQuery({
+    queryKey: ["admin-check"],
+    queryFn: async () => {
+      if (!session?.user) return null;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error checking admin status:", error);
+        return null;
+      }
+
+      return data;
+    },
+    enabled: !!session?.user,
   });
 
   const { isLoading: isLoadingPost } = useQuery({
     queryKey: ["admin-blog-post", id],
     queryFn: async () => {
       if (isNew) return null;
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .single();
-
-      if (!profile?.is_admin) {
-        navigate("/blog");
-        toast.error("You don't have access to this page");
-        return null;
-      }
 
       const { data, error } = await supabase
         .from("blog_posts")
@@ -58,18 +73,29 @@ export default function EditBlogPost() {
         status: data.status,
         meta_description: data.meta_description || "",
         meta_keywords: data.meta_keywords?.join(", ") || "",
-        reading_time: data.reading_time?.toString() || "5"
+        reading_time: data.reading_time?.toString() || "5",
+        custom_slug: data.slug || ""
       });
 
       return data;
     },
-    enabled: !isNew,
+    enabled: !isNew && !!adminCheck?.is_admin,
   });
 
   const { mutate: savePost, isPending } = useMutation({
     mutationFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) throw new Error("Not authenticated");
+      if (!session?.user) throw new Error("Not authenticated");
+      
+      // Generate or use custom slug
+      let slug = formData.custom_slug;
+      if (!slug) {
+        const { data: generatedSlug, error: slugError } = await supabase
+          .rpc("generate_unique_slug", { title: formData.title })
+          .single();
+        
+        if (slugError) throw slugError;
+        slug = generatedSlug;
+      }
 
       const post = {
         title: formData.title,
@@ -81,19 +107,14 @@ export default function EditBlogPost() {
         meta_keywords: formData.meta_keywords ? formData.meta_keywords.split(",").map(k => k.trim()) : null,
         reading_time: parseInt(formData.reading_time),
         published_at: formData.status === "published" ? new Date().toISOString() : null,
-        author_id: session.session.user.id
+        author_id: session.user.id,
+        slug
       };
 
       if (isNew) {
-        const { data, error } = await supabase
-          .rpc("generate_unique_slug", { title: formData.title })
-          .single();
-        
-        if (error) throw error;
-        
         const { error: insertError } = await supabase
           .from("blog_posts")
-          .insert({ ...post, slug: data });
+          .insert(post);
 
         if (insertError) throw insertError;
       } else {
@@ -104,17 +125,27 @@ export default function EditBlogPost() {
 
         if (error) throw error;
       }
+
+      // Invalidate queries to refresh the posts list
+      queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
     },
     onSuccess: () => {
       toast.success(isNew ? "Post created successfully" : "Post updated successfully");
       navigate("/admin/posts");
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error saving post:", error);
       toast.error("Failed to save post");
     },
   });
 
-  if (isLoadingPost) {
+  // Handle non-admin access
+  if (!isLoadingAdmin && !adminCheck?.is_admin) {
+    navigate("/blog");
+    return null;
+  }
+
+  if (isLoadingAdmin || isLoadingPost) {
     return (
       <div className="container max-w-4xl mx-auto p-4 animate-pulse">
         <div className="space-y-6">
@@ -134,7 +165,10 @@ export default function EditBlogPost() {
           <Button variant="outline" onClick={() => navigate("/admin/posts")}>
             Cancel
           </Button>
-          <Button onClick={() => savePost()} disabled={isPending}>
+          <Button 
+            onClick={() => savePost()} 
+            disabled={isPending || !formData.title || !formData.content}
+          >
             {isPending ? "Saving..." : "Save"}
           </Button>
         </div>
@@ -147,6 +181,16 @@ export default function EditBlogPost() {
             id="title"
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="custom_slug">URL Slug (optional)</Label>
+          <Input
+            id="custom_slug"
+            value={formData.custom_slug}
+            onChange={(e) => setFormData(prev => ({ ...prev, custom_slug: e.target.value }))}
+            placeholder="custom-url-slug (leave empty for auto-generation)"
           />
         </div>
 
