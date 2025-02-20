@@ -1,7 +1,7 @@
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Welcome from "./pages/Welcome";
@@ -38,7 +38,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Routes that should show navigation */}
-            <Route element={<AuthenticatedLayout />}>
+            <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
               <Route path="/" element={<Welcome />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/buy-books" element={<BuyBooks />} />
@@ -53,7 +53,7 @@ const App = () => (
             </Route>
             
             {/* Routes that should not show navigation */}
-            <Route element={<AuthenticatedLayout hideNav />}>
+            <Route element={<AuthenticatedLayout hideNav><Outlet /></AuthenticatedLayout>}>
               <Route path="/blog/:slug" element={<BlogPost />} />
             </Route>
             
