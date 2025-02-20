@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 export default function EditBlogPost() {
   const { id } = useParams();
@@ -86,11 +86,11 @@ export default function EditBlogPost() {
   const uploadImage = async (file: File) => {
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
       
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) {
         throw uploadError;
@@ -98,7 +98,7 @@ export default function EditBlogPost() {
 
       const { data: { publicUrl } } = supabase.storage
         .from('blog-images')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       return publicUrl;
     } catch (error) {
@@ -244,12 +244,10 @@ export default function EditBlogPost() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="content">Content (HTML)</Label>
-          <Textarea
-            id="content"
-            value={formData.content}
-            className="min-h-[300px] font-mono"
-            onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+          <Label htmlFor="content">Content</Label>
+          <RichTextEditor
+            content={formData.content}
+            onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
           />
         </div>
 
