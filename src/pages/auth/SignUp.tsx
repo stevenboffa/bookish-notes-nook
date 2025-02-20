@@ -52,8 +52,8 @@ export default function SignUp() {
 
   return (
     <AuthLayout
-      title="Create an account"
-      subtitle="Enter your email below to create your account"
+      title="Join BookNotes"
+      subtitle="Start your reading journey today - it's free to join!"
       backTo={{
         text: "Back to sign in",
         href: "/auth/sign-in"
@@ -103,7 +103,7 @@ export default function SignUp() {
             <Input
               id="email"
               type="email"
-              placeholder="m@example.com"
+              placeholder="hello@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -120,16 +120,16 @@ export default function SignUp() {
               required
             />
             <p className="text-xs text-muted-foreground">
-              Must be at least 8 characters long
+              At least 8 characters long with letters and numbers
             </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Create account"}
+          <Button type="submit" className="w-full h-11" disabled={isLoading}>
+            {isLoading ? "Creating your account..." : "Create your free account"}
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            By clicking continue, you agree to our{" "}
+            By creating an account, you agree to our{" "}
             <Link to="/terms" className="text-primary hover:text-primary/90 font-medium">
               Terms of Service
             </Link>{" "}

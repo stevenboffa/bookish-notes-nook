@@ -52,7 +52,7 @@ export default function SignIn() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Enter your email to sign in to your account"
+      subtitle="Pick up where you left off in your reading journey"
     >
       <div className="grid gap-6">
         <Button 
@@ -98,7 +98,7 @@ export default function SignIn() {
             <Input
               id="email"
               type="email"
-              placeholder="m@example.com"
+              placeholder="hello@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -112,7 +112,7 @@ export default function SignIn() {
                 to="/auth/forgot-password"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Forgot password?
+                Forgot your password?
               </Link>
             </div>
             <Input
@@ -124,17 +124,17 @@ export default function SignIn() {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Sign in"}
+          <Button type="submit" className="w-full h-11" disabled={isLoading}>
+            {isLoading ? "Signing you in..." : "Sign in to your account"}
           </Button>
         </form>
       </div>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Don't have an account?{" "}
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        New to BookNotes?{" "}
         <Link
           to="/auth/sign-up"
-          className="text-primary hover:text-primary/90 font-medium transition-colors"
+          className="text-primary hover:text-primary/90 font-medium"
         >
           Create an account
         </Link>
