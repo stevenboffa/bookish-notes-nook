@@ -36,12 +36,14 @@ interface BookDetailViewProps {
 }
 
 type BookStatus = "Not started" | "In Progress" | "Finished";
+type BookFormat = "physical_book" | "audiobook";
 
 export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
+  const [format, setFormat] = useState<BookFormat>(book?.format || "physical_book");
   const [rating, setRating] = useState(book?.rating || 0);
   const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
@@ -55,6 +57,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       setAuthor(book.author);
       setGenre(book.genre);
       setStatus(book.status as BookStatus);
+      setFormat(book.format as BookFormat);
       setRating(parseFloat(String(book.rating)) || 0);
       setIsFavorite(book.isFavorite || false);
     }
@@ -68,6 +71,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         author,
         genre,
         status,
+        format,
         rating: parseFloat(rating.toFixed(1)),
         notes: [],
         quotes: [],
@@ -75,7 +79,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         isFavorite,
         imageUrl: null,
         thumbnailUrl: null,
-        format: 'physical_book'
       };
       onSave(newBook);
     } else {
@@ -85,6 +88,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         author,
         genre,
         status,
+        format,
         rating: parseFloat(rating.toFixed(1)),
         isFavorite,
       };
@@ -198,6 +202,17 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                     <SelectItem value="Finished">Finished</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Select value={format} onValueChange={(value: BookFormat) => setFormat(value)}>
+                  <SelectTrigger className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors">
+                    <SelectValue>{format === "physical_book" ? "Book" : "Audiobook"}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="physical_book">Book</SelectItem>
+                    <SelectItem value="audiobook">Audiobook</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="isFavorite"

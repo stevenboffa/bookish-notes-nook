@@ -23,6 +23,14 @@ interface AddNoteFormProps {
   }) => void;
 }
 
+const NOTE_TYPES = [
+  "plot",
+  "character",
+  "theme",
+  "vocabulary",
+  "question"
+];
+
 export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const [content, setContent] = useState("");
   const [pageNumber, setPageNumber] = useState<string>("");
@@ -101,15 +109,14 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
 
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="Note type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="plot">Plot</SelectItem>
-            <SelectItem value="character">Character</SelectItem>
-            <SelectItem value="theme">Theme</SelectItem>
-            <SelectItem value="quote">Quote</SelectItem>
-            <SelectItem value="vocabulary">Vocabulary</SelectItem>
-            <SelectItem value="question">Question</SelectItem>
+            {NOTE_TYPES.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
