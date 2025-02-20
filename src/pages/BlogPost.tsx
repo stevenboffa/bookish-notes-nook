@@ -7,9 +7,12 @@ import { Helmet } from "react-helmet";
 import NotFound from "./NotFound";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { BlogFooter } from "@/components/blog/BlogFooter";
+import { useAuth } from "@/contexts/AuthContext";
+import { Header } from "@/components/Header";
 
 export default function BlogPost() {
   const { slug } = useParams();
+  const { session } = useAuth();
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["blog-post", slug],
@@ -36,7 +39,8 @@ export default function BlogPost() {
   if (isLoading) {
     return (
       <div className="animate-pulse">
-        <div className="h-[60vh] bg-muted" />
+        {!session && <Header />}
+        <div className={`h-[60vh] bg-muted ${!session ? 'mt-16' : ''}`} />
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="h-8 w-3/4 bg-muted rounded mb-4" />
           <div className="h-4 w-1/4 bg-muted rounded mb-8" />
@@ -70,12 +74,15 @@ export default function BlogPost() {
       </Helmet>
 
       <article className="min-h-screen flex flex-col">
+        {!session && <Header />}
+        
         <BlogHeader
           title={post.title}
           author={post.author.email}
           date={formattedDate}
           readingTime={post.reading_time}
           coverImage={post.cover_image}
+          className={!session ? 'mt-16' : ''}
         />
 
         <main className="flex-1 py-12 px-4 md:px-8">

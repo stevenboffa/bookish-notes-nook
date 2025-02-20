@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,7 @@ import { BookOpen, Bookmark, PenLine, Users, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { Header } from "@/components/Header";
 
 // Site configuration
 const SITE_CONFIG = {
@@ -98,9 +97,11 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
+      
       {/* Hero Section */}
       <div 
-        className="w-full text-white py-20 md:py-32 relative overflow-hidden"
+        className="w-full text-white pt-32 md:pt-40 pb-20 md:pb-32 relative overflow-hidden"
         style={{
           background: "linear-gradient(135deg, #9b87f5 0%, #7c6ad6 100%)"
         }}

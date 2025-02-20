@@ -3,8 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { Helmet } from "react-helmet";
+import { useAuth } from "@/contexts/AuthContext";
+import { Header } from "@/components/Header";
 
 export default function Blog() {
+  const { session } = useAuth();
+
   const { data: posts, isLoading } = useQuery({
     queryKey: ["blog-posts"],
     queryFn: async () => {
@@ -33,7 +37,9 @@ export default function Blog() {
         />
       </Helmet>
       
-      <div className="container max-w-6xl mx-auto px-4 py-8">
+      {!session && <Header />}
+      
+      <div className={`container max-w-6xl mx-auto px-4 ${!session ? 'pt-24' : 'pt-8'} pb-8`}>
         <h1 className="text-4xl font-bold mb-8">Blog</h1>
         
         {isLoading ? (
