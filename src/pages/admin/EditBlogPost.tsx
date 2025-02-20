@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -252,22 +253,41 @@ export default function EditBlogPost() {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="cover_image">Cover Image URL</Label>
-          <Input
-            id="cover_image"
-            value={formData.cover_image}
-            onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="cover_image_alt">Cover Image Alt Text</Label>
-          <Input
-            id="cover_image_alt"
-            value={formData.cover_image_alt}
-            onChange={(e) => setFormData(prev => ({ ...prev, cover_image_alt: e.target.value }))}
-          />
+        <div className="space-y-4">
+          <Label>Cover Image</Label>
+          {formData.cover_image && (
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-4">
+              <img
+                src={formData.cover_image}
+                alt={formData.cover_image_alt || "Blog post cover"}
+                className="w-full h-full object-cover"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => setFormData(prev => ({ ...prev, cover_image: "", cover_image_alt: "" }))}
+              >
+                Remove Image
+              </Button>
+            </div>
+          )}
+          <div className="grid gap-4">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="cursor-pointer"
+            />
+            {formData.cover_image && (
+              <Input
+                placeholder="Image alt text"
+                value={formData.cover_image_alt}
+                onChange={(e) => setFormData(prev => ({ ...prev, cover_image_alt: e.target.value }))}
+              />
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
