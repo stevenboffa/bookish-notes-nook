@@ -6,24 +6,39 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function BlogPosts() {
   const navigate = useNavigate();
+  const { session } = useAuth();
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ["admin-blog-posts"],
+  // First, check if user is admin
+  const { data: adminCheck, isLoading: isLoadingAdmin } = useQuery({
+    queryKey: ["admin-check"],
     queryFn: async () => {
-      const { data: profile } = await supabase
+      if (!session?.user) return null;
+
+      const { data, error } = await supabase
         .from("profiles")
         .select("is_admin")
+        .eq("id", session.user.id)
         .single();
 
-      if (!profile?.is_admin) {
-        navigate("/blog");
-        toast.error("You don't have access to this page");
+      if (error) {
+        console.error("Error checking admin status:", error);
         return null;
       }
 
+      return data;
+    },
+    enabled: !!session?.user,
+  });
+
+  // Fetch posts only if user is admin
+  const { data: posts, isLoading: isLoadingPosts } = useQuery({
+    queryKey: ["admin-blog-posts"],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("blog_posts")
         .select(`
@@ -35,9 +50,18 @@ export default function BlogPosts() {
       if (error) throw error;
       return data;
     },
+    enabled: !!adminCheck?.is_admin,
   });
 
-  if (isLoading) {
+  // Handle non-admin access
+  useEffect(() => {
+    if (!isLoadingAdmin && !adminCheck?.is_admin) {
+      toast.error("You don't have access to this page");
+      navigate("/blog");
+    }
+  }, [adminCheck, isLoadingAdmin, navigate]);
+
+  if (isLoadingAdmin || isLoadingPosts) {
     return (
       <div className="container max-w-6xl mx-auto p-4 animate-pulse">
         <div className="h-8 w-1/4 bg-muted rounded mb-8" />
@@ -48,6 +72,11 @@ export default function BlogPosts() {
         </div>
       </div>
     );
+  }
+
+  // If not admin, don't render anything (redirect will happen via useEffect)
+  if (!adminCheck?.is_admin) {
+    return null;
   }
 
   return (
