@@ -1,4 +1,3 @@
-
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -28,12 +27,27 @@ export interface Book {
   genre: string;
   dateRead: string;
   rating: number;
-  notes: Note[];
-  quotes: Quote[];  // Add this line
-  isFavorite?: boolean;
-  status: 'Not started' | 'In Progress' | 'Finished';
-  imageUrl?: string | null;
-  thumbnailUrl?: string | null;
+  status: string;
+  isFavorite: boolean;
+  imageUrl: string | null;
+  thumbnailUrl: string | null;
+  format: 'physical_book' | 'audiobook' | 'ebook';
+  notes: {
+    id: string;
+    content: string;
+    createdAt: string;
+    pageNumber?: number;
+    timestampSeconds?: number;
+    chapter?: string;
+    category?: string;
+    isPinned: boolean;
+    readingProgress?: number;
+  }[];
+  quotes: {
+    id: string;
+    content: string;
+    createdAt: string;
+  }[];
 }
 
 export interface Note {
@@ -42,7 +56,7 @@ export interface Note {
   createdAt: string;
 }
 
-export interface Quote {  // Add this interface
+export interface Quote {
   id: string;
   content: string;
   createdAt: string;

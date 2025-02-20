@@ -197,6 +197,7 @@ export type Database = {
           author: string
           created_at: string
           date_read: string
+          format: string
           genre: string
           id: string
           image_url: string | null
@@ -212,6 +213,7 @@ export type Database = {
           author: string
           created_at?: string
           date_read: string
+          format?: string
           genre: string
           id?: string
           image_url?: string | null
@@ -227,6 +229,7 @@ export type Database = {
           author?: string
           created_at?: string
           date_read?: string
+          format?: string
           genre?: string
           id?: string
           image_url?: string | null
@@ -282,21 +285,42 @@ export type Database = {
       notes: {
         Row: {
           book_id: string
+          category: string | null
+          chapter: string | null
           content: string
           created_at: string
           id: string
+          is_pinned: boolean | null
+          page_number: number | null
+          reading_progress: number | null
+          tags: string[] | null
+          timestamp_seconds: number | null
         }
         Insert: {
           book_id: string
+          category?: string | null
+          chapter?: string | null
           content: string
           created_at?: string
           id?: string
+          is_pinned?: boolean | null
+          page_number?: number | null
+          reading_progress?: number | null
+          tags?: string[] | null
+          timestamp_seconds?: number | null
         }
         Update: {
           book_id?: string
+          category?: string | null
+          chapter?: string | null
           content?: string
           created_at?: string
           id?: string
+          is_pinned?: boolean | null
+          page_number?: number | null
+          reading_progress?: number | null
+          tags?: string[] | null
+          timestamp_seconds?: number | null
         }
         Relationships: [
           {
