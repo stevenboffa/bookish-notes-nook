@@ -17,6 +17,9 @@ type BlogPost = {
 };
 
 export function BlogCard({ post }: { post: BlogPost }) {
+  // Format author name
+  const authorName = post.author.email === "hi@stevenboffa.com" ? "Steven B." : post.author.email;
+
   return (
     <Link to={`/blog/${post.slug}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group h-full flex flex-col">
@@ -44,7 +47,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
         </CardContent>
         <CardFooter className="text-sm text-muted-foreground border-t bg-muted/50">
           <div className="flex justify-between w-full items-center">
-            <span className="font-medium">{post.author.email}</span>
+            <span className="font-medium">{authorName}</span>
             <time dateTime={post.published_at} className="text-xs">
               {formatDistance(new Date(post.published_at), new Date(), { addSuffix: true })}
             </time>

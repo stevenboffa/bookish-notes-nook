@@ -11,6 +11,9 @@ type BlogHeaderProps = {
 };
 
 export function BlogHeader({ className, coverImage, title, author, date, readingTime }: BlogHeaderProps) {
+  // Format author name
+  const authorName = author === "hi@stevenboffa.com" ? "Steven B." : author;
+
   return (
     <header className={cn("w-full", className)}>
       {coverImage ? (
@@ -27,7 +30,7 @@ export function BlogHeader({ className, coverImage, title, author, date, reading
                 {title}
               </h1>
               <div className="flex items-center gap-4 text-sm md:text-base text-white/90">
-                <span className="font-medium">{author}</span>
+                <span className="font-medium">{authorName}</span>
                 <span>•</span>
                 <time dateTime={date}>{date}</time>
                 <span>•</span>
@@ -43,7 +46,7 @@ export function BlogHeader({ className, coverImage, title, author, date, reading
               {title}
             </h1>
             <div className="flex items-center gap-4 text-sm md:text-base text-muted-foreground">
-              <span className="font-medium">{author}</span>
+              <span className="font-medium">{authorName}</span>
               <span>•</span>
               <time dateTime={date}>{date}</time>
               <span>•</span>
