@@ -60,20 +60,28 @@ Deno.serve(async (req) => {
 
     // Helper function to check if query looks like an author name
     const isLikelyAuthorName = (query: string) => {
-      return query.split(' ').length >= 2 && // Has at least first and last name
-             !query.includes(':') && // Doesn't contain special search operators
-             !/\d/.test(query); // Doesn't contain numbers
+      const words = query.split(' ');
+      return words.length >= 2 && // Has multiple words
+             words.every(word => /^[A-Za-z]+$/.test(word)) && // All words are letters only
+             !query.includes(':'); // No search operators
     };
     
-    // Build advanced query parameters
+    // Build search query
     let finalQuery = searchQuery;
     if (!searchQuery.includes(':')) {
-      if (isLikelyAuthorName(searchQuery.trim())) {
-        // If it looks like an author name, prioritize author search
-        finalQuery = `inauthor:"${searchQuery.trim()}"`;
+      const trimmedQuery = searchQuery.trim();
+      
+      if (isLikelyAuthorName(trimmedQuery)) {
+        // If it looks like an author name, search both as author and general term
+        finalQuery = `(inauthor:"${trimmedQuery}") OR (${trimmedQuery})`;
       } else {
-        // For general searches, try both title and author with different weights
-        finalQuery = `intitle:"${searchQuery}" OR inauthor:"${searchQuery}" OR "${searchQuery}"`;
+        // For title-like searches or general terms, try a combination
+        const parts = [
+          `intitle:"${trimmedQuery}"`, // Exact title match
+          `title:${trimmedQuery}`, // Title contains
+          trimmedQuery // General search
+        ];
+        finalQuery = parts.join(' OR ');
       }
     }
     
@@ -104,8 +112,7 @@ Deno.serve(async (req) => {
       data.items = data.items
         .filter((book: GoogleBook) => 
           // Filter out books without essential information
-          book.volumeInfo?.title?.length > 0 &&
-          book.volumeInfo?.authors?.length > 0
+          book.volumeInfo?.title?.length > 0
         )
         .sort((a: GoogleBook, b: GoogleBook) => {
           const scoreA = getBookCompletionScore(a, searchQuery);
@@ -139,7 +146,8 @@ Deno.serve(async (req) => {
 function getBookCompletionScore(book: GoogleBook, searchQuery: string): number {
   let score = 0;
   const info = book.volumeInfo;
-  const query = searchQuery.toLowerCase();
+  const query = searchQuery.toLowerCase().trim();
+  const title = info.title?.toLowerCase() || '';
   
   // Basic completion score
   if (info.imageLinks?.thumbnail) score += 3;
@@ -147,18 +155,25 @@ function getBookCompletionScore(book: GoogleBook, searchQuery: string): number {
   if (info.categories?.length > 0) score += 1;
   if (info.publishedDate) score += 1;
   
-  // Author matching score (weighted heavily)
+  // Title matching score
+  if (title === query) {
+    score += 20; // Exact title match gets highest priority
+  } else if (title.includes(query)) {
+    score += 10; // Partial title match
+  }
+  
+  // Author matching score
   if (info.authors) {
     const authorMatch = info.authors.some(author => 
       author.toLowerCase().includes(query) || 
       query.includes(author.toLowerCase())
     );
     if (authorMatch) score += 10;
-  }
-  
-  // Exact author match gets highest priority
-  if (info.authors?.some(author => author.toLowerCase() === query)) {
-    score += 20;
+    
+    // Exact author match
+    if (info.authors.some(author => author.toLowerCase() === query)) {
+      score += 15;
+    }
   }
   
   return score;
