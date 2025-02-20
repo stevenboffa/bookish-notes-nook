@@ -1,4 +1,3 @@
-
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
@@ -25,7 +24,7 @@ import {
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -64,25 +63,28 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     },
   });
 
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+      setHtmlContent(content);
+    }
+  }, [content, editor]);
+
   const handleHtmlChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setHtmlContent(e.target.value);
-    onChange(e.target.value);
+    const newContent = e.target.value;
+    setHtmlContent(newContent);
+    onChange(newContent);
     if (editor) {
-      editor.commands.setContent(e.target.value);
+      editor.commands.setContent(newContent);
     }
   };
 
   const formatHtml = (html: string) => {
     let formatted = html;
-    // Add newlines after closing tags of block elements
     formatted = formatted.replace(/<\/(div|p|h[1-6]|ul|ol|li|blockquote)>/g, '</$1>\n');
-    // Add newlines before opening tags of block elements
     formatted = formatted.replace(/<(div|p|h[1-6]|ul|ol|li|blockquote)[^>]*>/g, '\n<$1>');
-    // Add newlines around img tags
     formatted = formatted.replace(/<img[^>]*>/g, '\n<$&>\n');
-    // Remove multiple consecutive newlines
     formatted = formatted.replace(/\n\s*\n/g, '\n');
-    // Add some basic indentation
     const lines = formatted.split('\n');
     let indent = 0;
     formatted = lines
@@ -131,7 +133,6 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       toast.error('Failed to upload image');
     }
 
-    // Reset the file input
     e.target.value = '';
   };
 
