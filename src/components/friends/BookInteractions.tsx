@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from "react";
-import { ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
+import { ThumbsUp, Heart, Brain, PartyPopper, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
@@ -29,12 +29,14 @@ export function BookInteractions({
 
   const reactionCounts = {
     like: reactions.filter(r => r.reaction_type === 'like').length,
-    dislike: reactions.filter(r => r.reaction_type === 'dislike').length
+    love: reactions.filter(r => r.reaction_type === 'love').length,
+    thinking: reactions.filter(r => r.reaction_type === 'thinking').length,
+    celebrate: reactions.filter(r => r.reaction_type === 'celebrate').length,
   };
 
   const userReaction = reactions.find(r => r.user_id === session?.user.id);
 
-  const handleReaction = useCallback(async (type: 'like' | 'dislike') => {
+  const handleReaction = useCallback(async (type: 'like' | 'love' | 'thinking' | 'celebrate') => {
     if (!session?.user.id) {
       toast({
         title: "Error",
@@ -121,16 +123,48 @@ export function BookInteractions({
         <Button
           variant="ghost"
           size="sm"
-          className={userReaction?.reaction_type === 'dislike' ? 'bg-primary/10' : ''}
-          onClick={() => handleReaction('dislike')}
+          className={userReaction?.reaction_type === 'love' ? 'bg-primary/10' : ''}
+          onClick={() => handleReaction('love')}
           disabled={isReacting}
         >
           {isReacting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <ThumbsDown className="h-4 w-4 mr-1" />
-              {reactionCounts.dislike}
+              <Heart className="h-4 w-4 mr-1" />
+              {reactionCounts.love}
+            </>
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={userReaction?.reaction_type === 'thinking' ? 'bg-primary/10' : ''}
+          onClick={() => handleReaction('thinking')}
+          disabled={isReacting}
+        >
+          {isReacting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <Brain className="h-4 w-4 mr-1" />
+              {reactionCounts.thinking}
+            </>
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={userReaction?.reaction_type === 'celebrate' ? 'bg-primary/10' : ''}
+          onClick={() => handleReaction('celebrate')}
+          disabled={isReacting}
+        >
+          {isReacting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <PartyPopper className="h-4 w-4 mr-1" />
+              {reactionCounts.celebrate}
             </>
           )}
         </Button>
