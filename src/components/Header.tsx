@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { Menu, X, BookOpen, Users, ChevronRight, MessageCircle, Info } from "lucide-react";
+import { Menu, BookOpen, Users, ChevronRight, MessageCircle, Info } from "lucide-react";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,7 +53,7 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="w-full p-0">
               <div className="flex flex-col h-full bg-gradient-to-br from-[#2B2930] to-[#403E43] text-white">
-                <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                <div className="p-6 border-b border-white/10">
                   <Link 
                     to="/" 
                     className="text-xl font-bold text-white"
@@ -61,14 +61,6 @@ export function Header() {
                   >
                     BookNotes
                   </Link>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="text-white hover:text-white/90"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <X className="h-6 w-6" />
-                  </Button>
                 </div>
                 <nav className="flex-1 px-6 py-8">
                   <div className="space-y-6">
