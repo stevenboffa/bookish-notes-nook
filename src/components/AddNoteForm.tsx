@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +45,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
       const SpeechRecognition = window.webkitSpeechRecognition;
       const newRecognition = new SpeechRecognition();
-      newRecognition.continuous = false; // Changed to false to prevent continuous recognition
+      newRecognition.continuous = false;
       newRecognition.interimResults = true;
 
       newRecognition.onresult = (event) => {
@@ -64,7 +63,6 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
 
       newRecognition.onend = () => {
         setIsRecording(false);
-        // Automatically restart recognition if still in recording mode
         if (isRecording) {
           newRecognition.start();
         }
@@ -85,7 +83,6 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
       setIsRecording(false);
       toast.success('Voice recording stopped');
     } else {
-      setContent(''); // Clear existing content when starting new recording
       recognition.start();
       setIsRecording(true);
       toast.success('Voice recording started');
@@ -113,7 +110,6 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
 
     onSubmit(note);
     
-    // Reset form
     setContent("");
     setPageNumber("");
     setTimestamp("");
