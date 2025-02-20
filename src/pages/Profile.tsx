@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 type ReadingStats = {
   notStarted: number;
@@ -193,13 +193,19 @@ export default function Profile() {
     }
 
     try {
+      setIsUpdating(true);
+
       // First, try to delete the old avatar if it exists
       if (profile.avatar_url) {
         const oldFileName = profile.avatar_url.split('/').pop();
         if (oldFileName) {
-          await supabase.storage
+          const { error: removeError } = await supabase.storage
             .from('avatars')
             .remove([oldFileName]);
+          
+          if (removeError) {
+            console.error('Error removing old avatar:', removeError);
+          }
         }
       }
 
@@ -211,7 +217,7 @@ export default function Profile() {
         .from('avatars')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         });
 
       if (uploadError) throw uploadError;
@@ -229,7 +235,12 @@ export default function Profile() {
 
       if (updateError) throw updateError;
 
+      // Update local state immediately
       setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
+      
+      // Force refresh profile data
+      await fetchProfile();
+
       toast({
         title: "Success",
         description: "Profile picture updated successfully",
@@ -241,6 +252,8 @@ export default function Profile() {
         description: error.message || "Failed to update profile picture",
         variant: "destructive",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -267,15 +280,23 @@ export default function Profile() {
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={profile.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10">
-                  {profile.username?.slice(0, 2).toUpperCase() || 
-                   session?.user.email?.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
+                {isUpdating ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : (
+                  <>
+                    <AvatarImage src={profile.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/10">
+                      {profile.username?.slice(0, 2).toUpperCase() || 
+                       session?.user.email?.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </>
+                )}
               </Avatar>
               <label 
                 htmlFor="avatar-upload" 
-                className="absolute bottom-0 right-0 p-1 bg-background border rounded-full cursor-pointer hover:bg-accent"
+                className="absolute bottom-0 right-0 p-1 bg-background border rounded-full cursor-pointer hover:bg-accent disabled:cursor-not-allowed"
               >
                 <Camera className="h-4 w-4" />
                 <input
@@ -284,6 +305,7 @@ export default function Profile() {
                   accept="image/*"
                   className="hidden"
                   onChange={handleAvatarUpload}
+                  disabled={isUpdating}
                 />
               </label>
             </div>
