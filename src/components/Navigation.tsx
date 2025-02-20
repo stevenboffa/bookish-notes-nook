@@ -1,75 +1,105 @@
+
 import { Link, useLocation } from "react-router-dom";
+import {
+  HomeIcon,
+  BookOpenIcon,
+  UserCircleIcon,
+  UsersIcon,
+  ShoppingCartIcon,
+  BookmarkIcon,
+  FileTextIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { Grid, ShoppingCart, PlusCircle, User, Users } from "lucide-react";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Navigation() {
   const location = useLocation();
-  const { session } = useAuth();
 
-  const links = session ? [
-    { href: "/dashboard", label: "Dashboard", icon: Grid },
-    { href: "/buy-books", label: "Buy Books", icon: ShoppingCart },
-    { href: "/add-book", label: "Add Book", icon: PlusCircle },
-    { href: "/friends", label: "Friends", icon: Users },
-    { href: "/profile", label: "Profile", icon: User },
-  ] : [
-    { href: "/", label: "Welcome" },
-  ];
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .single();
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "d" && e.altKey) {
-        window.location.href = "/dashboard";
-      } else if (e.key === "a" && e.altKey) {
-        window.location.href = "/add-book";
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, []);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg pb-safe-bottom">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-around items-center py-2">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = location.pathname === link.href;
-            
-            return (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="flex flex-col items-center group relative min-w-[64px] min-h-[64px] justify-center"
-              >
-                <Button
-                  variant={isActive ? "default" : "ghost"}
-                  size="icon"
-                  className={cn(
-                    "rounded-xl transition-all duration-300",
-                    isActive 
-                      ? "bg-primary text-white shadow-lg scale-110" 
-                      : "text-text hover:text-primary hover:scale-105"
-                  )}
-                >
-                  {Icon && <Icon className="h-5 w-5" />}
-                </Button>
-                <span className={cn(
-                  "text-xs mt-1 font-medium transition-colors duration-300",
-                  isActive ? "text-primary" : "text-text-muted"
-                )}>
-                  {link.label}
-                </span>
-                {isActive && (
-                  <div className="absolute -top-1 w-1.5 h-1.5 bg-primary rounded-full" />
-                )}
-              </Link>
-            );
-          })}
+    <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
+      <div className="container max-w-lg mx-auto px-4">
+        <div className="flex justify-between items-center">
+          <Link
+            to="/dashboard"
+            className={cn(
+              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+              location.pathname === "/dashboard" && "text-primary"
+            )}
+          >
+            <HomeIcon className="h-6 w-6" />
+            <span>Home</span>
+          </Link>
+
+          <Link
+            to="/buy-books"
+            className={cn(
+              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+              location.pathname === "/buy-books" && "text-primary"
+            )}
+          >
+            <ShoppingCartIcon className="h-6 w-6" />
+            <span>Buy</span>
+          </Link>
+
+          <Link
+            to="/blog"
+            className={cn(
+              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+              location.pathname === "/blog" && "text-primary"
+            )}
+          >
+            <BookmarkIcon className="h-6 w-6" />
+            <span>Blog</span>
+          </Link>
+
+          {profile?.is_admin && (
+            <Link
+              to="/admin/posts"
+              className={cn(
+                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                location.pathname.startsWith("/admin") && "text-primary"
+              )}
+            >
+              <FileTextIcon className="h-6 w-6" />
+              <span>Admin</span>
+            </Link>
+          )}
+
+          <Link
+            to="/friends"
+            className={cn(
+              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+              location.pathname === "/friends" && "text-primary"
+            )}
+          >
+            <UsersIcon className="h-6 w-6" />
+            <span>Friends</span>
+          </Link>
+
+          <Link
+            to="/profile"
+            className={cn(
+              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+              location.pathname === "/profile" && "text-primary"
+            )}
+          >
+            <UserCircleIcon className="h-6 w-6" />
+            <span>Profile</span>
+          </Link>
         </div>
       </div>
     </nav>
