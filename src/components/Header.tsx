@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -14,7 +13,7 @@ export function Header() {
         <div className="h-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-            BookNotes
+            BookishNotes
           </Link>
 
           {/* Desktop Navigation */}
@@ -59,7 +58,7 @@ export function Header() {
                     className="text-xl font-bold text-white"
                     onClick={() => setIsOpen(false)}
                   >
-                    BookNotes
+                    BookishNotes
                   </Link>
                 </div>
                 <nav className="flex-1 px-6 py-8">

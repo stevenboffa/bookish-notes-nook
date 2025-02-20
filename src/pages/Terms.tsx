@@ -1,4 +1,3 @@
-
 import { Header } from "@/components/Header";
 
 export default function Terms() {
@@ -20,13 +19,13 @@ export default function Terms() {
           <p>When you create an account with us, you must provide accurate information. You are responsible for maintaining the security of your account.</p>
 
           <h2>4. Intellectual Property</h2>
-          <p>The service and its original content, features, and functionality are owned by BookNotes and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
+          <p>The service and its original content, features, and functionality are owned by BookishNotes and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
 
           <h2>5. Termination</h2>
           <p>We may terminate or suspend your account and bar access to the service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever.</p>
 
           <h2>6. Limitation of Liability</h2>
-          <p>In no event shall BookNotes, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages.</p>
+          <p>In no event shall BookishNotes, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages.</p>
 
           <h2>7. Changes to Terms</h2>
           <p>We reserve the right to modify or replace these Terms at any time. We will provide notice of any changes by posting the new Terms on this page.</p>

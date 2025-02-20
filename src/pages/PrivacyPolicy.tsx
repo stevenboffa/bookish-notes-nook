@@ -1,4 +1,3 @@
-
 import { Header } from "@/components/Header";
 
 export default function PrivacyPolicy() {
@@ -48,7 +47,7 @@ export default function PrivacyPolicy() {
 
           <h2>6. Contact Us</h2>
           <p>If you have questions about this Privacy Policy, please contact us at:</p>
-          <p>Email: privacy@booknotes.com</p>
+          <p>Email: privacy@bookishnotes.com</p>
         </div>
       </main>
     </div>
