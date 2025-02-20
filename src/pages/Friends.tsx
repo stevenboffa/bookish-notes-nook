@@ -53,11 +53,15 @@ export default function Friends() {
           status,
           receiver:profiles!friends_receiver_id_fkey(
             id,
-            email
+            email,
+            username,
+            avatar_url
           ),
           sender:profiles!friends_sender_id_fkey(
             id,
-            email
+            email,
+            username,
+            avatar_url
           )
         `)
         .or(`sender_id.eq.${session?.user.id},receiver_id.eq.${session?.user.id}`);
@@ -72,8 +76,7 @@ export default function Friends() {
           requests.push(friendship as FriendRequest);
         } else if (friendship.status === 'accepted') {
           const isSender = friendship.sender.id === session?.user.id;
-          const friendId = isSender ? friendship.receiver.id : friendship.sender.id;
-          const friendEmail = isSender ? friendship.receiver.email : friendship.sender.email;
+          const friend = isSender ? friendship.receiver : friendship.sender;
           
           const { data: booksData } = await supabase
             .from('books')
@@ -98,11 +101,13 @@ export default function Friends() {
                 created_at
               )
             `)
-            .eq('user_id', friendId);
+            .eq('user_id', friend.id);
 
           acceptedFriends.push({
-            id: friendId,
-            email: friendEmail || '',
+            id: friend.id,
+            email: friend.email || '',
+            username: friend.username,
+            avatar_url: friend.avatar_url,
             status: friendship.status,
             type: isSender ? 'sent' : 'received',
             books: formatBooks((booksData || []).map(book => ({

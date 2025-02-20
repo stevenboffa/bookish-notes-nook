@@ -1,5 +1,5 @@
 
-import { User, UserCheck, UserX } from "lucide-react";
+import { UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,10 +29,14 @@ export function FriendRequestCard({ request, onAccept, onReject }: FriendRequest
     )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <FriendAvatar email={request.sender.email} />
+          <FriendAvatar 
+            email={request.sender.email}
+            username={request.sender.username}
+            avatarUrl={request.sender.avatar_url}
+          />
           <div className="flex-1 min-w-0">
             <CardTitle className="text-sm font-medium truncate">
-              {request.sender.email}
+              {request.sender.username || request.sender.email}
             </CardTitle>
             <CardDescription>
               Wants to be your friend

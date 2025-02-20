@@ -193,12 +193,26 @@ export default function Profile() {
     }
 
     try {
-      // Upload image to Supabase Storage
+      // First, try to delete the old avatar if it exists
+      if (profile.avatar_url) {
+        const oldFileName = profile.avatar_url.split('/').pop();
+        if (oldFileName) {
+          await supabase.storage
+            .from('avatars')
+            .remove([oldFileName]);
+        }
+      }
+
+      // Upload new image to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${session?.user.id}-${Date.now()}.${fileExt}`;
-      const { error: uploadError, data } = await supabase.storage
+      
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) throw uploadError;
 
@@ -221,9 +235,10 @@ export default function Profile() {
         description: "Profile picture updated successfully",
       });
     } catch (error: any) {
+      console.error('Error uploading avatar:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to update profile picture",
         variant: "destructive",
       });
     }
