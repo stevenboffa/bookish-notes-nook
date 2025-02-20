@@ -21,12 +21,12 @@ import { useAuth } from "./contexts/AuthContext";
 const queryClient = new QueryClient();
 
 // Create a layout component that only shows Navigation for authenticated routes
-const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
+const AuthenticatedLayout = ({ children, hideNav = false }: { children: React.ReactNode, hideNav?: boolean }) => {
   const { session } = useAuth();
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {children}
-      {session && <Navigation />}
+      {session && !hideNav && <Navigation />}
     </div>
   );
 };
@@ -36,8 +36,9 @@ const App = () => (
     <AuthProvider>
       <TooltipProvider>
         <BrowserRouter>
-          <AuthenticatedLayout>
-            <Routes>
+          <Routes>
+            {/* Routes that should show navigation */}
+            <Route element={<AuthenticatedLayout />}>
               <Route path="/" element={<Welcome />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/buy-books" element={<BuyBooks />} />
@@ -47,12 +48,17 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/friends" element={<Friends />} />
               <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/admin/posts" element={<BlogPosts />} />
               <Route path="/admin/posts/:id" element={<EditBlogPost />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AuthenticatedLayout>
+            </Route>
+            
+            {/* Routes that should not show navigation */}
+            <Route element={<AuthenticatedLayout hideNav />}>
+              <Route path="/blog/:slug" element={<BlogPost />} />
+            </Route>
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

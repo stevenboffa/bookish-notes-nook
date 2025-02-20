@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +22,7 @@ export default function EditBlogPost() {
     excerpt: "",
     content: "",
     cover_image: "",
+    cover_image_alt: "",
     status: "draft",
     meta_description: "",
     meta_keywords: "",
@@ -30,7 +30,6 @@ export default function EditBlogPost() {
     custom_slug: ""
   });
 
-  // First, check if user is admin
   const { data: adminCheck, isLoading: isLoadingAdmin } = useQuery({
     queryKey: ["admin-check"],
     queryFn: async () => {
@@ -70,6 +69,7 @@ export default function EditBlogPost() {
         excerpt: data.excerpt || "",
         content: data.content,
         cover_image: data.cover_image || "",
+        cover_image_alt: data.cover_image_alt || "",
         status: data.status,
         meta_description: data.meta_description || "",
         meta_keywords: data.meta_keywords?.join(", ") || "",
@@ -82,11 +82,51 @@ export default function EditBlogPost() {
     enabled: !isNew && !!adminCheck?.is_admin,
   });
 
+  const uploadImage = async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('blog-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+      return null;
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    const publicUrl = await uploadImage(file);
+    if (publicUrl) {
+      setFormData(prev => ({ ...prev, cover_image: publicUrl }));
+      toast.success('Image uploaded successfully');
+    }
+  };
+
   const { mutate: savePost, isPending } = useMutation({
     mutationFn: async () => {
       if (!session?.user) throw new Error("Not authenticated");
       
-      // Generate or use custom slug
       let slug = formData.custom_slug;
       if (!slug) {
         const { data: generatedSlug, error: slugError } = await supabase
@@ -102,6 +142,7 @@ export default function EditBlogPost() {
         excerpt: formData.excerpt || null,
         content: formData.content,
         cover_image: formData.cover_image || null,
+        cover_image_alt: formData.cover_image_alt || null,
         status: formData.status,
         meta_description: formData.meta_description || null,
         meta_keywords: formData.meta_keywords ? formData.meta_keywords.split(",").map(k => k.trim()) : null,
@@ -126,7 +167,6 @@ export default function EditBlogPost() {
         if (error) throw error;
       }
 
-      // Invalidate queries to refresh the posts list
       queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
     },
     onSuccess: () => {
@@ -139,7 +179,6 @@ export default function EditBlogPost() {
     },
   });
 
-  // Handle non-admin access
   if (!isLoadingAdmin && !adminCheck?.is_admin) {
     navigate("/blog");
     return null;
@@ -219,6 +258,15 @@ export default function EditBlogPost() {
             id="cover_image"
             value={formData.cover_image}
             onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="cover_image_alt">Cover Image Alt Text</Label>
+          <Input
+            id="cover_image_alt"
+            value={formData.cover_image_alt}
+            onChange={(e) => setFormData(prev => ({ ...prev, cover_image_alt: e.target.value }))}
           />
         </div>
 
