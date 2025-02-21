@@ -20,27 +20,30 @@ export function AIRecommendations({ title, books }: AIRecommendationsProps) {
               className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => book.amazonUrl ? window.open(book.amazonUrl, '_blank') : null}
             >
-              <CardHeader>
-                <div className="aspect-w-2 aspect-h-3 mb-4 flex items-center justify-center">
+              <CardHeader className="space-y-4">
+                <div className="aspect-w-2 aspect-h-3 flex items-center justify-center">
                   <BookCover
                     imageUrl={book.imageUrl}
                     thumbnailUrl={book.imageUrl}
-                    genre="Fantasy"
+                    genre={book.title.toLowerCase().includes("fantasy") ? "Fantasy" : "Science Fiction"}
                     title={book.title}
                   />
                 </div>
                 <div className="space-y-2">
                   <CardTitle className="text-lg line-clamp-2">{book.title}</CardTitle>
-                  <CardDescription>
-                    by {book.author} ({book.publicationYear})
+                  <CardDescription className="space-y-1">
+                    <div>by {book.author}</div>
+                    <div>({book.publicationYear})</div>
                     {book.rating && (
-                      <div className="mt-1">Rating: {book.rating}/5</div>
+                      <div>Rating: {book.rating}/5</div>
                     )}
                   </CardDescription>
                 </div>
               </CardHeader>
               <CardContent className="flex-1 space-y-2">
-                <p className="text-sm text-muted-foreground line-clamp-3">{book.description}</p>
+                <div className="text-sm text-muted-foreground line-clamp-3">
+                  {book.description}
+                </div>
                 {book.themes && book.themes.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {book.themes.map((theme, i) => (

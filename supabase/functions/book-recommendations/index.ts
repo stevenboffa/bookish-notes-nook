@@ -20,29 +20,25 @@ serve(async (req) => {
 
     let prompt = ''
     if (section === 'award-winning') {
-      prompt = `Generate 6 critically acclaimed or award-winning ${category} books. Include a mix of modern classics and recent notable works. For each book provide:
-      - Title
-      - Author
+      prompt = `Generate 6 critically acclaimed or award-winning ${category} books that are well-known and popular. Include books published after 2000. For each book provide:
+      - Title (exact, well-known titles only)
+      - Author (full name)
       - Publication year
-      - Brief compelling description (2-3 sentences)
-      - Rating (if applicable)
-      - 2-3 key themes or elements
-      - Amazon URL (optional)
-      - Cover image URL (optional)
+      - Brief description (2-3 sentences)
+      - Rating out of 5 (based on general consensus)
+      - 2-3 key themes
       
-      Format as JSON array of objects with these properties: title, author, publicationYear, description, rating, themes, amazonUrl, imageUrl`
+      Format as JSON array with these properties: title, author, publicationYear, description, rating, themes. Keep descriptions concise.`
     } else if (section === 'new') {
-      prompt = `Generate 6 highly-rated ${category} books published in the last 2 years. For each book provide:
-      - Title
-      - Author
-      - Publication year
-      - Brief compelling description (2-3 sentences)
-      - Rating (if applicable)
-      - 2-3 key themes or elements
-      - Amazon URL (optional)
-      - Cover image URL (optional)
+      prompt = `Generate 6 highly-rated ${category} books published in the last 2 years. Include well-known, verified books only. For each book provide:
+      - Title (exact, well-known titles only)
+      - Author (full name)
+      - Publication year (2022-2024 only)
+      - Brief description (2-3 sentences)
+      - Rating out of 5 (based on general consensus)
+      - 2-3 key themes
       
-      Format as JSON array of objects with these properties: title, author, publicationYear, description, rating, themes, amazonUrl, imageUrl`
+      Format as JSON array with these properties: title, author, publicationYear, description, rating, themes. Keep descriptions concise.`
     }
 
     console.log('Making request to OpenAI...')
@@ -53,16 +49,16 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',  // Fixed model name
+        model: 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
-            content: `You are a knowledgeable book recommendation system specializing in ${category} literature. Provide detailed, accurate recommendations with real books.`
+            content: `You are a knowledgeable book recommendation system specializing in ${category} literature. Only recommend real, verifiable books. Format output as clean JSON.`
           },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 2000,  // Increased token limit for more detailed responses
+        max_tokens: 1000,
       }),
     })
 
@@ -79,16 +75,46 @@ serve(async (req) => {
     try {
       recommendations = JSON.parse(data.choices[0].message.content)
       console.log(`Successfully parsed ${recommendations.length} recommendations`)
+
+      // Process recommendations to add cover images using Google Books API
+      const processedRecommendations = await Promise.all(recommendations.map(async (book) => {
+        try {
+          // Search Google Books API for the book
+          const query = `${book.title} ${book.author}`.replace(/\s+/g, '+')
+          const gbResponse = await fetch(
+            `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=1`,
+            { headers: { 'Accept': 'application/json' } }
+          )
+          const gbData = await gbResponse.json()
+          
+          // If we found a match, add the cover image URL
+          if (gbData.items?.[0]?.volumeInfo?.imageLinks?.thumbnail) {
+            return {
+              ...book,
+              imageUrl: gbData.items[0].volumeInfo.imageLinks.thumbnail.replace('http:', 'https:'),
+              amazonUrl: `https://www.amazon.com/s?k=${encodeURIComponent(`${book.title} ${book.author}`)}&i=stripbooks`
+            }
+          }
+          return book
+        } catch (error) {
+          console.error('Error fetching book cover:', error)
+          return book
+        }
+      }))
+
+      return new Response(
+        JSON.stringify({ recommendations: processedRecommendations }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     } catch (error) {
       console.error('Error parsing OpenAI response:', error)
       console.log('Raw content:', data.choices[0].message.content)
       recommendations = []
+      return new Response(
+        JSON.stringify({ recommendations }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
-
-    return new Response(
-      JSON.stringify({ recommendations }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
   } catch (error) {
     console.error('Error in book-recommendations function:', error)
     return new Response(
