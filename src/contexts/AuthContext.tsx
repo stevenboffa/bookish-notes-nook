@@ -17,22 +17,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Try to recover session from localStorage first
-    const savedSession = localStorage.getItem('supabase.auth.token');
-    if (savedSession) {
-      try {
-        const parsed = JSON.parse(savedSession);
-        if (parsed?.currentSession) {
-          setSession(parsed.currentSession);
-        }
-      } catch (e) {
-        console.error('Error parsing saved session:', e);
-      }
-    }
-
-    // Then get the current session from Supabase
-    supabase.auth.getSession().then(({ data: { session: currentSession }, error }) => {
-      console.log("Initial session check:", currentSession ? "Found session" : "No session");
+    // Set up initial session
+    const initializeSession = async () => {
+      // Get the current session
+      const { data, error } = await supabase.auth.getSession();
+      
       if (error) {
         console.error("Error getting session:", error);
         toast({
@@ -40,67 +29,65 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Authentication Error",
           description: "There was a problem with your session. Please try logging in again.",
         });
-      } else if (currentSession) {
-        setSession(currentSession);
-        // Save session to localStorage as backup
-        localStorage.setItem('supabase.auth.token', JSON.stringify({
-          currentSession,
-          timestamp: new Date().getTime()
-        }));
+        return;
       }
-      setLoading(false);
-    });
 
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event, currentSession ? "Session exists" : "No session");
-      
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        console.log("User signed in or token refreshed");
-        setSession(currentSession);
-        if (currentSession) {
-          localStorage.setItem('supabase.auth.token', JSON.stringify({
-            currentSession,
-            timestamp: new Date().getTime()
-          }));
-        }
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Welcome!",
-            description: "You have successfully signed in.",
-          });
-        }
+      if (data.session) {
+        console.log("Found existing session");
+        setSession(data.session);
       }
       
-      if (event === 'SIGNED_OUT') {
-        console.log("User signed out");
+      setLoading(false);
+    };
+
+    initializeSession();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      console.log("Auth state changed:", event);
+      
+      if (currentSession) {
+        console.log("Setting new session");
+        setSession(currentSession);
+      } else {
         setSession(null);
-        localStorage.removeItem('supabase.auth.token');
+      }
+      
+      setLoading(false);
+
+      // Show appropriate toasts
+      if (event === 'SIGNED_IN') {
+        toast({
+          title: "Welcome!",
+          description: "You have successfully signed in.",
+        });
+      } else if (event === 'SIGNED_OUT') {
         toast({
           title: "Signed out",
           description: "You have been signed out successfully.",
         });
       }
-
-      setLoading(false);
     });
 
+    // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
   }, [toast]);
 
-  // Refresh session periodically
+  // Set up automatic session refresh
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const { data: { session: refreshedSession }, error } = await supabase.auth.getSession();
-      if (!error && refreshedSession) {
+    if (!session) return;
+
+    const refreshInterval = setInterval(async () => {
+      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+      if (refreshedSession) {
         setSession(refreshedSession);
       }
     }, 1000 * 60 * 4); // Refresh every 4 minutes
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(refreshInterval);
+  }, [session]);
 
   return (
     <AuthContext.Provider value={{ session, loading }}>
