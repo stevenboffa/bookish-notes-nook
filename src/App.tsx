@@ -1,6 +1,7 @@
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Welcome from "./pages/Welcome";
@@ -23,12 +24,19 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
-// Create a protected route component
+// Create a protected route component that handles loading state
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session } = useAuth();
+  const { session, loading } = useAuth();
+  const location = useLocation();
+  
+  // Show nothing while checking authentication
+  if (loading) {
+    return null;
+  }
   
   if (!session) {
-    return <Navigate to="/auth/sign-in" replace />;
+    // Save the attempted route to redirect back after login
+    return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
   }
   
   return children;
