@@ -1,9 +1,8 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -21,9 +20,19 @@ import SignUp from "./pages/auth/SignUp";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
+
+// Create a protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session } = useAuth();
+  
+  if (!session) {
+    return <Navigate to="/auth/sign-in" replace />;
+  }
+  
+  return children;
+};
 
 // Create a layout component that only shows Navigation for authenticated routes
 const AuthenticatedLayout = ({ children, hideNav = false }: { children: React.ReactNode, hideNav?: boolean }) => {
@@ -44,7 +53,7 @@ const App = () => (
           <Routes>
             {/* Public routes */}
             <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
-              <Route path="/" element={<Welcome />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/auth/sign-in" element={<SignIn />} />
               <Route path="/auth/sign-up" element={<SignUp />} />
               <Route path="/blog" element={<Blog />} />
@@ -56,15 +65,51 @@ const App = () => (
 
             {/* Protected routes */}
             <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/buy-books" element={<BuyBooks />} />
-              <Route path="/book/:id" element={<GoogleBookDetail />} />
-              <Route path="/add-book" element={<AddBook />} />
-              <Route path="/edit-book/:id" element={<AddBook />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/friends" element={<Friends />} />
-              <Route path="/admin/posts" element={<BlogPosts />} />
-              <Route path="/admin/posts/:id" element={<EditBlogPost />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/buy-books" element={
+                <ProtectedRoute>
+                  <BuyBooks />
+                </ProtectedRoute>
+              } />
+              <Route path="/book/:id" element={
+                <ProtectedRoute>
+                  <GoogleBookDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/add-book" element={
+                <ProtectedRoute>
+                  <AddBook />
+                </ProtectedRoute>
+              } />
+              <Route path="/edit-book/:id" element={
+                <ProtectedRoute>
+                  <AddBook />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/friends" element={
+                <ProtectedRoute>
+                  <Friends />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/posts" element={
+                <ProtectedRoute>
+                  <BlogPosts />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/posts/:id" element={
+                <ProtectedRoute>
+                  <EditBlogPost />
+                </ProtectedRoute>
+              } />
             </Route>
             
             <Route path="*" element={<NotFound />} />

@@ -1,4 +1,3 @@
-
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -117,7 +116,7 @@ export function BookList({
   });
 
   return (
-    <div className="space-y-4 px-4 pb-safe-bottom">
+    <div className="space-y-4 px-4 pb-28">
       {filteredBooks.map((book) => (
         <Card
           key={book.id}

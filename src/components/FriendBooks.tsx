@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { BookCover } from "@/components/BookCover";
 import { Book } from "@/components/BookList";
@@ -10,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ChevronLeft, BookPlus } from "lucide-react";
+import { ChevronLeft, BookPlus, CheckCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +37,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
   const [genreFilter, setGenreFilter] = useState("all");
   const { toast } = useToast();
   const { session } = useAuth();
+  const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
 
   const genres = [...new Set(books.map(book => book.genre))];
 
@@ -100,6 +100,9 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
           description: `"${book.title}" has been added to your Future Reads list.`,
         });
       }
+      
+      // Add book to the added set to show checkmark
+      setAddedBooks(prev => new Set(prev).add(book.id));
     } catch (error) {
       console.error('Error adding to Future Reads:', error);
       toast({
@@ -195,7 +198,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
       </div>
       
       <div className={cn(
-        "grid gap-4",
+        "grid gap-4 pb-safe-bottom",
         isMobile ? "grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3"
       )}>
         {filteredBooks.map((book) => (
@@ -242,8 +245,12 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
                       addToFutureReads(book);
                     }}
                   >
-                    <BookPlus className="mr-2 h-4 w-4" />
-                    Add to Future Reads
+                    {addedBooks.has(book.id) ? (
+                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                    ) : (
+                      <BookPlus className="mr-2 h-4 w-4" />
+                    )}
+                    {addedBooks.has(book.id) ? 'Added to Future Reads' : 'Add to Future Reads'}
                   </Button>
                 </div>
               </div>
