@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -166,7 +167,7 @@ export default function BuyBooks() {
     enabled: ['science-fiction', 'fantasy'].includes(selectedCategory),
     retry: 1,
     staleTime: 24 * 60 * 60 * 1000,
-    cacheTime: 24 * 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
   });
 
   const { data: books = [], isLoading, error } = useQuery({
