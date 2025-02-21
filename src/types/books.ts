@@ -1,4 +1,3 @@
-
 export interface GoogleBook {
   id: string;
   volumeInfo: {
@@ -18,8 +17,8 @@ export interface AIBookRecommendation {
   author: string;
   publicationYear: string;
   description: string;
-  rating?: string;
   themes: string[];
+  rating: string;
   imageUrl?: string;
   amazonUrl?: string;
 }

@@ -10,6 +10,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const AMAZON_AFFILIATE_TAG = 'youraffiliatet-20'; // Replace with your actual affiliate tag
+
 async function getBookCover(title: string, author: string): Promise<string | undefined> {
   try {
     const query = encodeURIComponent(`${title} ${author}`);
@@ -26,6 +28,11 @@ async function getBookCover(title: string, author: string): Promise<string | und
   return undefined;
 }
 
+function generateAmazonUrl(title: string, author: string): string {
+  const searchQuery = encodeURIComponent(`${title} ${author}`);
+  return `https://www.amazon.com/s?k=${searchQuery}&tag=${AMAZON_AFFILIATE_TAG}`;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -37,7 +44,7 @@ serve(async (req) => {
 
     let systemPrompt = '';
     if (section === 'award-winning') {
-      systemPrompt = `You are a knowledgeable book curator. Please recommend 3 award-winning or highly acclaimed ${category} books.
+      systemPrompt = `You are a knowledgeable book curator. Please recommend 15 award-winning or highly acclaimed ${category} books.
 For each book, provide:
 - Title
 - Author
@@ -48,7 +55,7 @@ For each book, provide:
 
 Format the response as a JSON array of books with the exact properties: title, author, publicationYear, description, themes, rating.`;
     } else if (section === 'new') {
-      systemPrompt = `You are a knowledgeable book curator. Please recommend 3 recent ${category} books from the past 2 years.
+      systemPrompt = `You are a knowledgeable book curator. Please recommend 15 recent ${category} books from the past 2 years.
 For each book, provide:
 - Title
 - Author
@@ -104,7 +111,8 @@ Format the response as a JSON array of books with the exact properties: title, a
       publicationYear: String(book.publicationYear || ''),
       description: String(book.description || ''),
       themes: Array.isArray(book.themes) ? book.themes.map(String) : [],
-      rating: String(book.rating || '')
+      rating: String(book.rating || ''),
+      amazonUrl: generateAmazonUrl(book.title, book.author)
     }));
 
     // Fetch book covers in parallel
@@ -113,7 +121,7 @@ Format the response as a JSON array of books with the exact properties: title, a
     );
     const bookCovers = await Promise.all(bookCoversPromises);
 
-    // Add cover images to books
+    // Add cover images and Amazon URLs to books
     books = books.map((book, index) => ({
       ...book,
       imageUrl: bookCovers[index],
