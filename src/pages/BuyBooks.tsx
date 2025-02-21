@@ -165,7 +165,8 @@ export default function BuyBooks() {
     },
     enabled: ['science-fiction', 'fantasy'].includes(selectedCategory),
     retry: 1,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 24 * 60 * 60 * 1000,
+    cacheTime: 24 * 60 * 60 * 1000,
   });
 
   const { data: books = [], isLoading, error } = useQuery({
