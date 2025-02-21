@@ -45,6 +45,7 @@ serve(async (req) => {
       Format as JSON array of objects with these properties: title, author, publicationYear, description, rating, themes, amazonUrl, imageUrl`
     }
 
+    console.log('Making request to OpenAI...')
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -52,7 +53,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',  // Fixed model name
         messages: [
           { 
             role: 'system', 
@@ -60,12 +61,14 @@ serve(async (req) => {
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7, // Add some variability but keep responses focused
-        max_tokens: 1000, // Limit response length for faster generation
+        temperature: 0.7,
+        max_tokens: 2000,  // Increased token limit for more detailed responses
       }),
     })
 
     if (!response.ok) {
+      const errorBody = await response.text()
+      console.error('OpenAI API error:', response.status, errorBody)
       throw new Error(`OpenAI API error: ${response.status}`)
     }
 
@@ -78,6 +81,7 @@ serve(async (req) => {
       console.log(`Successfully parsed ${recommendations.length} recommendations`)
     } catch (error) {
       console.error('Error parsing OpenAI response:', error)
+      console.log('Raw content:', data.choices[0].message.content)
       recommendations = []
     }
 
