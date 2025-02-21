@@ -1,13 +1,38 @@
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BookCover } from "@/components/BookCover";
 import { GoogleBook } from "@/types/books";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BookSearchResultsProps {
   books: GoogleBook[];
   onBookClick: (bookId: string) => void;
+  isLoading?: boolean;
 }
 
-export function BookSearchResults({ books, onBookClick }: BookSearchResultsProps) {
+export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchResultsProps) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <Card key={index} className="flex flex-col">
+            <CardHeader className="flex-1">
+              <div className="aspect-w-2 aspect-h-3 mb-4">
+                <Skeleton className="w-full h-full" />
+              </div>
+              <Skeleton className="h-6 w-3/4 mb-2" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {books.map((book) => (
@@ -37,7 +62,7 @@ export function BookSearchResults({ books, onBookClick }: BookSearchResultsProps
           </CardContent>
         </Card>
       ))}
-      {books.length === 0 && (
+      {books.length === 0 && !isLoading && (
         <p className="col-span-full text-center text-muted-foreground py-8">
           No books found
         </p>

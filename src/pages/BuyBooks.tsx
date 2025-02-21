@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -122,12 +122,51 @@ export default function BuyBooks() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!session) {
       navigate("/");
     }
   }, [session, navigate]);
+
+  // Prefetch sci-fi and fantasy recommendations
+  useEffect(() => {
+    const prefetchCategories = ['science-fiction', 'fantasy'];
+    prefetchCategories.forEach(category => {
+      queryClient.prefetchQuery({
+        queryKey: ['ai-recommendations', category],
+        queryFn: async () => {
+          try {
+            const catName = category === 'science-fiction' ? 'Science Fiction' : 'Fantasy';
+            console.log(`Prefetching ${catName} recommendations...`);
+
+            const [awardWinningResponse, newBooksResponse] = await Promise.all([
+              supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+                body: { section: 'award-winning', category: catName }
+              }),
+              supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+                body: { section: 'new', category: catName }
+              })
+            ]);
+
+            if (awardWinningResponse.error) throw awardWinningResponse.error;
+            if (newBooksResponse.error) throw newBooksResponse.error;
+
+            return {
+              awardWinning: awardWinningResponse.data?.recommendations || [],
+              new: newBooksResponse.data?.recommendations || []
+            };
+          } catch (error) {
+            console.error('Error prefetching AI recommendations:', error);
+            throw error;
+          }
+        },
+        staleTime: 24 * 60 * 60 * 1000,
+        gcTime: 24 * 60 * 60 * 1000,
+      });
+    });
+  }, [queryClient]);
 
   const { data: aiRecommendations, isLoading: isLoadingAI } = useQuery({
     queryKey: ['ai-recommendations', selectedCategory],
@@ -276,25 +315,24 @@ export default function BuyBooks() {
             )}
           </div>
           
-          {isLoading || isLoadingAI ? (
-            <div className="flex justify-center items-center min-h-[200px]">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-            </div>
-          ) : ['science-fiction', 'fantasy'].includes(selectedCategory) ? (
+          {['science-fiction', 'fantasy'].includes(selectedCategory) ? (
             <div className="space-y-12">
               <AIRecommendations
                 title={`Award-Winning ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'}`}
                 books={aiRecommendations?.awardWinning || []}
+                isLoading={isLoadingAI}
               />
               <AIRecommendations
                 title={`New ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'} Releases`}
                 books={aiRecommendations?.new || []}
+                isLoading={isLoadingAI}
               />
             </div>
           ) : (
             <BookSearchResults
               books={books}
               onBookClick={(bookId) => navigate(`/book/${bookId}`)}
+              isLoading={isLoading}
             />
           )}
         </div>

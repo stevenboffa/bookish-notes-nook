@@ -2,17 +2,46 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BookCover } from "@/components/BookCover";
 import { AIBookRecommendation } from "@/types/books";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AIRecommendationsProps {
   title: string;
   books: AIBookRecommendation[];
+  isLoading?: boolean;
 }
 
-export function AIRecommendations({ title, books }: AIRecommendationsProps) {
+export function AIRecommendations({ title, books, isLoading }: AIRecommendationsProps) {
   return (
     <div className="space-y-4 mb-12">
       <h3 className="text-xl font-semibold">{title}</h3>
-      {books && books.length > 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Card key={index} className="flex flex-col">
+              <CardHeader className="space-y-4">
+                <div className="aspect-w-2 aspect-h-3">
+                  <Skeleton className="w-full h-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-1/3" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-6 w-16 rounded-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : books && books.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {books.map((book, index) => (
             <Card 
