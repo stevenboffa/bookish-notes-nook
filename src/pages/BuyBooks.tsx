@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CategorySection } from "@/components/books/CategorySection";
 import { BookSearchResults } from "@/components/books/BookSearchResults";
 import { AIRecommendations } from "@/components/books/AIRecommendations";
+import { GoogleBook, AIBookRecommendation } from "@/types/books";
 
 const categories = {
   fiction: {

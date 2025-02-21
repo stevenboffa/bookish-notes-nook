@@ -1,17 +1,6 @@
-
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BookCover } from "@/components/BookCover";
-
-interface AIBookRecommendation {
-  title: string;
-  author: string;
-  publicationYear: string;
-  description: string;
-  rating?: string;
-  themes: string[];
-  imageUrl?: string;
-  amazonUrl?: string;
-}
+import { AIBookRecommendation } from "@/types/books";
 
 interface AIRecommendationsProps {
   title: string;

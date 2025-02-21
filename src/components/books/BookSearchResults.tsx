@@ -1,20 +1,6 @@
-
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { BookCover } from "@/components/BookCover";
-
-interface GoogleBook {
-  id: string;
-  volumeInfo: {
-    title: string;
-    authors: string[];
-    description: string;
-    imageLinks?: {
-      thumbnail: string;
-      smallThumbnail: string;
-    };
-    categories: string[];
-  };
-}
+import { GoogleBook } from "@/types/books";
 
 interface BookSearchResultsProps {
   books: GoogleBook[];
