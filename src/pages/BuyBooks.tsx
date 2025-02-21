@@ -131,17 +131,23 @@ export default function BuyBooks() {
   const { data: aiRecommendations, isLoading: isLoadingAI } = useQuery({
     queryKey: ['ai-recommendations', selectedCategory],
     queryFn: async () => {
-      if (selectedCategory !== 'science-fiction') return { awardWinning: [], new: [] };
+      if (!['science-fiction', 'fantasy'].includes(selectedCategory)) return { awardWinning: [], new: [] };
 
       try {
-        console.log('Fetching award-winning books...');
+        console.log(`Fetching award-winning ${selectedCategory} books...`);
         const awardWinningResponse = await supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-          body: { section: 'award-winning' }
+          body: { 
+            section: 'award-winning',
+            category: selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'
+          }
         });
 
-        console.log('Fetching new books...');
+        console.log(`Fetching new ${selectedCategory} books...`);
         const newBooksResponse = await supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-          body: { section: 'new' }
+          body: { 
+            section: 'new',
+            category: selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'
+          }
         });
 
         if (awardWinningResponse.error) throw awardWinningResponse.error;
@@ -156,14 +162,14 @@ export default function BuyBooks() {
         throw error;
       }
     },
-    enabled: selectedCategory === 'science-fiction',
+    enabled: ['science-fiction', 'fantasy'].includes(selectedCategory),
     retry: 1
   });
 
   const { data: books = [], isLoading, error } = useQuery({
     queryKey: ['google-books', searchQuery, selectedCategory],
     queryFn: async () => {
-      if (selectedCategory === 'science-fiction') return [];
+      if (['science-fiction', 'fantasy'].includes(selectedCategory)) return [];
       
       try {
         console.log("Starting Google Books search...");
@@ -195,7 +201,7 @@ export default function BuyBooks() {
         throw error;
       }
     },
-    enabled: !!session && (!!searchQuery || (!!selectedCategory && selectedCategory !== 'science-fiction')),
+    enabled: !!session && (!!searchQuery || (!!selectedCategory && !['science-fiction', 'fantasy'].includes(selectedCategory))),
     staleTime: 60 * 1000,
     retry: 1,
   });
@@ -270,14 +276,14 @@ export default function BuyBooks() {
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
-          ) : selectedCategory === 'science-fiction' ? (
+          ) : ['science-fiction', 'fantasy'].includes(selectedCategory) ? (
             <div className="space-y-12">
               <AIRecommendations
-                title="Award-Winning Science Fiction"
+                title={`Award-Winning ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'}`}
                 books={aiRecommendations.awardWinning}
               />
               <AIRecommendations
-                title="New Science Fiction Releases"
+                title={`New ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'} Releases`}
                 books={aiRecommendations.new}
               />
             </div>
