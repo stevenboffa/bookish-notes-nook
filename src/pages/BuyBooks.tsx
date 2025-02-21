@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { BookCategoryCard } from "@/components/BookCategoryCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GoogleBook {
   id: string;
@@ -42,54 +44,111 @@ interface AIBookRecommendation {
   amazonUrl?: string;
 }
 
-const categories = [
-  {
-    id: "non-fiction",
-    title: "Non-fiction",
-    description: "Explore real-world stories and knowledge",
-    query: "subject:non-fiction&maxResults=16&filter=paid-ebooks",
-    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=60",
+const categories = {
+  fiction: {
+    title: "Fiction",
+    description: "Explore imaginative worlds and storytelling",
+    imageUrl: "https://images.unsplash.com/photo-1474932430478-367dbb6832c1?w=800&auto=format&fit=crop&q=60",
+    subcategories: [
+      {
+        id: "science-fiction",
+        title: "Science Fiction",
+        description: "Journey into imaginative futures",
+        query: "subject:science-fiction&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "fantasy",
+        title: "Fantasy",
+        description: "Magical realms and epic adventures",
+        query: "subject:fantasy&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "literary-fiction",
+        title: "Literary Fiction",
+        description: "Thoughtful and character-driven narratives",
+        query: "subject:literary+fiction&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "mystery-thriller",
+        title: "Mystery & Thriller",
+        description: "Suspenseful tales and clever mysteries",
+        query: "subject:mystery+thriller&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "historical-fiction",
+        title: "Historical Fiction",
+        description: "Stories set in fascinating past eras",
+        query: "subject:historical+fiction&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "romance",
+        title: "Romance",
+        description: "Love stories and romantic adventures",
+        query: "subject:romance&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=800&auto=format&fit=crop&q=60",
+      },
+    ],
   },
-  {
-    id: "science-fiction",
-    title: "Science Fiction",
-    description: "Journey into imaginative futures",
-    query: "subject:science-fiction&maxResults=16&filter=paid-ebooks",
-    imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&auto=format&fit=crop&q=60",
+  nonfiction: {
+    title: "Non-Fiction",
+    description: "Discover real-world knowledge and insights",
+    imageUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=800&auto=format&fit=crop&q=60",
+    subcategories: [
+      {
+        id: "biography",
+        title: "Biography & Memoir",
+        description: "Fascinating life stories",
+        query: "subject:biography+autobiography&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "history",
+        title: "History",
+        description: "Explore the past and its lessons",
+        query: "subject:history&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "science",
+        title: "Science & Technology",
+        description: "Understanding our world and beyond",
+        query: "subject:science&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "self-help",
+        title: "Self-Help & Personal Development",
+        description: "Tools for growth and improvement",
+        query: "subject:self-help&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "business",
+        title: "Business & Economics",
+        description: "Professional insights and strategies",
+        query: "subject:business&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&auto=format&fit=crop&q=60",
+      },
+      {
+        id: "philosophy",
+        title: "Philosophy & Psychology",
+        description: "Explore human thought and behavior",
+        query: "subject:philosophy+psychology&maxResults=16&filter=paid-ebooks",
+        imageUrl: "https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?w=800&auto=format&fit=crop&q=60",
+      },
+    ],
   },
-  {
-    id: "biography",
-    title: "Biographies",
-    description: "Discover remarkable life stories",
-    query: "subject:biography+autobiography&maxResults=16&filter=paid-ebooks",
-    imageUrl: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "classics",
-    title: "Classics",
-    description: "Timeless literary masterpieces",
-    query: "subject:classic+literature&maxResults=16&filter=paid-ebooks",
-    imageUrl: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "new-releases",
-    title: "New Releases",
-    description: "Fresh off the press",
-    query: "orderBy=newest&maxResults=16&filter=paid-ebooks",
-    imageUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "mystery",
-    title: "Mystery",
-    description: "Thrilling tales of suspense",
-    query: "subject:mystery+thriller&maxResults=16&filter=paid-ebooks",
-    imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=60",
-  },
-];
+};
 
 export default function BuyBooks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [mainCategory, setMainCategory] = useState<"fiction" | "nonfiction" | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -126,9 +185,6 @@ export default function BuyBooks() {
           throw newBooksResponse.error;
         }
 
-        console.log('Award-winning books:', awardWinningResponse.data);
-        console.log('New books:', newBooksResponse.data);
-
         return {
           awardWinning: awardWinningResponse.data?.recommendations || [],
           new: newBooksResponse.data?.recommendations || []
@@ -144,7 +200,7 @@ export default function BuyBooks() {
 
   const { data: books = [], isLoading, error } = useQuery({
     queryKey: ['google-books', searchQuery, selectedCategory],
-    queryFn: async ({ signal }) => {
+    queryFn: async () => {
       if (selectedCategory === 'science-fiction') return [];
       
       try {
@@ -152,7 +208,8 @@ export default function BuyBooks() {
         
         let queryString = searchQuery.trim();
         if (!queryString && selectedCategory) {
-          const category = categories.find(c => c.id === selectedCategory);
+          const category = [...(categories.fiction.subcategories || []), ...(categories.nonfiction.subcategories || [])]
+            .find(c => c.id === selectedCategory);
           queryString = category?.query || '';
         }
         
@@ -196,6 +253,7 @@ export default function BuyBooks() {
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
     setSelectedCategory(null);
+    setMainCategory(null);
     setIsSearching(true);
     setIsSearching(false);
   };
@@ -257,6 +315,51 @@ export default function BuyBooks() {
     </div>
   );
 
+  const renderMainCategories = () => (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold">Browse Categories</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {Object.entries(categories).map(([key, category]) => (
+          <BookCategoryCard
+            key={key}
+            title={category.title}
+            description={category.description}
+            imageUrl={category.imageUrl}
+            onClick={() => setMainCategory(key as "fiction" | "nonfiction")}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderSubcategories = () => {
+    if (!mainCategory) return null;
+    const category = categories[mainCategory];
+
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">{category.title} Categories</h2>
+          <Button variant="ghost" onClick={() => setMainCategory(null)}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Main Categories
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {category.subcategories.map((subcategory) => (
+            <BookCategoryCard
+              key={subcategory.id}
+              title={subcategory.title}
+              description={subcategory.description}
+              imageUrl={subcategory.imageUrl}
+              onClick={() => handleCategorySelect(subcategory.id)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex-1 container mx-auto p-4 space-y-8 pb-32">
       <h1 className="text-2xl font-bold">Buy Books</h1>
@@ -277,30 +380,21 @@ export default function BuyBooks() {
       </div>
 
       {!searchQuery && !selectedCategory ? (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Browse Categories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((category) => (
-              <BookCategoryCard
-                key={category.id}
-                title={category.title}
-                description={category.description}
-                imageUrl={category.imageUrl}
-                onClick={() => handleCategorySelect(category.id)}
-              />
-            ))}
-          </div>
-        </div>
+        mainCategory ? renderSubcategories() : renderMainCategories()
       ) : (
         <div className="space-y-8">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">
               {selectedCategory 
-                ? categories.find(c => c.id === selectedCategory)?.title 
+                ? [...categories.fiction.subcategories, ...categories.nonfiction.subcategories]
+                    .find(c => c.id === selectedCategory)?.title 
                 : 'Search Results'}
             </h2>
             {selectedCategory && (
-              <Button variant="ghost" onClick={() => setSelectedCategory(null)}>
+              <Button variant="ghost" onClick={() => {
+                setSelectedCategory(null);
+                setMainCategory(null);
+              }}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Categories
               </Button>
