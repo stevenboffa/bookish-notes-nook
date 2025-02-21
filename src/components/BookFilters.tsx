@@ -1,35 +1,33 @@
-import { Button } from "@/components/ui/button";
-import { Book, BookOpen, CheckCircle } from "lucide-react";
+
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface BookFiltersProps {
   activeFilter: string;
-  onFilterChange: (filter: string) => void;
+  onFilterChange: (value: string) => void;
 }
 
 export function BookFilters({ activeFilter, onFilterChange }: BookFiltersProps) {
-  const filters = [
-    { id: "all", label: "All titles", icon: Book },
-    { id: "in-progress", label: "In Progress", icon: BookOpen },
-    { id: "not-started", label: "Not Started", icon: Book },
-    { id: "finished", label: "Finished", icon: CheckCircle },
-  ];
-
   return (
-    <div className="flex gap-2 overflow-x-auto p-4 border-b bg-white sticky top-0 z-10">
-      {filters.map((filter) => {
-        const Icon = filter.icon;
-        return (
-          <Button
-            key={filter.id}
-            variant={activeFilter === filter.id ? "default" : "outline"}
-            className="whitespace-nowrap"
-            onClick={() => onFilterChange(filter.id)}
-          >
-            <Icon className="w-4 h-4 mr-2" />
-            {filter.label}
-          </Button>
-        );
-      })}
+    <div className="px-4 pb-2">
+      <Tabs value={activeFilter} onValueChange={onFilterChange}>
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="all" className="flex-1 sm:flex-none">
+            All
+          </TabsTrigger>
+          <TabsTrigger value="in-progress" className="flex-1 sm:flex-none">
+            In Progress
+          </TabsTrigger>
+          <TabsTrigger value="finished" className="flex-1 sm:flex-none">
+            Finished
+          </TabsTrigger>
+          <TabsTrigger value="not-started" className="flex-1 sm:flex-none">
+            Not Started
+          </TabsTrigger>
+          <TabsTrigger value="future-reads" className="flex-1 sm:flex-none">
+            Future Reads
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -78,6 +79,8 @@ const getStatusColor = (status: string) => {
       return "bg-primary/20 text-primary";
     case "Finished":
       return "bg-success text-success-foreground";
+    case "Future Reads":
+      return "bg-purple-100 text-purple-700";
     default:
       return "bg-gray-100 text-gray-700";
   }
@@ -106,6 +109,8 @@ export function BookList({
         return book.status === "Not started";
       case "finished":
         return book.status === "Finished";
+      case "future-reads":
+        return book.status === "Future Reads";
       default:
         return true;
     }
