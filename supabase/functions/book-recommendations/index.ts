@@ -10,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const AMAZON_AFFILIATE_TAG = 'youraffiliatet-20'; // Replace with your actual affiliate tag
+const AMAZON_AFFILIATE_TAG = 'bookwyrm-20'; // Updated with your actual affiliate tag
 
 async function getBookCover(title: string, author: string): Promise<string | undefined> {
   try {
