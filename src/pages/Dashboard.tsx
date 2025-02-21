@@ -59,7 +59,7 @@ const Dashboard = () => {
         id: book.id,
         title: book.title,
         author: book.author,
-        genre: book.genre,
+        genre: book.genre || 'Unknown',
         dateRead: book.date_read,
         rating: Number(book.rating) || 0,
         status: book.status || 'Not started',
@@ -239,3 +239,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
