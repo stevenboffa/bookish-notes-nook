@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -21,10 +22,10 @@ const formatBooks = (books: any[]): Book[] => {
     id: book.id,
     title: book.title,
     author: book.author,
-    genre: book.genre,
+    genre: book.genre || 'Unknown', // Ensure genre is never undefined
     dateRead: book.date_read,
-    rating: book.rating,
-    status: book.status,
+    rating: book.rating || 0,
+    status: book.status || 'Not started',
     isFavorite: book.is_favorite || false,
     imageUrl: book.image_url || null,
     thumbnailUrl: book.thumbnail_url || null,
