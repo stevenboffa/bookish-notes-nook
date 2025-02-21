@@ -124,6 +124,7 @@ const Dashboard = () => {
 
   const handleUpdateBook = async (updatedBook: Book) => {
     try {
+      console.log('Updating book with status:', updatedBook.status); // Debug log
       const { error } = await supabase
         .from('books')
         .update({
@@ -138,7 +139,10 @@ const Dashboard = () => {
         })
         .eq('id', updatedBook.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error); // Debug log
+        throw error;
+      }
 
       // Update books state immediately
       setBooks(books.map(book => 

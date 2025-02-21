@@ -28,7 +28,7 @@ export interface Book {
   genre: string;
   dateRead: string;
   rating: number;
-  status: string;
+  status: 'Not started' | 'In Progress' | 'Finished' | 'Future Reads';
   isFavorite: boolean;
   imageUrl: string | null;
   thumbnailUrl: string | null;

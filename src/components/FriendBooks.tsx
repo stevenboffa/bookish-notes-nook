@@ -50,18 +50,19 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
         .eq('user_id', session?.user.id)
         .eq('title', book.title)
         .eq('author', book.author)
-        .single();
+        .maybeSingle();
 
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-        throw checkError;
-      }
+      if (checkError) throw checkError;
 
       if (existingBook) {
         // If book exists but isn't in Future Reads, update its status
         if (existingBook.status !== 'Future Reads') {
           const { error: updateError } = await supabase
             .from('books')
-            .update({ status: 'Future Reads' })
+            .update({ 
+              status: 'Future Reads',
+              date_read: new Date().toISOString().split('T')[0]
+            })
             .eq('id', existingBook.id);
 
           if (updateError) throw updateError;
@@ -88,8 +89,8 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
             user_id: session?.user.id,
             image_url: book.imageUrl,
             thumbnail_url: book.thumbnailUrl,
-            date_read: new Date().toISOString(),
-            format: book.format
+            date_read: new Date().toISOString().split('T')[0],
+            format: book.format || 'physical_book'
           });
 
         if (insertError) throw insertError;
