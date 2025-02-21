@@ -61,7 +61,7 @@ const App = () => (
           <Routes>
             {/* Public routes */}
             <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Welcome />} /> {/* Changed to show Welcome page directly */}
               <Route path="/auth/sign-in" element={<SignIn />} />
               <Route path="/auth/sign-up" element={<SignUp />} />
               <Route path="/blog" element={<Blog />} />
