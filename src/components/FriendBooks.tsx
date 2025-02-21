@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BookCover } from "@/components/BookCover";
 import { Book } from "@/components/BookList";
 import {
@@ -13,9 +13,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { BookInteractions } from "./friends/BookInteractions";
-import { supabase } from "@/integrations/supabase/client";
-import { BookReaction, ReadingProgress } from "./friends/types";
 import {
   Select,
   SelectContent,
@@ -33,56 +30,9 @@ interface FriendBooksProps {
 
 export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) {
   const isMobile = useIsMobile();
-  const [reactions, setReactions] = useState<Record<string, BookReaction[]>>({});
-  const [progress, setProgress] = useState<Record<string, ReadingProgress>>({});
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [genreFilter, setGenreFilter] = useState("all");
-
-  const fetchReactions = async () => {
-    const { data } = await supabase
-      .from('book_reactions')
-      .select('*')
-      .in('book_id', books.map(b => b.id));
-    
-    if (data) {
-      const grouped = data.reduce((acc, reaction) => {
-        // Ensure reaction_type is one of the allowed types
-        if (['like', 'love', 'thinking', 'celebrate'].includes(reaction.reaction_type)) {
-          const typedReaction = {
-            ...reaction,
-            reaction_type: reaction.reaction_type as BookReaction['reaction_type']
-          };
-          acc[reaction.book_id] = acc[reaction.book_id] || [];
-          acc[reaction.book_id].push(typedReaction);
-        }
-        return acc;
-      }, {} as Record<string, BookReaction[]>);
-      setReactions(grouped);
-    }
-  };
-
-  const fetchProgress = async () => {
-    const { data } = await supabase
-      .from('reading_progress')
-      .select('*')
-      .in('book_id', books.map(b => b.id));
-    
-    if (data) {
-      const grouped = data.reduce((acc, prog) => {
-        acc[prog.book_id] = prog;
-        return acc;
-      }, {} as Record<string, ReadingProgress>);
-      setProgress(grouped);
-    }
-  };
-
-  useEffect(() => {
-    if (books.length > 0) {
-      fetchReactions();
-      fetchProgress();
-    }
-  }, [books]);
 
   const genres = [...new Set(books.map(book => book.genre))];
 
@@ -173,7 +123,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
         isMobile ? "grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3"
       )}>
         {filteredBooks.map((book) => (
-          <Card key={book.id} className="h-full">
+          <Card key={book.id}>
             <CardHeader className="p-4">
               <div className="flex gap-4">
                 <BookCover
@@ -209,16 +159,6 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 px-4 pb-4">
-              <BookInteractions
-                bookId={book.id}
-                ownerId={userId}
-                reactions={reactions[book.id] || []}
-                progress={progress[book.id]}
-                onReactionAdded={fetchReactions}
-                onProgressUpdated={fetchProgress}
-              />
-            </CardContent>
           </Card>
         ))}
         {filteredBooks.length === 0 && (
