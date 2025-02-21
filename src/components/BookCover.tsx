@@ -29,6 +29,15 @@ export function BookCover({
     lg: "w-48 h-72"
   };
 
+  // Function to validate image URL
+  const isValidImageUrl = (url?: string | null) => {
+    if (!url) return false;
+    return url.startsWith('http://') || url.startsWith('https://');
+  };
+
+  const validImageUrl = !error && isValidImageUrl(size === "sm" ? thumbnailUrl : imageUrl);
+  const fallbackAvailable = !!fallbackImage;
+
   return (
     <div 
       className={cn(
@@ -38,9 +47,9 @@ export function BookCover({
         className
       )}
     >
-      {(!error && (size === "sm" ? thumbnailUrl : imageUrl)) || fallbackImage ? (
+      {validImageUrl || fallbackAvailable ? (
         <img
-          src={error ? fallbackImage : (size === "sm" ? thumbnailUrl : imageUrl) || fallbackImage}
+          src={validImageUrl ? (size === "sm" ? thumbnailUrl : imageUrl) : fallbackImage}
           alt={`Cover of ${title}`}
           className="w-full h-full object-cover"
           onError={() => setError(true)}
@@ -50,7 +59,7 @@ export function BookCover({
           <span className="text-gray-500 text-sm font-medium">
             No Image Available
           </span>
-          <span className="text-gray-400 text-xs mt-1">
+          <span className="text-gray-400 text-xs mt-1 line-clamp-2">
             {title}
           </span>
         </div>
