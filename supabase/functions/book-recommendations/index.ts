@@ -60,8 +60,14 @@ serve(async (req) => {
           },
           { role: 'user', content: prompt }
         ],
+        temperature: 0.7, // Add some variability but keep responses focused
+        max_tokens: 1000, // Limit response length for faster generation
       }),
     })
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`)
+    }
 
     const data = await response.json()
     console.log('Received response from OpenAI')

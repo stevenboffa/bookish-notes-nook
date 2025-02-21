@@ -134,21 +134,17 @@ export default function BuyBooks() {
       if (!['science-fiction', 'fantasy'].includes(selectedCategory)) return { awardWinning: [], new: [] };
 
       try {
-        console.log(`Fetching award-winning ${selectedCategory} books...`);
-        const awardWinningResponse = await supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-          body: { 
-            section: 'award-winning',
-            category: selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'
-          }
-        });
+        const category = selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy';
+        console.log(`Fetching ${category} recommendations...`);
 
-        console.log(`Fetching new ${selectedCategory} books...`);
-        const newBooksResponse = await supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-          body: { 
-            section: 'new',
-            category: selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'
-          }
-        });
+        const [awardWinningResponse, newBooksResponse] = await Promise.all([
+          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+            body: { section: 'award-winning', category }
+          }),
+          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
+            body: { section: 'new', category }
+          })
+        ]);
 
         if (awardWinningResponse.error) throw awardWinningResponse.error;
         if (newBooksResponse.error) throw newBooksResponse.error;
@@ -159,11 +155,17 @@ export default function BuyBooks() {
         };
       } catch (error) {
         console.error('Error fetching AI recommendations:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch book recommendations. Please try again later."
+        });
         throw error;
       }
     },
     enabled: ['science-fiction', 'fantasy'].includes(selectedCategory),
-    retry: 1
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: books = [], isLoading, error } = useQuery({
@@ -273,18 +275,18 @@ export default function BuyBooks() {
           </div>
           
           {isLoading || isLoadingAI ? (
-            <div className="flex justify-center">
+            <div className="flex justify-center items-center min-h-[200px]">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
           ) : ['science-fiction', 'fantasy'].includes(selectedCategory) ? (
             <div className="space-y-12">
               <AIRecommendations
                 title={`Award-Winning ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'}`}
-                books={aiRecommendations.awardWinning}
+                books={aiRecommendations?.awardWinning || []}
               />
               <AIRecommendations
                 title={`New ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'} Releases`}
-                books={aiRecommendations.new}
+                books={aiRecommendations?.new || []}
               />
             </div>
           ) : (
