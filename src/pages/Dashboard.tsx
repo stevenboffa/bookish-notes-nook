@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -134,6 +133,8 @@ const Dashboard = () => {
           status: updatedBook.status,
           rating: updatedBook.rating,
           date_read: updatedBook.dateRead,
+          is_favorite: updatedBook.isFavorite,
+          format: updatedBook.format,
         })
         .eq('id', updatedBook.id);
 
@@ -239,4 +240,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

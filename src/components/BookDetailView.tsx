@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -35,7 +34,7 @@ interface BookDetailViewProps {
   onClose: () => void;
 }
 
-type BookStatus = "Not started" | "In Progress" | "Finished";
+type BookStatus = "Not started" | "In Progress" | "Finished" | "Future Reads";
 type BookFormat = "physical_book" | "audiobook";
 
 export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
@@ -214,6 +213,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                       <SelectItem value="Not started">Not started</SelectItem>
                       <SelectItem value="In Progress">In Progress</SelectItem>
                       <SelectItem value="Finished">Finished</SelectItem>
+                      <SelectItem value="Future Reads">Future Reads</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
