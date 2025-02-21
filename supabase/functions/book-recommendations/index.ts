@@ -46,7 +46,7 @@ For each book, provide:
 - 2-3 major themes
 - An estimated rating out of 5 (e.g., 4.5)
 
-Format the response as a JSON array of books. Do not include any additional text or explanation.`;
+Format the response as a JSON array of books with the exact properties: title, author, publicationYear, description, themes, rating.`;
     } else if (section === 'new') {
       systemPrompt = `You are a knowledgeable book curator. Please recommend 3 recent ${category} books from the past 2 years.
 For each book, provide:
@@ -57,7 +57,7 @@ For each book, provide:
 - 2-3 major themes
 - An estimated rating out of 5 (e.g., 4.5)
 
-Format the response as a JSON array of books. Do not include any additional text or explanation.`;
+Format the response as a JSON array of books with the exact properties: title, author, publicationYear, description, themes, rating.`;
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -67,7 +67,7 @@ Format the response as a JSON array of books. Do not include any additional text
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Please recommend ${section} ${category} books.` }
@@ -83,7 +83,7 @@ Format the response as a JSON array of books. Do not include any additional text
     }
 
     const data = await response.json();
-    console.log('OpenAI response received');
+    console.log('OpenAI response received:', data);
 
     if (!data.choices?.[0]?.message?.content) {
       throw new Error('Invalid response format from OpenAI');
@@ -97,6 +97,16 @@ Format the response as a JSON array of books. Do not include any additional text
       throw new Error('Failed to parse book recommendations');
     }
 
+    // Validate and format book data
+    books = books.map(book => ({
+      title: String(book.title || ''),
+      author: String(book.author || ''),
+      publicationYear: String(book.publicationYear || ''),
+      description: String(book.description || ''),
+      themes: Array.isArray(book.themes) ? book.themes.map(String) : [],
+      rating: String(book.rating || '')
+    }));
+
     // Fetch book covers in parallel
     const bookCoversPromises = books.map(book => 
       getBookCover(book.title, book.author)
@@ -109,6 +119,7 @@ Format the response as a JSON array of books. Do not include any additional text
       imageUrl: bookCovers[index],
     }));
 
+    console.log('Sending response with books:', books);
     return new Response(JSON.stringify({ recommendations: books }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
