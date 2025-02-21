@@ -27,17 +27,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Authentication Error",
           description: "There was a problem with your session. Please try logging in again.",
         });
-        // Clear any stale session data
-        supabase.auth.signOut().catch(console.error);
       }
       setSession(initialSession);
       setLoading(false);
     });
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession ? "Session exists" : "No session");
       
       if (event === 'SIGNED_IN') {
@@ -66,6 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
+    // Clean up subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
