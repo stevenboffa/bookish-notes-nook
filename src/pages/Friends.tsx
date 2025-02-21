@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +21,7 @@ const formatBooks = (books: any[]): Book[] => {
     id: book.id,
     title: book.title,
     author: book.author,
-    genre: book.genre || 'Unknown', // Ensure genre is never undefined
+    genre: book.genre || 'Unknown',
     dateRead: book.date_read,
     rating: book.rating || 0,
     status: book.status || 'Not started',
@@ -50,6 +49,7 @@ export default function Friends() {
   const fetchFriends = async () => {
     try {
       setIsLoading(true);
+      console.log('Fetching friends data...');
       const { data: friendsData, error: friendsError } = await supabase
         .from('friends')
         .select(`
@@ -82,31 +82,19 @@ export default function Friends() {
           const isSender = friendship.sender.id === session?.user.id;
           const friend = isSender ? friendship.receiver : friendship.sender;
           
-          const { data: booksData } = await supabase
+          console.log('Fetching books for friend:', friend.email);
+          const { data: booksData, error: booksError } = await supabase
             .from('books')
-            .select(`
-              id,
-              title,
-              author,
-              genre,
-              rating,
-              status,
-              date_read,
-              image_url,
-              thumbnail_url,
-              notes (
-                id,
-                content,
-                created_at
-              ),
-              quotes (
-                id,
-                content,
-                created_at
-              )
-            `)
+            .select('*, notes(*), quotes(*)')
             .eq('user_id', friend.id);
 
+          if (booksError) {
+            console.error('Error fetching books for friend:', booksError);
+            continue;
+          }
+
+          console.log('Books data for friend:', booksData);
+          
           acceptedFriends.push({
             id: friend.id,
             email: friend.email || '',
@@ -114,27 +102,7 @@ export default function Friends() {
             avatar_url: friend.avatar_url,
             status: friendship.status,
             type: isSender ? 'sent' : 'received',
-            books: formatBooks((booksData || []).map(book => ({
-              id: book.id,
-              title: book.title,
-              author: book.author,
-              genre: book.genre,
-              rating: book.rating || 0,
-              status: (book.status || 'Not started') as "Not started" | "In Progress" | "Finished",
-              dateRead: book.date_read,
-              imageUrl: book.image_url,
-              thumbnailUrl: book.thumbnail_url,
-              notes: (book.notes || []).map(note => ({
-                id: note.id,
-                content: note.content,
-                createdAt: note.created_at,
-              })),
-              quotes: (book.quotes || []).map(quote => ({
-                id: quote.id,
-                content: quote.content,
-                createdAt: quote.created_at,
-              })),
-            }))),
+            books: formatBooks(booksData || []),
           });
         }
       }
@@ -214,7 +182,6 @@ export default function Friends() {
         return;
       }
 
-      // First check if the user exists
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('id, username, email')
@@ -232,7 +199,6 @@ export default function Friends() {
         return;
       }
 
-      // Check if a friend request already exists in either direction
       const { data: existingFriend, error: existingError } = await supabase
         .from('friends')
         .select('*, sender:profiles!friends_sender_id_fkey(username, email), receiver:profiles!friends_receiver_id_fkey(username, email)')
@@ -261,7 +227,6 @@ export default function Friends() {
         return;
       }
 
-      // If no existing request, create a new one
       const { error: friendError } = await supabase
         .from('friends')
         .insert({
@@ -272,7 +237,6 @@ export default function Friends() {
 
       if (friendError) throw friendError;
 
-      // Set the last sent request
       setLastSentRequest({
         email: userData.email,
         timestamp: Date.now()
