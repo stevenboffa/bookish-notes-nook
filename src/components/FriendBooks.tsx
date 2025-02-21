@@ -10,9 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, BookPlus } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Select,
   SelectContent,
@@ -33,8 +36,78 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   const [genreFilter, setGenreFilter] = useState("all");
+  const { toast } = useToast();
+  const { session } = useAuth();
 
   const genres = [...new Set(books.map(book => book.genre))];
+
+  const addToFutureReads = async (book: Book) => {
+    try {
+      // Check if the book already exists in user's collection
+      const { data: existingBook, error: checkError } = await supabase
+        .from('books')
+        .select('id, status')
+        .eq('user_id', session?.user.id)
+        .eq('title', book.title)
+        .eq('author', book.author)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        throw checkError;
+      }
+
+      if (existingBook) {
+        // If book exists but isn't in Future Reads, update its status
+        if (existingBook.status !== 'Future Reads') {
+          const { error: updateError } = await supabase
+            .from('books')
+            .update({ status: 'Future Reads' })
+            .eq('id', existingBook.id);
+
+          if (updateError) throw updateError;
+
+          toast({
+            title: "Status Updated",
+            description: `"${book.title}" has been moved to your Future Reads list.`,
+          });
+        } else {
+          toast({
+            title: "Already in Future Reads",
+            description: `"${book.title}" is already in your Future Reads list.`,
+          });
+        }
+      } else {
+        // If book doesn't exist, add it to the user's collection
+        const { error: insertError } = await supabase
+          .from('books')
+          .insert({
+            title: book.title,
+            author: book.author,
+            genre: book.genre,
+            status: 'Future Reads',
+            user_id: session?.user.id,
+            image_url: book.imageUrl,
+            thumbnail_url: book.thumbnailUrl,
+            date_read: new Date().toISOString(),
+            format: book.format
+          });
+
+        if (insertError) throw insertError;
+
+        toast({
+          title: "Book Added",
+          description: `"${book.title}" has been added to your Future Reads list.`,
+        });
+      }
+    } catch (error) {
+      console.error('Error adding to Future Reads:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add book to Future Reads. Please try again.",
+      });
+    }
+  };
 
   const filteredBooks = books
     .filter(book => {
@@ -42,6 +115,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
       if (filter === "in-progress") return book.status === "In Progress";
       if (filter === "finished") return book.status === "Finished";
       if (filter === "not-started") return book.status === "Not started";
+      if (filter === "future-reads") return book.status === "Future Reads";
       return true;
     })
     .filter(book => {
@@ -91,6 +165,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
             <SelectItem value="in-progress">In Progress</SelectItem>
             <SelectItem value="finished">Finished</SelectItem>
             <SelectItem value="not-started">Not Started</SelectItem>
+            <SelectItem value="future-reads">Future Reads</SelectItem>
           </SelectContent>
         </Select>
 
@@ -151,11 +226,24 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
                       "text-xs px-2 py-1 rounded-full",
                       book.status === "In Progress" ? "bg-blue-100 text-blue-700" :
                       book.status === "Finished" ? "bg-green-100 text-green-700" :
+                      book.status === "Future Reads" ? "bg-purple-100 text-purple-700" :
                       "bg-gray-100 text-gray-700"
                     )}>
                       {book.status}
                     </span>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 w-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToFutureReads(book);
+                    }}
+                  >
+                    <BookPlus className="mr-2 h-4 w-4" />
+                    Add to Future Reads
+                  </Button>
                 </div>
               </div>
             </CardHeader>
