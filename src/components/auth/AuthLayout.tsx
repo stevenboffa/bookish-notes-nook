@@ -50,6 +50,24 @@ export function AuthLayout({
           </div>
           
           {children}
+
+          <div className="text-sm text-center text-muted-foreground">
+            <p className="mb-4">
+              By signing in, you agree to BookNotes'
+              {" "}
+              <Link to="/terms" className="text-primary hover:text-primary/90 underline">
+                Terms of Service
+              </Link>
+              {" "}and{" "}
+              <Link to="/privacy" className="text-primary hover:text-primary/90 underline">
+                Privacy Policy
+              </Link>
+            </p>
+            <p>
+              BookNotes will only use your data to provide and improve the service.
+              We never share your personal information with third parties without your explicit consent.
+            </p>
+          </div>
         </div>
 
         {/* Footer */}
