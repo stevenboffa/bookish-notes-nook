@@ -10,17 +10,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface Book {
-  title: string;
-  author: string;
-  publicationYear: number;
-  description: string;
-  themes?: string[];
-  imageUrl?: string;
-  amazonUrl?: string;
-  rating?: number;
-}
-
 async function getBookCover(title: string, author: string): Promise<string | undefined> {
   try {
     const query = encodeURIComponent(`${title} ${author}`);
@@ -43,20 +32,33 @@ serve(async (req) => {
   }
 
   try {
-    const { genre } = await req.json();
+    const { section, category } = await req.json();
+    console.log(`Generating ${section} ${category} recommendations...`);
 
-    const prompt = `You are a knowledgeable book curator. Please recommend 6 fantasy books based on these criteria:
-- 3 award-winning or highly acclaimed books
-- 3 recent releases from the past 2 years
+    let systemPrompt = '';
+    if (section === 'award-winning') {
+      systemPrompt = `You are a knowledgeable book curator. Please recommend 3 award-winning or highly acclaimed ${category} books.
 For each book, provide:
 - Title
 - Author
 - Publication year (between 1950 and 2024)
-- A brief compelling description
+- A brief compelling description (max 150 characters)
 - 2-3 major themes
 - An estimated rating out of 5 (e.g., 4.5)
 
 Format the response as a JSON array of books. Do not include any additional text or explanation.`;
+    } else if (section === 'new') {
+      systemPrompt = `You are a knowledgeable book curator. Please recommend 3 recent ${category} books from the past 2 years.
+For each book, provide:
+- Title
+- Author
+- Publication year (2022-2024 only)
+- A brief compelling description (max 150 characters)
+- 2-3 major themes
+- An estimated rating out of 5 (e.g., 4.5)
+
+Format the response as a JSON array of books. Do not include any additional text or explanation.`;
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -67,15 +69,33 @@ Format the response as a JSON array of books. Do not include any additional text
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a knowledgeable book curator who provides accurate, well-researched book recommendations.' },
-          { role: 'user', content: prompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Please recommend ${section} ${category} books.` }
         ],
         temperature: 0.7,
       }),
     });
 
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('OpenAI API error:', error);
+      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+    }
+
     const data = await response.json();
-    let books: Book[] = JSON.parse(data.choices[0].message.content);
+    console.log('OpenAI response received');
+
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response format from OpenAI');
+    }
+
+    let books;
+    try {
+      books = JSON.parse(data.choices[0].message.content);
+    } catch (e) {
+      console.error('Error parsing OpenAI response:', e);
+      throw new Error('Failed to parse book recommendations');
+    }
 
     // Fetch book covers in parallel
     const bookCoversPromises = books.map(book => 
@@ -89,13 +109,13 @@ Format the response as a JSON array of books. Do not include any additional text
       imageUrl: bookCovers[index],
     }));
 
-    return new Response(JSON.stringify({ books }), {
+    return new Response(JSON.stringify({ recommendations: books }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in book-recommendations function:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch book recommendations' }),
+      JSON.stringify({ error: error.message || 'Failed to fetch book recommendations' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
