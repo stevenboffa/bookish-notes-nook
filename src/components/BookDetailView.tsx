@@ -104,6 +104,10 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     }, 2000);
   };
 
+  const handleUpdateBook = (bookId: string, updatedBook: Book) => {
+    onSave(updatedBook);
+  };
+
   const renderRatingStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating / 2);
@@ -338,10 +342,10 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                 </TabsList>
               </div>
               <TabsContent value="notes">
-                <NoteSection book={{...book, format}} onUpdateBook={onSave} />
+                <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
               </TabsContent>
               <TabsContent value="quotes">
-                <QuoteSection book={book} onUpdateBook={onSave} />
+                <QuoteSection book={book} onUpdateBook={handleUpdateBook} />
               </TabsContent>
             </Tabs>
           )}

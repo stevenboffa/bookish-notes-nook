@@ -9,17 +9,29 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Note {
+  id: string;
+  content: string;
+  created_at: string;
+  page_number?: number;
+  timestamp_seconds?: number;
+  chapter?: string;
+  category?: string;
+  is_pinned: boolean;
+  images?: string[];
+}
+
 interface NoteSectionProps {
   book: Book;
   onUpdateBook: (bookId: string, updatedBook: Book) => void;
 }
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
-  const [notes, setNotes] = useState(book.notes);
+  const [notes, setNotes] = useState<Note[]>(book.notes || []);
   const { toast } = useToast();
 
   useEffect(() => {
-    setNotes(book.notes);
+    setNotes(book.notes || []);
   }, [book.notes]);
 
   const handleAddNote = async (note: {
@@ -31,7 +43,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     images?: File[];
   }) => {
     try {
-      // 1. Upload images to Supabase storage
       const imageUrls: string[] = [];
       if (note.images && note.images.length > 0) {
         for (const image of note.images) {
@@ -49,7 +60,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
               description: "Please try again.",
               variant: "destructive",
             });
-            return; // Stop the process if image upload fails
+            return;
           }
 
           const publicURL = supabase.storage
@@ -59,7 +70,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         }
       }
 
-      // 2. Create the note in Supabase
       const { data: newNote, error: createNoteError } = await supabase
         .from("notes")
         .insert({
@@ -84,21 +94,19 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         return;
       }
 
-      // 3. Optimistically update local state
       const newNotes = [...notes, {
         id: newNote.id,
         content: newNote.content,
-        createdAt: newNote.createdAt,
-        pageNumber: newNote.page_number,
-        timestampSeconds: newNote.timestamp_seconds,
+        created_at: newNote.created_at,
+        page_number: newNote.page_number,
+        timestamp_seconds: newNote.timestamp_seconds,
         chapter: newNote.chapter,
         category: newNote.category,
-        isPinned: false,
+        is_pinned: false,
         images: newNote.images,
       }];
       setNotes(newNotes);
 
-      // 4. Update the book with the new note
       const updatedBook = { ...book, notes: newNotes };
       onUpdateBook(book.id, updatedBook);
 
@@ -118,7 +126,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      // 1. Delete the note from Supabase
       const { error: deleteNoteError } = await supabase
         .from("notes")
         .delete()
@@ -134,45 +141,19 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         return;
       }
 
-      // 2. Delete associated images from Supabase storage
-      const noteToDelete = notes.find(note => note.id === noteId);
-      if (noteToDelete?.images && noteToDelete.images.length > 0) {
-        const filesToDelete = noteToDelete.images.map(imageUrl => {
-          const path = new URL(imageUrl).pathname.substring(1);
-          return path;
-        });
-
-        const { error: deleteStorageError } = await supabase.storage
-          .from('note-images')
-          .remove(filesToDelete);
-
-        if (deleteStorageError) {
-          console.error("Error deleting images:", deleteStorageError);
-          toast({
-            title: "Error deleting images",
-            description: "However, the note was deleted successfully.",
-            variant: "destructive",
-          });
-        }
-      }
-
-      // 3. Optimistically update local state
       const updatedNotes = notes.filter((note) => note.id !== noteId);
       setNotes(updatedNotes);
-
-      // 4. Update the book with the deleted note
-      const updatedBook = { ...book, notes: updatedNotes };
-      onUpdateBook(book.id, updatedBook);
+      onUpdateBook(book.id, { ...book, notes: updatedNotes });
 
       toast({
         title: "Note deleted",
         description: "Your note has been successfully deleted.",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting note:", error);
       toast({
         title: "Error deleting note",
-        description: error.message || "Failed to delete note. Please try again.",
+        description: "Failed to delete note. Please try again.",
         variant: "destructive",
       });
     }
@@ -180,7 +161,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
   const handleTogglePin = async (noteId: string) => {
     try {
-      // 1. Find the note to update
       const noteToUpdate = notes.find((note) => note.id === noteId);
       if (!noteToUpdate) {
         toast({
@@ -191,10 +171,9 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         return;
       }
 
-      // 2. Update the note in Supabase
       const { error: updateNoteError } = await supabase
         .from("notes")
-        .update({ is_pinned: !noteToUpdate.isPinned })
+        .update({ is_pinned: !noteToUpdate.is_pinned })
         .eq("id", noteId);
 
       if (updateNoteError) {
@@ -207,13 +186,11 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         return;
       }
 
-      // 3. Optimistically update local state
       const updatedNotes = notes.map((note) =>
-        note.id === noteId ? { ...note, isPinned: !note.isPinned } : note
+        note.id === noteId ? { ...note, is_pinned: !note.is_pinned } : note
       );
       setNotes(updatedNotes);
 
-      // 4. Update the book with the updated note
       const updatedBook = { ...book, notes: updatedNotes };
       onUpdateBook(book.id, updatedBook);
 
@@ -232,9 +209,9 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   };
 
   const sortedNotes = [...notes].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (a.is_pinned && !b.is_pinned) return -1;
+    if (!a.is_pinned && b.is_pinned) return 1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   return (
@@ -245,7 +222,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         {sortedNotes.map((note) => (
           <Card key={note.id} className="relative">
             <CardContent className="p-4 space-y-4">
-              {note.isPinned && (
+              {note.is_pinned && (
                 <div className="absolute top-2 right-2">
                   <Pin className="w-4 h-4 text-primary" />
                 </div>
@@ -267,13 +244,13 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                         ))}
                       </div>
                     )}
-                    {(note.pageNumber || note.timestampSeconds || note.chapter) && (
+                    {(note.page_number || note.timestamp_seconds || note.chapter) && (
                       <div className="flex gap-2 text-sm text-muted-foreground mt-2">
-                        {note.pageNumber && <span>Page {note.pageNumber}</span>}
-                        {note.timestampSeconds && (
+                        {note.page_number && <span>Page {note.page_number}</span>}
+                        {note.timestamp_seconds && (
                           <span>
-                            {Math.floor(note.timestampSeconds / 60)}:
-                            {(note.timestampSeconds % 60).toString().padStart(2, "0")}
+                            {Math.floor(note.timestamp_seconds / 60)}:
+                            {(note.timestamp_seconds % 60).toString().padStart(2, "0")}
                           </span>
                         )}
                         {note.chapter && <span>Chapter: {note.chapter}</span>}
@@ -291,7 +268,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleTogglePin(note.id)}
-                      className={note.isPinned ? "text-primary" : ""}
+                      className={note.is_pinned ? "text-primary" : ""}
                     >
                       <Pin className="h-4 w-4" />
                     </Button>
@@ -306,7 +283,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                 </div>
                 
                 <div className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(note.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(note.created_at), { addSuffix: true })}
                 </div>
               </div>
             </CardContent>
