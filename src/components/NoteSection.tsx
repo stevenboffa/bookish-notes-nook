@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Pin, Clock, BookOpen } from "lucide-react";
+import { Trash2, Pin, Clock, BookOpen, Image } from "lucide-react";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -31,6 +33,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     timestampSeconds?: number;
     chapter?: string;
     category?: string;
+    images?: File[];
   }) => {
     try {
       const { data: noteRecord, error: noteError } = await supabase
@@ -49,6 +52,31 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       if (noteError) throw noteError;
 
+      // Handle image uploads if any
+      const uploadedImageUrls = [];
+      if (noteData.images && noteData.images.length > 0) {
+        for (const image of noteData.images) {
+          const fileExt = image.name.split('.').pop();
+          const filePath = `${noteRecord.id}/${crypto.randomUUID()}.${fileExt}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('book-notes-images')
+            .upload(filePath, image);
+
+          if (uploadError) {
+            console.error('Error uploading image:', uploadError);
+            toast.error('Failed to upload image');
+            continue;
+          }
+
+          const { data: publicUrl } = supabase.storage
+            .from('book-notes-images')
+            .getPublicUrl(filePath);
+
+          uploadedImageUrls.push(publicUrl.publicUrl);
+        }
+      }
+
       const newNoteObject = {
         id: noteRecord.id,
         content: noteRecord.content,
@@ -59,6 +87,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         category: noteRecord.category,
         isPinned: noteRecord.is_pinned,
         readingProgress: noteRecord.reading_progress,
+        images: uploadedImageUrls,
       };
 
       const updatedNotes = [newNoteObject, ...localNotes];
@@ -68,8 +97,15 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         ...book,
         notes: updatedNotes,
       });
+
+      if (uploadedImageUrls.length > 0) {
+        toast.success(`Note and ${uploadedImageUrls.length} image(s) added successfully`);
+      } else {
+        toast.success('Note added successfully');
+      }
     } catch (error) {
       console.error('Error adding note:', error);
+      toast.error('Failed to add note');
     }
   };
 
@@ -82,6 +118,18 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       if (error) throw error;
 
+      // Delete associated images from storage
+      const { data: files } = await supabase.storage
+        .from('book-notes-images')
+        .list(noteId);
+
+      if (files && files.length > 0) {
+        const filesToDelete = files.map(file => `${noteId}/${file.name}`);
+        await supabase.storage
+          .from('book-notes-images')
+          .remove(filesToDelete);
+      }
+
       const updatedNotes = localNotes.filter(note => note.id !== noteId);
       setLocalNotes(updatedNotes);
 
@@ -89,8 +137,11 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         ...book,
         notes: updatedNotes,
       });
+
+      toast.success('Note deleted successfully');
     } catch (error) {
       console.error('Error deleting note:', error);
+      toast.error('Failed to delete note');
     }
   };
 
@@ -112,8 +163,11 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         ...book,
         notes: updatedNotes,
       });
+
+      toast.success(currentPinned ? 'Note unpinned' : 'Note pinned');
     } catch (error) {
       console.error('Error toggling pin:', error);
+      toast.error('Failed to update note');
     }
   };
 
@@ -224,6 +278,25 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                   </div>
                 </div>
                 <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                {note.images && note.images.length > 0 && (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {note.images.map((imageUrl, index) => (
+                      <a 
+                        key={index} 
+                        href={imageUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <img 
+                          src={imageUrl} 
+                          alt={`Note image ${index + 1}`} 
+                          className="rounded-md w-full h-32 object-cover hover:opacity-90 transition-opacity"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                )}
                 <p className="text-xs text-gray-500 mt-2">
                   {new Date(note.createdAt).toLocaleDateString()}
                 </p>
