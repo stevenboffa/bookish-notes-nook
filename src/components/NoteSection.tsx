@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Pin, Trash2 } from "lucide-react";
+import { Pin, Trash2, X } from "lucide-react";
 import { Book } from "@/components/BookList";
 import { AddNoteForm } from "@/components/AddNoteForm";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface Note {
   id: string;
@@ -30,7 +37,8 @@ interface NoteSectionProps {
 }
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
-  const [notes, setNotes] = useState<Note[]>([]); // Initialize as empty array
+  const [notes, setNotes] = useState<Note[]>([]); 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -273,12 +281,17 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                     {note.images && note.images.length > 0 && (
                       <div className="grid grid-cols-2 gap-2 mt-4">
                         {note.images.map((imageUrl, index) => (
-                          <img
+                          <div 
                             key={index}
-                            src={imageUrl}
-                            alt={`Note image ${index + 1}`}
-                            className="w-full h-40 object-cover rounded-md"
-                          />
+                            className="relative aspect-auto cursor-pointer"
+                            onClick={() => setSelectedImage(imageUrl)}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={`Note image ${index + 1}`}
+                              className="w-full h-auto rounded-md hover:opacity-90 transition-opacity"
+                            />
+                          </div>
                         ))}
                       </div>
                     )}
@@ -334,6 +347,25 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
           </div>
         )}
       </div>
+
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl w-[90vw] p-0">
+          <DialogTitle className="sr-only">Image Preview</DialogTitle>
+          <div className="relative">
+            <DialogClose className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none bg-background p-2">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+            {selectedImage && (
+              <img
+                src={selectedImage}
+                alt="Expanded view"
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
