@@ -24,7 +24,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
-// Create a protected route component that handles loading state
+// Create a protected route component that handles loading state and authenticated redirects
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   const location = useLocation();
@@ -39,6 +39,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
   }
   
+  return children;
+};
+
+// Create a public route component that redirects authenticated users
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, loading } = useAuth();
+  
+  // Show nothing while checking authentication
+  if (loading) {
+    return null;
+  }
+
+  // Redirect authenticated users to dashboard
+  if (session) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return children;
 };
 
@@ -59,11 +76,23 @@ const App = () => (
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
+            {/* Public routes that redirect to dashboard when authenticated */}
             <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
-              <Route path="/" element={<Welcome />} /> {/* Changed to show Welcome page directly */}
-              <Route path="/auth/sign-in" element={<SignIn />} />
-              <Route path="/auth/sign-up" element={<SignUp />} />
+              <Route path="/" element={
+                <PublicRoute>
+                  <Welcome />
+                </PublicRoute>
+              } />
+              <Route path="/auth/sign-in" element={
+                <PublicRoute>
+                  <SignIn />
+                </PublicRoute>
+              } />
+              <Route path="/auth/sign-up" element={
+                <PublicRoute>
+                  <SignUp />
+                </PublicRoute>
+              } />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/contact" element={<Contact />} />
@@ -71,7 +100,7 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPolicy />} />
             </Route>
 
-            {/* Protected routes */}
+            {/* Protected routes that require authentication */}
             <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
               <Route path="/dashboard" element={
                 <ProtectedRoute>
