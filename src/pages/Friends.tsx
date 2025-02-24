@@ -347,7 +347,7 @@ export default function Friends() {
     });
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="container mx-auto px-4 py-8 pb-32 space-y-8">
       <h1 className="text-3xl font-bold mb-8 animate-fade-in">Friends</h1>
       
       <AddFriendSection onAddFriend={addFriend} isLoading={isLoading} />
@@ -388,7 +388,7 @@ export default function Friends() {
       />
 
       {isMobile && selectedFriend ? (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 pb-32">
           <FriendBooks 
             books={selectedFriend.books} 
             email={selectedFriend.email}

@@ -278,7 +278,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="container max-w-md mx-auto p-4 space-y-4">
+    <div className="container max-w-md mx-auto p-4 pb-24 space-y-4 mb-16">
       <Card>
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
