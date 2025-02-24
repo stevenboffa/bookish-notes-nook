@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Pin, Trash2 } from "lucide-react";
@@ -32,8 +33,22 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    setNotes(book.notes || []);
-  }, [book.notes]);
+    if (book.notes) {
+      const formattedNotes: Note[] = book.notes.map(note => ({
+        id: note.id,
+        content: note.content,
+        created_at: note.createdAt,
+        page_number: note.pageNumber,
+        timestamp_seconds: note.timestampSeconds,
+        chapter: note.chapter,
+        category: note.category,
+        is_pinned: note.isPinned,
+        images: note.images,
+        book_id: book.id
+      }));
+      setNotes(formattedNotes);
+    }
+  }, [book.notes, book.id]);
 
   const handleAddNote = async (note: {
     content: string;
@@ -102,7 +117,21 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       const updatedNotes = [...notes, newNoteFormatted];
       setNotes(updatedNotes);
-      onUpdateBook({ ...book, notes: updatedNotes });
+      
+      // Convert Note[] to Book's note format for the parent component
+      const bookNotes = updatedNotes.map(note => ({
+        id: note.id,
+        content: note.content,
+        createdAt: note.created_at,
+        pageNumber: note.page_number,
+        timestampSeconds: note.timestamp_seconds,
+        chapter: note.chapter,
+        category: note.category,
+        isPinned: note.is_pinned,
+        images: note.images,
+      }));
+      
+      onUpdateBook({ ...book, notes: bookNotes });
 
       toast({
         title: "Note added",
@@ -125,19 +154,24 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         .delete()
         .eq("id", noteId);
 
-      if (deleteNoteError) {
-        console.error("Error deleting note:", deleteNoteError);
-        toast({
-          title: "Error deleting note",
-          description: "Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (deleteNoteError) throw deleteNoteError;
 
       const updatedNotes = notes.filter((note) => note.id !== noteId);
       setNotes(updatedNotes);
-      onUpdateBook({ ...book, notes: updatedNotes });
+      
+      const bookNotes = updatedNotes.map(note => ({
+        id: note.id,
+        content: note.content,
+        createdAt: note.created_at,
+        pageNumber: note.page_number,
+        timestampSeconds: note.timestamp_seconds,
+        chapter: note.chapter,
+        category: note.category,
+        isPinned: note.is_pinned,
+        images: note.images,
+      }));
+      
+      onUpdateBook({ ...book, notes: bookNotes });
 
       toast({
         title: "Note deleted",
@@ -156,47 +190,43 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const handleTogglePin = async (noteId: string) => {
     try {
       const noteToUpdate = notes.find((note) => note.id === noteId);
-      if (!noteToUpdate) {
-        toast({
-          title: "Error updating note",
-          description: "Note not found.",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (!noteToUpdate) throw new Error('Note not found');
 
       const { error: updateNoteError } = await supabase
         .from("notes")
         .update({ is_pinned: !noteToUpdate.is_pinned })
         .eq("id", noteId);
 
-      if (updateNoteError) {
-        console.error("Error updating note:", updateNoteError);
-        toast({
-          title: "Error updating note",
-          description: "Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (updateNoteError) throw updateNoteError;
 
       const updatedNotes = notes.map((note) =>
         note.id === noteId ? { ...note, is_pinned: !note.is_pinned } : note
       );
       setNotes(updatedNotes);
 
-      const updatedBook = { ...book, notes: updatedNotes };
-      onUpdateBook(updatedBook);
+      const bookNotes = updatedNotes.map(note => ({
+        id: note.id,
+        content: note.content,
+        createdAt: note.created_at,
+        pageNumber: note.page_number,
+        timestampSeconds: note.timestamp_seconds,
+        chapter: note.chapter,
+        category: note.category,
+        isPinned: note.is_pinned,
+        images: note.images,
+      }));
+      
+      onUpdateBook({ ...book, notes: bookNotes });
 
       toast({
         title: "Note updated",
         description: "Your note has been successfully updated.",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating note:", error);
       toast({
         title: "Error updating note",
-        description: error.message || "Failed to update note. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update note",
         variant: "destructive",
       });
     }
