@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { Button } from "@/components/ui/button";
@@ -52,7 +51,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       if (noteError) throw noteError;
 
-      // Handle image uploads if any
       const uploadedImageUrls = [];
       if (noteData.images && noteData.images.length > 0) {
         for (const image of noteData.images) {
@@ -118,7 +116,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       if (error) throw error;
 
-      // Delete associated images from storage
       const { data: files } = await supabase.storage
         .from('book-notes-images')
         .list(noteId);

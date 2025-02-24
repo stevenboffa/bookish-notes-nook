@@ -27,11 +27,11 @@ export interface Book {
   genre: string;
   dateRead: string;
   rating: number;
-  status: 'Not started' | 'In Progress' | 'Finished' | 'Future Reads';
+  status: string;
   isFavorite: boolean;
   imageUrl: string | null;
   thumbnailUrl: string | null;
-  format: 'physical_book' | 'audiobook' | 'ebook';
+  format: 'physical_book' | 'ebook' | 'audiobook';
   notes: {
     id: string;
     content: string;
@@ -42,6 +42,7 @@ export interface Book {
     category?: string;
     isPinned: boolean;
     readingProgress?: number;
+    images?: string[];
   }[];
   quotes: {
     id: string;
