@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Pin, Trash2 } from "lucide-react";
@@ -20,6 +19,7 @@ interface Note {
   category?: string;
   is_pinned: boolean;
   images?: string[];
+  book_id: string;
 }
 
 interface NoteSectionProps {
@@ -45,29 +45,25 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   }) => {
     try {
       const imageUrls: string[] = [];
+      
       if (note.images && note.images.length > 0) {
         for (const image of note.images) {
-          const { data, error } = await supabase.storage
+          const fileName = `${book.id}/${Date.now()}-${image.name}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
             .from('note-images')
-            .upload(`${book.id}/${Date.now()}-${image.name}`, image, {
-              cacheControl: '3600',
-              upsert: false
-            });
+            .upload(fileName, image);
 
-          if (error) {
-            console.error("Error uploading image:", error);
-            toast({
-              title: "Error uploading image",
-              description: "Please try again.",
-              variant: "destructive",
-            });
-            return;
+          if (uploadError) {
+            console.error("Error uploading image:", uploadError);
+            throw new Error('Failed to upload image');
           }
 
-          const publicURL = supabase.storage
+          const { data: { publicUrl } } = supabase.storage
             .from('note-images')
-            .getPublicUrl(data.path).data.publicUrl;
-          imageUrls.push(publicURL);
+            .getPublicUrl(fileName);
+
+          imageUrls.push(publicUrl);
         }
       }
 
@@ -81,18 +77,14 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
           chapter: note.chapter,
           category: note.category,
           images: imageUrls,
+          is_pinned: false
         })
-        .select("*")
+        .select()
         .single();
 
       if (createNoteError) {
         console.error("Error creating note:", createNoteError);
-        toast({
-          title: "Error creating note",
-          description: "Please try again.",
-          variant: "destructive",
-        });
-        return;
+        throw new Error('Failed to create note');
       }
 
       const newNoteFormatted: Note = {
@@ -103,25 +95,24 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         timestamp_seconds: newNote.timestamp_seconds,
         chapter: newNote.chapter,
         category: newNote.category,
-        is_pinned: false,
+        is_pinned: newNote.is_pinned,
         images: newNote.images,
+        book_id: newNote.book_id
       };
 
-      const newNotes = [...notes, newNoteFormatted];
-      setNotes(newNotes);
-
-      const updatedBook = { ...book, notes: newNotes };
-      onUpdateBook(updatedBook);
+      const updatedNotes = [...notes, newNoteFormatted];
+      setNotes(updatedNotes);
+      onUpdateBook({ ...book, notes: updatedNotes });
 
       toast({
         title: "Note added",
         description: "Your note has been successfully added.",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error adding note:", error);
       toast({
         title: "Error adding note",
-        description: error.message || "Failed to add note. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to add note",
         variant: "destructive",
       });
     }
@@ -214,7 +205,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      // Check if the date is valid
       if (isNaN(date.getTime())) {
         console.error('Invalid date:', dateString);
         return 'Invalid date';
@@ -317,4 +307,3 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     </div>
   );
 }
-
