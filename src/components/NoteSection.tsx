@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Pin, Trash2 } from "lucide-react";
@@ -23,7 +24,7 @@ interface Note {
 
 interface NoteSectionProps {
   book: Book;
-  onUpdateBook: (bookId: string, updatedBook: Book) => void;
+  onUpdateBook: (book: Book) => void;
 }
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
@@ -94,7 +95,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         return;
       }
 
-      const newNotes = [...notes, {
+      const newNoteFormatted: Note = {
         id: newNote.id,
         content: newNote.content,
         created_at: newNote.created_at,
@@ -104,11 +105,13 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         category: newNote.category,
         is_pinned: false,
         images: newNote.images,
-      }];
+      };
+
+      const newNotes = [...notes, newNoteFormatted];
       setNotes(newNotes);
 
       const updatedBook = { ...book, notes: newNotes };
-      onUpdateBook(book.id, updatedBook);
+      onUpdateBook(updatedBook);
 
       toast({
         title: "Note added",
@@ -143,7 +146,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
       const updatedNotes = notes.filter((note) => note.id !== noteId);
       setNotes(updatedNotes);
-      onUpdateBook(book.id, { ...book, notes: updatedNotes });
+      onUpdateBook({ ...book, notes: updatedNotes });
 
       toast({
         title: "Note deleted",
@@ -192,7 +195,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       setNotes(updatedNotes);
 
       const updatedBook = { ...book, notes: updatedNotes };
-      onUpdateBook(book.id, updatedBook);
+      onUpdateBook(updatedBook);
 
       toast({
         title: "Note updated",

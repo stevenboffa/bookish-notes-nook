@@ -104,7 +104,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     }, 2000);
   };
 
-  const handleUpdateBook = (bookId: string, updatedBook: Book) => {
+  const handleUpdateBook = (updatedBook: Book) => {
     onSave(updatedBook);
   };
 
