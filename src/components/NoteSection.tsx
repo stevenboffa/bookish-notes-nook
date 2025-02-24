@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Pin, Trash2 } from "lucide-react";
@@ -120,7 +119,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       const updatedNotes = [...notes, newNoteFormatted];
       setNotes(updatedNotes);
       
-      // Convert Note[] to Book's note format for the parent component
       const bookNotes = updatedNotes.map(note => ({
         id: note.id,
         content: note.content,
