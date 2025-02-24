@@ -211,6 +211,21 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        console.error('Invalid date:', dateString);
+        return 'Invalid date';
+      }
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   const sortedNotes = [...notes].sort((a, b) => {
     if (a.is_pinned && !b.is_pinned) return -1;
     if (!a.is_pinned && b.is_pinned) return 1;
@@ -286,7 +301,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                 </div>
                 
                 <div className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(note.created_at), { addSuffix: true })}
+                  {formatDate(note.created_at)}
                 </div>
               </div>
             </CardContent>
@@ -302,3 +317,4 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     </div>
   );
 }
+
