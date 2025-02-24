@@ -1,32 +1,28 @@
 import { useState, useEffect } from "react";
-import { Book } from "./BookList";
+import { formatDistanceToNow } from "date-fns";
+import { Pin, Trash2 } from "lucide-react";
+import { Book } from "@/components/BookList";
+import { AddNoteForm } from "@/components/AddNoteForm";
 import { Button } from "@/components/ui/button";
-import { AddNoteForm } from "./AddNoteForm";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Pin, Clock, BookOpen, Image } from "lucide-react";
-import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface NoteSectionProps {
   book: Book;
-  onUpdateBook: (book: Book) => void;
+  onUpdateBook: (bookId: string, updatedBook: Book) => void;
 }
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
-  const [localNotes, setLocalNotes] = useState(book.notes);
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'page' | 'chapter'>('newest');
+  const [notes, setNotes] = useState(book.notes);
+  const { toast } = useToast();
 
   useEffect(() => {
-    setLocalNotes(book.notes);
+    setNotes(book.notes);
   }, [book.notes]);
 
-  const handleAddNote = async (noteData: {
+  const handleAddNote = async (note: {
     content: string;
     pageNumber?: number;
     timestampSeconds?: number;
@@ -35,272 +31,293 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     images?: File[];
   }) => {
     try {
-      const { data: noteRecord, error: noteError } = await supabase
-        .from('notes')
-        .insert({
-          content: noteData.content,
-          book_id: book.id,
-          page_number: noteData.pageNumber,
-          timestamp_seconds: noteData.timestampSeconds,
-          chapter: noteData.chapter,
-          category: noteData.category,
-          reading_progress: 0,
-        })
-        .select()
-        .single();
+      // 1. Upload images to Supabase storage
+      const imageUrls: string[] = [];
+      if (note.images && note.images.length > 0) {
+        for (const image of note.images) {
+          const { data, error } = await supabase.storage
+            .from('note-images')
+            .upload(`${book.id}/${Date.now()}-${image.name}`, image, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-      if (noteError) throw noteError;
-
-      const uploadedImageUrls = [];
-      if (noteData.images && noteData.images.length > 0) {
-        for (const image of noteData.images) {
-          const fileExt = image.name.split('.').pop();
-          const filePath = `${noteRecord.id}/${crypto.randomUUID()}.${fileExt}`;
-
-          const { error: uploadError } = await supabase.storage
-            .from('book-notes-images')
-            .upload(filePath, image);
-
-          if (uploadError) {
-            console.error('Error uploading image:', uploadError);
-            toast.error('Failed to upload image');
-            continue;
+          if (error) {
+            console.error("Error uploading image:", error);
+            toast({
+              title: "Error uploading image",
+              description: "Please try again.",
+              variant: "destructive",
+            });
+            return; // Stop the process if image upload fails
           }
 
-          const { data: publicUrl } = supabase.storage
-            .from('book-notes-images')
-            .getPublicUrl(filePath);
-
-          uploadedImageUrls.push(publicUrl.publicUrl);
+          const publicURL = supabase.storage
+            .from('note-images')
+            .getPublicUrl(data.path).data.publicUrl;
+          imageUrls.push(publicURL);
         }
       }
 
-      const newNoteObject = {
-        id: noteRecord.id,
-        content: noteRecord.content,
-        createdAt: noteRecord.created_at,
-        pageNumber: noteRecord.page_number,
-        timestampSeconds: noteRecord.timestamp_seconds,
-        chapter: noteRecord.chapter,
-        category: noteRecord.category,
-        isPinned: noteRecord.is_pinned,
-        readingProgress: noteRecord.reading_progress,
-        images: uploadedImageUrls,
-      };
+      // 2. Create the note in Supabase
+      const { data: newNote, error: createNoteError } = await supabase
+        .from("notes")
+        .insert({
+          book_id: book.id,
+          content: note.content,
+          page_number: note.pageNumber,
+          timestamp_seconds: note.timestampSeconds,
+          chapter: note.chapter,
+          category: note.category,
+          images: imageUrls,
+        })
+        .select("*")
+        .single();
 
-      const updatedNotes = [newNoteObject, ...localNotes];
-      setLocalNotes(updatedNotes);
-
-      onUpdateBook({
-        ...book,
-        notes: updatedNotes,
-      });
-
-      if (uploadedImageUrls.length > 0) {
-        toast.success(`Note and ${uploadedImageUrls.length} image(s) added successfully`);
-      } else {
-        toast.success('Note added successfully');
+      if (createNoteError) {
+        console.error("Error creating note:", createNoteError);
+        toast({
+          title: "Error creating note",
+          description: "Please try again.",
+          variant: "destructive",
+        });
+        return;
       }
-    } catch (error) {
-      console.error('Error adding note:', error);
-      toast.error('Failed to add note');
+
+      // 3. Optimistically update local state
+      const newNotes = [...notes, {
+        id: newNote.id,
+        content: newNote.content,
+        createdAt: newNote.createdAt,
+        pageNumber: newNote.page_number,
+        timestampSeconds: newNote.timestamp_seconds,
+        chapter: newNote.chapter,
+        category: newNote.category,
+        isPinned: false,
+        images: newNote.images,
+      }];
+      setNotes(newNotes);
+
+      // 4. Update the book with the new note
+      const updatedBook = { ...book, notes: newNotes };
+      onUpdateBook(book.id, updatedBook);
+
+      toast({
+        title: "Note added",
+        description: "Your note has been successfully added.",
+      });
+    } catch (error: any) {
+      console.error("Error adding note:", error);
+      toast({
+        title: "Error adding note",
+        description: error.message || "Failed to add note. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      const { error } = await supabase
-        .from('notes')
+      // 1. Delete the note from Supabase
+      const { error: deleteNoteError } = await supabase
+        .from("notes")
         .delete()
-        .eq('id', noteId);
+        .eq("id", noteId);
 
-      if (error) throw error;
+      if (deleteNoteError) {
+        console.error("Error deleting note:", deleteNoteError);
+        toast({
+          title: "Error deleting note",
+          description: "Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      const { data: files } = await supabase.storage
-        .from('book-notes-images')
-        .list(noteId);
+      // 2. Delete associated images from Supabase storage
+      const noteToDelete = notes.find(note => note.id === noteId);
+      if (noteToDelete?.images && noteToDelete.images.length > 0) {
+        const filesToDelete = noteToDelete.images.map(imageUrl => {
+          const path = new URL(imageUrl).pathname.substring(1);
+          return path;
+        });
 
-      if (files && files.length > 0) {
-        const filesToDelete = files.map(file => `${noteId}/${file.name}`);
-        await supabase.storage
-          .from('book-notes-images')
+        const { error: deleteStorageError } = await supabase.storage
+          .from('note-images')
           .remove(filesToDelete);
+
+        if (deleteStorageError) {
+          console.error("Error deleting images:", deleteStorageError);
+          toast({
+            title: "Error deleting images",
+            description: "However, the note was deleted successfully.",
+            variant: "destructive",
+          });
+        }
       }
 
-      const updatedNotes = localNotes.filter(note => note.id !== noteId);
-      setLocalNotes(updatedNotes);
+      // 3. Optimistically update local state
+      const updatedNotes = notes.filter((note) => note.id !== noteId);
+      setNotes(updatedNotes);
 
-      onUpdateBook({
-        ...book,
-        notes: updatedNotes,
+      // 4. Update the book with the deleted note
+      const updatedBook = { ...book, notes: updatedNotes };
+      onUpdateBook(book.id, updatedBook);
+
+      toast({
+        title: "Note deleted",
+        description: "Your note has been successfully deleted.",
       });
-
-      toast.success('Note deleted successfully');
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      toast.error('Failed to delete note');
+    } catch (error: any) {
+      console.error("Error deleting note:", error);
+      toast({
+        title: "Error deleting note",
+        description: error.message || "Failed to delete note. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  const togglePinNote = async (noteId: string, currentPinned: boolean) => {
+  const handleTogglePin = async (noteId: string) => {
     try {
-      const { error } = await supabase
-        .from('notes')
-        .update({ is_pinned: !currentPinned })
-        .eq('id', noteId);
+      // 1. Find the note to update
+      const noteToUpdate = notes.find((note) => note.id === noteId);
+      if (!noteToUpdate) {
+        toast({
+          title: "Error updating note",
+          description: "Note not found.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      if (error) throw error;
+      // 2. Update the note in Supabase
+      const { error: updateNoteError } = await supabase
+        .from("notes")
+        .update({ is_pinned: !noteToUpdate.isPinned })
+        .eq("id", noteId);
 
-      const updatedNotes = localNotes.map(note =>
-        note.id === noteId ? { ...note, isPinned: !currentPinned } : note
+      if (updateNoteError) {
+        console.error("Error updating note:", updateNoteError);
+        toast({
+          title: "Error updating note",
+          description: "Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // 3. Optimistically update local state
+      const updatedNotes = notes.map((note) =>
+        note.id === noteId ? { ...note, isPinned: !note.isPinned } : note
       );
-      setLocalNotes(updatedNotes);
+      setNotes(updatedNotes);
 
-      onUpdateBook({
-        ...book,
-        notes: updatedNotes,
+      // 4. Update the book with the updated note
+      const updatedBook = { ...book, notes: updatedNotes };
+      onUpdateBook(book.id, updatedBook);
+
+      toast({
+        title: "Note updated",
+        description: "Your note has been successfully updated.",
       });
-
-      toast.success(currentPinned ? 'Note unpinned' : 'Note pinned');
-    } catch (error) {
-      console.error('Error toggling pin:', error);
-      toast.error('Failed to update note');
+    } catch (error: any) {
+      console.error("Error updating note:", error);
+      toast({
+        title: "Error updating note",
+        description: error.message || "Failed to update note. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  const formatTimestamp = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const sortNotes = (notes: typeof localNotes) => {
-    const pinnedNotes = notes.filter(note => note.isPinned);
-    const unpinnedNotes = notes.filter(note => !note.isPinned);
-
-    const sortFn = (a: typeof notes[0], b: typeof notes[0]) => {
-      switch (sortBy) {
-        case 'oldest':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case 'page':
-          if (!a.pageNumber) return 1;
-          if (!b.pageNumber) return -1;
-          return a.pageNumber - b.pageNumber;
-        case 'chapter':
-          if (!a.chapter) return 1;
-          if (!b.chapter) return -1;
-          return a.chapter.localeCompare(b.chapter);
-        default: // newest
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
-    };
-
-    return [...pinnedNotes.sort(sortFn), ...unpinnedNotes.sort(sortFn)];
-  };
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   return (
-    <div className="p-4 h-full flex flex-col">
+    <div className="space-y-4">
+      <AddNoteForm book={book} onSubmit={handleAddNote} />
+      
       <div className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground italic">
-            Organize your thoughts and notes for easy reference.
-          </p>
-          
-          <AddNoteForm book={book} onSubmit={handleAddNote} />
-
-          <div className="flex justify-end space-x-2 my-4">
-            <Select value={sortBy} onValueChange={(value: typeof sortBy) => setSortBy(value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-                {book.format === "physical_book" && (
-                  <SelectItem value="page">Page Number</SelectItem>
-                )}
-                <SelectItem value="chapter">Chapter</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2 mt-4">
-            {sortNotes(localNotes).map((note) => (
-              <div
-                key={note.id}
-                className={`p-3 bg-white rounded-lg shadow animate-fade-in group relative ${
-                  note.isPinned ? 'border-l-4 border-primary' : ''
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        {sortedNotes.map((note) => (
+          <Card key={note.id} className="relative">
+            <CardContent className="p-4 space-y-4">
+              {note.isPinned && (
+                <div className="absolute top-2 right-2">
+                  <Pin className="w-4 h-4 text-primary" />
+                </div>
+              )}
+              
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1 flex-1">
+                    <p className="whitespace-pre-wrap">{note.content}</p>
+                    {note.images && note.images.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2 mt-4">
+                        {note.images.map((imageUrl, index) => (
+                          <img
+                            key={index}
+                            src={imageUrl}
+                            alt={`Note image ${index + 1}`}
+                            className="w-full h-40 object-cover rounded-md"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {(note.pageNumber || note.timestampSeconds || note.chapter) && (
+                      <div className="flex gap-2 text-sm text-muted-foreground mt-2">
+                        {note.pageNumber && <span>Page {note.pageNumber}</span>}
+                        {note.timestampSeconds && (
+                          <span>
+                            {Math.floor(note.timestampSeconds / 60)}:
+                            {(note.timestampSeconds % 60).toString().padStart(2, "0")}
+                          </span>
+                        )}
+                        {note.chapter && <span>Chapter: {note.chapter}</span>}
+                      </div>
+                    )}
                     {note.category && (
-                      <span className="bg-secondary px-2 py-1 rounded-full">
+                      <Badge variant="secondary" className="mt-2">
                         {note.category}
-                      </span>
-                    )}
-                    {note.chapter && (
-                      <span className="flex items-center gap-1">
-                        <BookOpen className="h-3 w-3" />
-                        Chapter {note.chapter}
-                      </span>
-                    )}
-                    {note.pageNumber && (
-                      <span>Page {note.pageNumber}</span>
-                    )}
-                    {note.timestampSeconds && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {formatTimestamp(note.timestampSeconds)}
-                      </span>
+                      </Badge>
                     )}
                   </div>
-                  <div className="flex gap-1">
+                  
+                  <div className="flex gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className={`h-8 w-8 ${note.isPinned ? 'text-primary' : ''}`}
-                      onClick={() => togglePinNote(note.id, note.isPinned)}
+                      onClick={() => handleTogglePin(note.id)}
+                      className={note.isPinned ? "text-primary" : ""}
                     >
                       <Pin className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-destructive"
                       onClick={() => handleDeleteNote(note.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-                {note.images && note.images.length > 0 && (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {note.images.map((imageUrl, index) => (
-                      <a 
-                        key={index} 
-                        href={imageUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="block"
-                      >
-                        <img 
-                          src={imageUrl} 
-                          alt={`Note image ${index + 1}`} 
-                          className="rounded-md w-full h-32 object-cover hover:opacity-90 transition-opacity"
-                        />
-                      </a>
-                    ))}
-                  </div>
-                )}
-                <p className="text-xs text-gray-500 mt-2">
-                  {new Date(note.createdAt).toLocaleDateString()}
-                </p>
+                
+                <div className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(note.createdAt), { addSuffix: true })}
+                </div>
               </div>
-            ))}
+            </CardContent>
+          </Card>
+        ))}
+        
+        {notes.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No notes yet. Add your first note above!
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
