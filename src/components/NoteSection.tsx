@@ -19,8 +19,10 @@ interface Note {
   chapter?: string;
   category?: string;
   is_pinned: boolean;
-  images?: string[];
   book_id: string;
+  tags?: string[];
+  reading_progress?: number;
+  images?: string[];
 }
 
 interface NoteSectionProps {
@@ -29,7 +31,7 @@ interface NoteSectionProps {
 }
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
-  const [notes, setNotes] = useState<Note[]>(book.notes || []);
+  const [notes, setNotes] = useState<Note[]>([]); // Initialize as empty array
   const { toast } = useToast();
 
   useEffect(() => {
@@ -43,8 +45,8 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         chapter: note.chapter,
         category: note.category,
         is_pinned: note.isPinned,
+        book_id: book.id,
         images: note.images,
-        book_id: book.id
       }));
       setNotes(formattedNotes);
     }
