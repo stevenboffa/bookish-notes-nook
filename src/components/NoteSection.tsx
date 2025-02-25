@@ -60,6 +60,19 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     }
   }, [book.notes, book.id]);
 
+  const sanitizeFileName = (fileName: string): string => {
+    // Remove non-ASCII characters and special characters
+    const nameWithoutExt = fileName.split('.')[0];
+    const ext = fileName.split('.').pop();
+    const sanitized = nameWithoutExt
+      .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII
+      .replace(/[^a-zA-Z0-9-_]/g, '-') // Replace special chars with hyphen
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    
+    return `${sanitized}-${Date.now()}.${ext}`;
+  };
+
   const handleAddNote = async (note: {
     content: string;
     pageNumber?: number;
@@ -73,7 +86,8 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       
       if (note.images && note.images.length > 0) {
         for (const image of note.images) {
-          const fileName = `${book.id}/${Date.now()}-${image.name}`;
+          const sanitizedFileName = sanitizeFileName(image.name);
+          const fileName = `${book.id}/${sanitizedFileName}`;
           
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('note-images')
@@ -375,3 +389,4 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     </div>
   );
 }
+
