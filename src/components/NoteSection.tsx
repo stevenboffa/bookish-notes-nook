@@ -86,8 +86,12 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       
       if (note.images && note.images.length > 0) {
         for (const image of note.images) {
+          console.log('Processing image:', image.name); // Debug log
+          
           const sanitizedFileName = sanitizeFileName(image.name);
           const fileName = `${book.id}/${sanitizedFileName}`;
+          
+          console.log('Uploading image with filename:', fileName); // Debug log
           
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('note-images')
@@ -95,16 +99,21 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
 
           if (uploadError) {
             console.error("Error uploading image:", uploadError);
-            throw new Error('Failed to upload image');
+            throw new Error(`Failed to upload image: ${uploadError.message}`);
           }
+
+          console.log('Upload successful:', uploadData); // Debug log
 
           const { data: { publicUrl } } = supabase.storage
             .from('note-images')
             .getPublicUrl(fileName);
 
+          console.log('Generated public URL:', publicUrl); // Debug log
           imageUrls.push(publicUrl);
         }
       }
+
+      console.log('All images uploaded, creating note with URLs:', imageUrls); // Debug log
 
       const { data: newNote, error: createNoteError } = await supabase
         .from("notes")
@@ -125,6 +134,8 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         console.error("Error creating note:", createNoteError);
         throw new Error('Failed to create note');
       }
+
+      console.log('Note created successfully:', newNote); // Debug log
 
       const newNoteFormatted: Note = {
         id: newNote.id,
@@ -299,13 +310,20 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                           <div 
                             key={index}
                             className="relative cursor-pointer block w-full"
-                            onClick={() => setSelectedImage(imageUrl)}
+                            onClick={() => {
+                              console.log('Opening image:', imageUrl); // Debug log
+                              setSelectedImage(imageUrl);
+                            }}
                           >
                             <img
                               src={imageUrl}
                               alt={`Note image ${index + 1}`}
                               className="w-full h-auto rounded-md hover:opacity-90 transition-opacity"
                               loading="lazy"
+                              onError={(e) => {
+                                console.error('Image failed to load:', imageUrl);
+                                e.currentTarget.src = 'placeholder.svg'; // Fallback image
+                              }}
                             />
                           </div>
                         ))}
@@ -381,6 +399,10 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                 alt="Expanded view"
                 className="w-full h-auto max-h-[80vh] object-contain"
                 loading="lazy"
+                onError={(e) => {
+                  console.error('Modal image failed to load:', selectedImage);
+                  e.currentTarget.src = 'placeholder.svg'; // Fallback image
+                }}
               />
             )}
           </div>
@@ -389,4 +411,3 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     </div>
   );
 }
-
