@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
 
@@ -37,7 +38,7 @@ interface NoteSectionProps {
 }
 
 export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
-  const [notes, setNotes] = useState<Note[]>([]); 
+  const [notes, setNotes] = useState<Note[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -283,13 +284,14 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                         {note.images.map((imageUrl, index) => (
                           <div 
                             key={index}
-                            className="relative aspect-auto cursor-pointer"
+                            className="relative cursor-pointer block w-full"
                             onClick={() => setSelectedImage(imageUrl)}
                           >
                             <img
                               src={imageUrl}
                               alt={`Note image ${index + 1}`}
                               className="w-full h-auto rounded-md hover:opacity-90 transition-opacity"
+                              loading="lazy"
                             />
                           </div>
                         ))}
@@ -351,6 +353,9 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-4xl w-[90vw] p-0">
           <DialogTitle className="sr-only">Image Preview</DialogTitle>
+          <DialogDescription className="sr-only">
+            Expanded view of the selected note image
+          </DialogDescription>
           <div className="relative">
             <DialogClose className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none bg-background p-2">
               <X className="h-4 w-4" />
@@ -361,6 +366,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                 src={selectedImage}
                 alt="Expanded view"
                 className="w-full h-auto max-h-[80vh] object-contain"
+                loading="lazy"
               />
             )}
           </div>
