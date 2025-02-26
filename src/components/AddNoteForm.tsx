@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,28 +84,25 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const uploadImage = async (file: File): Promise<string> => {
     try {
       const fileExt = file.name.split('.').pop();
-      const sanitizedFileName = `${book.id}/${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
-      
-      console.log('Processing image:', file.name);
-      console.log('Uploading image with filename:', sanitizedFileName);
-      
+      const fileName = `${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
+      const filePath = `${book.id}/${fileName}`;
+
+      console.log('Starting image upload:', filePath);
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('note-images')
-        .upload(sanitizedFileName, file);
+        .upload(filePath, file);
 
       if (uploadError) {
-        console.error("Error uploading image:", uploadError);
+        console.error('Upload error:', uploadError);
         throw new Error(`Failed to upload image: ${uploadError.message}`);
       }
 
-      console.log('Upload successful:', uploadData);
-
       const { data: { publicUrl } } = supabase.storage
         .from('note-images')
-        .getPublicUrl(sanitizedFileName);
+        .getPublicUrl(filePath);
 
-      console.log('Generated public URL:', publicUrl);
-      
+      console.log('Upload successful, public URL:', publicUrl);
       return publicUrl;
     } catch (error) {
       console.error('Error in uploadImage:', error);
@@ -179,22 +177,31 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      setIsSubmitting(true);
-      
       if (isRecording) {
         recognition?.stop();
       }
 
       let uploadedImageUrls: string[] = [];
-      
+
       if (selectedImages.length > 0) {
-        // Upload all images first
-        const uploadPromises = selectedImages.map(file => uploadImage(file));
-        uploadedImageUrls = await Promise.all(uploadPromises);
-        console.log('All images uploaded successfully:', uploadedImageUrls);
+        try {
+          // Upload images sequentially to avoid race conditions
+          for (const file of selectedImages) {
+            const imageUrl = await uploadImage(file);
+            uploadedImageUrls.push(imageUrl);
+            console.log('Image uploaded successfully:', imageUrl);
+          }
+        } catch (error) {
+          console.error('Error uploading images:', error);
+          toast.error('Failed to upload one or more images');
+          setIsSubmitting(false);
+          return;
+        }
       }
-      
+
       const note: any = { content };
       
       if (book.format === "physical_book" && pageNumber) {
@@ -223,7 +230,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
       
       toast.success('Note added successfully');
     } catch (error) {
-      console.error('Error handling form submission:', error);
+      console.error('Error submitting note:', error);
       toast.error('Failed to create note. Please try again.');
     } finally {
       setIsSubmitting(false);
