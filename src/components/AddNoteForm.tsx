@@ -158,7 +158,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
                 type="number"
                 value={timestampSeconds}
                 onChange={(e) => setTimestampSeconds(e.target.value)}
-                placeholder="Timestamp (seconds)"
+                placeholder="Timestamp"
                 disabled={isSubmitting}
               />
             </div>
