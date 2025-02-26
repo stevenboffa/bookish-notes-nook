@@ -14,14 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Save, Star, StarHalf, Check } from "lucide-react";
+import { X, Save, Star, StarHalf, Check, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 import { QuoteSection } from "./QuoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -47,6 +46,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [rating, setRating] = useState(book?.rating || 0);
   const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
   const [description, setDescription] = useState(book?.description || "");
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const navigate = useNavigate();
@@ -64,6 +64,13 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       setDescription(book.description || "");
     }
   }, [book]);
+
+  const truncateDescription = (text: string, wordCount = 30) => {
+    if (!text) return "";
+    const words = text.split(/\s+/);
+    if (words.length <= wordCount) return text;
+    return words.slice(0, wordCount).join(" ") + "...";
+  };
 
   const handleSave = () => {
     if (!format) {
@@ -286,14 +293,26 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
             </div>
           </div>
 
-          <div className="mt-6">
-            <Label className="text-sm font-medium text-gray-700 block mb-2">Description</Label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add a description..."
-              className="w-full min-h-[100px] text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-lg border border-gray-100 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-colors"
-            />
+          <div className="mt-6 prose prose-sm max-w-none">
+            <div className="text-gray-700 leading-relaxed">
+              {showFullDescription ? (
+                <p>{description}</p>
+              ) : (
+                <p>{truncateDescription(description)}</p>
+              )}
+              {description && description.split(/\s+/).length > 30 && (
+                <button
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className="flex items-center gap-1 text-primary hover:text-primary/80 font-medium mt-2 transition-colors"
+                >
+                  {showFullDescription ? (
+                    <>Show less</>
+                  ) : (
+                    <>Show more<ChevronDown className="h-4 w-4" /></>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -369,3 +388,4 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     </div>
   );
 }
+
