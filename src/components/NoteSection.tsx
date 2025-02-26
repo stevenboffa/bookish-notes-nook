@@ -2,8 +2,6 @@
 import { useState, useEffect } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { Note, BookWithNotes } from "@/types/books";
 import { useToast } from "@/hooks/use-toast";
 import { NoteItem } from "./NoteItem";
@@ -14,7 +12,6 @@ interface NoteSectionProps {
 }
 
 export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
-  const [showForm, setShowForm] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const { toast } = useToast();
 
@@ -105,7 +102,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       };
 
       setNotes((prevNotes) => [formattedNote, ...prevNotes]);
-      setShowForm(false);
 
       onUpdateBook({
         ...book,
@@ -228,21 +224,12 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Notes</h3>
-        <Button size="sm" onClick={() => setShowForm(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Note
-        </Button>
-      </div>
-
-      {showForm && (
-        <AddNoteForm
-          bookId={book.id}
-          onSubmit={handleAddNote}
-          onCancel={() => setShowForm(false)}
-        />
-      )}
+      <h3 className="text-lg font-semibold">Notes</h3>
+      
+      <AddNoteForm
+        bookId={book.id}
+        onSubmit={handleAddNote}
+      />
 
       {notes.length === 0 ? (
         <p className="text-sm text-gray-500">No notes added yet.</p>

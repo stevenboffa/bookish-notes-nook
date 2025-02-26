@@ -6,12 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 
 interface AddNoteFormProps {
   bookId: string;
@@ -23,10 +17,9 @@ interface AddNoteFormProps {
     category?: string;
     images?: string[];
   }) => void;
-  onCancel: () => void;
 }
 
-export const AddNoteForm = ({ bookId, onSubmit, onCancel }: AddNoteFormProps) => {
+export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
   const [content, setContent] = useState("");
   const [pageNumber, setPageNumber] = useState<string>("");
   const [timestampSeconds, setTimestampSeconds] = useState<string>("");
@@ -103,7 +96,6 @@ export const AddNoteForm = ({ bookId, onSubmit, onCancel }: AddNoteFormProps) =>
       setChapter("");
       setCategory("");
       setSelectedImages([]);
-      onCancel();
     } catch (error) {
       console.error('Error submitting note:', error);
       toast({
@@ -117,127 +109,112 @@ export const AddNoteForm = ({ bookId, onSubmit, onCancel }: AddNoteFormProps) =>
   };
 
   return (
-    <Sheet open={true} onOpenChange={onCancel}>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-        <SheetHeader>
-          <SheetTitle>Add New Note</SheetTitle>
-        </SheetHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-4">
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your note here..."
-              required
-              disabled={isSubmitting}
-              className="min-h-[100px]"
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Input
-                  type="number"
-                  value={pageNumber}
-                  onChange={(e) => setPageNumber(e.target.value)}
-                  placeholder="Page number"
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div>
-                <Input
-                  type="number"
-                  value={timestampSeconds}
-                  onChange={(e) => setTimestampSeconds(e.target.value)}
-                  placeholder="Timestamp (seconds)"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Input
-                  value={chapter}
-                  onChange={(e) => setChapter(e.target.value)}
-                  placeholder="Chapter"
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div>
-                <Input
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  placeholder="Category"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-lg p-4 border mb-4">
+      <div className="space-y-4">
+        <Textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Write your note here..."
+          required
+          disabled={isSubmitting}
+          className="min-h-[100px]"
+        />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
             <Input
-              type="file"
-              onChange={handleImageSelect}
-              accept="image/*"
-              multiple
-              className="hidden"
-              id="image-upload"
+              type="number"
+              value={pageNumber}
+              onChange={(e) => setPageNumber(e.target.value)}
+              placeholder="Page number"
               disabled={isSubmitting}
             />
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => document.getElementById('image-upload')?.click()}
-              disabled={isSubmitting}
-            >
-              <ImagePlus className="w-4 h-4 mr-2" />
-              Add Images
-            </Button>
-            {selectedImages.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {selectedImages.map((file, index) => (
-                  <div
-                    key={index}
-                    className="relative group bg-gray-100 rounded-md p-2"
-                  >
-                    <div className="text-sm truncate max-w-[150px]">
-                      {file.name}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                      disabled={isSubmitting}
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
+          <div>
+            <Input
+              type="number"
+              value={timestampSeconds}
+              onChange={(e) => setTimestampSeconds(e.target.value)}
+              placeholder="Timestamp (seconds)"
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Input
+              value={chapter}
+              onChange={(e) => setChapter(e.target.value)}
+              placeholder="Chapter"
+              disabled={isSubmitting}
+            />
+          </div>
+          <div>
+            <Input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Category"
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+      </div>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting || !content}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Note'
-              )}
-            </Button>
+      <div className="space-y-2">
+        <Input
+          type="file"
+          onChange={handleImageSelect}
+          accept="image/*"
+          multiple
+          className="hidden"
+          id="image-upload"
+          disabled={isSubmitting}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => document.getElementById('image-upload')?.click()}
+          disabled={isSubmitting}
+        >
+          <ImagePlus className="w-4 h-4 mr-2" />
+          Add Images
+        </Button>
+        {selectedImages.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {selectedImages.map((file, index) => (
+              <div
+                key={index}
+                className="relative group bg-gray-100 rounded-md p-2"
+              >
+                <div className="text-sm truncate max-w-[150px]">
+                  {file.name}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                  disabled={isSubmitting}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
           </div>
-        </form>
-      </SheetContent>
-    </Sheet>
+        )}
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isSubmitting || !content}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            'Save Note'
+          )}
+        </Button>
+      </div>
+    </form>
   );
 };
