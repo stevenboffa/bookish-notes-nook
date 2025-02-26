@@ -228,7 +228,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Notes</h3>
+      <h3 className="text-lg font-semibold">Organize your thoughts and notes for easy reference</h3>
       
       <AddNoteForm
         bookId={book.id}

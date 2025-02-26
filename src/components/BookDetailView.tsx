@@ -16,9 +16,7 @@ import {
 import { X, Save, Star, StarHalf, Check, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
-import { QuoteSection } from "./QuoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 
@@ -424,20 +422,9 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
         <div className="mt-2">
           {book && format && (
-            <Tabs defaultValue="notes" className="w-full">
-              <div className="px-6 border-b">
-                <TabsList className="w-full sm:w-auto">
-                  <TabsTrigger value="notes" className="flex-1 sm:flex-none">Notes</TabsTrigger>
-                  <TabsTrigger value="quotes" className="flex-1 sm:flex-none">Quotes</TabsTrigger>
-                </TabsList>
-              </div>
-              <TabsContent value="notes">
-                <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
-              </TabsContent>
-              <TabsContent value="quotes">
-                <QuoteSection book={book} onUpdateBook={handleUpdateBook} />
-              </TabsContent>
-            </Tabs>
+            <div className="w-full">
+              <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
+            </div>
           )}
         </div>
       </div>
