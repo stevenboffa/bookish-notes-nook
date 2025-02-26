@@ -138,6 +138,7 @@ const Dashboard = () => {
           date_read: updatedBook.dateRead,
           is_favorite: updatedBook.isFavorite,
           format: updatedBook.format,
+          description: updatedBook.description,
         })
         .eq('id', updatedBook.id);
 

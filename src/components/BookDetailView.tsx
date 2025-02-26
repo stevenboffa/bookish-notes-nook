@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -45,6 +46,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [format, setFormat] = useState<BookFormat | "">("");
   const [rating, setRating] = useState(book?.rating || 0);
   const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
+  const [description, setDescription] = useState(book?.description || "");
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const navigate = useNavigate();
@@ -59,6 +61,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       setFormat(book.format as BookFormat || "");
       setRating(parseFloat(String(book.rating)) || 0);
       setIsFavorite(book.isFavorite || false);
+      setDescription(book.description || "");
     }
   }, [book]);
 
@@ -82,7 +85,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         isFavorite,
         imageUrl: null,
         thumbnailUrl: null,
-        description: '',
+        description: description,
       };
       onSave(newBook);
     } else {
@@ -95,6 +98,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         format,
         rating: parseFloat(rating.toFixed(1)),
         isFavorite,
+        description: description,
       };
       onSave(updatedBook);
     }
@@ -284,9 +288,12 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
 
           <div className="mt-6">
             <Label className="text-sm font-medium text-gray-700 block mb-2">Description</Label>
-            <p className="text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-lg border border-gray-100">
-              {book?.description || "No description available."}
-            </p>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add a description..."
+              className="w-full min-h-[100px] text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-lg border border-gray-100 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-colors"
+            />
           </div>
         </div>
 
