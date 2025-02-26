@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -120,6 +121,7 @@ export default function AddBook() {
       imageUrl,
       thumbnailUrl,
       format: "physical_book",
+      description: googleBook.volumeInfo.description || "",
     };
     setBook(newBook);
     setSearchResults([]);
@@ -142,6 +144,8 @@ export default function AddBook() {
       user_id: session.user.id,
       image_url: updatedBook.imageUrl,
       thumbnail_url: updatedBook.thumbnailUrl,
+      format: updatedBook.format,
+      description: updatedBook.description,
     };
 
     if (updatedBook.id && updatedBook.id !== "") {
@@ -233,18 +237,15 @@ export default function AddBook() {
                       <div>
                         <CardTitle className="text-lg">{result.volumeInfo.title}</CardTitle>
                         <CardDescription>
-                          by {result.volumeInfo.authors?.[0] || "Unknown Author"}
+                          by {result.volumeInfo.authors?.join(', ') || 'Unknown Author'}
                         </CardDescription>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {result.volumeInfo.categories?.[0] || "Uncategorized"}
-                        </p>
-                        {result.volumeInfo.publishedDate && (
-                          <p className="text-sm text-muted-foreground">
-                            Published: {result.volumeInfo.publishedDate}
-                          </p>
-                        )}
                       </div>
                     </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {result.volumeInfo.description || 'No description available'}
+                      </p>
+                    </CardContent>
                   </Card>
                 ))}
               </div>
@@ -268,9 +269,15 @@ export default function AddBook() {
               )}
             </div>
           )}
+          {searchResults.length === 0 && searchQuery && !isSearching && (
+            <p className="text-center text-muted-foreground py-8">
+              No books found
+            </p>
+          )}
         </div>
       )}
       <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
     </div>
   );
 }
+
