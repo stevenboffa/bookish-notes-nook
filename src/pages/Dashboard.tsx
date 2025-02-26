@@ -66,6 +66,7 @@ const Dashboard = () => {
         imageUrl: book.image_url || null,
         thumbnailUrl: book.thumbnail_url || null,
         format: book.format || 'physical_book',
+        description: book.description || '',  // Add this line to include the description
         notes: book.notes.map((note: any) => ({
           id: note.id,
           content: note.content,
