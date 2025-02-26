@@ -3,20 +3,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Book } from "./BookList";
-import { Mic, MicOff, Image as ImageIcon, X } from "lucide-react";
-import { toast } from "sonner";
+import { ImagePlus, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddNoteFormProps {
-  book: Book;
+  bookId: string;
   onSubmit: (note: {
     content: string;
     pageNumber?: number;
@@ -25,79 +17,46 @@ interface AddNoteFormProps {
     category?: string;
     images?: string[];
   }) => void;
+  onCancel: () => void;
 }
 
-const NOTE_TYPES = [
-  "plot",
-  "character", 
-  "theme",
-  "vocabulary",
-  "question"
-];
-
-const MAX_IMAGES = 4;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
+export const AddNoteForm = ({ bookId, onSubmit, onCancel }: AddNoteFormProps) => {
   const [content, setContent] = useState("");
   const [pageNumber, setPageNumber] = useState<string>("");
-  const [timestamp, setTimestamp] = useState<string>("");
+  const [timestampSeconds, setTimestampSeconds] = useState<string>("");
   const [chapter, setChapter] = useState("");
-  const [category, setCategory] = useState<string>("");
-  const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [category, setCategory] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition;
-      const newRecognition = new SpeechRecognition();
-      newRecognition.continuous = false;
-      newRecognition.interimResults = true;
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedImages((prev) => [...prev, ...files]);
+  };
 
-      newRecognition.onresult = (event) => {
-        const lastResult = event.results[event.results.length - 1];
-        if (lastResult.isFinal) {
-          setContent(prev => prev + (prev ? ' ' : '') + lastResult[0].transcript);
-        }
-      };
+  const removeImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
-      newRecognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        toast.error('Error recording voice. Please try again.');
-        setIsRecording(false);
-      };
+  const uploadImages = async (): Promise<string[]> => {
+    const uploadedUrls: string[] = [];
 
-      newRecognition.onend = () => {
-        setIsRecording(false);
-        if (isRecording) {
-          newRecognition.start();
-        }
-      };
-
-      setRecognition(newRecognition);
-    }
-  }, [isRecording]);
-
-  const uploadImage = async (file: File): Promise<string> => {
-    try {
+    for (const file of selectedImages) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${book.id}/${fileName}`;
+      const filePath = `${bookId}/${fileName}`;
 
-      console.log('Starting image upload:', filePath);
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('note-images')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('Error uploading image:', uploadError);
         throw new Error(`Failed to upload image: ${uploadError.message}`);
       }
 
@@ -105,135 +64,46 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
         .from('note-images')
         .getPublicUrl(filePath);
 
-      console.log('Upload successful, public URL:', publicUrl);
-      return publicUrl;
-    } catch (error) {
-      console.error('Error in uploadImage:', error);
-      throw error;
-    }
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    
-    if (selectedImages.length + files.length > MAX_IMAGES) {
-      toast.error(`You can only upload up to ${MAX_IMAGES} images per note`);
-      return;
+      uploadedUrls.push(publicUrl);
     }
 
-    const validFiles = files.filter(file => {
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not an image file`);
-        return false;
-      }
-      if (file.size > MAX_FILE_SIZE) {
-        toast.error(`${file.name} is too large. Maximum size is 5MB`);
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length > 0) {
-      setSelectedImages(prev => [...prev, ...validFiles]);
-      
-      validFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreviews(prev => [...prev, reader.result as string]);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const toggleRecording = () => {
-    if (!recognition) {
-      toast.error('Speech recognition is not supported in your browser');
-      return;
-    }
-
-    if (isRecording) {
-      recognition.stop();
-      setIsRecording(false);
-      toast.success('Voice recording stopped');
-    } else {
-      recognition.start();
-      setIsRecording(true);
-      toast.success('Voice recording started');
-    }
+    return uploadedUrls;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!content.trim()) {
-      toast.error('Please enter some content for the note');
-      return;
-    }
-
-    if (isSubmitting) {
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      if (isRecording) {
-        recognition?.stop();
-      }
-
-      let uploadedImageUrls: string[] = [];
-
+      let imageUrls: string[] = [];
       if (selectedImages.length > 0) {
-        try {
-          for (const file of selectedImages) {
-            const publicUrl = await uploadImage(file);
-            uploadedImageUrls.push(publicUrl);
-            console.log('Image uploaded successfully:', publicUrl);
-          }
-        } catch (error) {
-          console.error('Error uploading images:', error);
-          toast.error('Failed to upload one or more images');
-          setIsSubmitting(false);
-          return;
-        }
+        imageUrls = await uploadImages();
       }
 
-      const note: any = { content };
-      
-      if (book.format === "physical_book" && pageNumber) {
-        note.pageNumber = parseInt(pageNumber);
-      } else if (book.format === "audiobook" && timestamp) {
-        const [minutes, seconds] = timestamp.split(":").map(Number);
-        note.timestampSeconds = minutes * 60 + seconds;
-      }
-      
-      if (chapter) note.chapter = chapter;
-      if (category) note.category = category;
-      if (uploadedImageUrls.length > 0) note.images = uploadedImageUrls;
+      const noteData = {
+        content,
+        pageNumber: pageNumber ? parseInt(pageNumber) : undefined,
+        timestampSeconds: timestampSeconds ? parseInt(timestampSeconds) : undefined,
+        chapter: chapter || undefined,
+        category: category || undefined,
+        images: imageUrls,
+      };
 
-      console.log('Submitting note with data:', note);
-      
-      await onSubmit(note);
-      
-      // Reset form
+      await onSubmit(noteData);
       setContent("");
       setPageNumber("");
-      setTimestamp("");
+      setTimestampSeconds("");
       setChapter("");
       setCategory("");
       setSelectedImages([]);
-      setImagePreviews([]);
-      
-      toast.success('Note added successfully');
+      setUploadedImageUrls([]);
     } catch (error) {
       console.error('Error submitting note:', error);
-      toast.error('Failed to create note. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to save note. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -241,135 +111,107 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <Textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Write your note here..."
+        required
+        disabled={isSubmitting}
+        className="min-h-[100px]"
+      />
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          type="number"
+          value={pageNumber}
+          onChange={(e) => setPageNumber(e.target.value)}
+          placeholder="Page number"
+          disabled={isSubmitting}
+        />
+        <Input
+          type="number"
+          value={timestampSeconds}
+          onChange={(e) => setTimestampSeconds(e.target.value)}
+          placeholder="Timestamp (seconds)"
+          disabled={isSubmitting}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          value={chapter}
+          onChange={(e) => setChapter(e.target.value)}
+          placeholder="Chapter"
+          disabled={isSubmitting}
+        />
+        <Input
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Category"
+          disabled={isSubmitting}
+        />
+      </div>
       <div className="space-y-2">
-        <div className="relative">
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Add a note..."
-            className="min-h-[100px] pr-12"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={`absolute right-2 top-2 ${isRecording ? 'text-red-500' : ''}`}
-            onClick={toggleRecording}
-          >
-            {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => document.getElementById('image-upload')?.click()}
-            className="flex items-center gap-2"
-            disabled={selectedImages.length >= MAX_IMAGES || isSubmitting}
-          >
-            <ImageIcon className="h-4 w-4" />
-            Add Images
-          </Button>
-          <input
-            type="file"
-            id="image-upload"
-            className="hidden"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            disabled={isSubmitting}
-          />
-          {selectedImages.length > 0 && (
-            <span className="text-sm text-muted-foreground">
-              {selectedImages.length} of {MAX_IMAGES} images selected
-            </span>
-          )}
-        </div>
-
-        {imagePreviews.length > 0 && (
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            {imagePreviews.map((preview, index) => (
-              <div key={index} className="relative group">
-                <img
-                  src={preview}
-                  alt={`Preview ${index + 1}`}
-                  className="h-24 w-full object-cover rounded-md"
-                />
-                <Button
+        <Input
+          type="file"
+          onChange={handleImageSelect}
+          accept="image/*"
+          multiple
+          className="hidden"
+          id="image-upload"
+          disabled={isSubmitting}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => document.getElementById('image-upload')?.click()}
+          disabled={isSubmitting}
+        >
+          <ImagePlus className="w-4 h-4 mr-2" />
+          Add Images
+        </Button>
+        {selectedImages.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {selectedImages.map((file, index) => (
+              <div
+                key={index}
+                className="relative group bg-gray-100 rounded-md p-2"
+              >
+                <div className="text-sm truncate max-w-[150px]">
+                  {file.name}
+                </div>
+                <button
                   type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => removeImage(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
                   disabled={isSubmitting}
                 >
-                  <X className="h-4 w-4" />
-                </Button>
+                  <X className="w-3 h-3" />
+                </button>
               </div>
             ))}
           </div>
         )}
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {book.format === "physical_book" ? (
-          <div className="space-y-2">
-            <Input
-              type="number"
-              placeholder="Page number"
-              value={pageNumber}
-              onChange={(e) => setPageNumber(e.target.value)}
-              min="1"
-              className="w-full"
-              disabled={isSubmitting}
-            />
-          </div>
-        ) : book.format === "audiobook" ? (
-          <div className="space-y-2">
-            <Input
-              type="text"
-              placeholder="Time (MM:SS)"
-              value={timestamp}
-              onChange={(e) => setTimestamp(e.target.value)}
-              pattern="[0-9]{1,2}:[0-9]{2}"
-              title="Format: MM:SS (eg: 12:34)"
-              className="w-full"
-              disabled={isSubmitting}
-            />
-          </div>
-        ) : null}
-
-        <div className="space-y-2">
-          <Input
-            placeholder="Chapter"
-            value={chapter}
-            onChange={(e) => setChapter(e.target.value)}
-            className="w-full"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Select value={category} onValueChange={setCategory} disabled={isSubmitting}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Note type" />
-            </SelectTrigger>
-            <SelectContent>
-              {NOTE_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="flex justify-end space-x-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting || !content}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            'Save Note'
+          )}
+        </Button>
       </div>
-
-      <Button type="submit" disabled={!content.trim() || isSubmitting}>
-        {isSubmitting ? 'Adding note...' : 'Add Note'}
-      </Button>
     </form>
   );
-}
+};

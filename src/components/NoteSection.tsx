@@ -1,59 +1,48 @@
 import { useState, useEffect } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { Pin, Trash2, X } from "lucide-react";
-import { Book } from "@/components/BookList";
-import { AddNoteForm } from "@/components/AddNoteForm";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-} from "@/components/ui/dialog";
-
-interface Note {
-  id: string;
-  content: string;
-  created_at: string;
-  page_number?: number;
-  timestamp_seconds?: number;
-  chapter?: string;
-  category?: string;
-  is_pinned: boolean;
-  book_id: string;
-  tags?: string[];
-  reading_progress?: number;
-  images?: string[];
-}
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { Note } from "@/types/books";
+import { useToast } from "@/hooks/use-toast";
+import { NoteItem } from "./NoteItem";
 
 interface NoteSectionProps {
-  book: Book;
-  onUpdateBook: (book: Book) => void;
+  book: {
+    id: string;
+    notes: Array<{
+      id: string;
+      content: string;
+      createdAt: string;
+      pageNumber?: number;
+      timestampSeconds?: number;
+      chapter?: string;
+      category?: string;
+      isPinned?: boolean;
+      images?: string[];
+    }>;
+  };
+  onUpdateBook: (book: any) => void;
 }
 
-export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
+export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
+  const [showForm, setShowForm] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     if (book.notes) {
-      const formattedNotes: Note[] = book.notes.map(note => ({
+      const formattedNotes = book.notes.map((note) => ({
         id: note.id,
         content: note.content,
-        created_at: note.createdAt,
-        page_number: note.pageNumber,
-        timestamp_seconds: note.timestampSeconds,
+        createdAt: note.createdAt,
+        pageNumber: note.pageNumber,
+        timestampSeconds: note.timestampSeconds,
         chapter: note.chapter,
         category: note.category,
-        is_pinned: note.isPinned,
-        book_id: book.id,
+        isPinned: note.isPinned,
         images: note.images || [],
+        book_id: book.id,
       }));
       setNotes(formattedNotes);
     }
@@ -73,8 +62,8 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
       const { data: newNote, error: createNoteError } = await supabase
         .from("notes")
         .insert({
-          book_id: book.id,
           content: note.content,
+          book_id: book.id,
           page_number: note.pageNumber,
           timestamp_seconds: note.timestampSeconds,
           chapter: note.chapter,
@@ -86,280 +75,176 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         .single();
 
       if (createNoteError) {
-        console.error("Error creating note:", createNoteError);
-        throw new Error('Failed to create note');
+        throw createNoteError;
       }
 
-      console.log('Note created successfully:', newNote);
+      console.log('New note created:', newNote);
 
-      const newNoteFormatted: Note = {
+      const formattedNote = {
         id: newNote.id,
         content: newNote.content,
-        created_at: newNote.created_at,
-        page_number: newNote.page_number,
-        timestamp_seconds: newNote.timestamp_seconds,
+        createdAt: newNote.created_at,
+        pageNumber: newNote.page_number,
+        timestampSeconds: newNote.timestamp_seconds,
         chapter: newNote.chapter,
         category: newNote.category,
-        is_pinned: newNote.is_pinned,
+        isPinned: newNote.is_pinned,
         images: newNote.images || [],
         book_id: newNote.book_id
       };
 
-      const updatedNotes = [...notes, newNoteFormatted];
-      setNotes(updatedNotes);
-      
-      const bookNotes = updatedNotes.map(note => ({
+      setNotes((prevNotes) => [formattedNote, ...prevNotes]);
+      setShowForm(false);
+
+      // Update the book's notes in the parent component
+      const bookNotes = [formattedNote, ...notes].map(note => ({
         id: note.id,
         content: note.content,
-        createdAt: note.created_at,
-        pageNumber: note.page_number,
-        timestampSeconds: note.timestamp_seconds,
+        createdAt: note.createdAt,
+        pageNumber: note.pageNumber,
+        timestampSeconds: note.timestampSeconds,
         chapter: note.chapter,
         category: note.category,
-        isPinned: note.is_pinned,
+        isPinned: note.isPinned,
         images: note.images || [],
       }));
       
       onUpdateBook({ ...book, notes: bookNotes });
 
       toast({
-        title: "Note added",
-        description: "Your note has been successfully added.",
+        title: "Success",
+        description: "Note added successfully",
       });
     } catch (error) {
-      console.error("Error adding note:", error);
+      console.error('Error adding note:', error);
       toast({
-        title: "Error adding note",
-        description: error instanceof Error ? error.message : "Failed to add note",
+        title: "Error",
+        description: "Failed to add note. Please try again.",
         variant: "destructive",
       });
     }
   };
 
-  const handleDeleteNote = async (noteId: string) => {
+  const deleteNote = async (noteId: string) => {
     try {
-      const { error: deleteNoteError } = await supabase
+      const { error } = await supabase
         .from("notes")
         .delete()
         .eq("id", noteId);
 
-      if (deleteNoteError) throw deleteNoteError;
+      if (error) throw error;
 
       const updatedNotes = notes.filter((note) => note.id !== noteId);
       setNotes(updatedNotes);
-      
+
+      // Update the book's notes in the parent component
       const bookNotes = updatedNotes.map(note => ({
         id: note.id,
         content: note.content,
-        createdAt: note.created_at,
-        pageNumber: note.page_number,
-        timestampSeconds: note.timestamp_seconds,
+        createdAt: note.createdAt,
+        pageNumber: note.pageNumber,
+        timestampSeconds: note.timestampSeconds,
         chapter: note.chapter,
         category: note.category,
-        isPinned: note.is_pinned,
+        isPinned: note.isPinned,
         images: note.images || [],
       }));
       
       onUpdateBook({ ...book, notes: bookNotes });
 
       toast({
-        title: "Note deleted",
-        description: "Your note has been successfully deleted.",
+        title: "Success",
+        description: "Note deleted successfully",
       });
     } catch (error) {
-      console.error("Error deleting note:", error);
+      console.error('Error deleting note:', error);
       toast({
-        title: "Error deleting note",
+        title: "Error",
         description: "Failed to delete note. Please try again.",
         variant: "destructive",
       });
     }
   };
 
-  const handleTogglePin = async (noteId: string) => {
+  const togglePin = async (noteId: string, currentPinned: boolean) => {
     try {
-      const noteToUpdate = notes.find((note) => note.id === noteId);
-      if (!noteToUpdate) throw new Error('Note not found');
-
-      const { error: updateNoteError } = await supabase
+      const { data: updatedNote, error } = await supabase
         .from("notes")
-        .update({ is_pinned: !noteToUpdate.is_pinned })
-        .eq("id", noteId);
+        .update({ is_pinned: !currentPinned })
+        .eq("id", noteId)
+        .select()
+        .single();
 
-      if (updateNoteError) throw updateNoteError;
+      if (error) throw error;
 
       const updatedNotes = notes.map((note) =>
-        note.id === noteId ? { ...note, is_pinned: !note.is_pinned } : note
+        note.id === noteId
+          ? { ...note, isPinned: updatedNote.is_pinned }
+          : note
       );
       setNotes(updatedNotes);
 
+      // Update the book's notes in the parent component
       const bookNotes = updatedNotes.map(note => ({
         id: note.id,
         content: note.content,
-        createdAt: note.created_at,
-        pageNumber: note.page_number,
-        timestampSeconds: note.timestamp_seconds,
+        createdAt: note.createdAt,
+        pageNumber: note.pageNumber,
+        timestampSeconds: note.timestampSeconds,
         chapter: note.chapter,
         category: note.category,
-        isPinned: note.is_pinned,
+        isPinned: note.isPinned,
         images: note.images || [],
       }));
       
       onUpdateBook({ ...book, notes: bookNotes });
 
       toast({
-        title: "Note updated",
-        description: "Your note has been successfully updated.",
+        title: "Success",
+        description: `Note ${updatedNote.is_pinned ? 'pinned' : 'unpinned'} successfully`,
       });
     } catch (error) {
-      console.error("Error updating note:", error);
+      console.error('Error toggling pin:', error);
       toast({
-        title: "Error updating note",
-        description: error instanceof Error ? error.message : "Failed to update note",
+        title: "Error",
+        description: "Failed to update note. Please try again.",
         variant: "destructive",
       });
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        console.error('Invalid date:', dateString);
-        return 'Invalid date';
-      }
-      return formatDistanceToNow(date, { addSuffix: true });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid date';
-    }
-  };
-
-  const sortedNotes = [...notes].sort((a, b) => {
-    if (a.is_pinned && !b.is_pinned) return -1;
-    if (!a.is_pinned && b.is_pinned) return 1;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
-
   return (
     <div className="space-y-4">
-      <AddNoteForm book={book} onSubmit={handleAddNote} />
-      
-      <div className="space-y-4">
-        {sortedNotes.map((note) => (
-          <Card key={note.id} className="relative">
-            <CardContent className="p-4 space-y-4">
-              {note.is_pinned && (
-                <div className="absolute top-2 right-2">
-                  <Pin className="w-4 h-4 text-primary" />
-                </div>
-              )}
-              
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1 flex-1">
-                    <p className="whitespace-pre-wrap">{note.content}</p>
-                    {note.images && note.images.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2 mt-4">
-                        {note.images.map((imageUrl, index) => (
-                          <div 
-                            key={index}
-                            className="relative cursor-pointer block w-full"
-                            onClick={() => setSelectedImage(imageUrl)}
-                          >
-                            <img
-                              src={imageUrl}
-                              alt={`Note image ${index + 1}`}
-                              className="w-full h-auto rounded-md hover:opacity-90 transition-opacity"
-                              loading="lazy"
-                              onError={(e) => {
-                                console.error('Image failed to load:', imageUrl);
-                                e.currentTarget.src = 'placeholder.svg';
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {(note.page_number || note.timestamp_seconds || note.chapter) && (
-                      <div className="flex gap-2 text-sm text-muted-foreground mt-2">
-                        {note.page_number && <span>Page {note.page_number}</span>}
-                        {note.timestamp_seconds && (
-                          <span>
-                            {Math.floor(note.timestamp_seconds / 60)}:
-                            {(note.timestamp_seconds % 60).toString().padStart(2, "0")}
-                          </span>
-                        )}
-                        {note.chapter && <span>Chapter: {note.chapter}</span>}
-                      </div>
-                    )}
-                    {note.category && (
-                      <Badge variant="secondary" className="mt-2">
-                        {note.category}
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleTogglePin(note.id)}
-                      className={note.is_pinned ? "text-primary" : ""}
-                    >
-                      <Pin className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteNote(note.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="text-xs text-muted-foreground">
-                  {formatDate(note.created_at)}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        
-        {notes.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            No notes yet. Add your first note above!
-          </div>
-        )}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Notes</h3>
+        <Button size="sm" onClick={() => setShowForm(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Note
+        </Button>
       </div>
 
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl w-[90vw] p-0">
-          <DialogTitle className="sr-only">Image Preview</DialogTitle>
-          <DialogDescription className="sr-only">
-            Expanded view of the selected note image
-          </DialogDescription>
-          <div className="relative">
-            <DialogClose className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none bg-background p-2">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </DialogClose>
-            {selectedImage && (
-              <img
-                src={selectedImage}
-                alt="Expanded view"
-                className="w-full h-auto max-h-[80vh] object-contain"
-                loading="lazy"
-                onError={(e) => {
-                  console.error('Modal image failed to load:', selectedImage);
-                  e.currentTarget.src = 'placeholder.svg';
-                }}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {showForm && (
+        <AddNoteForm
+          bookId={book.id}
+          onSubmit={handleAddNote}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
+
+      {notes.length === 0 ? (
+        <p className="text-sm text-gray-500">No notes added yet.</p>
+      ) : (
+        <div className="space-y-2">
+          {notes.map((note) => (
+            <NoteItem
+              key={note.id}
+              note={note}
+              onDelete={deleteNote}
+              onTogglePin={togglePin}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
-}
+};
