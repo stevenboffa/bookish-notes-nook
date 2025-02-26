@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,7 @@ interface AddNoteFormProps {
     timestampSeconds?: number;
     chapter?: string;
     category?: string;
-    images?: string[];  // Changed from File[] to string[]
+    images?: string[];
   }) => void;
 }
 
@@ -48,7 +47,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
@@ -81,7 +80,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
     }
   }, [isRecording]);
 
-  const uploadImage = async (file: File) => {
+  const uploadImage = async (file: File): Promise<string> => {
     try {
       const fileExt = file.name.split('.').pop();
       const sanitizedFileName = `${book.id}/${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
@@ -113,7 +112,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
     }
   };
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
     if (selectedImages.length + files.length > MAX_IMAGES) {
@@ -149,7 +148,6 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const removeImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
-    setUploadedImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   const toggleRecording = () => {
@@ -177,18 +175,24 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
       return;
     }
 
+    if (isSubmitting) {
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
+      
       if (isRecording) {
         recognition?.stop();
       }
 
-      let imageUrls: string[] = [];
+      let uploadedImageUrls: string[] = [];
       
       if (selectedImages.length > 0) {
         // Upload all images first
         const uploadPromises = selectedImages.map(file => uploadImage(file));
-        imageUrls = await Promise.all(uploadPromises);
-        console.log('All images uploaded successfully:', imageUrls);
+        uploadedImageUrls = await Promise.all(uploadPromises);
+        console.log('All images uploaded successfully:', uploadedImageUrls);
       }
       
       const note: any = { content };
@@ -202,10 +206,13 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
       
       if (chapter) note.chapter = chapter;
       if (category) note.category = category;
-      if (imageUrls.length > 0) note.images = imageUrls;
+      if (uploadedImageUrls.length > 0) note.images = uploadedImageUrls;
 
-      onSubmit(note);
+      console.log('Submitting note with data:', note);
       
+      await onSubmit(note);
+      
+      // Reset form
       setContent("");
       setPageNumber("");
       setTimestamp("");
@@ -213,11 +220,13 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
       setCategory("");
       setSelectedImages([]);
       setImagePreviews([]);
-      setUploadedImageUrls([]);
       
+      toast.success('Note added successfully');
     } catch (error) {
       console.error('Error handling form submission:', error);
       toast.error('Failed to create note. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -249,7 +258,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
             size="sm"
             onClick={() => document.getElementById('image-upload')?.click()}
             className="flex items-center gap-2"
-            disabled={selectedImages.length >= MAX_IMAGES}
+            disabled={selectedImages.length >= MAX_IMAGES || isSubmitting}
           >
             <ImageIcon className="h-4 w-4" />
             Add Images
@@ -261,6 +270,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
             accept="image/*"
             multiple
             onChange={handleImageChange}
+            disabled={isSubmitting}
           />
           {selectedImages.length > 0 && (
             <span className="text-sm text-muted-foreground">
@@ -284,6 +294,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
                   size="icon"
                   className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => removeImage(index)}
+                  disabled={isSubmitting}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -303,6 +314,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
               onChange={(e) => setPageNumber(e.target.value)}
               min="1"
               className="w-full"
+              disabled={isSubmitting}
             />
           </div>
         ) : book.format === "audiobook" ? (
@@ -315,6 +327,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
               pattern="[0-9]{1,2}:[0-9]{2}"
               title="Format: MM:SS (eg: 12:34)"
               className="w-full"
+              disabled={isSubmitting}
             />
           </div>
         ) : null}
@@ -325,11 +338,12 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
             value={chapter}
             onChange={(e) => setChapter(e.target.value)}
             className="w-full"
+            disabled={isSubmitting}
           />
         </div>
 
         <div className="space-y-2">
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={setCategory} disabled={isSubmitting}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Note type" />
             </SelectTrigger>
@@ -344,7 +358,9 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
         </div>
       </div>
 
-      <Button type="submit" disabled={!content.trim()}>Add Note</Button>
+      <Button type="submit" disabled={!content.trim() || isSubmitting}>
+        {isSubmitting ? 'Adding note...' : 'Add Note'}
+      </Button>
     </form>
   );
 }
