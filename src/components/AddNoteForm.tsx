@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import {
 import { Book } from "./BookList";
 import { Mic, MicOff, Image as ImageIcon, X } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddNoteFormProps {
   book: Book;
@@ -21,7 +23,7 @@ interface AddNoteFormProps {
     timestampSeconds?: number;
     chapter?: string;
     category?: string;
-    images?: File[];
+    images?: string[];
   }) => void;
 }
 
@@ -46,6 +48,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
@@ -78,7 +81,39 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
     }
   }, [isRecording]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadImage = async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const sanitizedFileName = `${book.id}/${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
+      
+      console.log('Processing image:', file.name);
+      console.log('Uploading image with filename:', sanitizedFileName);
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('note-images')
+        .upload(sanitizedFileName, file);
+
+      if (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        throw new Error(`Failed to upload image: ${uploadError.message}`);
+      }
+
+      console.log('Upload successful:', uploadData);
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('note-images')
+        .getPublicUrl(sanitizedFileName);
+
+      console.log('Generated public URL:', publicUrl);
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('Error in uploadImage:', error);
+      throw error;
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
     if (selectedImages.length + files.length > MAX_IMAGES) {
@@ -114,6 +149,7 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const removeImage = (index: number) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setUploadedImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   const toggleRecording = () => {
@@ -133,35 +169,56 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isRecording) {
-      recognition?.stop();
+    if (!content.trim()) {
+      toast.error('Please enter some content for the note');
+      return;
     }
-    
-    const note: any = { content };
-    
-    if (book.format === "physical_book" && pageNumber) {
-      note.pageNumber = parseInt(pageNumber);
-    } else if (book.format === "audiobook" && timestamp) {
-      const [minutes, seconds] = timestamp.split(":").map(Number);
-      note.timestampSeconds = minutes * 60 + seconds;
-    }
-    
-    if (chapter) note.chapter = chapter;
-    if (category) note.category = category;
-    if (selectedImages.length > 0) note.images = selectedImages;
 
-    onSubmit(note);
-    
-    setContent("");
-    setPageNumber("");
-    setTimestamp("");
-    setChapter("");
-    setCategory("");
-    setSelectedImages([]);
-    setImagePreviews([]);
+    try {
+      if (isRecording) {
+        recognition?.stop();
+      }
+
+      let imageUrls: string[] = [];
+      
+      if (selectedImages.length > 0) {
+        // Upload all images first
+        const uploadPromises = selectedImages.map(file => uploadImage(file));
+        imageUrls = await Promise.all(uploadPromises);
+        console.log('All images uploaded successfully:', imageUrls);
+      }
+      
+      const note: any = { content };
+      
+      if (book.format === "physical_book" && pageNumber) {
+        note.pageNumber = parseInt(pageNumber);
+      } else if (book.format === "audiobook" && timestamp) {
+        const [minutes, seconds] = timestamp.split(":").map(Number);
+        note.timestampSeconds = minutes * 60 + seconds;
+      }
+      
+      if (chapter) note.chapter = chapter;
+      if (category) note.category = category;
+      if (imageUrls.length > 0) note.images = imageUrls;
+
+      onSubmit(note);
+      
+      setContent("");
+      setPageNumber("");
+      setTimestamp("");
+      setChapter("");
+      setCategory("");
+      setSelectedImages([]);
+      setImagePreviews([]);
+      setUploadedImageUrls([]);
+      
+    } catch (error) {
+      console.error('Error handling form submission:', error);
+      toast.error('Failed to create note. Please try again.');
+    }
   };
 
   return (
