@@ -20,8 +20,7 @@ import { QuoteSection } from "./QuoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { toast } from "react-toastify";
-import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -132,7 +131,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     }
 
     try {
-      // Sanitize the filename to remove special characters
       const fileExt = file.name.split('.').pop();
       const sanitizedFileName = `${crypto.randomUUID()}.${fileExt}`;
       
@@ -142,12 +140,16 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         fileSize: file.size
       });
 
-      const { error: uploadError, data } = await supabase.storage
-        .from('note-images')
-        .upload(sanitizedFileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      const { data: uploadedImage, error: uploadError } = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName: sanitizedFileName,
+          fileType: file.type
+        })
+      }).then(res => res.json());
 
       if (uploadError) {
         console.error('Image upload error:', uploadError);
@@ -155,17 +157,11 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         return;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('note-images')
-        .getPublicUrl(sanitizedFileName);
-
-      console.log('Image uploaded successfully:', {
-        publicUrl,
-        path: sanitizedFileName
-      });
-
-      if (editor) {
-        editor.chain().focus().setImage({ src: publicUrl }).run();
+      if (uploadedImage?.url) {
+        console.log('Image uploaded successfully:', {
+          url: uploadedImage.url,
+          path: sanitizedFileName
+        });
         toast.success('Image uploaded successfully');
       }
     } catch (error) {
