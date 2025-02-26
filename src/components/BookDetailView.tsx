@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -21,6 +20,8 @@ import { QuoteSection } from "./QuoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { toast } from "react-toastify";
+import { supabase } from "@/lib/supabase";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -36,6 +37,11 @@ interface BookDetailViewProps {
 
 type BookStatus = "Not started" | "In Progress" | "Finished" | "Future Reads";
 type BookFormat = "physical_book" | "audiobook";
+
+interface RichTextEditorProps {
+  content: string;
+  onChange: (html: string) => void;
+}
 
 export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
@@ -72,7 +78,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     return words.slice(0, wordCount).join(" ") + "...";
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!format) {
       return;
     }
@@ -114,6 +120,60 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     setTimeout(() => {
       setShowSaveConfirmation(false);
     }, 2000);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    try {
+      // Sanitize the filename to remove special characters
+      const fileExt = file.name.split('.').pop();
+      const sanitizedFileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      console.log('Uploading image:', {
+        fileName: sanitizedFileName,
+        fileType: file.type,
+        fileSize: file.size
+      });
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('note-images')
+        .upload(sanitizedFileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Image upload error:', uploadError);
+        toast.error('Failed to upload image. Please try again.');
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('note-images')
+        .getPublicUrl(sanitizedFileName);
+
+      console.log('Image uploaded successfully:', {
+        publicUrl,
+        path: sanitizedFileName
+      });
+
+      if (editor) {
+        editor.chain().focus().setImage({ src: publicUrl }).run();
+        toast.success('Image uploaded successfully');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+    }
+
+    e.target.value = '';
   };
 
   const handleUpdateBook = (updatedBook: Book) => {
@@ -388,4 +448,3 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     </div>
   );
 }
-
