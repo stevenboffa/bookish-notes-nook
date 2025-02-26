@@ -295,6 +295,7 @@ export type Database = {
           id: string
           images: string[] | null
           is_pinned: boolean | null
+          note_type: string | null
           page_number: number | null
           reading_progress: number | null
           tags: string[] | null
@@ -309,6 +310,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_pinned?: boolean | null
+          note_type?: string | null
           page_number?: number | null
           reading_progress?: number | null
           tags?: string[] | null
@@ -323,6 +325,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_pinned?: boolean | null
+          note_type?: string | null
           page_number?: number | null
           reading_progress?: number | null
           tags?: string[] | null

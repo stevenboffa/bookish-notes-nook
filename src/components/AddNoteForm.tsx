@@ -6,6 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AddNoteFormProps {
   bookId: string;
@@ -16,6 +23,7 @@ interface AddNoteFormProps {
     chapter?: string;
     category?: string;
     images?: string[];
+    noteType?: string;
   }) => void;
 }
 
@@ -25,6 +33,7 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
   const [timestampSeconds, setTimestampSeconds] = useState<string>("");
   const [chapter, setChapter] = useState("");
   const [category, setCategory] = useState("");
+  const [noteType, setNoteType] = useState<string>("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -86,6 +95,7 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
         chapter: chapter || undefined,
         category: category || undefined,
         images: imageUrls,
+        noteType: noteType || undefined,
       };
 
       await onSubmit(noteData);
@@ -95,6 +105,7 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
       setTimestampSeconds("");
       setChapter("");
       setCategory("");
+      setNoteType("");
       setSelectedImages([]);
     } catch (error) {
       console.error('Error submitting note:', error);
@@ -119,6 +130,20 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
           disabled={isSubmitting}
           className="min-h-[100px]"
         />
+        
+        <Select value={noteType} onValueChange={setNoteType}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select note type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">General Note</SelectItem>
+            <SelectItem value="quote">Quote</SelectItem>
+            <SelectItem value="summary">Summary</SelectItem>
+            <SelectItem value="insight">Insight</SelectItem>
+            <SelectItem value="question">Question</SelectItem>
+          </SelectContent>
+        </Select>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Input

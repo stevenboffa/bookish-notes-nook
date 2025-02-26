@@ -45,6 +45,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
             category: note.category,
             isPinned: note.is_pinned,
             images: note.images || [],
+            noteType: note.note_type,
             book_id: note.book_id,
           }));
           setNotes(formattedNotes);
@@ -63,6 +64,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     chapter?: string;
     category?: string;
     images?: string[];
+    noteType?: string;
   }) => {
     try {
       console.log('Creating note with data:', note);
@@ -77,6 +79,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
           chapter: note.chapter,
           category: note.category,
           images: note.images || [],
+          note_type: note.noteType,
           is_pinned: false
         })
         .select('*')
@@ -98,6 +101,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         category: newNote.category,
         isPinned: newNote.is_pinned,
         images: newNote.images || [],
+        noteType: newNote.note_type,
         book_id: newNote.book_id
       };
 
