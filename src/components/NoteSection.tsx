@@ -53,23 +53,11 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         category: note.category,
         is_pinned: note.isPinned,
         book_id: book.id,
-        images: note.images,
+        images: note.images || [],
       }));
       setNotes(formattedNotes);
     }
   }, [book.notes, book.id]);
-
-  const sanitizeFileName = (fileName: string): string => {
-    const nameWithoutExt = fileName.split('.')[0];
-    const ext = fileName.split('.').pop();
-    const sanitized = nameWithoutExt
-      .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII
-      .replace(/[^a-zA-Z0-9-_]/g, '-') // Replace special chars with hyphen
-      .replace(/-+/g, '-') // Replace multiple hyphens with single
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-    
-    return `${sanitized}-${Date.now()}.${ext}`;
-  };
 
   const handleAddNote = async (note: {
     content: string;
@@ -80,6 +68,8 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     images?: string[];
   }) => {
     try {
+      console.log('Creating note with data:', note);
+
       const { data: newNote, error: createNoteError } = await supabase
         .from("notes")
         .insert({
@@ -89,10 +79,10 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
           timestamp_seconds: note.timestampSeconds,
           chapter: note.chapter,
           category: note.category,
-          images: note.images,
+          images: note.images || [],
           is_pinned: false
         })
-        .select()
+        .select('*')
         .single();
 
       if (createNoteError) {
@@ -111,7 +101,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         chapter: newNote.chapter,
         category: newNote.category,
         is_pinned: newNote.is_pinned,
-        images: newNote.images,
+        images: newNote.images || [],
         book_id: newNote.book_id
       };
 
@@ -127,7 +117,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         chapter: note.chapter,
         category: note.category,
         isPinned: note.is_pinned,
-        images: note.images,
+        images: note.images || [],
       }));
       
       onUpdateBook({ ...book, notes: bookNotes });
@@ -167,7 +157,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         chapter: note.chapter,
         category: note.category,
         isPinned: note.is_pinned,
-        images: note.images,
+        images: note.images || [],
       }));
       
       onUpdateBook({ ...book, notes: bookNotes });
@@ -212,7 +202,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         chapter: note.chapter,
         category: note.category,
         isPinned: note.is_pinned,
-        images: note.images,
+        images: note.images || [],
       }));
       
       onUpdateBook({ ...book, notes: bookNotes });
