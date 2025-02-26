@@ -202,7 +202,7 @@ export const NoteSection = ({
     }
   };
   return <div className="space-y-5 px-4 sm:px-6">
-      <h3 className="text-gray-900 tracking-tight text-base text-center font-medium">Add notes, quotes, and upload images you find interesting</h3>
+      <h3 className="text-gray-900 tracking-tight text-base text-center font-medium">Add meaningful notes, quotes, and upload images you find interesting</h3>
       
       <AddNoteForm bookId={book.id} onSubmit={handleAddNote} />
 
