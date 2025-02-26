@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -5,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -47,7 +47,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
   const [format, setFormat] = useState<BookFormat | "">("");
   const [rating, setRating] = useState(book?.rating || 0);
-  const [isFavorite, setIsFavorite] = useState(book?.isFavorite || false);
   const [description, setDescription] = useState(book?.description || "");
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
@@ -63,7 +62,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
       setStatus(book.status as BookStatus);
       setFormat(book.format as BookFormat || "");
       setRating(parseFloat(String(book.rating)) || 0);
-      setIsFavorite(book.isFavorite || false);
       setDescription(book.description || "");
     }
   }, [book]);
@@ -92,7 +90,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         notes: [],
         quotes: [],
         dateRead: new Date().toISOString().split('T')[0],
-        isFavorite,
+        isFavorite: false,
         imageUrl: null,
         thumbnailUrl: null,
         description: description,
@@ -107,7 +105,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         status,
         format,
         rating: parseFloat(rating.toFixed(1)),
-        isFavorite,
         description: description,
       };
       onSave(updatedBook);
@@ -310,19 +307,55 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isFavorite"
-                    checked={isFavorite}
-                    onCheckedChange={(checked) => setIsFavorite(checked as boolean)}
-                    className="h-4 w-4 text-primary"
-                  />
-                  <Label htmlFor="isFavorite" className="text-sm cursor-pointer hover:text-primary transition-colors">
-                    Favorite
-                  </Label>
-                </div>
               </div>
+
+              <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+                <CollapsibleTrigger className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium text-text-muted hover:text-primary transition-all group w-full">
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isDetailsOpen ? 'rotate-180' : ''} group-hover:text-primary`} />
+                  <span className="group-hover:translate-x-0.5 transition-transform duration-200">Edit book details</span>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-6 px-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-sm font-medium text-text-muted">Title</Label>
+                      <Input
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Enter book title"
+                        className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="author" className="text-sm font-medium text-text-muted">Author</Label>
+                      <Input
+                        id="author"
+                        value={author}
+                        onChange={(e) => setAuthor(e.target.value)}
+                        placeholder="Enter author name"
+                        className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="genre" className="text-sm font-medium text-text-muted">Genre</Label>
+                      <Select value={genre} onValueChange={setGenre}>
+                        <SelectTrigger className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors">
+                          <SelectValue placeholder="Select genre" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {genres.map((g) => (
+                            <SelectItem key={g} value={g} className="text-sm">
+                              {g}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
               
               <div className="space-y-4 bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
                 <Label className="text-sm font-medium text-text-muted">Rating</Label>
@@ -370,56 +403,6 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
           </div>
         </div>
 
-        <div className="p-6 space-y-6 bg-white">
-          <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-            <CollapsibleTrigger className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium text-text-muted hover:text-primary transition-all group w-full">
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isDetailsOpen ? 'rotate-180' : ''} group-hover:text-primary`} />
-              <span className="group-hover:translate-x-0.5 transition-transform duration-200">Edit book details</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pt-6 px-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50/50 rounded-lg border border-gray-100">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-medium text-text-muted">Title</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter book title"
-                    className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="author" className="text-sm font-medium text-text-muted">Author</Label>
-                  <Input
-                    id="author"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    placeholder="Enter author name"
-                    className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="genre" className="text-sm font-medium text-text-muted">Genre</Label>
-                  <Select value={genre} onValueChange={setGenre}>
-                    <SelectTrigger className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors">
-                      <SelectValue placeholder="Select genre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {genres.map((g) => (
-                        <SelectItem key={g} value={g} className="text-sm">
-                          {g}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-
         <div className="mt-2">
           {book && format && (
             <div className="w-full">
@@ -431,3 +414,4 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     </div>
   );
 }
+
