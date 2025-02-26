@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -9,14 +10,12 @@ import { Loader2, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdatingDescriptions, setIsUpdatingDescriptions] = useState(false);
   const { session } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -99,33 +98,6 @@ const Dashboard = () => {
       console.error('Error fetching books:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const updateAllBookDescriptions = async () => {
-    try {
-      setIsUpdatingDescriptions(true);
-      const response = await fetch('https://cotmtwabbkxrvbjygnwk.supabase.co/functions/v1/update-book-descriptions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.message);
-        await fetchBooks();
-      } else {
-        toast.error('Failed to update book descriptions');
-      }
-    } catch (error) {
-      console.error('Error updating book descriptions:', error);
-      toast.error('Failed to update book descriptions');
-    } finally {
-      setIsUpdatingDescriptions(false);
     }
   };
 
@@ -216,27 +188,14 @@ const Dashboard = () => {
               <h1 className="text-xl font-semibold text-text">My Books</h1>
               <p className="text-sm text-text-muted">{books.length} books in your collection</p>
             </div>
-            <div className="flex gap-2">
-              {session?.user?.email === 'hi@stevenboffa.com' && (
-                <Button
-                  onClick={updateAllBookDescriptions}
-                  size="sm"
-                  variant="outline"
-                  disabled={isUpdatingDescriptions}
-                >
-                  {isUpdatingDescriptions && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Update Descriptions
-                </Button>
-              )}
-              <Button
-                onClick={() => navigate('/add-book')}
-                size="sm"
-                className="bg-primary hover:bg-primary/90"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Book
-              </Button>
-            </div>
+            <Button
+              onClick={() => navigate('/add-book')}
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Book
+            </Button>
           </div>
           <BookFilters
             activeFilter={activeFilter}
@@ -285,3 +244,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
