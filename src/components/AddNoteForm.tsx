@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,7 +27,6 @@ export const AddNoteForm = ({ bookId, onSubmit, onCancel }: AddNoteFormProps) =>
   const [chapter, setChapter] = useState("");
   const [category, setCategory] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -78,6 +77,7 @@ export const AddNoteForm = ({ bookId, onSubmit, onCancel }: AddNoteFormProps) =>
       let imageUrls: string[] = [];
       if (selectedImages.length > 0) {
         imageUrls = await uploadImages();
+        console.log('Uploaded image URLs:', imageUrls);
       }
 
       const noteData = {
@@ -90,13 +90,13 @@ export const AddNoteForm = ({ bookId, onSubmit, onCancel }: AddNoteFormProps) =>
       };
 
       await onSubmit(noteData);
+      
       setContent("");
       setPageNumber("");
       setTimestampSeconds("");
       setChapter("");
       setCategory("");
       setSelectedImages([]);
-      setUploadedImageUrls([]);
     } catch (error) {
       console.error('Error submitting note:', error);
       toast({

@@ -19,22 +19,45 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (book.notes) {
-      const formattedNotes = book.notes.map((note) => ({
-        id: note.id,
-        content: note.content,
-        createdAt: note.createdAt,
-        pageNumber: note.pageNumber,
-        timestampSeconds: note.timestampSeconds,
-        chapter: note.chapter,
-        category: note.category,
-        isPinned: note.isPinned,
-        images: note.images || [],
-        book_id: book.id,
-      }));
-      setNotes(formattedNotes);
-    }
-  }, [book.notes, book.id]);
+    const loadNotes = async () => {
+      if (book.id) {
+        const { data: notesData, error } = await supabase
+          .from("notes")
+          .select("*")
+          .eq("book_id", book.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error('Error loading notes:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load notes. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (notesData) {
+          const formattedNotes = notesData.map((note) => ({
+            id: note.id,
+            content: note.content,
+            createdAt: note.created_at,
+            pageNumber: note.page_number,
+            timestampSeconds: note.timestamp_seconds,
+            chapter: note.chapter,
+            category: note.category,
+            isPinned: note.is_pinned,
+            images: note.images || [],
+            book_id: note.book_id,
+          }));
+          setNotes(formattedNotes);
+          onUpdateBook({ ...book, notes: formattedNotes });
+        }
+      }
+    };
+
+    loadNotes();
+  }, [book.id]);
 
   const handleAddNote = async (note: {
     content: string;
@@ -84,20 +107,10 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       setNotes((prevNotes) => [formattedNote, ...prevNotes]);
       setShowForm(false);
 
-      // Update the book's notes in the parent component
-      const bookNotes = [formattedNote, ...notes].map(note => ({
-        id: note.id,
-        content: note.content,
-        createdAt: note.createdAt,
-        pageNumber: note.pageNumber,
-        timestampSeconds: note.timestampSeconds,
-        chapter: note.chapter,
-        category: note.category,
-        isPinned: note.isPinned,
-        images: note.images || [],
-      }));
-      
-      onUpdateBook({ ...book, notes: bookNotes });
+      onUpdateBook({
+        ...book,
+        notes: [formattedNote, ...notes],
+      });
 
       toast({
         title: "Success",
@@ -115,6 +128,38 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
 
   const deleteNote = async (noteId: string) => {
     try {
+      // First, get the note to retrieve its images
+      const { data: noteToDelete, error: fetchError } = await supabase
+        .from("notes")
+        .select('images')
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Delete the images from storage if they exist
+      if (noteToDelete?.images && noteToDelete.images.length > 0) {
+        const imagePaths = noteToDelete.images.map(url => {
+          try {
+            const path = new URL(url).pathname.split('/').pop();
+            return path;
+          } catch (e) {
+            console.error('Invalid image URL:', url);
+            return null;
+          }
+        }).filter(Boolean);
+
+        if (imagePaths.length > 0) {
+          const { error: storageError } = await supabase.storage
+            .from('note-images')
+            .remove(imagePaths);
+
+          if (storageError) {
+            console.error('Error deleting images:', storageError);
+          }
+        }
+      }
+
       const { error } = await supabase
         .from("notes")
         .delete()
@@ -125,20 +170,10 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       const updatedNotes = notes.filter((note) => note.id !== noteId);
       setNotes(updatedNotes);
 
-      // Update the book's notes in the parent component
-      const bookNotes = updatedNotes.map(note => ({
-        id: note.id,
-        content: note.content,
-        createdAt: note.createdAt,
-        pageNumber: note.pageNumber,
-        timestampSeconds: note.timestampSeconds,
-        chapter: note.chapter,
-        category: note.category,
-        isPinned: note.isPinned,
-        images: note.images || [],
-      }));
-      
-      onUpdateBook({ ...book, notes: bookNotes });
+      onUpdateBook({
+        ...book,
+        notes: updatedNotes,
+      });
 
       toast({
         title: "Success",
@@ -172,20 +207,10 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       );
       setNotes(updatedNotes);
 
-      // Update the book's notes in the parent component
-      const bookNotes = updatedNotes.map(note => ({
-        id: note.id,
-        content: note.content,
-        createdAt: note.createdAt,
-        pageNumber: note.pageNumber,
-        timestampSeconds: note.timestampSeconds,
-        chapter: note.chapter,
-        category: note.category,
-        isPinned: note.isPinned,
-        images: note.images || [],
-      }));
-      
-      onUpdateBook({ ...book, notes: bookNotes });
+      onUpdateBook({
+        ...book,
+        notes: updatedNotes,
+      });
 
       toast({
         title: "Success",
@@ -236,4 +261,3 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     </div>
   );
 };
-
