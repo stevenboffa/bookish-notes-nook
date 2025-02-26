@@ -190,9 +190,32 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
         try {
           // Upload images sequentially to avoid race conditions
           for (const file of selectedImages) {
-            const imageUrl = await uploadImage(file);
-            uploadedImageUrls.push(imageUrl);
-            console.log('Image uploaded successfully:', imageUrl);
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
+            const filePath = `${book.id}/${fileName}`;
+
+            console.log('Starting image upload:', filePath);
+
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('note-images')
+              .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError);
+              throw new Error(`Failed to upload image: ${uploadError.message}`);
+            }
+
+            // Get the public URL with cache busting
+            const timestamp = Date.now();
+            const { data: { publicUrl } } = supabase.storage
+              .from('note-images')
+              .getPublicUrl(`${filePath}?v=${timestamp}`);
+
+            uploadedImageUrls.push(publicUrl);
+            console.log('Image uploaded successfully:', publicUrl);
           }
         } catch (error) {
           console.error('Error uploading images:', error);
