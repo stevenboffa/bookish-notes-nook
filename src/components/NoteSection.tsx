@@ -227,8 +227,8 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Organize your thoughts and notes for easy reference</h3>
+    <div className="space-y-6 px-4 sm:px-6">
+      <h3 className="text-xl font-medium text-gray-900 tracking-tight">Organize your thoughts and notes</h3>
       
       <AddNoteForm
         bookId={book.id}
@@ -236,9 +236,9 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       />
 
       {notes.length === 0 ? (
-        <p className="text-sm text-gray-500">No notes added yet.</p>
+        <p className="text-sm text-gray-500 font-normal">No notes added yet.</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {notes.map((note) => (
             <NoteItem
               key={note.id}
