@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -235,3 +236,4 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     </div>
   );
 };
+
