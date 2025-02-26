@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Pin, Trash2, X } from "lucide-react";
@@ -79,42 +78,9 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
     timestampSeconds?: number;
     chapter?: string;
     category?: string;
-    images?: File[];
+    images?: string[];
   }) => {
     try {
-      const imageUrls: string[] = [];
-      
-      if (note.images && note.images.length > 0) {
-        for (const image of note.images) {
-          console.log('Processing image:', image.name); // Debug log
-          
-          const sanitizedFileName = sanitizeFileName(image.name);
-          const fileName = `${book.id}/${sanitizedFileName}`;
-          
-          console.log('Uploading image with filename:', fileName); // Debug log
-          
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('note-images')
-            .upload(fileName, image);
-
-          if (uploadError) {
-            console.error("Error uploading image:", uploadError);
-            throw new Error(`Failed to upload image: ${uploadError.message}`);
-          }
-
-          console.log('Upload successful:', uploadData); // Debug log
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('note-images')
-            .getPublicUrl(fileName);
-
-          console.log('Generated public URL:', publicUrl); // Debug log
-          imageUrls.push(publicUrl);
-        }
-      }
-
-      console.log('All images uploaded, creating note with URLs:', imageUrls); // Debug log
-
       const { data: newNote, error: createNoteError } = await supabase
         .from("notes")
         .insert({
@@ -124,7 +90,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
           timestamp_seconds: note.timestampSeconds,
           chapter: note.chapter,
           category: note.category,
-          images: imageUrls,
+          images: note.images,
           is_pinned: false
         })
         .select()
@@ -135,7 +101,7 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
         throw new Error('Failed to create note');
       }
 
-      console.log('Note created successfully:', newNote); // Debug log
+      console.log('Note created successfully:', newNote);
 
       const newNoteFormatted: Note = {
         id: newNote.id,

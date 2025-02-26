@@ -23,7 +23,7 @@ interface AddNoteFormProps {
     timestampSeconds?: number;
     chapter?: string;
     category?: string;
-    images?: string[];
+    images?: string[];  // Changed from File[] to string[]
   }) => void;
 }
 
