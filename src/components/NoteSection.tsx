@@ -271,30 +271,24 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
                     <p className="whitespace-pre-wrap">{note.content}</p>
                     {note.images && note.images.length > 0 && (
                       <div className="grid grid-cols-2 gap-2 mt-4">
-                        {note.images.map((imageUrl, index) => {
-                          const finalImageUrl = imageUrl.includes('?') 
-                            ? imageUrl 
-                            : `${imageUrl}?v=${Date.now()}`;
-
-                          return (
-                            <div 
-                              key={index}
-                              className="relative cursor-pointer block w-full"
-                              onClick={() => setSelectedImage(finalImageUrl)}
-                            >
-                              <img
-                                src={finalImageUrl}
-                                alt={`Note image ${index + 1}`}
-                                className="w-full h-auto rounded-md hover:opacity-90 transition-opacity"
-                                loading="lazy"
-                                onError={(e) => {
-                                  console.error('Image failed to load:', finalImageUrl);
-                                  e.currentTarget.src = 'placeholder.svg';
-                                }}
-                              />
-                            </div>
-                          );
-                        })}
+                        {note.images.map((imageUrl, index) => (
+                          <div 
+                            key={index}
+                            className="relative cursor-pointer block w-full"
+                            onClick={() => setSelectedImage(imageUrl)}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={`Note image ${index + 1}`}
+                              className="w-full h-auto rounded-md hover:opacity-90 transition-opacity"
+                              loading="lazy"
+                              onError={(e) => {
+                                console.error('Image failed to load:', imageUrl);
+                                e.currentTarget.src = 'placeholder.svg';
+                              }}
+                            />
+                          </div>
+                        ))}
                       </div>
                     )}
                     {(note.page_number || note.timestamp_seconds || note.chapter) && (

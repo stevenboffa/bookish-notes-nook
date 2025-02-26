@@ -83,14 +83,17 @@ export function AddNoteForm({ book, onSubmit }: AddNoteFormProps) {
   const uploadImage = async (file: File): Promise<string> => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}-${Date.now()}.${fileExt}`;
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `${book.id}/${fileName}`;
 
       console.log('Starting image upload:', filePath);
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('note-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
