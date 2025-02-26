@@ -1,12 +1,13 @@
 
 import { Note } from "@/types/books";
 import { Button } from "@/components/ui/button";
-import { Pin, Trash2 } from "lucide-react";
+import { Pin, Trash2, Tag } from "lucide-react";
 import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 interface NoteItemProps {
   note: Note;
@@ -17,11 +18,35 @@ interface NoteItemProps {
 export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  const getNoteTypeColor = (type: string | undefined) => {
+    switch (type) {
+      case 'quote':
+        return 'bg-blue-500 hover:bg-blue-600';
+      case 'summary':
+        return 'bg-green-500 hover:bg-green-600';
+      case 'insight':
+        return 'bg-purple-500 hover:bg-purple-600';
+      case 'question':
+        return 'bg-yellow-500 hover:bg-yellow-600';
+      default:
+        return 'bg-gray-500 hover:bg-gray-600';
+    }
+  };
+
   return (
     <>
       <div className="p-4 border rounded-lg bg-white shadow-sm">
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1">
+            {note.noteType && (
+              <Badge 
+                className={`mb-2 ${getNoteTypeColor(note.noteType)}`}
+                variant="secondary"
+              >
+                <Tag className="w-3 h-3 mr-1" />
+                {note.noteType.charAt(0).toUpperCase() + note.noteType.slice(1)}
+              </Badge>
+            )}
             <p className="text-sm text-gray-900">{note.content}</p>
             {note.pageNumber && (
               <span className="text-xs text-gray-500 mt-1 block">
