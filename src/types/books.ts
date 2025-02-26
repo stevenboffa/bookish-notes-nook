@@ -1,3 +1,4 @@
+
 export interface GoogleBook {
   id: string;
   volumeInfo: {
@@ -22,3 +23,33 @@ export interface AIBookRecommendation {
   imageUrl?: string;
   amazonUrl?: string;
 }
+
+export interface Note {
+  id: string;
+  content: string;
+  createdAt: string;
+  pageNumber?: number;
+  timestampSeconds?: number;
+  chapter?: string;
+  category?: string;
+  isPinned?: boolean;
+  images?: string[];
+  book_id: string;
+}
+
+export interface BookWithNotes {
+  id: string;
+  notes: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    pageNumber?: number;
+    timestampSeconds?: number;
+    chapter?: string;
+    category?: string;
+    isPinned?: boolean;
+    images?: string[];
+  }>;
+  format?: string;
+}
+

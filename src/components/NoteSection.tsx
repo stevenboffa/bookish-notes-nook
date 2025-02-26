@@ -3,26 +3,13 @@ import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Note } from "@/types/books";
+import { Note, BookWithNotes } from "@/types/books";
 import { useToast } from "@/hooks/use-toast";
 import { NoteItem } from "./NoteItem";
 
 interface NoteSectionProps {
-  book: {
-    id: string;
-    notes: Array<{
-      id: string;
-      content: string;
-      createdAt: string;
-      pageNumber?: number;
-      timestampSeconds?: number;
-      chapter?: string;
-      category?: string;
-      isPinned?: boolean;
-      images?: string[];
-    }>;
-  };
-  onUpdateBook: (book: any) => void;
+  book: BookWithNotes;
+  onUpdateBook: (book: BookWithNotes) => void;
 }
 
 export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
