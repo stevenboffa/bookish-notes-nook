@@ -60,7 +60,6 @@ export function NoteSection({ book, onUpdateBook }: NoteSectionProps) {
   }, [book.notes, book.id]);
 
   const sanitizeFileName = (fileName: string): string => {
-    // Remove non-ASCII characters and special characters
     const nameWithoutExt = fileName.split('.')[0];
     const ext = fileName.split('.').pop();
     const sanitized = nameWithoutExt
