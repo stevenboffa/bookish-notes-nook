@@ -82,6 +82,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         isFavorite,
         imageUrl: null,
         thumbnailUrl: null,
+        description: '',
       };
       onSave(newBook);
     } else {

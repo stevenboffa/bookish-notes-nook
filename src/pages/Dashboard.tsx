@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -66,7 +67,7 @@ const Dashboard = () => {
         imageUrl: book.image_url || null,
         thumbnailUrl: book.thumbnail_url || null,
         format: book.format || 'physical_book',
-        description: book.description || '',  // Add this line to include the description
+        description: book.description || '',
         notes: book.notes.map((note: any) => ({
           id: note.id,
           content: note.content,
