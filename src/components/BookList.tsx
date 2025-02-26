@@ -32,6 +32,7 @@ export interface Book {
   imageUrl: string | null;
   thumbnailUrl: string | null;
   format: 'physical_book' | 'ebook' | 'audiobook';
+  description?: string;
   notes: {
     id: string;
     content: string;

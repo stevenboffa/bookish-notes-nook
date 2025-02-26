@@ -280,6 +280,13 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
               </div>
             </div>
           </div>
+
+          <div className="mt-6">
+            <Label className="text-sm font-medium text-gray-700 block mb-2">Description</Label>
+            <p className="text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+              {book?.description || "No description available."}
+            </p>
+          </div>
         </div>
 
         <div className="p-6 space-y-6 bg-white">
