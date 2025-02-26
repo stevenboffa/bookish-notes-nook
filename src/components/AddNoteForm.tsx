@@ -16,23 +16,22 @@ import {
 
 interface AddNoteFormProps {
   bookId: string;
+  bookFormat?: string;
   onSubmit: (note: {
     content: string;
     pageNumber?: number;
     timestampSeconds?: number;
     chapter?: string;
-    category?: string;
     images?: string[];
     noteType?: string;
   }) => void;
 }
 
-export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
+export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) => {
   const [content, setContent] = useState("");
   const [pageNumber, setPageNumber] = useState<string>("");
   const [timestampSeconds, setTimestampSeconds] = useState<string>("");
   const [chapter, setChapter] = useState("");
-  const [category, setCategory] = useState("");
   const [noteType, setNoteType] = useState<string>("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,15 +84,13 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
       let imageUrls: string[] = [];
       if (selectedImages.length > 0) {
         imageUrls = await uploadImages();
-        console.log('Uploaded image URLs:', imageUrls);
       }
 
       const noteData = {
         content,
-        pageNumber: pageNumber ? parseInt(pageNumber) : undefined,
-        timestampSeconds: timestampSeconds ? parseInt(timestampSeconds) : undefined,
+        pageNumber: pageNumber && bookFormat === 'physical_book' ? parseInt(pageNumber) : undefined,
+        timestampSeconds: timestampSeconds && bookFormat === 'audiobook' ? parseInt(timestampSeconds) : undefined,
         chapter: chapter || undefined,
-        category: category || undefined,
         images: imageUrls,
         noteType: noteType || undefined,
       };
@@ -104,7 +101,6 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
       setPageNumber("");
       setTimestampSeconds("");
       setChapter("");
-      setCategory("");
       setNoteType("");
       setSelectedImages([]);
     } catch (error) {
@@ -145,39 +141,33 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
         </Select>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Input
-              type="number"
-              value={pageNumber}
-              onChange={(e) => setPageNumber(e.target.value)}
-              placeholder="Page number"
-              disabled={isSubmitting}
-            />
-          </div>
-          <div>
-            <Input
-              type="number"
-              value={timestampSeconds}
-              onChange={(e) => setTimestampSeconds(e.target.value)}
-              placeholder="Timestamp (seconds)"
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+          {bookFormat === 'physical_book' && (
+            <div>
+              <Input
+                type="number"
+                value={pageNumber}
+                onChange={(e) => setPageNumber(e.target.value)}
+                placeholder="Page number"
+                disabled={isSubmitting}
+              />
+            </div>
+          )}
+          {bookFormat === 'audiobook' && (
+            <div>
+              <Input
+                type="number"
+                value={timestampSeconds}
+                onChange={(e) => setTimestampSeconds(e.target.value)}
+                placeholder="Timestamp (seconds)"
+                disabled={isSubmitting}
+              />
+            </div>
+          )}
           <div>
             <Input
               value={chapter}
               onChange={(e) => setChapter(e.target.value)}
               placeholder="Chapter"
-              disabled={isSubmitting}
-            />
-          </div>
-          <div>
-            <Input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Category"
               disabled={isSubmitting}
             />
           </div>
@@ -243,3 +233,4 @@ export const AddNoteForm = ({ bookId, onSubmit }: AddNoteFormProps) => {
     </form>
   );
 };
+
