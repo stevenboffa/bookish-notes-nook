@@ -34,6 +34,7 @@ export interface Note {
   category?: string;
   isPinned?: boolean;
   images?: string[];
+  noteType?: string;
   book_id: string;
 }
 
@@ -49,6 +50,7 @@ export interface BookWithNotes {
     category?: string;
     isPinned?: boolean;
     images?: string[];
+    noteType?: string;
   }>;
   format?: string;
 }
