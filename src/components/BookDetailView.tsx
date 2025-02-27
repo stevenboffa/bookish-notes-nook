@@ -5,12 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookCover } from "@/components/BookCover";
 import { Rating } from "@/components/Rating";
 import { FormatBadge } from "@/components/FormatBadge";
-import { Book } from "@/components/BookList";
+import { Book, Note } from "@/types/books";
 import { ReadingStatusDropdown } from "@/components/ReadingStatusDropdown";
 import { Button } from "@/components/ui/button";
 import { AddNoteForm } from "@/components/AddNoteForm";
 import { NoteItem } from "@/components/NoteItem";
-import { Note } from "@/types/books";
 import { NoteSection } from "@/components/NoteSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +38,8 @@ type BookDetailViewProps = {
   onReturn: () => void;
   isMobile?: boolean;
   isInReadingList?: boolean;
+  onSave?: (updatedBook: Book) => Promise<void>;
+  onClose?: () => void;
 };
 
 export function BookDetailView({
@@ -46,6 +47,8 @@ export function BookDetailView({
   onReturn,
   isMobile = false,
   isInReadingList = false,
+  onSave,
+  onClose,
 }: BookDetailViewProps) {
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -74,6 +77,71 @@ export function BookDetailView({
         variant: "destructive",
         title: "Error",
         description: "Failed to delete book. Please try again.",
+      });
+    }
+  };
+
+  const handleAddNote = async (note: {
+    content: string;
+    pageNumber?: number;
+    timestampSeconds?: number;
+    chapter?: string;
+    images?: string[];
+    noteType?: string;
+  }) => {
+    try {
+      const { data: newNote, error } = await supabase
+        .from("notes")
+        .insert({
+          content: note.content,
+          book_id: book.id,
+          page_number: note.pageNumber,
+          timestamp_seconds: note.timestampSeconds,
+          chapter: note.chapter,
+          images: note.images || [],
+          note_type: note.noteType,
+          is_pinned: false
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      // Update the local book object with the new note
+      const updatedNotes = [
+        ...(book.notes || []),
+        {
+          id: newNote.id,
+          content: newNote.content,
+          createdAt: newNote.created_at,
+          pageNumber: newNote.page_number,
+          timestampSeconds: newNote.timestamp_seconds,
+          chapter: newNote.chapter,
+          isPinned: newNote.is_pinned,
+          images: newNote.images || [],
+          noteType: newNote.note_type,
+          book_id: newNote.book_id
+        }
+      ];
+
+      // Call the onSave prop if provided
+      if (onSave) {
+        await onSave({
+          ...book,
+          notes: updatedNotes
+        });
+      }
+
+      toast({
+        title: "Note Added",
+        description: "Your note has been saved"
+      });
+    } catch (error) {
+      console.error("Error adding note:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add note. Please try again."
       });
     }
   };
@@ -156,7 +224,7 @@ export function BookDetailView({
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <FormatBadge format={book.format} />
+            <FormatBadge format={book.format as "physical_book" | "ebook" | "audiobook"} />
             <div className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
               {book.genre}
             </div>
@@ -209,7 +277,11 @@ export function BookDetailView({
           )}
         </div>
         
-        <AddNoteForm bookId={book.id} bookFormat={book.format} />
+        <AddNoteForm 
+          bookId={book.id} 
+          bookFormat={book.format as "physical_book" | "ebook" | "audiobook"} 
+          onSubmit={handleAddNote}
+        />
         
         {book.notes && book.notes.length > 0 ? (
           <div className="mt-4 space-y-3">
@@ -217,9 +289,16 @@ export function BookDetailView({
               .slice()
               .sort((a, b) => {
                 // Sort by pinned first, then by date (newest first)
-                if (a.is_pinned && !b.is_pinned) return -1;
-                if (!a.is_pinned && b.is_pinned) return 1;
-                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                const aPinned = a.isPinned || a.is_pinned || false;
+                const bPinned = b.isPinned || b.is_pinned || false;
+                
+                if (aPinned && !bPinned) return -1;
+                if (!aPinned && bPinned) return 1;
+                
+                const aCreatedAt = a.createdAt || a.created_at || "";
+                const bCreatedAt = b.createdAt || b.created_at || "";
+                
+                return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
               })
               .map((note) => (
                 <NoteItem

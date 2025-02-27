@@ -11,11 +11,12 @@ import { Badge } from "@/components/ui/badge";
 
 interface NoteItemProps {
   note: Note;
-  onDelete: (id: string) => void;
-  onTogglePin: (id: string, isPinned: boolean) => void;
+  onDelete?: (id: string) => void;
+  onTogglePin?: (id: string, isPinned: boolean) => void;
+  isEditing?: boolean;
 }
 
-export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
+export const NoteItem = ({ note, onDelete, onTogglePin, isEditing }: NoteItemProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const getNoteTypeColor = (type: string | undefined) => {
@@ -32,6 +33,11 @@ export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
         return 'bg-gray-500 hover:bg-gray-600';
     }
   };
+
+  // Handle both is_pinned (from database) and isPinned (client-side format)
+  const isPinned = note.isPinned !== undefined ? note.isPinned : note.is_pinned;
+  // Handle both created_at (from database) and createdAt (client-side format)
+  const createdAt = note.createdAt || note.created_at;
 
   return (
     <>
@@ -77,29 +83,35 @@ export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
               </div>
             )}
           </div>
-          <div className="flex gap-2 ml-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onTogglePin(note.id, note.isPinned || false)}
-              className={`hover:bg-gray-100 ${
-                note.isPinned ? "text-primary" : "text-gray-500"
-              }`}
-            >
-              <Pin className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(note.id)}
-              className="hover:bg-red-100 hover:text-red-600 text-gray-500"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {isEditing && (
+            <div className="flex gap-2 ml-4">
+              {onTogglePin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onTogglePin(note.id, isPinned || false)}
+                  className={`hover:bg-gray-100 ${
+                    isPinned ? "text-primary" : "text-gray-500"
+                  }`}
+                >
+                  <Pin className="h-4 w-4" />
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(note.id)}
+                  className="hover:bg-red-100 hover:text-red-600 text-gray-500"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
         <div className="text-xs text-gray-400">
-          {new Date(note.createdAt).toLocaleDateString()}
+          {new Date(createdAt).toLocaleDateString()}
         </div>
       </div>
 
@@ -117,4 +129,3 @@ export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
     </>
   );
 };
-
