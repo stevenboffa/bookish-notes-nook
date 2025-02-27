@@ -1,327 +1,417 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { BookCover } from "@/components/BookCover";
-import { Rating } from "@/components/Rating";
-import { FormatBadge } from "@/components/FormatBadge";
-import { Book, Note } from "@/types/books";
-import { ReadingStatusDropdown } from "@/components/ReadingStatusDropdown";
+import { useState, useEffect } from "react";
+import { Book } from "./BookList";
+import { BookCover } from "./BookCover";
 import { Button } from "@/components/ui/button";
-import { AddNoteForm } from "@/components/AddNoteForm";
-import { NoteItem } from "@/components/NoteItem";
-import { NoteSection } from "@/components/NoteSection";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import {
-  MoreHorizontal,
-  ChevronLeft,
-  Edit3,
-} from "lucide-react";
-import {
-  BookPlus,
-  Share2,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { RecommendBookModal } from "./friends/RecommendBookModal";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { X, Save, Star, StarHalf, Check, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { NoteSection } from "./NoteSection";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { toast } from "sonner";
 
-type BookDetailViewProps = {
-  book: Book;
-  onReturn: () => void;
-  isMobile?: boolean;
-  isInReadingList?: boolean;
-  onSave?: (updatedBook: Book) => Promise<void>;
-  onClose?: () => void;
-};
+const genres = [
+  "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
+  "Romance", "Thriller", "Horror", "Biography", "History", 
+  "Self-Help", "Poetry", "Drama", "Adventure", "Children's",
+];
 
-export function BookDetailView({
-  book,
-  onReturn,
-  isMobile = false,
-  isInReadingList = false,
-  onSave,
-  onClose,
-}: BookDetailViewProps) {
+interface BookDetailViewProps {
+  book: Book | null;
+  onSave: (book: Book) => void;
+  onClose: () => void;
+}
+
+type BookStatus = "Not started" | "In Progress" | "Finished" | "Future Reads";
+type BookFormat = "physical_book" | "audiobook";
+
+interface RichTextEditorProps {
+  content: string;
+  onChange: (html: string) => void;
+}
+
+export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
+  const [title, setTitle] = useState(book?.title || "");
+  const [author, setAuthor] = useState(book?.author || "");
+  const [genre, setGenre] = useState(book?.genre || "");
+  const [status, setStatus] = useState<BookStatus>(book?.status as BookStatus || "Not started");
+  const [format, setFormat] = useState<BookFormat | "">("");
+  const [rating, setRating] = useState(book?.rating || 0);
+  const [description, setDescription] = useState(book?.description || "");
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const navigate = useNavigate();
-  const { session } = useAuth();
-  const { toast } = useToast();
-  const [isEditingNotes, setIsEditingNotes] = useState(false);
-  const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
-  const handleDeleteBook = async () => {
-    try {
-      const { error } = await supabase
-        .from("books")
-        .delete()
-        .eq("id", book.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Book Deleted",
-        description: "Book has been removed from your library",
-      });
-
-      onReturn();
-    } catch (error) {
-      console.error("Error deleting book:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete book. Please try again.",
-      });
+  useEffect(() => {
+    if (book) {
+      setTitle(book.title);
+      setAuthor(book.author);
+      setGenre(book.genre);
+      setStatus(book.status as BookStatus);
+      setFormat(book.format as BookFormat || "");
+      setRating(parseFloat(String(book.rating)) || 0);
+      setDescription(book.description || "");
     }
+  }, [book]);
+
+  const truncateDescription = (text: string, wordCount = 30) => {
+    if (!text) return "";
+    const words = text.split(/\s+/);
+    if (words.length <= wordCount) return text;
+    return words.slice(0, wordCount).join(" ") + "...";
   };
 
-  const handleAddNote = async (note: {
-    content: string;
-    pageNumber?: number;
-    timestampSeconds?: number;
-    chapter?: string;
-    images?: string[];
-    noteType?: string;
-  }) => {
+  const handleSave = async () => {
+    if (!format) {
+      return;
+    }
+
+    if (!book) {
+      const newBook: Book = {
+        id: crypto.randomUUID(),
+        title,
+        author,
+        genre,
+        status,
+        format,
+        rating: parseFloat(rating.toFixed(1)),
+        notes: [],
+        quotes: [],
+        dateRead: new Date().toISOString().split('T')[0],
+        isFavorite: false,
+        imageUrl: null,
+        thumbnailUrl: null,
+        description: description,
+      };
+      onSave(newBook);
+    } else {
+      const updatedBook = {
+        ...book,
+        title,
+        author,
+        genre,
+        status,
+        format,
+        rating: parseFloat(rating.toFixed(1)),
+        description: description,
+      };
+      onSave(updatedBook);
+    }
+    
+    setShowSaveConfirmation(true);
+    setTimeout(() => {
+      setShowSaveConfirmation(false);
+    }, 2000);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
     try {
-      const { data: newNote, error } = await supabase
-        .from("notes")
-        .insert({
-          content: note.content,
-          book_id: book.id,
-          page_number: note.pageNumber,
-          timestamp_seconds: note.timestampSeconds,
-          chapter: note.chapter,
-          images: note.images || [],
-          note_type: note.noteType,
-          is_pinned: false
+      const fileExt = file.name.split('.').pop();
+      const sanitizedFileName = `${crypto.randomUUID()}.${fileExt}`;
+      
+      console.log('Uploading image:', {
+        fileName: sanitizedFileName,
+        fileType: file.type,
+        fileSize: file.size
+      });
+
+      const { data: uploadedImage, error: uploadError } = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName: sanitizedFileName,
+          fileType: file.type
         })
-        .select('*')
-        .single();
+      }).then(res => res.json());
 
-      if (error) throw error;
-
-      // Update the local book object with the new note
-      const updatedNotes = [
-        ...(book.notes || []),
-        {
-          id: newNote.id,
-          content: newNote.content,
-          createdAt: newNote.created_at,
-          pageNumber: newNote.page_number,
-          timestampSeconds: newNote.timestamp_seconds,
-          chapter: newNote.chapter,
-          isPinned: newNote.is_pinned,
-          images: newNote.images || [],
-          noteType: newNote.note_type,
-          book_id: newNote.book_id
-        }
-      ];
-
-      // Call the onSave prop if provided
-      if (onSave) {
-        await onSave({
-          ...book,
-          notes: updatedNotes
-        });
+      if (uploadError) {
+        console.error('Image upload error:', uploadError);
+        toast.error('Failed to upload image. Please try again.');
+        return;
       }
 
-      toast({
-        title: "Note Added",
-        description: "Your note has been saved"
-      });
+      if (uploadedImage?.url) {
+        console.log('Image uploaded successfully:', {
+          url: uploadedImage.url,
+          path: sanitizedFileName
+        });
+        toast.success('Image uploaded successfully');
+      }
     } catch (error) {
-      console.error("Error adding note:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to add note. Please try again."
-      });
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
     }
+
+    e.target.value = '';
   };
 
-  const renderQuotes = () => {
-    if (!book.quotes || book.quotes.length === 0) return null;
+  const handleUpdateBook = (updatedBook: Book) => {
+    onSave(updatedBook);
+  };
 
-    return (
-      <div className="space-y-4 mt-6">
-        <h3 className="text-lg font-medium">Quotes</h3>
-        <div className="space-y-3">
-          {book.quotes.map((quote) => (
-            <div
-              key={quote.id}
-              className="p-4 bg-muted/50 rounded-md border border-border"
-            >
-              <blockquote className="italic">{quote.content}</blockquote>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+  const renderRatingStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating / 2);
+    const hasHalfStar = rating % 2 !== 0;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(
+          <Star 
+            key={`star-${i}`} 
+            className="w-5 h-5 fill-current text-yellow-400 cursor-pointer hover:scale-110 transition-transform" 
+            onClick={() => setRating((i + 1) * 2)}
+          />
+        );
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(
+          <StarHalf 
+            key={`half-star-${i}`} 
+            className="w-5 h-5 fill-current text-yellow-400 cursor-pointer hover:scale-110 transition-transform" 
+            onClick={() => setRating(i * 2 + 1)}
+          />
+        );
+      } else {
+        stars.push(
+          <Star 
+            key={`empty-star-${i}`} 
+            className="w-5 h-5 text-gray-300 cursor-pointer hover:scale-110 transition-transform" 
+            onClick={() => setRating((i + 1) * 2)}
+          />
+        );
+      }
+    }
+    return stars;
   };
 
   return (
-    <div className="animate-in fade-in duration-300 pb-safe-bottom">
-      <div className="flex justify-between items-center mb-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="-ml-2"
-          onClick={onReturn}
-        >
-          <ChevronLeft className="mr-1 h-4 w-4" />
-          Back
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="-mr-2">
-              <MoreHorizontal className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => navigate(`/edit-book/${book.id}`)}
-            >
-              <Edit3 className="mr-2 h-4 w-4" />
-              Edit Book Details
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={handleDeleteBook}
-            >
-              Delete Book
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-6">
-        <div className="flex-shrink-0 flex justify-center">
-          <BookCover
-            imageUrl={book.imageUrl}
-            thumbnailUrl={book.thumbnailUrl}
-            title={book.title}
-            genre={book.genre}
-            size={isMobile ? "md" : "lg"}
-          />
-        </div>
-
+    <div className="flex flex-col h-full bg-gradient-to-b from-white via-gray-50 to-white">
+      <div className="flex justify-between items-center p-4 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
         <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-serif text-book-title leading-tight">
-            {book.title}
-          </h1>
-          
-          <p className="mt-1 text-lg text-muted-foreground">
-            by {book.author}
-          </p>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <FormatBadge format={book.format as "physical_book" | "ebook" | "audiobook"} />
-            <div className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
-              {book.genre}
+          <h2 className="text-xl font-serif font-semibold truncate text-text animate-fade-in">{title}</h2>
+          <p className="text-sm text-text-muted truncate italic">{author}</p>
+        </div>
+        <div className="flex gap-2 ml-2">
+          <Button 
+            variant="ghost"
+            size="sm"
+            onClick={handleSave}
+            className="h-9 px-4 bg-gradient-to-r from-success to-success/90 text-success-foreground hover:opacity-90 transition-opacity relative"
+          >
+            <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-100' : 'opacity-0'}`}>
+              <Check className="h-4 w-4" />
             </div>
-          </div>
-
-          <div className="mt-6">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Rating:</span>
-              <Rating rating={book.rating || 0} maxRating={10} />
-              <span className="text-sm text-muted-foreground">
-                {book.rating}/10
-              </span>
+            <div className={`flex items-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-0' : 'opacity-100'}`}>
+              <Save className="h-4 w-4 mr-1" />
+              Save
             </div>
-          </div>
-
-          <div className="mt-4">
-            <ReadingStatusDropdown
-              bookId={book.id}
-              currentStatus={book.status}
-              isInReadingList={isInReadingList}
-            />
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsRecommendModalOpen(true)}
-            >
-              <Share2 className="mr-2 h-4 w-4" />
-              Recommend to Friend
-            </Button>
-          </div>
+          </Button>
+          <Button 
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-9 w-9 hover:bg-gray-100 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      <div className="mt-8">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            My Notes
-          </h2>
-          {(book.notes && book.notes.length > 0) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditingNotes(prev => !prev)}
-            >
-              {isEditingNotes ? "Done" : "Edit Notes"}
-            </Button>
+      <div className={`flex-1 overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
+        <div className="p-6 bg-white border-b shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-8">
+            <div className="flex justify-center sm:justify-start">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-accent to-success/20 rounded-lg blur opacity-30 group-hover:opacity-70 transition duration-1000"></div>
+                <BookCover
+                  imageUrl={book?.imageUrl}
+                  thumbnailUrl={book?.thumbnailUrl}
+                  genre={book?.genre || ""}
+                  title={book?.title || ""}
+                  size="md"
+                  className="relative w-48 h-64 transition-all duration-300 group-hover:scale-105 shadow-lg rounded-lg"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-end justify-center pb-4">
+                  <p className="text-white text-sm font-medium px-3 py-1 bg-black/40 rounded-full backdrop-blur-sm">
+                    {genre || "No genre selected"}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label 
+                    htmlFor="status" 
+                    className="text-sm font-medium text-gray-700 block mb-1 tracking-wide"
+                  >
+                    Reading Status
+                  </Label>
+                  <Select value={status} onValueChange={(value: BookStatus) => setStatus(value)}>
+                    <SelectTrigger 
+                      id="status"
+                      className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors"
+                    >
+                      <SelectValue>{status}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Not started">Not started</SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="Finished">Finished</SelectItem>
+                      <SelectItem value="Future Reads">Future Reads</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label 
+                    htmlFor="format" 
+                    className="text-sm font-medium text-gray-700 block mb-1 tracking-wide"
+                  >
+                    Book Type
+                  </Label>
+                  <Select value={format} onValueChange={(value: BookFormat) => setFormat(value)}>
+                    <SelectTrigger 
+                      id="format"
+                      className="h-9 text-sm bg-accent/80 text-accent-foreground hover:bg-accent transition-colors"
+                    >
+                      <SelectValue placeholder="Select type">
+                        {format === "physical_book" ? "Book" : format === "audiobook" ? "Audiobook" : "Select type"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="physical_book">Book</SelectItem>
+                      <SelectItem value="audiobook">Audiobook</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Collapsible open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+                <CollapsibleTrigger className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium text-text-muted hover:text-primary transition-all group w-full">
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isDetailsOpen ? 'rotate-180' : ''} group-hover:text-primary`} />
+                  <span className="group-hover:translate-x-0.5 transition-transform duration-200">Edit book details</span>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-6 px-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50/50 rounded-lg border border-gray-100">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-sm font-medium text-text-muted">Title</Label>
+                      <Input
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Enter book title"
+                        className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="author" className="text-sm font-medium text-text-muted">Author</Label>
+                      <Input
+                        id="author"
+                        value={author}
+                        onChange={(e) => setAuthor(e.target.value)}
+                        placeholder="Enter author name"
+                        className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="genre" className="text-sm font-medium text-text-muted">Genre</Label>
+                      <Select value={genre} onValueChange={setGenre}>
+                        <SelectTrigger className="h-9 text-sm bg-white border-gray-200 hover:border-primary/30 transition-colors">
+                          <SelectValue placeholder="Select genre" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {genres.map((g) => (
+                            <SelectItem key={g} value={g} className="text-sm">
+                              {g}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+              
+              <div className="space-y-4 bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
+                <Label className="text-sm font-medium text-text-muted">Rating</Label>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    {renderRatingStars(rating)}
+                    <span className="text-sm font-medium text-text-muted ml-2">
+                      {rating.toFixed(1)}/10
+                    </span>
+                  </div>
+                  <Slider
+                    id="rating"
+                    min={0}
+                    max={10}
+                    step={0.5}
+                    value={[rating]}
+                    onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 prose prose-sm max-w-none">
+            <div className="text-gray-700 leading-relaxed">
+              {showFullDescription ? (
+                <p>{description}</p>
+              ) : (
+                <p>{truncateDescription(description)}</p>
+              )}
+              {description && description.split(/\s+/).length > 30 && (
+                <button
+                  onClick={() => setShowFullDescription(!showFullDescription)}
+                  className="flex items-center gap-1 text-primary hover:text-primary/80 font-medium mt-2 transition-colors"
+                >
+                  {showFullDescription ? (
+                    <>Show less</>
+                  ) : (
+                    <>Show more<ChevronDown className="h-4 w-4" /></>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-2">
+          {book && format && (
+            <div className="w-full">
+              <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
+            </div>
           )}
         </div>
-        
-        <AddNoteForm 
-          bookId={book.id} 
-          bookFormat={book.format as "physical_book" | "ebook" | "audiobook"} 
-          onSubmit={handleAddNote}
-        />
-        
-        {book.notes && book.notes.length > 0 ? (
-          <div className="mt-4 space-y-3">
-            {book.notes
-              .slice()
-              .sort((a, b) => {
-                // Sort by pinned first, then by date (newest first)
-                const aPinned = a.isPinned || a.is_pinned || false;
-                const bPinned = b.isPinned || b.is_pinned || false;
-                
-                if (aPinned && !bPinned) return -1;
-                if (!aPinned && bPinned) return 1;
-                
-                const aCreatedAt = a.createdAt || a.created_at || "";
-                const bCreatedAt = b.createdAt || b.created_at || "";
-                
-                return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
-              })
-              .map((note) => (
-                <NoteItem
-                  key={note.id}
-                  note={note}
-                  isEditing={isEditingNotes}
-                />
-              ))}
-          </div>
-        ) : (
-          <p className="mt-4 text-muted-foreground text-sm">
-            No notes added yet. Add your first note above.
-          </p>
-        )}
       </div>
-
-      {renderQuotes()}
-      
-      <RecommendBookModal 
-        book={book}
-        isOpen={isRecommendModalOpen}
-        onClose={() => setIsRecommendModalOpen(false)}
-      />
     </div>
   );
 }
+
