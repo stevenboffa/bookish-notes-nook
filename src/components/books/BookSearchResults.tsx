@@ -33,9 +33,23 @@ export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchR
     );
   }
 
+  // Process and fix book image URLs
+  const processedBooks = books.map(book => {
+    if (book.volumeInfo.imageLinks) {
+      // Ensure we're using HTTPS
+      if (book.volumeInfo.imageLinks.thumbnail) {
+        book.volumeInfo.imageLinks.thumbnail = book.volumeInfo.imageLinks.thumbnail.replace('http:', 'https:');
+      }
+      if (book.volumeInfo.imageLinks.smallThumbnail) {
+        book.volumeInfo.imageLinks.smallThumbnail = book.volumeInfo.imageLinks.smallThumbnail.replace('http:', 'https:');
+      }
+    }
+    return book;
+  });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {books.map((book) => (
+      {processedBooks.map((book) => (
         <Card 
           key={book.id} 
           className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"

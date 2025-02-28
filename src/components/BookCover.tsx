@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getBookCoverFallback } from "@/utils/bookCovers";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,7 @@ export function BookCover({
   size = "md"
 }: BookCoverProps) {
   const [error, setError] = useState(false);
+  const [finalImageUrl, setFinalImageUrl] = useState<string | null>(null);
   const fallbackImage = getBookCoverFallback(genre);
   
   const sizeClasses = {
@@ -29,13 +30,35 @@ export function BookCover({
     lg: "w-48 h-72"
   };
 
+  useEffect(() => {
+    // Reset error state when props change
+    setError(false);
+    
+    // Determine which URL to use based on size and availability
+    const urlToUse = size === "sm" ? thumbnailUrl : imageUrl;
+    
+    if (urlToUse) {
+      // Fix common Google Books API URL issues
+      let fixedUrl = urlToUse.replace('http:', 'https:');
+      
+      // Add zoom parameter if it's a Google Books URL without one
+      if (fixedUrl.includes('books.google.com') && !fixedUrl.includes('zoom=')) {
+        fixedUrl = fixedUrl.replace('&source=gbs_api', '&zoom=1&source=gbs_api');
+      }
+      
+      setFinalImageUrl(fixedUrl);
+    } else {
+      setFinalImageUrl(null);
+    }
+  }, [imageUrl, thumbnailUrl, size]);
+
   // Function to validate image URL
   const isValidImageUrl = (url?: string | null) => {
     if (!url) return false;
     return url.startsWith('http://') || url.startsWith('https://');
   };
 
-  const validImageUrl = !error && isValidImageUrl(size === "sm" ? thumbnailUrl : imageUrl);
+  const validImageUrl = !error && isValidImageUrl(finalImageUrl);
   const fallbackAvailable = !!fallbackImage;
 
   return (
@@ -49,7 +72,7 @@ export function BookCover({
     >
       {validImageUrl || fallbackAvailable ? (
         <img
-          src={validImageUrl ? (size === "sm" ? thumbnailUrl : imageUrl) : fallbackImage}
+          src={validImageUrl ? finalImageUrl as string : fallbackImage}
           alt={`Cover of ${title}`}
           className="w-full h-full object-cover"
           onError={() => setError(true)}

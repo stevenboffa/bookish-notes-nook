@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -79,6 +80,16 @@ export default function GoogleBookDetail() {
         if (error) {
           console.error('Error fetching book details:', error);
           throw error;
+        }
+
+        // Ensure image URLs use HTTPS
+        if (data?.volumeInfo?.imageLinks) {
+          if (data.volumeInfo.imageLinks.thumbnail) {
+            data.volumeInfo.imageLinks.thumbnail = data.volumeInfo.imageLinks.thumbnail.replace('http:', 'https:');
+          }
+          if (data.volumeInfo.imageLinks.smallThumbnail) {
+            data.volumeInfo.imageLinks.smallThumbnail = data.volumeInfo.imageLinks.smallThumbnail.replace('http:', 'https:');
+          }
         }
 
         return data;
