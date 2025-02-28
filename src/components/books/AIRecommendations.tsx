@@ -127,7 +127,7 @@ export function AIRecommendations({ title, books, isLoading }: AIRecommendations
       ) : books && books.length > 0 ? (
         isMobile ? renderMobileCarousel() : renderDesktopGrid()
       ) : (
-        <p className="text-muted-foreground text-center py-4">No books found</p>
+        <div className="text-muted-foreground text-center py-4">No books found</div>
       )}
     </div>
   );

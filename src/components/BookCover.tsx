@@ -38,15 +38,21 @@ export function BookCover({
     const urlToUse = size === "sm" ? thumbnailUrl : imageUrl;
     
     if (urlToUse) {
-      // Fix common Google Books API URL issues
-      let fixedUrl = urlToUse.replace('http:', 'https:');
-      
-      // Add zoom parameter if it's a Google Books URL without one
-      if (fixedUrl.includes('books.google.com') && !fixedUrl.includes('zoom=')) {
-        fixedUrl = fixedUrl.replace('&source=gbs_api', '&zoom=1&source=gbs_api');
+      try {
+        // Fix common Google Books API URL issues
+        let fixedUrl = urlToUse.replace('http:', 'https:');
+        
+        // Add zoom parameter if it's a Google Books URL without one
+        if (fixedUrl.includes('books.google.com') && !fixedUrl.includes('zoom=')) {
+          fixedUrl = fixedUrl.replace('&source=gbs_api', '&zoom=1&source=gbs_api');
+        }
+        
+        setFinalImageUrl(fixedUrl);
+      } catch (e) {
+        console.error("Error processing image URL:", e);
+        setError(true);
+        setFinalImageUrl(null);
       }
-      
-      setFinalImageUrl(fixedUrl);
     } else {
       setFinalImageUrl(null);
     }
