@@ -55,3 +55,23 @@ export interface BookWithNotes {
   format?: string;
 }
 
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  genre?: string;
+  dateRead?: string;
+  rating?: number;
+  status?: string;
+  isFavorite?: boolean;
+  imageUrl?: string | null;
+  thumbnailUrl?: string | null;
+  format?: 'physical_book' | 'ebook' | 'audiobook';
+  description?: string;
+  notes?: Note[];
+  quotes?: {
+    id: string;
+    content: string;
+    createdAt: string;
+  }[];
+}

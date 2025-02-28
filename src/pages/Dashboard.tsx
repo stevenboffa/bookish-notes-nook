@@ -10,6 +10,7 @@ import { Loader2, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { BookRecommendationWidget } from "@/components/books/BookRecommendationWidget";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -78,6 +79,7 @@ const Dashboard = () => {
           category: note.category,
           isPinned: note.is_pinned,
           readingProgress: note.reading_progress,
+          book_id: book.id,
         })),
         quotes: book.quotes.map((quote: any) => ({
           id: quote.id,
@@ -203,6 +205,12 @@ const Dashboard = () => {
           />
         </div>
         <div className="flex-1 overflow-auto pb-20">
+          {/* Book Recommendations Widget */}
+          <div className="px-4 pt-6">
+            <BookRecommendationWidget />
+          </div>
+          
+          {/* Book List */}
           <BookList
             books={books}
             selectedBook={selectedBook}
@@ -244,4 +252,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

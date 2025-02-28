@@ -1,3 +1,4 @@
+
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -19,38 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-export interface Book {
-  id: string;
-  title: string;
-  author: string;
-  genre: string;
-  dateRead: string;
-  rating: number;
-  status: string;
-  isFavorite: boolean;
-  imageUrl: string | null;
-  thumbnailUrl: string | null;
-  format: 'physical_book' | 'ebook' | 'audiobook';
-  description?: string;
-  notes: {
-    id: string;
-    content: string;
-    createdAt: string;
-    pageNumber?: number;
-    timestampSeconds?: number;
-    chapter?: string;
-    category?: string;
-    isPinned: boolean;
-    readingProgress?: number;
-    images?: string[];
-  }[];
-  quotes: {
-    id: string;
-    content: string;
-    createdAt: string;
-  }[];
-}
+import { Book } from "@/types/books";
 
 export interface Note {
   id: string;
@@ -134,7 +104,7 @@ export function BookList({
               <BookCover
                 imageUrl={book.imageUrl}
                 thumbnailUrl={book.thumbnailUrl}
-                genre={book.genre}
+                genre={book.genre || "Unknown"}
                 title={book.title}
                 size="sm"
               />
@@ -156,13 +126,13 @@ export function BookList({
                         {book.genre}
                       </span>
                       <span 
-                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(book.status)}`}
+                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(book.status || "Not started")}`}
                       >
                         {book.status}
                       </span>
                       {book.status === "Finished" && (
                         <span 
-                          className={`text-xs px-2 py-1 rounded-full ${getRatingColor(book.rating)}`}
+                          className={`text-xs px-2 py-1 rounded-full ${getRatingColor(book.rating || 0)}`}
                         >
                           Rating: {book.rating}/10
                         </span>

@@ -13,10 +13,10 @@ interface AIRecommendationsProps {
 export function AIRecommendations({ title, books, isLoading }: AIRecommendationsProps) {
   return (
     <div className="space-y-4 mb-12">
-      <h3 className="text-xl font-semibold">{title}</h3>
+      {title && <h3 className="text-xl font-semibold">{title}</h3>}
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 5 }).map((_, index) => (
+          {Array.from({ length: 3 }).map((_, index) => (
             <Card key={index} className="flex flex-col">
               <CardHeader className="space-y-4">
                 <div className="aspect-w-2 aspect-h-3">
