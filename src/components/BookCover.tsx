@@ -53,6 +53,7 @@ export function BookCover({
           alt={`Cover of ${title}`}
           className="w-full h-full object-cover"
           onError={() => setError(true)}
+          loading="lazy"
         />
       ) : (
         <div className="flex flex-col items-center justify-center p-4 text-center">
