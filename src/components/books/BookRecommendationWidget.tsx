@@ -90,7 +90,21 @@ export function BookRecommendationWidget() {
         }
       ];
 
-      setRecommendations(sampleRecommendations);
+      // Filter out books that the user already has in their collection
+      const userTitlesLowercase = books.map(book => book.title.toLowerCase());
+      const userAuthorsLowercase = books.map(book => book.author.toLowerCase());
+      
+      const filteredRecommendations = sampleRecommendations.filter(rec => {
+        const titleLowercase = rec.title.toLowerCase();
+        const authorLowercase = rec.author.toLowerCase();
+        
+        // Check if the book is already in the user's collection
+        return !userTitlesLowercase.some(title => 
+          title === titleLowercase && userAuthorsLowercase.some(author => author === authorLowercase)
+        );
+      });
+
+      setRecommendations(filteredRecommendations);
       setIsLoading(false);
     } catch (error) {
       console.error("Error generating recommendations:", error);

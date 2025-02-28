@@ -33,10 +33,13 @@ export interface Note {
   chapter?: string;
   category?: string;
   isPinned?: boolean;
+  readingProgress?: number;
   images?: string[];
   noteType?: string;
   book_id: string;
 }
+
+export type BookFormat = 'physical_book' | 'ebook' | 'audiobook';
 
 export interface BookWithNotes {
   id: string;
@@ -52,7 +55,7 @@ export interface BookWithNotes {
     images?: string[];
     noteType?: string;
   }>;
-  format?: string;
+  format?: BookFormat;
 }
 
 export interface Book {
@@ -66,7 +69,7 @@ export interface Book {
   isFavorite?: boolean;
   imageUrl?: string | null;
   thumbnailUrl?: string | null;
-  format?: 'physical_book' | 'ebook' | 'audiobook';
+  format?: BookFormat;
   description?: string;
   notes?: Note[];
   quotes?: {
