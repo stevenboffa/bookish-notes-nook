@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
-import { Book } from "@/components/BookList";
+import { Book } from "@/types/books";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

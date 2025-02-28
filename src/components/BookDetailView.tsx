@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Book } from "./BookList";
+import { Book } from "@/types/books";
 import { BookCover } from "./BookCover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

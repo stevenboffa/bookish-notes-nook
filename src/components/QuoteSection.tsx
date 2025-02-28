@@ -1,10 +1,8 @@
 
-import { useState, useEffect } from "react";
-import { Book } from "./BookList";
+import { useState } from "react";
+import { PlusCircle } from "lucide-react";
+import { Book } from "@/types/books";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
-import { Trash2 } from "lucide-react";
 
 interface QuoteSectionProps {
   book: Book;
@@ -12,118 +10,104 @@ interface QuoteSectionProps {
 }
 
 export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
-  const [newQuote, setNewQuote] = useState("");
-  const [localQuotes, setLocalQuotes] = useState(book.quotes || []);
+  const [isAdding, setIsAdding] = useState(false);
+  const [quoteContent, setQuoteContent] = useState("");
 
-  // Sync local quotes with book quotes when they change
-  useEffect(() => {
-    setLocalQuotes(book.quotes || []);
-  }, [book.quotes]);
-
-  const handleAddQuote = async () => {
-    if (!newQuote.trim()) return;
-
-    try {
-      const { data: quoteData, error: quoteError } = await supabase
-        .from('quotes')
-        .insert({
-          content: newQuote,
-          book_id: book.id,
-        })
-        .select()
-        .single();
-
-      if (quoteError) throw quoteError;
-
-      const newQuoteObject = {
-        id: quoteData.id,
-        content: quoteData.content,
-        createdAt: quoteData.created_at,
-      };
-
-      // Update local state
-      const updatedQuotes = [newQuoteObject, ...localQuotes];
-      setLocalQuotes(updatedQuotes);
-
-      // Update parent component with new quotes array
-      const updatedBook = {
-        ...book,
-        quotes: updatedQuotes,
-      };
-
-      onUpdateBook(updatedBook);
-      setNewQuote("");
-    } catch (error) {
-      console.error('Error adding quote:', error);
+  const handleSaveQuote = () => {
+    if (!quoteContent.trim()) {
+      setIsAdding(false);
+      return;
     }
+
+    const newQuote = {
+      id: crypto.randomUUID(),
+      content: quoteContent,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedQuotes = [...(book.quotes || []), newQuote];
+    onUpdateBook({ ...book, quotes: updatedQuotes });
+    setQuoteContent("");
+    setIsAdding(false);
   };
 
-  const handleDeleteQuote = async (quoteId: string) => {
-    try {
-      const { error } = await supabase
-        .from('quotes')
-        .delete()
-        .eq('id', quoteId);
-
-      if (error) throw error;
-
-      // Update local state immediately
-      const updatedQuotes = localQuotes.filter(quote => quote.id !== quoteId);
-      setLocalQuotes(updatedQuotes);
-
-      // Update parent component
-      const updatedBook = {
-        ...book,
-        quotes: updatedQuotes,
-      };
-
-      onUpdateBook(updatedBook);
-    } catch (error) {
-      console.error('Error deleting quote:', error);
-    }
+  const handleDeleteQuote = (quoteId: string) => {
+    const updatedQuotes = (book.quotes || []).filter(
+      (quote) => quote.id !== quoteId
+    );
+    onUpdateBook({ ...book, quotes: updatedQuotes });
   };
 
   return (
-    <div className="p-4 h-full flex flex-col">
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground italic">Save the words that stood out to you.</p>
-          <div className="flex flex-col space-y-2">
-            <Textarea
-              value={newQuote}
-              onChange={(e) => setNewQuote(e.target.value)}
-              placeholder="Add a quote..."
-              className="min-h-[100px]"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.metaKey) {
-                  handleAddQuote();
-                }
+    <div className="my-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-text">Quotes</h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center"
+          onClick={() => setIsAdding(true)}
+        >
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Add Quote
+        </Button>
+      </div>
+
+      {isAdding && (
+        <div className="mb-4 border rounded-md p-4 bg-gray-50">
+          <textarea
+            value={quoteContent}
+            onChange={(e) => setQuoteContent(e.target.value)}
+            placeholder="Enter a memorable quote from this book..."
+            className="w-full h-24 p-3 border rounded-md mb-2 text-sm"
+          />
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setIsAdding(false);
+                setQuoteContent("");
               }}
-            />
-            <Button onClick={handleAddQuote}>Add Quote</Button>
-          </div>
-          <div className="space-y-2 mt-4">
-            {localQuotes.map((quote) => (
-              <div
-                key={quote.id}
-                className="p-3 bg-white rounded-lg shadow animate-fade-in group relative"
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleDeleteQuote(quote.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-                <p className="text-sm whitespace-pre-wrap pr-8">{quote.content}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(quote.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
+            >
+              Cancel
+            </Button>
+            <Button variant="default" size="sm" onClick={handleSaveQuote}>
+              Save Quote
+            </Button>
           </div>
         </div>
+      )}
+
+      <div className="space-y-3">
+        {book.quotes && book.quotes.length > 0 ? (
+          book.quotes.map((quote) => (
+            <div
+              key={quote.id}
+              className="bg-accent/10 p-4 rounded-md border border-accent/20 relative"
+            >
+              <p className="text-text italic">"{quote.content}"</p>
+              <div className="flex justify-between mt-2">
+                <span className="text-xs text-text-muted">
+                  Added on {new Date(quote.createdAt).toLocaleDateString()}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs hover:bg-accent/20"
+                  onClick={() => handleDeleteQuote(quote.id)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-text-muted text-sm italic">
+            No quotes added yet. Add your first quote by clicking the button
+            above.
+          </p>
+        )}
       </div>
     </div>
   );

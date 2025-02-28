@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { BookList, type Book } from "@/components/BookList";
+import { BookList } from "@/components/BookList";
+import { Book } from "@/types/books";
 import { BookFilters } from "@/components/BookFilters";
 import { BookDetailView } from "@/components/BookDetailView";
 import { supabase } from "@/integrations/supabase/client";
