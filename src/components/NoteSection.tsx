@@ -179,8 +179,7 @@ export const NoteSection = ({
               <NoteItem
                 key={note.id}
                 note={note}
-                onPin={(isPinned) => onNotePinned(note.id, isPinned)}
-                onEdit={() => {}}
+                onTogglePin={(id, isPinned) => onNotePinned(id, isPinned)}
                 onDelete={() => onNoteDeleted(note.id)}
               />
             ))

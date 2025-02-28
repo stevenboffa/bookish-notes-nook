@@ -167,8 +167,46 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     e.target.value = '';
   };
 
-  const handleUpdateBook = (updatedBook: Book) => {
-    onSave(updatedBook);
+  // Handle notes in a way that's compatible with NoteSection's props
+  const handleNoteAdded = (bookWithNotes: any) => {
+    if (book) {
+      const updatedBook = {
+        ...book,
+        notes: bookWithNotes.notes.map((note: any) => ({
+          ...note,
+          book_id: book.id
+        }))
+      };
+      onSave(updatedBook);
+    }
+  };
+
+  const handleNotePinned = (noteId: string, isPinned: boolean) => {
+    if (book && book.notes) {
+      const updatedNotes = book.notes.map(note => 
+        note.id === noteId ? { ...note, isPinned } : note
+      );
+      const updatedBook = { ...book, notes: updatedNotes };
+      onSave(updatedBook);
+    }
+  };
+
+  const handleNoteEdited = (updatedNote: any) => {
+    if (book && book.notes) {
+      const updatedNotes = book.notes.map(note => 
+        note.id === updatedNote.id ? updatedNote : note
+      );
+      const updatedBook = { ...book, notes: updatedNotes };
+      onSave(updatedBook);
+    }
+  };
+
+  const handleNoteDeleted = (noteId: string) => {
+    if (book && book.notes) {
+      const updatedNotes = book.notes.filter(note => note.id !== noteId);
+      const updatedBook = { ...book, notes: updatedNotes };
+      onSave(updatedBook);
+    }
   };
 
   const renderRatingStars = (rating: number) => {
@@ -406,7 +444,13 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
         <div className="mt-2">
           {book && format && (
             <div className="w-full">
-              <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
+              <NoteSection 
+                book={{...book, format}} 
+                onNoteAdded={handleNoteAdded}
+                onNotePinned={handleNotePinned}
+                onNoteEdited={handleNoteEdited}
+                onNoteDeleted={handleNoteDeleted}
+              />
             </div>
           )}
         </div>
@@ -414,4 +458,3 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     </div>
   );
 }
-

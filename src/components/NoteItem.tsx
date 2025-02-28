@@ -9,7 +9,7 @@ import {
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
-interface NoteItemProps {
+export interface NoteItemProps {
   note: Note;
   onDelete: (id: string) => void;
   onTogglePin: (id: string, isPinned: boolean) => void;
@@ -81,7 +81,7 @@ export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onTogglePin(note.id, note.isPinned || false)}
+              onClick={() => onTogglePin(note.id, !note.isPinned)}
               className={`hover:bg-gray-100 ${
                 note.isPinned ? "text-primary" : "text-gray-500"
               }`}
@@ -117,4 +117,3 @@ export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
     </>
   );
 };
-
