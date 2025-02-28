@@ -33,23 +33,9 @@ export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchR
     );
   }
 
-  // Process and fix book image URLs
-  const processedBooks = books.map(book => {
-    if (book.volumeInfo.imageLinks) {
-      // Ensure we're using HTTPS
-      if (book.volumeInfo.imageLinks.thumbnail) {
-        book.volumeInfo.imageLinks.thumbnail = book.volumeInfo.imageLinks.thumbnail.replace('http:', 'https:');
-      }
-      if (book.volumeInfo.imageLinks.smallThumbnail) {
-        book.volumeInfo.imageLinks.smallThumbnail = book.volumeInfo.imageLinks.smallThumbnail.replace('http:', 'https:');
-      }
-    }
-    return book;
-  });
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {processedBooks.map((book) => (
+      {books.map((book) => (
         <Card 
           key={book.id} 
           className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
@@ -70,16 +56,16 @@ export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchR
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground line-clamp-3">
+            <div className="text-sm text-muted-foreground line-clamp-3">
               {book.volumeInfo.description || 'No description available'}
-            </p>
+            </div>
           </CardContent>
         </Card>
       ))}
       {books.length === 0 && !isLoading && (
-        <p className="col-span-full text-center text-muted-foreground py-8">
+        <div className="col-span-full text-center text-muted-foreground py-8">
           No books found
-        </p>
+        </div>
       )}
     </div>
   );

@@ -30,21 +30,36 @@ export function BookCover({
     lg: "w-48 h-72"
   };
 
+  // Process the image URL to handle different formats and fix common issues
   useEffect(() => {
     // Reset error state when props change
     setError(false);
     
     // Determine which URL to use based on size and availability
-    const urlToUse = size === "sm" ? thumbnailUrl : imageUrl;
+    // For small sizes, prefer thumbnail URL, otherwise use full image URL
+    const urlToUse = size === "sm" && thumbnailUrl ? thumbnailUrl : 
+                    imageUrl || thumbnailUrl;
     
     if (urlToUse) {
       try {
-        // Fix common Google Books API URL issues
-        let fixedUrl = urlToUse.replace('http:', 'https:');
+        // Convert to HTTPS for security and to prevent mixed content warnings
+        let fixedUrl = urlToUse.replace(/^http:/i, 'https:');
         
-        // Add zoom parameter if it's a Google Books URL without one
-        if (fixedUrl.includes('books.google.com') && !fixedUrl.includes('zoom=')) {
-          fixedUrl = fixedUrl.replace('&source=gbs_api', '&zoom=1&source=gbs_api');
+        // Handle Google Books API URLs specifically
+        if (fixedUrl.includes('books.google.com')) {
+          // Add zoom parameter for better image quality if missing
+          if (!fixedUrl.includes('zoom=')) {
+            fixedUrl = fixedUrl.includes('&source=gbs_api') 
+              ? fixedUrl.replace('&source=gbs_api', '&zoom=1&source=gbs_api')
+              : fixedUrl + '&zoom=1';
+          }
+          
+          // Ensure edge=curl parameter for better rendering
+          if (!fixedUrl.includes('edge=curl')) {
+            fixedUrl = fixedUrl.includes('?') 
+              ? fixedUrl + '&edge=curl' 
+              : fixedUrl + '?edge=curl';
+          }
         }
         
         setFinalImageUrl(fixedUrl);
