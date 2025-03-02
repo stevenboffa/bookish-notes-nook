@@ -56,16 +56,16 @@ export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchR
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-muted-foreground line-clamp-3">
+            <p className="text-sm text-muted-foreground line-clamp-3">
               {book.volumeInfo.description || 'No description available'}
-            </div>
+            </p>
           </CardContent>
         </Card>
       ))}
       {books.length === 0 && !isLoading && (
-        <div className="col-span-full text-center text-muted-foreground py-8">
+        <p className="col-span-full text-center text-muted-foreground py-8">
           No books found
-        </div>
+        </p>
       )}
     </div>
   );

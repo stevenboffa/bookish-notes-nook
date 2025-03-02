@@ -1,5 +1,5 @@
 
-import { Book } from "@/types/books";
+import { Book } from "@/components/BookList";
 
 export interface Friend {
   id: string;
@@ -43,21 +43,4 @@ export interface ReadingProgress {
   user_id: string;
   progress: number;
   created_at: string;
-}
-
-export interface Recommendation {
-  id: string;
-  book_id: string;
-  from_user_id: string;
-  to_user_id: string;
-  message?: string;
-  status: 'pending' | 'accepted' | 'declined';
-  created_at: string;
-  from_user: {
-    id: string;
-    username: string;
-    email: string;
-    avatar_url: string;
-  };
-  book: Book;
 }

@@ -1,20 +1,22 @@
-
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import type { EmblaOptionsType } from "embla-carousel"
-import type { EmblaPluginType } from "embla-carousel"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
+type CarouselApi = UseEmblaCarouselType[1]
+type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+type CarouselOptions = UseCarouselParameters[0]
+type CarouselPlugin = UseCarouselParameters[1]
+
 type CarouselProps = {
-  opts?: EmblaOptionsType
-  plugins?: EmblaPluginType[]
+  opts?: CarouselOptions
+  plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
-  setApi?: (api: UseEmblaCarouselType[1]) => void
+  setApi?: (api: CarouselApi) => void
 }
 
 type CarouselContextProps = {
@@ -64,7 +66,7 @@ const Carousel = React.forwardRef<
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
 
-    const onSelect = React.useCallback((api: UseEmblaCarouselType[1]) => {
+    const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
         return
       }
@@ -108,12 +110,11 @@ const Carousel = React.forwardRef<
       }
 
       onSelect(api)
-      api.on("select", onSelect)
       api.on("reInit", onSelect)
+      api.on("select", onSelect)
 
       return () => {
-        api.off("select", onSelect)
-        api.off("reInit", onSelect)
+        api?.off("select", onSelect)
       }
     }, [api, onSelect])
 
@@ -203,7 +204,7 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute  h-8 w-8 rounded-full",
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -250,7 +251,7 @@ const CarouselNext = React.forwardRef<
 CarouselNext.displayName = "CarouselNext"
 
 export {
-  type UseEmblaCarouselType as CarouselApi,
+  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,

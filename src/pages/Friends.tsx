@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { FriendBooks } from "@/components/FriendBooks";
-import { Book } from "@/types/books";
+import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { FriendCard } from "@/components/friends/FriendCard";
 import { FriendRequestCard } from "@/components/friends/FriendRequestCard";
