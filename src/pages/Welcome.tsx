@@ -1,11 +1,12 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Bookmark, PenLine, Users, ArrowRight, Star } from "lucide-react";
+import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 
 const SITE_CONFIG = {
-  name: "BookNotes",
+  name: "BookishNotes",
   description: "Your personal reading companion",
 };
 
@@ -57,26 +58,17 @@ const Welcome = () => {
         {/* Content */}
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
-            {/* Animated badge */}
-            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm mb-8 animate-fade-in">
-              <span className="flex h-2 w-2 mr-2">
-                <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
-              </span>
-              Join 10,000+ readers today
-            </div>
-
             {/* Main heading */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in [text-wrap:balance]">
-              Your Digital
+              Never Forget
               <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                Reading Journey
+                What You Read
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="text-xl md:text-2xl text-white/90 mb-12 animate-fade-in [animation-delay:200ms] max-w-2xl mx-auto leading-relaxed">
-              Track your books, capture your thoughts, and connect with fellow readers - all in one beautifully designed space.
+              BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come.
             </p>
 
             {/* CTA Button */}
@@ -87,26 +79,10 @@ const Welcome = () => {
                 asChild
               >
                 <Link to="/auth/sign-up">
-                  Start Your Reading Journey
+                  Start Taking Notes
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </Button>
-            </div>
-
-            {/* Stats */}
-            <div className="mt-16 grid grid-cols-2 md:grid-cols-3 gap-8 max-w-3xl mx-auto animate-fade-in [animation-delay:600ms]">
-              <div className="text-center">
-                <div className="text-3xl font-bold mb-1">10k+</div>
-                <div className="text-white/70 text-sm">Active Readers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold mb-1">100k+</div>
-                <div className="text-white/70 text-sm">Books Tracked</div>
-              </div>
-              <div className="text-center md:col-span-1 col-span-2">
-                <div className="text-3xl font-bold mb-1">50k+</div>
-                <div className="text-white/70 text-sm">Notes Created</div>
-              </div>
             </div>
 
             {/* Decorative elements */}
@@ -120,67 +96,118 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Main Pain Point Section */}
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">The Reader's Dilemma</h2>
+            <p className="text-xl text-muted-foreground">
+              As avid readers, we often can't remember details of books we read years ago. 
+              BookishNotes solves this problem with a smart note-taking system that gives you 
+              a crystal clear memory of everything you read.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24 bg-muted/30">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Everything You Need to Track Your Reading</h2>
+            <h2 className="text-3xl font-bold mb-4">Capture Everything Important</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Powerful features to help you organize your books, capture your thoughts, and connect with other readers.
+              BookishNotes gives you powerful tools to capture and organize everything that matters in your books.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <Feature
-              icon={<BookOpen className="h-6 w-6" />}
-              title="Track Your Books"
-              description="Keep a detailed record of every book you read, want to read, and are currently reading."
+              icon={<BookText className="h-6 w-6" />}
+              title="Intelligent Note-Taking"
+              description="Take detailed notes on chapters, concepts, and key points so you never forget what you read."
+              primary
             />
             <Feature
-              icon={<PenLine className="h-6 w-6" />}
-              title="Take Notes"
-              description="Capture your thoughts, favorite quotes, and insights as you read."
+              icon={<Quote className="h-6 w-6" />}
+              title="Save Inspiring Quotes"
+              description="Collect powerful quotes and passages that move you, and revisit them whenever you need inspiration."
             />
             <Feature
-              icon={<Bookmark className="h-6 w-6" />}
-              title="Organize Collections"
-              description="Create custom collections to organize your books by genre, theme, or any way you like."
+              icon={<FolderKanban className="h-6 w-6" />}
+              title="Organize Your Library"
+              description="Categorize and organize books by genre, topic, or custom collections to build your personal knowledge system."
             />
             <Feature
               icon={<Users className="h-6 w-6" />}
-              title="Connect with Readers"
-              description="Find and follow other readers who share your literary interests."
+              title="Share with Friends"
+              description="Connect with fellow readers and share book recommendations with your trusted circle."
             />
             <Feature
-              icon={<Star className="h-6 w-6" />}
-              title="Rate & Review"
-              description="Share your opinions and read reviews from other members of the community."
+              icon={<Camera className="h-6 w-6" />}
+              title="Capture Visual Content"
+              description="Snap photos of diagrams, charts, or important passages directly into your notes for visual reference."
             />
             <Feature
-              icon={<BookOpen className="h-6 w-6" />}
-              title="Reading Goals"
-              description="Set and track your reading goals to stay motivated throughout the year."
+              icon={<BookText className="h-6 w-6" />}
+              title="Build a Second Brain"
+              description="Transform your reading into a powerful knowledge base that grows with every book you read."
             />
           </div>
         </div>
       </section>
 
-      {/* Social Proof Section */}
+      {/* How It Works Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">Remember More of What You Read</h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Our guided note-taking system helps you capture the most important elements of each book.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <Step 
+                number="01" 
+                title="Capture Key Insights" 
+                description="Take smart notes on the most important concepts and ideas while you read."
+              />
+              <Step 
+                number="02" 
+                title="Organize Your Notes" 
+                description="Categorize your notes by chapter, theme, or concept for easy reference."
+              />
+              <Step 
+                number="03" 
+                title="Build Your Knowledge" 
+                description="Revisit and connect ideas across books to deepen your understanding."
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonial Section */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center p-6">
-                <div className="text-4xl font-bold text-primary mb-2">10k+</div>
-                <div className="text-muted-foreground">Active Readers</div>
-              </div>
-              <div className="text-center p-6">
-                <div className="text-4xl font-bold text-primary mb-2">100k+</div>
-                <div className="text-muted-foreground">Books Tracked</div>
-              </div>
-              <div className="text-center p-6">
-                <div className="text-4xl font-bold text-primary mb-2">50k+</div>
-                <div className="text-muted-foreground">Notes Created</div>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">From Our Readers</h2>
+            </div>
+
+            <div className="bg-background p-8 rounded-2xl shadow-md">
+              <p className="text-lg italic mb-6">
+                "Before BookishNotes, I'd read a book and forget most of it within weeks. Now I have a system that helps me capture and remember the most important ideas from everything I read. It's changed how I learn from books completely."
+              </p>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                  AK
+                </div>
+                <div className="ml-4">
+                  <div className="font-semibold">Alex Kim</div>
+                  <div className="text-sm text-muted-foreground">Reads 30+ books per year</div>
+                </div>
               </div>
             </div>
           </div>
@@ -192,11 +219,10 @@ const Welcome = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Start Your Reading Journey?
+              Remember Every Book You Read
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of readers who use BookNotes to track their reading journey.
-              Sign up now and get started for free!
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join BookishNotes today and transform your reading experience with our powerful note-taking system.
             </p>
             <Button 
               size="lg"
@@ -227,7 +253,7 @@ const Welcome = () => {
                 Terms of Service
               </Link>
               <a 
-                href="mailto:support@booknotes.com" 
+                href="mailto:support@bookishnotes.com" 
                 className="text-sm text-muted-foreground hover:text-foreground"
               >
                 Contact
@@ -240,10 +266,30 @@ const Welcome = () => {
   );
 };
 
-const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => (
-  <div className="p-6 rounded-lg border bg-card hover:shadow-lg transition-shadow">
-    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
+const Feature = ({ 
+  icon, 
+  title, 
+  description, 
+  primary = false 
+}: { 
+  icon: React.ReactNode; 
+  title: string; 
+  description: string;
+  primary?: boolean;
+}) => (
+  <div className={`p-6 rounded-lg border ${primary ? 'border-primary/20 bg-primary/5' : 'bg-card'} hover:shadow-lg transition-shadow`}>
+    <div className={`w-12 h-12 rounded-lg ${primary ? 'bg-primary/20' : 'bg-primary/10'} flex items-center justify-center text-primary mb-4`}>
       {icon}
+    </div>
+    <h3 className="text-xl font-semibold mb-2">{title}</h3>
+    <p className="text-muted-foreground">{description}</p>
+  </div>
+);
+
+const Step = ({ number, title, description }: { number: string; title: string; description: string }) => (
+  <div className="flex flex-col items-center text-center p-6">
+    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-4">
+      {number}
     </div>
     <h3 className="text-xl font-semibold mb-2">{title}</h3>
     <p className="text-muted-foreground">{description}</p>
