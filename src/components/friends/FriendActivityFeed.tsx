@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,7 +48,6 @@ export function FriendActivityFeed() {
 
         setLoading(true);
         
-        // Get user's friends
         const { data: friendsData, error: friendsError } = await supabase
           .from('friends')
           .select('sender_id, receiver_id')
@@ -58,7 +56,6 @@ export function FriendActivityFeed() {
 
         if (friendsError) throw friendsError;
 
-        // Extract friend IDs
         const friendIds = friendsData
           .map(friend => 
             friend.sender_id === session.user.id 
@@ -66,10 +63,8 @@ export function FriendActivityFeed() {
               : friend.sender_id
           );
 
-        // Include the user's own ID to see their activities too
         const userIds = [session.user.id, ...friendIds];
         
-        // Fetch recent activities
         const { data, error } = await supabase
           .from('friend_activities')
           .select(`
@@ -97,7 +92,6 @@ export function FriendActivityFeed() {
 
     fetchActivities();
     
-    // Set up real-time subscription for new activities
     const subscription = supabase
       .channel('friend_activities_changes')
       .on('postgres_changes', {
@@ -105,7 +99,6 @@ export function FriendActivityFeed() {
         schema: 'public',
         table: 'friend_activities'
       }, (payload) => {
-        // Fetch the full activity with profile info
         supabase
           .from('friend_activities')
           .select('*, profile:profiles(username, email, avatar_url)')
@@ -162,17 +155,14 @@ export function FriendActivityFeed() {
     const date = new Date(timestamp);
     const now = new Date();
     
-    // If the activity happened today
     if (date.toDateString() === now.toDateString()) {
       return formatDistanceToNow(date, { addSuffix: true });
     }
     
-    // If it happened within the last week
     if ((now.getTime() - date.getTime()) < 7 * 24 * 60 * 60 * 1000) {
       return formatDistanceToNow(date, { addSuffix: true });
     }
     
-    // Otherwise, show the actual date
     return format(date, 'MMM d, yyyy');
   };
 
@@ -222,11 +212,11 @@ export function FriendActivityFeed() {
                   <BookCover
                     imageUrl={null}
                     thumbnailUrl={null}
-                    genre={activity.details.title.length % 5 === 0 ? "Fantasy" : 
-                           activity.details.title.length % 4 === 0 ? "Science Fiction" : 
-                           activity.details.title.length % 3 === 0 ? "Romance" : 
-                           activity.details.title.length % 2 === 0 ? "Mystery" : "Non-Fiction"}
-                    title={activity.details.title}
+                    genre={activity.details.title?.length % 5 === 0 ? "Fantasy" : 
+                           activity.details.title?.length % 4 === 0 ? "Science Fiction" : 
+                           activity.details.title?.length % 3 === 0 ? "Romance" : 
+                           activity.details.title?.length % 2 === 0 ? "Mystery" : "Non-Fiction"}
+                    title={activity.details.title || "Unknown Book"}
                     size="sm"
                   />
                 </div>
