@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -52,6 +53,7 @@ export default function AddBook() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [showManualAdd, setShowManualAdd] = useState(false);
+  const [openDetailsForManualAdd, setOpenDetailsForManualAdd] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -182,6 +184,7 @@ export default function AddBook() {
     e.stopPropagation();
     
     setShowManualAdd(true);
+    setOpenDetailsForManualAdd(true); // Set this to true when manual add is clicked
     setBook({
       id: crypto.randomUUID(),
       title: "",
@@ -327,7 +330,12 @@ export default function AddBook() {
         </div>
       )}
       {(book || id || showManualAdd) && (
-        <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
+        <BookDetailView 
+          book={book} 
+          onSave={handleSave} 
+          onClose={handleClose} 
+          initialOpenDetails={openDetailsForManualAdd}
+        />
       )}
     </div>
   );

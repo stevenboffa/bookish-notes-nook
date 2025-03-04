@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -30,6 +29,7 @@ interface BookDetailViewProps {
   book: Book | null;
   onSave: (book: Book) => void;
   onClose: () => void;
+  initialOpenDetails?: boolean;
 }
 
 type BookStatus = "Not started" | "In Progress" | "Finished" | "Future Reads";
@@ -40,7 +40,7 @@ interface RichTextEditorProps {
   onChange: (html: string) => void;
 }
 
-export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
+export function BookDetailView({ book, onSave, onClose, initialOpenDetails = false }: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
@@ -50,7 +50,7 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
   const [description, setDescription] = useState(book?.description || "");
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(initialOpenDetails);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -414,4 +414,3 @@ export function BookDetailView({ book, onSave, onClose }: BookDetailViewProps) {
     </div>
   );
 }
-
