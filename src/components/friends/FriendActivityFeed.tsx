@@ -13,6 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookPlus, BookOpen, BookCheck, Star, Clock } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
+import { getBookCoverFallback } from "@/utils/bookCovers";
 
 interface ActivityItem {
   id: string;
@@ -26,6 +27,7 @@ interface ActivityItem {
     old_status?: string;
     new_status?: string;
     rating?: number;
+    genre?: string;
   };
   created_at: string;
   profile?: {
@@ -63,7 +65,7 @@ export function FriendActivityFeed() {
               : friend.sender_id
           );
 
-        const userIds = [session.user.id, ...friendIds];
+        const userIds = [...friendIds];
         
         const { data, error } = await supabase
           .from('friend_activities')
@@ -99,16 +101,18 @@ export function FriendActivityFeed() {
         schema: 'public',
         table: 'friend_activities'
       }, (payload) => {
-        supabase
-          .from('friend_activities')
-          .select('*, profile:profiles(username, email, avatar_url)')
-          .eq('id', payload.new.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setActivities(current => [data as ActivityItem, ...current].slice(0, 20));
-            }
-          });
+        if (payload.new.user_id !== session?.user.id) {
+          supabase
+            .from('friend_activities')
+            .select('*, profile:profiles(username, email, avatar_url)')
+            .eq('id', payload.new.id)
+            .single()
+            .then(({ data }) => {
+              if (data) {
+                setActivities(current => [data as ActivityItem, ...current].slice(0, 20));
+              }
+            });
+        }
       })
       .subscribe();
 
@@ -166,6 +170,19 @@ export function FriendActivityFeed() {
     return format(date, 'MMM d, yyyy');
   };
 
+  const getGenreFromActivity = (activity: ActivityItem) => {
+    if (activity.details.genre) {
+      return activity.details.genre;
+    }
+    
+    const title = activity.details.title || "";
+    if (title.length % 5 === 0) return "Fantasy";
+    if (title.length % 4 === 0) return "Science Fiction";
+    if (title.length % 3 === 0) return "Romance";
+    if (title.length % 2 === 0) return "Mystery";
+    return "Non-Fiction";
+  };
+
   if (loading) {
     return (
       <Card className="w-full">
@@ -212,10 +229,7 @@ export function FriendActivityFeed() {
                   <BookCover
                     imageUrl={null}
                     thumbnailUrl={null}
-                    genre={activity.details.title?.length % 5 === 0 ? "Fantasy" : 
-                           activity.details.title?.length % 4 === 0 ? "Science Fiction" : 
-                           activity.details.title?.length % 3 === 0 ? "Romance" : 
-                           activity.details.title?.length % 2 === 0 ? "Mystery" : "Non-Fiction"}
+                    genre={getGenreFromActivity(activity)}
                     title={activity.details.title || "Unknown Book"}
                     size="sm"
                   />
