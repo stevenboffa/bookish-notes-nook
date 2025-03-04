@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +9,7 @@ import { FriendCard } from "@/components/friends/FriendCard";
 import { FriendRequestCard } from "@/components/friends/FriendRequestCard";
 import { AddFriendSection } from "@/components/friends/AddFriendSection";
 import { FriendSearch } from "@/components/friends/FriendSearch";
+import { FriendActivityFeed } from "@/components/friends/FriendActivityFeed";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Friend, FriendRequest } from "@/components/friends/types";
@@ -380,12 +382,102 @@ export default function Friends() {
         </div>
       )}
 
-      <FriendSearch
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-      />
+      {/* Activity Feed Section (Desktop - side panel, Mobile - full width) */}
+      {!isMobile && !selectedFriend ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="col-span-1 lg:col-span-2">
+            <FriendSearch
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+            />
+            
+            <div className="grid gap-6 animate-fade-in grid-cols-1 sm:grid-cols-2 mt-6">
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="p-4">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-12 w-12 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-[200px]" />
+                        <Skeleton className="h-4 w-[100px]" />
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <>
+                  {filteredFriends.map((friend) => (
+                    <FriendCard
+                      key={friend.id}
+                      friend={friend}
+                      isSelected={selectedFriend?.id === friend.id}
+                      onSelect={setSelectedFriend}
+                      onRemove={removeFriend}
+                    />
+                  ))}
+                  {!isLoading && filteredFriends.length === 0 && (
+                    <div className="col-span-full text-center py-12 text-muted-foreground">
+                      {searchTerm ? 'No friends match your search' : 'No friends added yet. Add your first friend above!'}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          
+          <div className="col-span-1 animate-fade-in">
+            <FriendActivityFeed />
+          </div>
+        </div>
+      ) : isMobile && !selectedFriend ? (
+        <>
+          <div className="mt-6">
+            <FriendActivityFeed />
+          </div>
+        
+          <FriendSearch
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+          />
+          
+          <div className="grid gap-6 animate-fade-in grid-cols-1">
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="p-4">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-[200px]" />
+                      <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <>
+                {filteredFriends.map((friend) => (
+                  <FriendCard
+                    key={friend.id}
+                    friend={friend}
+                    isSelected={selectedFriend?.id === friend.id}
+                    onSelect={setSelectedFriend}
+                    onRemove={removeFriend}
+                  />
+                ))}
+                {!isLoading && filteredFriends.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    {searchTerm ? 'No friends match your search' : 'No friends added yet. Add your first friend above!'}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </>
+      ) : null}
 
       {isMobile && selectedFriend ? (
         <div className="container mx-auto px-4 py-8 pb-32">
@@ -396,40 +488,7 @@ export default function Friends() {
             onBack={handleBack}
           />
         </div>
-      ) : (
-        <div className="grid gap-6 animate-fade-in grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {isLoading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="p-4">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-12 w-12 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-[200px]" />
-                    <Skeleton className="h-4 w-[100px]" />
-                  </div>
-                </div>
-              </Card>
-            ))
-          ) : (
-            <>
-              {filteredFriends.map((friend) => (
-                <FriendCard
-                  key={friend.id}
-                  friend={friend}
-                  isSelected={selectedFriend?.id === friend.id}
-                  onSelect={setSelectedFriend}
-                  onRemove={removeFriend}
-                />
-              ))}
-              {!isLoading && filteredFriends.length === 0 && (
-                <div className="col-span-full text-center py-12 text-muted-foreground">
-                  {searchTerm ? 'No friends match your search' : 'No friends added yet. Add your first friend above!'}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
+      ) : null}
 
       {!isMobile && selectedFriend && (
         <div className="mt-8 animate-fade-in">
