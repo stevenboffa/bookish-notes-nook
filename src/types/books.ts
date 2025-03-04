@@ -1,6 +1,4 @@
 
-import { BookGenre } from "@/components/BookFilters";
-
 export interface GoogleBook {
   id: string;
   volumeInfo: {
@@ -14,13 +12,6 @@ export interface GoogleBook {
     categories?: string[];
     publishedDate?: string;
   };
-}
-
-export interface GoogleBooksResponse {
-  items: GoogleBook[];
-  totalItems: number;
-  currentPage: number;
-  hasMore: boolean;
 }
 
 export interface AIBookRecommendation {

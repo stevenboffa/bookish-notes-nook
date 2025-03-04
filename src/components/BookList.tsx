@@ -2,7 +2,6 @@
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
-import { bookGenres } from "@/components/BookFilters";
 import {
   Card,
   CardContent,

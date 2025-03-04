@@ -26,25 +26,25 @@ export function BookFilters({
           <TabsList className="w-full grid grid-cols-4 h-11 bg-white/80 backdrop-blur-sm rounded-xl shadow-[0_2px_10px] shadow-black/5 border border-gray-100/50">
             <TabsTrigger 
               value="all" 
-              className="text-sm data-[state=active]:bg-primary/25 data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               All
             </TabsTrigger>
             <TabsTrigger 
               value="in-progress" 
-              className="text-sm data-[state=active]:bg-primary/25 data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               In progress
             </TabsTrigger>
             <TabsTrigger 
               value="finished" 
-              className="text-sm data-[state=active]:bg-primary/25 data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               Finished
             </TabsTrigger>
             <TabsTrigger 
               value="not-started" 
-              className="text-sm data-[state=active]:bg-primary/25 data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               Not started
             </TabsTrigger>
@@ -65,65 +65,3 @@ export function BookFilters({
     </div>
   );
 }
-
-/**
- * A comprehensive list of book genres for use throughout the application
- */
-export const bookGenres = [
-  "Fiction",
-  "Non-Fiction",
-  "Fantasy",
-  "Science Fiction",
-  "Mystery",
-  "Thriller",
-  "Romance",
-  "Historical Fiction",
-  "Horror",
-  "Biography",
-  "Autobiography",
-  "Memoir",
-  "Self-Help",
-  "Business",
-  "Philosophy",
-  "Poetry",
-  "Drama",
-  "Adventure",
-  "Young Adult",
-  "Children's",
-  "Dystopian",
-  "Classic",
-  "Crime",
-  "Graphic Novel",
-  "Manga",
-  "Comedy",
-  "Satire",
-  "History",
-  "Travel",
-  "Cookbook",
-  "Art",
-  "Music",
-  "Science",
-  "Technology",
-  "Psychology",
-  "Sociology",
-  "Politics",
-  "Economics",
-  "Education",
-  "Health",
-  "Fitness",
-  "Religion",
-  "Spirituality",
-  "True Crime",
-  "Western",
-  "Short Stories",
-  "Essay",
-  "Reference",
-  "Literary Fiction",
-  "Contemporary Fiction",
-  "Historical Non-Fiction",
-  "Paranormal",
-  "Urban Fantasy",
-  "Magical Realism",
-] as const;
-
-export type BookGenre = typeof bookGenres[number];
