@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [currentSort, setCurrentSort] = useState<SortOption>("recently_added");
+  const [isReversed, setIsReversed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -161,22 +162,41 @@ const Dashboard = () => {
 
   const handleSortChange = (sortOption: SortOption) => {
     setCurrentSort(sortOption);
-    
+    sortBooks(sortOption, isReversed);
+  };
+  
+  const handleReverseChange = (reversed: boolean) => {
+    setIsReversed(reversed);
+    sortBooks(currentSort, reversed);
+  };
+  
+  const sortBooks = (sortOption: SortOption, reversed: boolean) => {
     const sortedBooks = [...books];
     
     switch (sortOption) {
       case "title":
-        sortedBooks.sort((a, b) => a.title.localeCompare(b.title));
+        sortedBooks.sort((a, b) => {
+          const result = a.title.localeCompare(b.title);
+          return reversed ? -result : result;
+        });
         break;
       case "author":
-        sortedBooks.sort((a, b) => a.author.localeCompare(b.author));
+        sortedBooks.sort((a, b) => {
+          const result = a.author.localeCompare(b.author);
+          return reversed ? -result : result;
+        });
         break;
       case "rating":
-        sortedBooks.sort((a, b) => b.rating - a.rating);
+        sortedBooks.sort((a, b) => {
+          const result = b.rating - a.rating;
+          return reversed ? -result : result;
+        });
         break;
       case "recently_added":
       default:
-        // Books are already sorted by created_at in descending order from the API
+        if (reversed) {
+          sortedBooks.reverse();
+        }
         break;
     }
     
@@ -229,6 +249,8 @@ const Dashboard = () => {
             onFilterChange={setActiveFilter}
             currentSort={currentSort}
             onSortChange={handleSortChange}
+            isReversed={isReversed}
+            onReverseChange={handleReverseChange}
           />
         </div>
         <div className="flex-1 overflow-auto pb-20">
