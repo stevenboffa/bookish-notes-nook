@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BookSearchResults } from "@/components/books/BookSearchResults";
 import { bookGenres } from "@/components/BookFilters";
-import { GoogleBook } from "@/types/books";
+import { GoogleBook, GoogleBooksResponse } from "@/types/books";
 
 type SearchType = "title" | "author";
 

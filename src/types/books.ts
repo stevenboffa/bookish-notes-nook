@@ -16,6 +16,13 @@ export interface GoogleBook {
   };
 }
 
+export interface GoogleBooksResponse {
+  items: GoogleBook[];
+  totalItems: number;
+  currentPage: number;
+  hasMore: boolean;
+}
+
 export interface AIBookRecommendation {
   title: string;
   author: string;
