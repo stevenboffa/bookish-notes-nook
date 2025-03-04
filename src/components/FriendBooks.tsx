@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { BookCover } from "@/components/BookCover";
 import { Book } from "@/components/BookList";
@@ -41,7 +42,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
 
   const genres = [...new Set(books.map(book => book.genre))];
 
-  const addToFutureReads = async (book: Book) => {
+  const addToCollection = async (book: Book) => {
     try {
       // Check if the book already exists in user's collection
       const { data: existingBook, error: checkError } = await supabase
@@ -55,12 +56,12 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
       if (checkError) throw checkError;
 
       if (existingBook) {
-        // If book exists but isn't in Future Reads, update its status
-        if (existingBook.status !== 'Future Reads') {
+        // If book exists but isn't in Not started, update its status
+        if (existingBook.status !== 'Not started') {
           const { error: updateError } = await supabase
             .from('books')
             .update({ 
-              status: 'Future Reads',
+              status: 'Not started',
               date_read: new Date().toISOString().split('T')[0]
             })
             .eq('id', existingBook.id);
@@ -69,12 +70,12 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
 
           toast({
             title: "Status Updated",
-            description: `"${book.title}" has been moved to your Future Reads list.`,
+            description: `"${book.title}" has been moved to your Not started list.`,
           });
         } else {
           toast({
-            title: "Already in Future Reads",
-            description: `"${book.title}" is already in your Future Reads list.`,
+            title: "Already in Collection",
+            description: `"${book.title}" is already in your Not started list.`,
           });
         }
       } else {
@@ -85,7 +86,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
             title: book.title,
             author: book.author,
             genre: book.genre,
-            status: 'Future Reads',
+            status: 'Not started',
             user_id: session?.user.id,
             image_url: book.imageUrl,
             thumbnail_url: book.thumbnailUrl,
@@ -97,18 +98,18 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
 
         toast({
           title: "Book Added",
-          description: `"${book.title}" has been added to your Future Reads list.`,
+          description: `"${book.title}" has been added to your Not started list.`,
         });
       }
       
       // Add book to the added set to show checkmark
       setAddedBooks(prev => new Set(prev).add(book.id));
     } catch (error) {
-      console.error('Error adding to Future Reads:', error);
+      console.error('Error adding to collection:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to add book to Future Reads. Please try again.",
+        description: "Failed to add book to your collection. Please try again.",
       });
     }
   };
@@ -242,7 +243,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
                     className="mt-4 w-full"
                     onClick={(e) => {
                       e.stopPropagation();
-                      addToFutureReads(book);
+                      addToCollection(book);
                     }}
                   >
                     {addedBooks.has(book.id) ? (
@@ -250,7 +251,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
                     ) : (
                       <BookPlus className="mr-2 h-4 w-4" />
                     )}
-                    {addedBooks.has(book.id) ? 'Added to Future Reads' : 'Add to Future Reads'}
+                    {addedBooks.has(book.id) ? 'Added to Collection' : 'Add Book'}
                   </Button>
                 </div>
               </div>
