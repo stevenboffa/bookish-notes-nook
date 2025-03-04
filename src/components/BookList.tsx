@@ -121,7 +121,7 @@ export function BookList({
           key={book.id}
           className={`transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:shadow-card-hover animate-slide-up ${
             selectedBook?.id === book.id
-              ? "bg-primary text-white shadow-lg ring-2 ring-primary"
+              ? "bg-primary/15 text-primary shadow-md border-primary/20"
               : "hover:shadow-md bg-white shadow-card"
           }`}
           onClick={() => onSelectBook(book)}
@@ -143,7 +143,7 @@ export function BookList({
                     </CardTitle>
                     <CardDescription
                       className={
-                        selectedBook?.id === book.id ? "text-white/80" : "text-text-muted"
+                        selectedBook?.id === book.id ? "text-primary/80" : "text-text-muted"
                       }
                     >
                       by {book.author}
@@ -176,7 +176,7 @@ export function BookList({
                         }}
                         className={
                           selectedBook?.id === book.id
-                            ? "hover:bg-white/20 text-white"
+                            ? "hover:bg-primary/30 text-primary"
                             : "hover:bg-accent/20"
                         }
                       >
