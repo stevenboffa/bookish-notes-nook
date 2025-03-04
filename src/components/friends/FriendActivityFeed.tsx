@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,8 @@ interface ActivityItem {
     new_status?: string;
     rating?: number;
     genre?: string;
+    image_url?: string;
+    thumbnail_url?: string;
   };
   created_at: string;
   profile?: {
@@ -67,11 +70,13 @@ export function FriendActivityFeed() {
 
         const userIds = [...friendIds];
         
+        // Fetch friend activities with books information
         const { data, error } = await supabase
           .from('friend_activities')
           .select(`
             *,
-            profile:profiles(username, email, avatar_url)
+            profile:profiles(username, email, avatar_url),
+            book:books(image_url, thumbnail_url, genre)
           `)
           .in('user_id', userIds)
           .order('created_at', { ascending: false })
@@ -79,7 +84,21 @@ export function FriendActivityFeed() {
 
         if (error) throw error;
 
-        setActivities(data as ActivityItem[]);
+        // Process the activities to include book cover information
+        const activitiesWithCovers = data.map((activity: any) => {
+          const activityItem = activity as ActivityItem;
+          
+          // Add book cover information if available
+          if (activity.book) {
+            activityItem.details.image_url = activity.book.image_url || null;
+            activityItem.details.thumbnail_url = activity.book.thumbnail_url || null;
+            activityItem.details.genre = activity.book.genre || activityItem.details.genre || 'Fiction';
+          }
+          
+          return activityItem;
+        });
+
+        setActivities(activitiesWithCovers);
       } catch (error) {
         console.error('Error fetching activities:', error);
         toast({
@@ -104,12 +123,25 @@ export function FriendActivityFeed() {
         if (payload.new.user_id !== session?.user.id) {
           supabase
             .from('friend_activities')
-            .select('*, profile:profiles(username, email, avatar_url)')
+            .select(`
+              *, 
+              profile:profiles(username, email, avatar_url),
+              book:books(image_url, thumbnail_url, genre)
+            `)
             .eq('id', payload.new.id)
             .single()
             .then(({ data }) => {
               if (data) {
-                setActivities(current => [data as ActivityItem, ...current].slice(0, 20));
+                const activityItem = data as unknown as ActivityItem;
+                
+                // Add book cover information if available
+                if (data.book) {
+                  activityItem.details.image_url = data.book.image_url || null;
+                  activityItem.details.thumbnail_url = data.book.thumbnail_url || null;
+                  activityItem.details.genre = data.book.genre || activityItem.details.genre || 'Fiction';
+                }
+                
+                setActivities(current => [activityItem, ...current].slice(0, 20));
               }
             });
         }
@@ -171,10 +203,12 @@ export function FriendActivityFeed() {
   };
 
   const getGenreFromActivity = (activity: ActivityItem) => {
+    // First try to use the genre from the book data
     if (activity.details.genre) {
       return activity.details.genre;
     }
     
+    // If not available, use a simple algorithm based on title for a fallback
     const title = activity.details.title || "";
     if (title.length % 5 === 0) return "Fantasy";
     if (title.length % 4 === 0) return "Science Fiction";
@@ -227,8 +261,8 @@ export function FriendActivityFeed() {
               {activity.book_id && (
                 <div className="flex-shrink-0">
                   <BookCover
-                    imageUrl={null}
-                    thumbnailUrl={null}
+                    imageUrl={activity.details.image_url || null}
+                    thumbnailUrl={activity.details.thumbnail_url || null}
                     genre={getGenreFromActivity(activity)}
                     title={activity.details.title || "Unknown Book"}
                     size="sm"
