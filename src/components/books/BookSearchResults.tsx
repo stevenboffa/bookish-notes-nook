@@ -38,7 +38,7 @@ export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchR
       {books.map((book, index) => (
         <Card 
           key={book.id} 
-          className="flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px] group overflow-hidden border-gray-200"
+          className="flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px] group overflow-hidden border-gray-200 animate-slide-up"
           onClick={() => onBookClick(book.id)}
           style={{ animationDelay: `${index * 50}ms` }}
         >

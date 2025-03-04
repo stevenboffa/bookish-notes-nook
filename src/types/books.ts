@@ -3,13 +3,14 @@ export interface GoogleBook {
   id: string;
   volumeInfo: {
     title: string;
-    authors: string[];
-    description: string;
+    authors?: string[];
+    description?: string;
     imageLinks?: {
-      thumbnail: string;
-      smallThumbnail: string;
+      thumbnail?: string;
+      smallThumbnail?: string;
     };
-    categories: string[];
+    categories?: string[];
+    publishedDate?: string;
   };
 }
 
@@ -54,4 +55,3 @@ export interface BookWithNotes {
   }>;
   format?: string;
 }
-
