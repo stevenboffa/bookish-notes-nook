@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
+import { Meta } from "@/components/Meta";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -19,6 +20,10 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Meta 
+        title="Welcome"
+        description="BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come."
+      />
       <Header />
       
       {/* Hero Section */}

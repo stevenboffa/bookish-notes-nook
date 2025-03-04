@@ -5,6 +5,7 @@ import { ArrowLeft, Loader, ShoppingCart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Meta } from "@/components/Meta";
 
 interface GoogleBook {
   id: string;
@@ -46,18 +47,15 @@ function createAmazonLink(book: GoogleBook | undefined): string | null {
     return null;
   }
 
-  // Try to find ISBN-13 first, then ISBN-10
   const isbn13 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_13')?.identifier;
   const isbn10 = book.volumeInfo.industryIdentifiers.find(id => id.type === 'ISBN_10')?.identifier;
   const identifier = isbn13 || isbn10;
 
   if (!identifier) return null;
 
-  // Create a search URL with the book title and author
   const searchQuery = `${book.volumeInfo.title} ${book.volumeInfo.authors?.[0] || ''}`.trim();
   const encodedQuery = encodeURIComponent(searchQuery);
   
-  // Include the affiliate tag in the URL
   return `https://www.amazon.com/s?k=${encodedQuery}&i=stripbooks&rh=p_66:${identifier}&tag=ps4fans06-20`;
 }
 
@@ -94,6 +92,7 @@ export default function GoogleBookDetail() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
+        <Meta title="Loading Book Details" />
         <Loader className="h-8 w-8 animate-spin" />
       </div>
     );
@@ -102,6 +101,7 @@ export default function GoogleBookDetail() {
   if (!book) {
     return (
       <div className="container mx-auto p-4">
+        <Meta title="Book Not Found" />
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
@@ -116,6 +116,10 @@ export default function GoogleBookDetail() {
 
   return (
     <div className="container mx-auto p-4">
+      <Meta 
+        title={book.volumeInfo?.title || "Book Details"}
+        description={book.volumeInfo?.description?.substring(0, 160) || `Details about ${book.volumeInfo?.title} by ${book.volumeInfo?.authors?.[0] || 'Unknown Author'}`}
+      />
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
         <ArrowLeft className="mr-2 h-4 w-4" /> Back
       </Button>

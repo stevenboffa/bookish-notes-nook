@@ -1,9 +1,9 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { HelmetProvider } from 'react-helmet-async';
 import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -29,13 +29,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   const location = useLocation();
   
-  // Show nothing while checking authentication
   if (loading) {
     return null;
   }
   
   if (!session) {
-    // Save the attempted route to redirect back after login
     return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
   }
   
@@ -46,12 +44,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   
-  // Show nothing while checking authentication
   if (loading) {
     return null;
   }
 
-  // Redirect authenticated users to dashboard
   if (session) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -73,86 +69,86 @@ const AuthenticatedLayout = ({ children, hideNav = false }: { children: React.Re
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes that redirect to dashboard when authenticated */}
-            <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
-              <Route path="/" element={
-                <PublicRoute>
-                  <Welcome />
-                </PublicRoute>
-              } />
-              <Route path="/auth/sign-in" element={
-                <PublicRoute>
-                  <SignIn />
-                </PublicRoute>
-              } />
-              <Route path="/auth/sign-up" element={
-                <PublicRoute>
-                  <SignUp />
-                </PublicRoute>
-              } />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-            </Route>
+      <HelmetProvider>
+        <TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
+                <Route path="/" element={
+                  <PublicRoute>
+                    <Welcome />
+                  </PublicRoute>
+                } />
+                <Route path="/auth/sign-in" element={
+                  <PublicRoute>
+                    <SignIn />
+                  </PublicRoute>
+                } />
+                <Route path="/auth/sign-up" element={
+                  <PublicRoute>
+                    <SignUp />
+                  </PublicRoute>
+                } />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+              </Route>
 
-            {/* Protected routes that require authentication */}
-            <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/buy-books" element={
-                <ProtectedRoute>
-                  <BuyBooks />
-                </ProtectedRoute>
-              } />
-              <Route path="/book/:id" element={
-                <ProtectedRoute>
-                  <GoogleBookDetail />
-                </ProtectedRoute>
-              } />
-              <Route path="/add-book" element={
-                <ProtectedRoute>
-                  <AddBook />
-                </ProtectedRoute>
-              } />
-              <Route path="/edit-book/:id" element={
-                <ProtectedRoute>
-                  <AddBook />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              <Route path="/friends" element={
-                <ProtectedRoute>
-                  <Friends />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/posts" element={
-                <ProtectedRoute>
-                  <BlogPosts />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/posts/:id" element={
-                <ProtectedRoute>
-                  <EditBlogPost />
-                </ProtectedRoute>
-              } />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+              <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/buy-books" element={
+                  <ProtectedRoute>
+                    <BuyBooks />
+                  </ProtectedRoute>
+                } />
+                <Route path="/book/:id" element={
+                  <ProtectedRoute>
+                    <GoogleBookDetail />
+                  </ProtectedRoute>
+                } />
+                <Route path="/add-book" element={
+                  <ProtectedRoute>
+                    <AddBook />
+                  </ProtectedRoute>
+                } />
+                <Route path="/edit-book/:id" element={
+                  <ProtectedRoute>
+                    <AddBook />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/friends" element={
+                  <ProtectedRoute>
+                    <Friends />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/posts" element={
+                  <ProtectedRoute>
+                    <BlogPosts />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/posts/:id" element={
+                  <ProtectedRoute>
+                    <EditBlogPost />
+                  </ProtectedRoute>
+                } />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </HelmetProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

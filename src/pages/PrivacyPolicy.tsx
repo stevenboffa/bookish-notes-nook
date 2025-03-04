@@ -1,8 +1,14 @@
+
 import { Header } from "@/components/Header";
+import { Meta } from "@/components/Meta";
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-background">
+      <Meta 
+        title="Privacy Policy"
+        description="Our privacy policy explains how we collect, use, and protect your personal information when you use BookishNotes."
+      />
       <Header />
       <main className="container max-w-4xl mx-auto px-4 py-24">
         <div className="prose prose-gray max-w-none">
