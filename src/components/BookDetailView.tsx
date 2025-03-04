@@ -32,7 +32,7 @@ interface BookDetailViewProps {
   initialOpenDetails?: boolean;
 }
 
-type BookStatus = "Not started" | "In Progress" | "Finished" | "Future Reads";
+type BookStatus = "Not started" | "In progress" | "Finished";
 type BookFormat = "physical_book" | "audiobook";
 
 interface RichTextEditorProps {
@@ -278,9 +278,8 @@ export function BookDetailView({ book, onSave, onClose, initialOpenDetails = fal
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Not started">Not started</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="In progress">In progress</SelectItem>
                       <SelectItem value="Finished">Finished</SelectItem>
-                      <SelectItem value="Future Reads">Future Reads</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

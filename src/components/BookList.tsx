@@ -1,3 +1,4 @@
+
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -76,12 +77,10 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case "Not started":
       return "bg-accent text-accent-foreground";
-    case "In Progress":
+    case "In progress":
       return "bg-primary/20 text-primary";
     case "Finished":
       return "bg-success text-success-foreground";
-    case "Future Reads":
-      return "bg-purple-100 text-purple-700";
     default:
       return "bg-gray-100 text-gray-700";
   }
@@ -105,20 +104,18 @@ export function BookList({
   const filteredBooks = books.filter((book) => {
     switch (activeFilter) {
       case "in-progress":
-        return book.status === "In Progress";
+        return book.status === "In progress";
       case "not-started":
         return book.status === "Not started";
       case "finished":
         return book.status === "Finished";
-      case "future-reads":
-        return book.status === "Future Reads";
       default:
         return true;
     }
   });
 
   return (
-    <div className="space-y-4 px-4 pb-28">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pb-28">
       {filteredBooks.map((book) => (
         <Card
           key={book.id}
@@ -216,7 +213,7 @@ export function BookList({
         </Card>
       ))}
       {filteredBooks.length === 0 && (
-        <div className="text-center py-12 animate-fade-in">
+        <div className="text-center py-12 animate-fade-in col-span-3">
           <p className="text-text-muted">No books found for this filter</p>
         </div>
       )}

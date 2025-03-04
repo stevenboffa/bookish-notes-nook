@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -62,7 +61,7 @@ const Dashboard = () => {
         genre: book.genre || 'Unknown',
         dateRead: book.date_read,
         rating: Number(book.rating) || 0,
-        status: book.status || 'Not started',
+        status: book.status === 'In Progress' ? 'In progress' : book.status || 'Not started',
         isFavorite: book.is_favorite || false,
         imageUrl: book.image_url || null,
         thumbnailUrl: book.thumbnail_url || null,
@@ -126,13 +125,15 @@ const Dashboard = () => {
   const handleUpdateBook = async (updatedBook: Book) => {
     try {
       console.log('Updating book with status:', updatedBook.status);
+      const status = updatedBook.status === 'In progress' ? 'In Progress' : updatedBook.status;
+      
       const { error } = await supabase
         .from('books')
         .update({
           title: updatedBook.title,
           author: updatedBook.author,
           genre: updatedBook.genre,
-          status: updatedBook.status,
+          status: status,
           rating: updatedBook.rating,
           date_read: updatedBook.dateRead,
           is_favorite: updatedBook.isFavorite,
@@ -244,4 +245,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
