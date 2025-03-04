@@ -1,4 +1,6 @@
 
+import { BookGenre } from "@/components/BookFilters";
+
 export interface GoogleBook {
   id: string;
   volumeInfo: {

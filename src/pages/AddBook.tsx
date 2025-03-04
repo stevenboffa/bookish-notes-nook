@@ -19,28 +19,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BookSearchResults } from "@/components/books/BookSearchResults";
-
-interface GoogleBook {
-  id: string;
-  volumeInfo: {
-    title: string;
-    authors?: string[];
-    categories?: string[];
-    publishedDate?: string;
-    description?: string;
-    imageLinks?: {
-      thumbnail?: string;
-      smallThumbnail?: string;
-    };
-  };
-}
-
-interface GoogleBooksResponse {
-  items?: GoogleBook[];
-  totalItems: number;
-  currentPage: number;
-  hasMore: boolean;
-}
+import { bookGenres } from "@/components/BookFilters";
+import { GoogleBook } from "@/types/books";
 
 type SearchType = "title" | "author";
 
@@ -114,7 +94,7 @@ export default function AddBook() {
       id: crypto.randomUUID(),
       title: googleBook.volumeInfo.title,
       author: googleBook.volumeInfo.authors?.[0] || "Unknown Author",
-      genre: googleBook.volumeInfo.categories?.[0] || "Uncategorized",
+      genre: googleBook.volumeInfo.categories?.[0] || "Fiction",
       dateRead: new Date().toISOString().split('T')[0],
       rating: 0,
       status: "Not started",
@@ -189,7 +169,7 @@ export default function AddBook() {
       id: crypto.randomUUID(),
       title: "",
       author: "",
-      genre: "",
+      genre: "Fiction",
       dateRead: new Date().toISOString().split('T')[0],
       rating: 0,
       status: "Not started",
