@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface GoogleBook {
   id: string;
@@ -130,6 +131,12 @@ export default function AddBook() {
   const handleSave = async (updatedBook: Book) => {
     if (!session?.user?.id) {
       console.error('User must be logged in to save books');
+      toast.error('You must be logged in to save books');
+      return;
+    }
+
+    if (!updatedBook.title || !updatedBook.author) {
+      toast.error('Book title and author are required');
       return;
     }
 
@@ -158,9 +165,11 @@ export default function AddBook() {
 
     if (error) {
       console.error('Error saving book:', error);
+      toast.error('Error saving book. Please try again.');
       return;
     }
 
+    toast.success('Book saved successfully!');
     navigate("/dashboard");
   };
 
@@ -170,6 +179,7 @@ export default function AddBook() {
 
   const handleManualAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     
     setShowManualAdd(true);
     setBook({
@@ -192,7 +202,7 @@ export default function AddBook() {
 
   return (
     <div className="flex-1 md:container">
-      {!id && (
+      {!id && !showManualAdd && (
         <div className="p-4 space-y-6">
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">Search for a Book</h2>
@@ -316,7 +326,7 @@ export default function AddBook() {
           )}
         </div>
       )}
-      {(book || id) && (
+      {(book || id || showManualAdd) && (
         <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
       )}
     </div>
