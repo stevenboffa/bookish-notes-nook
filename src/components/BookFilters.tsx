@@ -20,20 +20,32 @@ export function BookFilters({
   onReverseChange
 }: BookFiltersProps) {
   return (
-    <div className="px-2">
-      <div className="flex flex-wrap justify-between items-center gap-2">
+    <div className="px-3 py-2 bg-gray-50 border-b">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <Tabs value={activeFilter} onValueChange={onFilterChange} className="w-full sm:w-auto">
-          <TabsList className="w-full grid grid-cols-4 h-9">
-            <TabsTrigger value="all" className="text-[13px] px-1">
+          <TabsList className="w-full grid grid-cols-4 h-10 bg-white/60 backdrop-blur-sm rounded-md shadow-sm border border-gray-200">
+            <TabsTrigger 
+              value="all" 
+              className="text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium"
+            >
               All
             </TabsTrigger>
-            <TabsTrigger value="in-progress" className="text-[13px] px-1">
+            <TabsTrigger 
+              value="in-progress" 
+              className="text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium"
+            >
               In progress
             </TabsTrigger>
-            <TabsTrigger value="finished" className="text-[13px] px-1">
+            <TabsTrigger 
+              value="finished" 
+              className="text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium"
+            >
               Finished
             </TabsTrigger>
-            <TabsTrigger value="not-started" className="text-[13px] px-1">
+            <TabsTrigger 
+              value="not-started" 
+              className="text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium"
+            >
               Not started
             </TabsTrigger>
           </TabsList>
