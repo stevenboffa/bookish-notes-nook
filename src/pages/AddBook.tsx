@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -19,6 +18,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { BookSearchResults } from "@/components/books/BookSearchResults";
 
 interface GoogleBook {
   id: string;
@@ -184,7 +184,7 @@ export default function AddBook() {
     e.stopPropagation();
     
     setShowManualAdd(true);
-    setOpenDetailsForManualAdd(true); // Set this to true when manual add is clicked
+    setOpenDetailsForManualAdd(true);
     setBook({
       id: crypto.randomUUID(),
       title: "",
@@ -206,13 +206,16 @@ export default function AddBook() {
   return (
     <div className="flex-1 md:container">
       {!id && !showManualAdd && (
-        <div className="p-4 space-y-6">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold">Search for a Book</h2>
-            <p className="text-muted-foreground">
-              Search and lookup a book by title or by author in the search bar below
-            </p>
-            <div className="space-y-4">
+        <div className="p-4 space-y-6 bg-gradient-to-b from-white via-gray-50 to-white min-h-[calc(100vh-4rem)]">
+          <div className="space-y-4 animate-fade-in">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold font-serif tracking-tight">Search for a Book</h2>
+              <p className="text-muted-foreground text-sm">
+                Search and lookup a book by title or by author in the search bar below
+              </p>
+            </div>
+            
+            <div className="space-y-5 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
               <RadioGroup
                 defaultValue="title"
                 value={searchType}
@@ -221,24 +224,29 @@ export default function AddBook() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="title" id="title" />
-                  <Label htmlFor="title">Search by Title</Label>
+                  <Label htmlFor="title" className="cursor-pointer font-medium">Search by Title</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="author" id="author" />
-                  <Label htmlFor="author">Search by Author</Label>
+                  <Label htmlFor="author" className="cursor-pointer font-medium">Search by Author</Label>
                 </div>
               </RadioGroup>
 
-              <div className="flex gap-2">
-                <Input
-                  placeholder={searchType === "author" ? "Enter author name..." : "Enter book title..."}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && searchBooks(1)}
-                />
+              <div className="flex gap-2 relative">
+                <div className="relative flex-1 group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-accent opacity-0 group-focus-within:opacity-100 rounded-lg blur transition duration-300"></div>
+                  <Input
+                    placeholder={searchType === "author" ? "Enter author name..." : "Enter book title..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && searchBooks(1)}
+                    className="relative border-gray-200 hover:border-primary/40 transition-colors focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
                 <Button 
                   onClick={() => searchBooks(1)}
                   disabled={isSearching}
+                  className="transition-all hover:scale-105 bg-primary hover:bg-primary/90"
                 >
                   {isSearching ? (
                     <>
@@ -256,12 +264,12 @@ export default function AddBook() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center space-y-3 border-t border-b py-6">
-            <p className="text-muted-foreground">If you cannot find your book, you can add it manually</p>
+          <div className="flex flex-col items-center justify-center space-y-3 py-8 border-t border-b border-gray-100 my-6 bg-gradient-to-r from-accent/20 to-success/20 rounded-lg p-6 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05)]">
+            <p className="text-text-muted italic">If you cannot find your book, you can add it manually</p>
             <Button 
               onClick={handleManualAdd} 
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 hover:scale-105 transition-transform shadow-sm hover:shadow bg-white hover:bg-accent/30"
               type="button"
             >
               <BookPlus className="h-4 w-4" />
@@ -270,44 +278,24 @@ export default function AddBook() {
           </div>
 
           {searchResults.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Search Results</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {searchResults.map((result) => (
-                  <Card 
-                    key={result.id}
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => selectBook(result)}
-                  >
-                    <CardHeader className="flex flex-row gap-4">
-                      <BookCover
-                        imageUrl={result.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:')}
-                        thumbnailUrl={result.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:')}
-                        genre={result.volumeInfo.categories?.[0] || "Uncategorized"}
-                        title={result.volumeInfo.title}
-                        size="sm"
-                      />
-                      <div>
-                        <CardTitle className="text-lg">{result.volumeInfo.title}</CardTitle>
-                        <CardDescription>
-                          by {result.volumeInfo.authors?.join(', ') || 'Unknown Author'}
-                        </CardDescription>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-3">
-                        {result.volumeInfo.description || 'No description available'}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+            <div className="space-y-4 animate-slide-up">
+              <h3 className="text-lg font-semibold font-serif tracking-tight">Search Results</h3>
+              <BookSearchResults 
+                books={searchResults} 
+                onBookClick={(bookId) => {
+                  const selectedBook = searchResults.find(book => book.id === bookId);
+                  if (selectedBook) {
+                    selectBook(selectedBook);
+                  }
+                }} 
+              />
               {hasMore && (
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-center mt-6">
                   <Button
                     onClick={loadMore}
                     disabled={isSearching}
                     variant="outline"
+                    className="group transition-all hover:shadow-md"
                   >
                     {isSearching ? (
                       <>
@@ -315,7 +303,9 @@ export default function AddBook() {
                         Loading more...
                       </>
                     ) : (
-                      'Load More Results'
+                      <span className="flex items-center group-hover:translate-y-[-1px] transition-transform">
+                        Load More Results
+                      </span>
                     )}
                   </Button>
                 </div>
@@ -323,9 +313,10 @@ export default function AddBook() {
             </div>
           )}
           {searchResults.length === 0 && searchQuery && !isSearching && (
-            <p className="text-center text-muted-foreground py-8">
-              No books found
-            </p>
+            <div className="text-center text-muted-foreground py-10 bg-gray-50/50 rounded-lg border border-gray-100 animate-fade-in">
+              <p className="font-serif italic">No books found</p>
+              <p className="text-sm mt-2">Try a different search term or add your book manually</p>
+            </div>
           )}
         </div>
       )}

@@ -35,23 +35,26 @@ export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchR
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {books.map((book) => (
+      {books.map((book, index) => (
         <Card 
           key={book.id} 
-          className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+          className="flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px] group overflow-hidden border-gray-200"
           onClick={() => onBookClick(book.id)}
+          style={{ animationDelay: `${index * 50}ms` }}
         >
           <CardHeader className="flex-1">
-            <div className="aspect-w-2 aspect-h-3 mb-4">
+            <div className="aspect-w-2 aspect-h-3 mb-4 relative overflow-hidden rounded-md">
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-50/20 via-transparent to-gray-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
               <BookCover
                 imageUrl={book.volumeInfo.imageLinks?.thumbnail}
                 thumbnailUrl={book.volumeInfo.imageLinks?.smallThumbnail}
                 genre={book.volumeInfo.categories?.[0] || 'Unknown'}
                 title={book.volumeInfo.title}
+                className="transform group-hover:scale-105 transition-transform duration-500"
               />
             </div>
-            <CardTitle className="text-lg">{book.volumeInfo.title}</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg font-serif group-hover:text-primary transition-colors">{book.volumeInfo.title}</CardTitle>
+            <CardDescription className="italic">
               by {book.volumeInfo.authors?.join(', ') || 'Unknown Author'}
             </CardDescription>
           </CardHeader>
@@ -63,7 +66,7 @@ export function BookSearchResults({ books, onBookClick, isLoading }: BookSearchR
         </Card>
       ))}
       {books.length === 0 && !isLoading && (
-        <p className="col-span-full text-center text-muted-foreground py-8">
+        <p className="col-span-full text-center text-muted-foreground py-8 font-serif italic">
           No books found
         </p>
       )}
