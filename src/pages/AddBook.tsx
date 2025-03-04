@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -6,7 +5,7 @@ import { Book } from "@/components/BookList";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, BookPlus } from "lucide-react";
 import { BookCover } from "@/components/BookCover";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -51,6 +50,7 @@ export default function AddBook() {
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [showManualAdd, setShowManualAdd] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -168,52 +168,89 @@ export default function AddBook() {
     navigate("/dashboard");
   };
 
+  const handleManualAdd = () => {
+    setShowManualAdd(true);
+    setBook({
+      id: crypto.randomUUID(),
+      title: "",
+      author: "",
+      genre: "",
+      dateRead: new Date().toISOString().split('T')[0],
+      rating: 0,
+      status: "Not started",
+      notes: [],
+      quotes: [],
+      isFavorite: false,
+      imageUrl: null,
+      thumbnailUrl: null,
+      format: "physical_book",
+      description: "",
+    });
+  };
+
   return (
     <div className="flex-1 md:container">
       {!id && (
-        <div className="p-4 space-y-4">
-          <h2 className="text-2xl font-bold">Search for a Book</h2>
-          <div className="space-y-4">
-            <RadioGroup
-              defaultValue="title"
-              value={searchType}
-              onValueChange={(value) => setSearchType(value as SearchType)}
-              className="flex space-x-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="title" id="title" />
-                <Label htmlFor="title">Search by Title</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="author" id="author" />
-                <Label htmlFor="author">Search by Author</Label>
-              </div>
-            </RadioGroup>
-
-            <div className="flex gap-2">
-              <Input
-                placeholder={searchType === "author" ? "Enter author name..." : "Enter book title..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && searchBooks(1)}
-              />
-              <Button 
-                onClick={() => searchBooks(1)}
-                disabled={isSearching}
+        <div className="p-4 space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold">Search for a Book</h2>
+            <p className="text-muted-foreground">
+              Search and lookup a book by title or by author in the search bar below
+            </p>
+            <div className="space-y-4">
+              <RadioGroup
+                defaultValue="title"
+                value={searchType}
+                onValueChange={(value) => setSearchType(value as SearchType)}
+                className="flex space-x-4"
               >
-                {isSearching ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4 mr-2" />
-                    Search
-                  </>
-                )}
-              </Button>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="title" id="title" />
+                  <Label htmlFor="title">Search by Title</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="author" id="author" />
+                  <Label htmlFor="author">Search by Author</Label>
+                </div>
+              </RadioGroup>
+
+              <div className="flex gap-2">
+                <Input
+                  placeholder={searchType === "author" ? "Enter author name..." : "Enter book title..."}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && searchBooks(1)}
+                />
+                <Button 
+                  onClick={() => searchBooks(1)}
+                  disabled={isSearching}
+                >
+                  {isSearching ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
+          </div>
+
+          <div className="flex flex-col items-center justify-center space-y-3 border-t border-b py-6">
+            <p className="text-muted-foreground">If you cannot find your book, you can add it manually</p>
+            <Button 
+              onClick={handleManualAdd} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <BookPlus className="h-4 w-4" />
+              Add book manually
+            </Button>
           </div>
 
           {searchResults.length > 0 && (
@@ -276,8 +313,9 @@ export default function AddBook() {
           )}
         </div>
       )}
-      <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
+      {(book || id) && (
+        <BookDetailView book={book} onSave={handleSave} onClose={handleClose} />
+      )}
     </div>
   );
 }
-
