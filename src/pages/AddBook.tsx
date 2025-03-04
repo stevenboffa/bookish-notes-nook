@@ -168,7 +168,9 @@ export default function AddBook() {
     navigate("/dashboard");
   };
 
-  const handleManualAdd = () => {
+  const handleManualAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
     setShowManualAdd(true);
     setBook({
       id: crypto.randomUUID(),
@@ -247,6 +249,7 @@ export default function AddBook() {
               onClick={handleManualAdd} 
               variant="outline"
               className="flex items-center gap-2"
+              type="button"
             >
               <BookPlus className="h-4 w-4" />
               Add book manually
