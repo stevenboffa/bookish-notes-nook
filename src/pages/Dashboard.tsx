@@ -9,11 +9,13 @@ import { Loader2, Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { type SortOption } from "@/components/SortingOptions";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [currentSort, setCurrentSort] = useState<SortOption>("recently_added");
   const [isLoading, setIsLoading] = useState(true);
   const { session } = useAuth();
   const navigate = useNavigate();
@@ -157,6 +159,30 @@ const Dashboard = () => {
     }
   };
 
+  const handleSortChange = (sortOption: SortOption) => {
+    setCurrentSort(sortOption);
+    
+    const sortedBooks = [...books];
+    
+    switch (sortOption) {
+      case "title":
+        sortedBooks.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "author":
+        sortedBooks.sort((a, b) => a.author.localeCompare(b.author));
+        break;
+      case "rating":
+        sortedBooks.sort((a, b) => b.rating - a.rating);
+        break;
+      case "recently_added":
+      default:
+        // Books are already sorted by created_at in descending order from the API
+        break;
+    }
+    
+    setBooks(sortedBooks);
+  };
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -201,6 +227,8 @@ const Dashboard = () => {
           <BookFilters
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
+            currentSort={currentSort}
+            onSortChange={handleSortChange}
           />
         </div>
         <div className="flex-1 overflow-auto pb-20">
