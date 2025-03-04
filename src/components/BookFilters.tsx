@@ -26,25 +26,25 @@ export function BookFilters({
           <TabsList className="w-full grid grid-cols-4 h-11 bg-white/80 backdrop-blur-sm rounded-xl shadow-[0_2px_10px] shadow-black/5 border border-gray-100/50">
             <TabsTrigger 
               value="all" 
-              className="text-sm data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/50"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               All
             </TabsTrigger>
             <TabsTrigger 
               value="in-progress" 
-              className="text-sm data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/50"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               In progress
             </TabsTrigger>
             <TabsTrigger 
               value="finished" 
-              className="text-sm data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/50"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               Finished
             </TabsTrigger>
             <TabsTrigger 
               value="not-started" 
-              className="text-sm data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/50"
+              className="text-sm data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
             >
               Not started
             </TabsTrigger>
