@@ -254,13 +254,15 @@ const Dashboard = () => {
           />
         </div>
         <div className="flex-1 overflow-auto pb-20">
-          <BookList
-            books={books}
-            selectedBook={selectedBook}
-            onSelectBook={handleSelectBook}
-            onDeleteBook={handleDeleteBook}
-            activeFilter={activeFilter}
-          />
+          <div className="pt-4 px-2">
+            <BookList
+              books={books}
+              selectedBook={selectedBook}
+              onSelectBook={handleSelectBook}
+              onDeleteBook={handleDeleteBook}
+              activeFilter={activeFilter}
+            />
+          </div>
         </div>
       </div>
       

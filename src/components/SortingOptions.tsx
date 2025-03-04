@@ -21,7 +21,7 @@ export function SortingOptions({
   return (
     <div className="flex items-center gap-2">
       <Select value={currentSort} onValueChange={(value) => onSortChange(value as SortOption)}>
-        <SelectTrigger className="h-9 text-xs md:text-sm bg-white border-gray-200 rounded-md shadow-sm min-w-[130px]">
+        <SelectTrigger className="h-9 text-xs md:text-sm bg-white border-gray-100 rounded-lg shadow-sm min-w-[130px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
@@ -35,7 +35,7 @@ export function SortingOptions({
       <Button 
         variant="outline" 
         size="sm" 
-        className="h-9 bg-white shadow-sm border-gray-200 hover:bg-gray-50 transition-all"
+        className="h-9 bg-white shadow-sm border-gray-100 hover:bg-gray-50 transition-all rounded-lg"
         onClick={() => onReverseChange(!isReversed)}
         title={isReversed ? "Sort ascending" : "Sort descending"}
       >
