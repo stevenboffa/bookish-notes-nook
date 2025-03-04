@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -226,7 +227,7 @@ export function FriendActivityFeed() {
                            activity.details.title.length % 3 === 0 ? "Romance" : 
                            activity.details.title.length % 2 === 0 ? "Mystery" : "Non-Fiction"}
                     title={activity.details.title}
-                    size="xs"
+                    size="sm"
                   />
                 </div>
               )}
