@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -187,8 +188,7 @@ const Dashboard = () => {
       
       setSelectedBook(updatedBook);
       
-      // Refresh books from the database to ensure we have the latest data
-      fetchBooks();
+      // Don't call fetchBooks here to prevent UI flashing
     } catch (error) {
       console.error('Error updating book:', error);
       toast.error('Error updating book: ' + (error as Error).message);

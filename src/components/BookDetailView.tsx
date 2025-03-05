@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
 import { Button } from "@/components/ui/button";
@@ -65,20 +65,26 @@ export function BookDetailView({
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
+  const updateBookState = useCallback((bookData: Book | null) => {
+    if (bookData) {
+      setTitle(bookData.title);
+      setAuthor(bookData.author);
+      setGenre(bookData.genre);
+      setStatus(bookData.status as BookStatus);
+      setFormat(bookData.format as BookFormat || "");
+      setRating(parseFloat(String(bookData.rating)) || 0);
+      setDescription(bookData.description || "");
+      setSelectedCollections(bookData.collections || []);
+      
+      console.log('Book collections loaded:', bookData.collections);
+    }
+  }, []);
+
   useEffect(() => {
     if (book) {
-      setTitle(book.title);
-      setAuthor(book.author);
-      setGenre(book.genre);
-      setStatus(book.status as BookStatus);
-      setFormat(book.format as BookFormat || "");
-      setRating(parseFloat(String(book.rating)) || 0);
-      setDescription(book.description || "");
-      setSelectedCollections(book.collections || []);
-      
-      console.log('Book collections loaded:', book.collections);
+      updateBookState(book);
     }
-  }, [book]);
+  }, [book, updateBookState]);
 
   const truncateDescription = (text: string, wordCount = 30) => {
     if (!text) return "";
