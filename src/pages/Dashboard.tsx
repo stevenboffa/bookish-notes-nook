@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { type SortOption } from "@/components/SortingOptions";
 import { Collection } from "@/types/books";
 import { CollectionManager } from "@/components/CollectionManager";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -140,6 +141,8 @@ const Dashboard = () => {
   const handleUpdateBook = async (updatedBook: Book) => {
     try {
       console.log('Updating book with status:', updatedBook.status);
+      console.log('Collections to save:', updatedBook.collections);
+      
       const status = updatedBook.status === 'In progress' ? 'In Progress' : updatedBook.status;
       
       const { error } = await supabase
@@ -160,8 +163,12 @@ const Dashboard = () => {
 
       if (error) {
         console.error('Supabase error:', error);
+        toast.error('Failed to update book: ' + error.message);
         throw error;
       }
+
+      // Success notification
+      toast.success('Book updated successfully');
 
       setBooks(books.map(book => 
         book.id === updatedBook.id ? updatedBook : book

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PlusCircle, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,12 @@ export function CollectionManager({
     toast.success(`Collection "${newCollectionName}" created`);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && newCollectionName.trim() !== "") {
+      handleAddCollection();
+    }
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -71,7 +77,9 @@ export function CollectionManager({
                 placeholder="Collection name (e.g. 'Summer 2024', 'Sci-Fi Favorites')"
                 value={newCollectionName}
                 onChange={(e) => setNewCollectionName(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="w-full"
+                autoFocus
               />
               <div className="flex justify-end gap-2">
                 <DialogClose asChild>
