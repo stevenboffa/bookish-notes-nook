@@ -1,26 +1,17 @@
-import { Trash } from "lucide-react";
+import React from 'react';
+import { BookCover } from "./BookCover";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BookCover } from "@/components/BookCover";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/card"
 
-export interface Book {
+export type Book = {
   id: string;
   title: string;
   author: string;
@@ -31,10 +22,10 @@ export interface Book {
   isFavorite: boolean;
   imageUrl: string | null;
   thumbnailUrl: string | null;
-  format: 'physical_book' | 'ebook' | 'audiobook';
-  description?: string;
+  format: string;
+  description: string;
   collections?: string[];
-  notes: {
+  notes?: Array<{
     id: string;
     content: string;
     createdAt: string;
@@ -42,58 +33,25 @@ export interface Book {
     timestampSeconds?: number;
     chapter?: string;
     category?: string;
-    isPinned: boolean;
-    readingProgress?: number;
+    isPinned?: boolean;
     images?: string[];
-  }[];
-  quotes: {
+    noteType?: string;
+  }>;
+  quotes?: Array<{
     id: string;
     content: string;
     createdAt: string;
-  }[];
-}
-
-export interface Note {
-  id: string;
-  content: string;
-  createdAt: string;
-}
-
-export interface Quote {
-  id: string;
-  content: string;
-  createdAt: string;
-}
+  }>;
+};
 
 interface BookListProps {
   books: Book[];
   selectedBook: Book | null;
   onSelectBook: (book: Book) => void;
-  onDeleteBook: (bookId: string) => void;
+  onDeleteBook: (id: string) => void;
   activeFilter: string;
   activeCollection?: string;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Not started":
-      return "bg-accent text-accent-foreground";
-    case "In progress":
-      return "bg-primary/20 text-primary";
-    case "Finished":
-      return "bg-success text-success-foreground";
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
-};
-
-const getRatingColor = (rating: number) => {
-  if (rating >= 9) return "bg-emerald-500 text-white";
-  if (rating >= 7) return "bg-green-500 text-white";
-  if (rating >= 5) return "bg-yellow-500 text-white";
-  if (rating >= 3) return "bg-orange-500 text-white";
-  return "bg-red-500 text-white";
-};
 
 export function BookList({
   books,
@@ -103,12 +61,16 @@ export function BookList({
   activeFilter,
   activeCollection,
 }: BookListProps) {
+  // Filter books based on the active filter
   const filteredBooks = books.filter((book) => {
-    const statusMatch = activeFilter === "all" || 
-      (activeFilter === "in-progress" && book.status === "In progress") ||
-      (activeFilter === "not-started" && book.status === "Not started") ||
-      (activeFilter === "finished" && book.status === "Finished");
+    // First filter by status
+    const statusMatch = 
+      activeFilter === "all" ||
+      (activeFilter === "reading" && book.status === "In progress") ||
+      (activeFilter === "completed" && book.status === "Finished") ||
+      (activeFilter === "not-started" && book.status === "Not started");
     
+    // Then filter by collection if one is selected
     const collectionMatch = !activeCollection || 
       (book.collections && book.collections.includes(activeCollection));
     
@@ -116,108 +78,46 @@ export function BookList({
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pb-28">
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {filteredBooks.map((book) => (
-        <Card
+        <Card 
           key={book.id}
-          className={`transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:shadow-card-hover animate-slide-up ${
-            selectedBook?.id === book.id
-              ? "bg-primary/15 text-primary shadow-md border-primary/20"
-              : "hover:shadow-md bg-white shadow-card"
-          }`}
+          className={`group relative transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer ${selectedBook?.id === book.id ? 'ring-2 ring-primary/50' : 'ring-0'}`}
           onClick={() => onSelectBook(book)}
         >
-          <CardHeader className="p-4">
-            <div className="flex gap-4">
-              <BookCover
-                imageUrl={book.imageUrl}
-                thumbnailUrl={book.thumbnailUrl}
-                genre={book.genre}
-                title={book.title}
-                size="sm"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="font-serif text-book-title mb-1 leading-tight">
-                      {book.title}
-                    </CardTitle>
-                    <CardDescription
-                      className={
-                        selectedBook?.id === book.id ? "text-primary/80" : "text-text-muted"
-                      }
-                    >
-                      by {book.author}
-                    </CardDescription>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-text">
-                        {book.genre}
-                      </span>
-                      <span 
-                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(book.status)}`}
-                      >
-                        {book.status}
-                      </span>
-                      {book.status === "Finished" && (
-                        <span 
-                          className={`text-xs px-2 py-1 rounded-full ${getRatingColor(book.rating)}`}
-                        >
-                          Rating: {book.rating}/10
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        className={
-                          selectedBook?.id === book.id
-                            ? "hover:bg-primary/30 text-primary"
-                            : "hover:bg-accent/20"
-                        }
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="animate-fade-in">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Book</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{book.title}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteBook(book.id);
-                          }}
-                          className="bg-red-500 hover:bg-red-600 text-white"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            </div>
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteBook(book.id);
+              }}
+              className="hover:bg-red-500 hover:text-red-50 transition-colors duration-200"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+          <CardHeader>
+            <CardTitle className="text-lg font-medium truncate">{book.title}</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground truncate italic">{book.author}</CardDescription>
           </CardHeader>
+          <CardContent className="aspect-square relative overflow-hidden">
+            <BookCover
+              imageUrl={book.imageUrl}
+              thumbnailUrl={book.thumbnailUrl}
+              genre={book.genre}
+              title={book.title}
+              size="sm"
+              className="rounded-md"
+            />
+          </CardContent>
+          <CardFooter className="flex items-center justify-between text-sm text-muted-foreground">
+            <span className="truncate">{book.genre}</span>
+            <span>{book.status}</span>
+          </CardFooter>
         </Card>
       ))}
-      {filteredBooks.length === 0 && (
-        <div className="text-center py-12 animate-fade-in col-span-3">
-          <p className="text-text-muted">No books found for this filter</p>
-        </div>
-      )}
     </div>
   );
 }

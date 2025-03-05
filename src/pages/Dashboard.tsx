@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -13,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { type SortOption } from "@/components/SortingOptions";
 import { Collection } from "@/types/books";
 import { CollectionManager } from "@/components/CollectionManager";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -103,7 +103,6 @@ const Dashboard = () => {
         }
       }
 
-      // Load collections from localStorage
       const savedCollections = localStorage.getItem('bookish_collections');
       if (savedCollections) {
         setCollections(JSON.parse(savedCollections));
@@ -168,8 +167,10 @@ const Dashboard = () => {
       ));
       
       setSelectedBook(updatedBook);
+      toast.success('Book updated successfully');
     } catch (error) {
       console.error('Error updating book:', error);
+      toast.error('Failed to update book');
     }
   };
 
@@ -183,7 +184,6 @@ const Dashboard = () => {
     const updatedCollections = [...collections, newCollection];
     setCollections(updatedCollections);
     
-    // Save to localStorage
     localStorage.setItem('bookish_collections', JSON.stringify(updatedCollections));
     
     return newCollection.id;
@@ -191,6 +191,7 @@ const Dashboard = () => {
 
   const handleSelectCollection = (collectionId: string | null) => {
     setActiveCollection(collectionId);
+    setActiveFilter("all");
   };
 
   const handleSortChange = (sortOption: SortOption) => {
