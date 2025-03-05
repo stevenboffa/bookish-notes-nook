@@ -1,4 +1,3 @@
-
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -34,6 +33,7 @@ export interface Book {
   thumbnailUrl: string | null;
   format: 'physical_book' | 'ebook' | 'audiobook';
   description?: string;
+  collections?: string[];
   notes: {
     id: string;
     content: string;
@@ -71,6 +71,7 @@ interface BookListProps {
   onSelectBook: (book: Book) => void;
   onDeleteBook: (bookId: string) => void;
   activeFilter: string;
+  activeCollection?: string;
 }
 
 const getStatusColor = (status: string) => {
@@ -100,18 +101,18 @@ export function BookList({
   onSelectBook,
   onDeleteBook,
   activeFilter,
+  activeCollection,
 }: BookListProps) {
   const filteredBooks = books.filter((book) => {
-    switch (activeFilter) {
-      case "in-progress":
-        return book.status === "In progress";
-      case "not-started":
-        return book.status === "Not started";
-      case "finished":
-        return book.status === "Finished";
-      default:
-        return true;
-    }
+    const statusMatch = activeFilter === "all" || 
+      (activeFilter === "in-progress" && book.status === "In progress") ||
+      (activeFilter === "not-started" && book.status === "Not started") ||
+      (activeFilter === "finished" && book.status === "Finished");
+    
+    const collectionMatch = !activeCollection || 
+      (book.collections && book.collections.includes(activeCollection));
+    
+    return statusMatch && collectionMatch;
   });
 
   return (

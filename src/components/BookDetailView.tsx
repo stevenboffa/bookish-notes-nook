@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -12,12 +13,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Save, Star, StarHalf, Check, ChevronDown } from "lucide-react";
+import { X, Save, Star, StarHalf, Check, ChevronDown, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
+import { Collection } from "@/types/books";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -30,17 +39,19 @@ interface BookDetailViewProps {
   onSave: (book: Book) => void;
   onClose: () => void;
   initialOpenDetails?: boolean;
+  collections: Collection[];
 }
 
 type BookStatus = "Not started" | "In progress" | "Finished";
 type BookFormat = "physical_book" | "audiobook";
 
-interface RichTextEditorProps {
-  content: string;
-  onChange: (html: string) => void;
-}
-
-export function BookDetailView({ book, onSave, onClose, initialOpenDetails = false }: BookDetailViewProps) {
+export function BookDetailView({ 
+  book, 
+  onSave, 
+  onClose, 
+  initialOpenDetails = false,
+  collections = []
+}: BookDetailViewProps) {
   const [title, setTitle] = useState(book?.title || "");
   const [author, setAuthor] = useState(book?.author || "");
   const [genre, setGenre] = useState(book?.genre || "");
@@ -48,6 +59,7 @@ export function BookDetailView({ book, onSave, onClose, initialOpenDetails = fal
   const [format, setFormat] = useState<BookFormat | "">("");
   const [rating, setRating] = useState(book?.rating || 0);
   const [description, setDescription] = useState(book?.description || "");
+  const [selectedCollections, setSelectedCollections] = useState<string[]>(book?.collections || []);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(initialOpenDetails);
@@ -63,6 +75,7 @@ export function BookDetailView({ book, onSave, onClose, initialOpenDetails = fal
       setFormat(book.format as BookFormat || "");
       setRating(parseFloat(String(book.rating)) || 0);
       setDescription(book.description || "");
+      setSelectedCollections(book.collections || []);
     }
   }, [book]);
 
@@ -94,6 +107,7 @@ export function BookDetailView({ book, onSave, onClose, initialOpenDetails = fal
         imageUrl: null,
         thumbnailUrl: null,
         description: description,
+        collections: selectedCollections,
       };
       onSave(newBook);
     } else {
@@ -106,6 +120,7 @@ export function BookDetailView({ book, onSave, onClose, initialOpenDetails = fal
         format,
         rating: parseFloat(rating.toFixed(1)),
         description: description,
+        collections: selectedCollections,
       };
       onSave(updatedBook);
     }
@@ -114,6 +129,14 @@ export function BookDetailView({ book, onSave, onClose, initialOpenDetails = fal
     setTimeout(() => {
       setShowSaveConfirmation(false);
     }, 2000);
+  };
+
+  const handleCollectionChange = (collectionId: string, isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedCollections([...selectedCollections, collectionId]);
+    } else {
+      setSelectedCollections(selectedCollections.filter(id => id !== collectionId));
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,6 +328,82 @@ export function BookDetailView({ book, onSave, onClose, initialOpenDetails = fal
                       <SelectItem value="audiobook">Audiobook</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+
+              {/* Collections section */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center">
+                    <Tag className="h-4 w-4 mr-1" />
+                    Collections
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 text-xs bg-accent/20 text-accent-foreground hover:bg-accent/30"
+                      >
+                        Manage collections
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-4">
+                      <h4 className="text-sm font-medium mb-3">Add to collections</h4>
+                      {collections.length > 0 ? (
+                        <div className="space-y-2">
+                          {collections.map((collection) => (
+                            <div key={collection.id} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`collection-${collection.id}`}
+                                checked={selectedCollections.includes(collection.id)}
+                                onCheckedChange={(checked) => 
+                                  handleCollectionChange(collection.id, checked === true)
+                                }
+                              />
+                              <label 
+                                htmlFor={`collection-${collection.id}`}
+                                className="text-sm text-gray-700 cursor-pointer"
+                              >
+                                {collection.name}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          No collections created yet. Create collections in the dashboard sidebar.
+                        </p>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {selectedCollections.length > 0 ? (
+                    selectedCollections.map(collectionId => {
+                      const collection = collections.find(c => c.id === collectionId);
+                      return collection ? (
+                        <Badge 
+                          key={collection.id} 
+                          variant="outline" 
+                          className="bg-primary/10 text-primary border-primary/20"
+                        >
+                          {collection.name}
+                          <button 
+                            className="ml-1 text-primary/70 hover:text-primary"
+                            onClick={() => handleCollectionChange(collection.id, false)}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ) : null;
+                    })
+                  ) : (
+                    <span className="text-xs text-gray-500 italic">
+                      No collections assigned
+                    </span>
+                  )}
                 </div>
               </div>
 

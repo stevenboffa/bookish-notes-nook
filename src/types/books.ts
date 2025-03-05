@@ -39,6 +39,12 @@ export interface Note {
   book_id: string;
 }
 
+export interface Collection {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
 export interface BookWithNotes {
   id: string;
   notes: Array<{
@@ -54,4 +60,5 @@ export interface BookWithNotes {
     noteType?: string;
   }>;
   format?: string;
+  collections?: string[];
 }

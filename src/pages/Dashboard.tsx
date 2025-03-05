@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -10,6 +11,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { type SortOption } from "@/components/SortingOptions";
+import { Collection } from "@/types/books";
+import { CollectionManager } from "@/components/CollectionManager";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -18,6 +21,8 @@ const Dashboard = () => {
   const [currentSort, setCurrentSort] = useState<SortOption>("recently_added");
   const [isReversed, setIsReversed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [activeCollection, setActiveCollection] = useState<string | null>(null);
   const { session } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -70,6 +75,7 @@ const Dashboard = () => {
         thumbnailUrl: book.thumbnail_url || null,
         format: book.format || 'physical_book',
         description: book.description || '',
+        collections: book.collections || [],
         notes: book.notes.map((note: any) => ({
           id: note.id,
           content: note.content,
@@ -95,6 +101,12 @@ const Dashboard = () => {
         if (updatedSelectedBook) {
           setSelectedBook(updatedSelectedBook);
         }
+      }
+
+      // Load collections from localStorage
+      const savedCollections = localStorage.getItem('bookish_collections');
+      if (savedCollections) {
+        setCollections(JSON.parse(savedCollections));
       }
     } catch (error) {
       console.error('Error fetching books:', error);
@@ -142,6 +154,7 @@ const Dashboard = () => {
           is_favorite: updatedBook.isFavorite,
           format: updatedBook.format,
           description: updatedBook.description,
+          collections: updatedBook.collections || [],
         })
         .eq('id', updatedBook.id);
 
@@ -158,6 +171,26 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error updating book:', error);
     }
+  };
+
+  const handleAddCollection = (name: string) => {
+    const newCollection: Collection = {
+      id: crypto.randomUUID(),
+      name,
+      createdAt: new Date().toISOString(),
+    };
+    
+    const updatedCollections = [...collections, newCollection];
+    setCollections(updatedCollections);
+    
+    // Save to localStorage
+    localStorage.setItem('bookish_collections', JSON.stringify(updatedCollections));
+    
+    return newCollection.id;
+  };
+
+  const handleSelectCollection = (collectionId: string | null) => {
+    setActiveCollection(collectionId);
   };
 
   const handleSortChange = (sortOption: SortOption) => {
@@ -244,6 +277,14 @@ const Dashboard = () => {
               Add Book
             </Button>
           </div>
+          <div className="px-4 py-3">
+            <CollectionManager 
+              collections={collections}
+              onAddCollection={handleAddCollection}
+              onSelectCollection={handleSelectCollection}
+              activeCollection={activeCollection}
+            />
+          </div>
           <BookFilters
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
@@ -261,6 +302,7 @@ const Dashboard = () => {
               onSelectBook={handleSelectBook}
               onDeleteBook={handleDeleteBook}
               activeFilter={activeFilter}
+              activeCollection={activeCollection || undefined}
             />
           </div>
         </div>
@@ -277,6 +319,7 @@ const Dashboard = () => {
                 book={selectedBook}
                 onSave={handleUpdateBook}
                 onClose={() => setSelectedBook(null)}
+                collections={collections}
               />
             )}
           </SheetContent>
@@ -288,6 +331,7 @@ const Dashboard = () => {
               book={selectedBook}
               onSave={handleUpdateBook}
               onClose={() => setSelectedBook(null)}
+              collections={collections}
             />
           </div>
         )
