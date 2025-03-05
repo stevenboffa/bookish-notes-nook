@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -87,7 +88,6 @@ export function BookDetailView({
 
   const handleSave = async () => {
     if (!format) {
-      toast.error("Please select a book type");
       return;
     }
 
@@ -190,15 +190,8 @@ export function BookDetailView({
     e.target.value = '';
   };
 
-  const handleUpdateBook = (updatedBook: Book | BookWithNotes) => {
-    if ('title' in updatedBook) {
-      onSave(updatedBook as Book);
-    } else {
-      onSave({
-        ...book,
-        notes: (updatedBook as BookWithNotes).notes,
-      });
-    }
+  const handleUpdateBook = (updatedBook: Book) => {
+    onSave(updatedBook);
   };
 
   const renderRatingStars = (rating: number) => {
@@ -338,10 +331,11 @@ export function BookDetailView({
                 </div>
               </div>
 
-              <div className="space-y-3 p-4 bg-accent/5 rounded-lg border border-accent/10">
+              {/* Collections section */}
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-gray-700 flex items-center">
-                    <Tag className="h-4 w-4 mr-2 text-primary" />
+                    <Tag className="h-4 w-4 mr-1" />
                     Collections
                   </Label>
                   <Popover>
@@ -349,7 +343,7 @@ export function BookDetailView({
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="h-8 text-xs bg-accent/20 text-accent-foreground hover:bg-accent/30 shadow-sm"
+                        className="h-8 text-xs bg-accent/20 text-accent-foreground hover:bg-accent/30"
                       >
                         Manage collections
                       </Button>
@@ -357,9 +351,9 @@ export function BookDetailView({
                     <PopoverContent className="w-80 p-4">
                       <h4 className="text-sm font-medium mb-3">Add to collections</h4>
                       {collections.length > 0 ? (
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                        <div className="space-y-2">
                           {collections.map((collection) => (
-                            <div key={collection.id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-md transition-colors">
+                            <div key={collection.id} className="flex items-center space-x-2">
                               <Checkbox 
                                 id={`collection-${collection.id}`}
                                 checked={selectedCollections.includes(collection.id)}
@@ -369,7 +363,7 @@ export function BookDetailView({
                               />
                               <label 
                                 htmlFor={`collection-${collection.id}`}
-                                className="text-sm text-gray-700 cursor-pointer flex-1"
+                                className="text-sm text-gray-700 cursor-pointer"
                               >
                                 {collection.name}
                               </label>
@@ -385,7 +379,7 @@ export function BookDetailView({
                   </Popover>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 mt-2 min-h-8">
+                <div className="flex flex-wrap gap-1 mt-1">
                   {selectedCollections.length > 0 ? (
                     selectedCollections.map(collectionId => {
                       const collection = collections.find(c => c.id === collectionId);
@@ -393,11 +387,11 @@ export function BookDetailView({
                         <Badge 
                           key={collection.id} 
                           variant="outline" 
-                          className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors px-2 py-1"
+                          className="bg-primary/10 text-primary border-primary/20"
                         >
                           {collection.name}
                           <button 
-                            className="ml-1.5 text-primary/70 hover:text-primary"
+                            className="ml-1 text-primary/70 hover:text-primary"
                             onClick={() => handleCollectionChange(collection.id, false)}
                           >
                             <X className="h-3 w-3" />
@@ -406,7 +400,7 @@ export function BookDetailView({
                       ) : null;
                     })
                   ) : (
-                    <span className="text-xs text-gray-500 italic px-1">
+                    <span className="text-xs text-gray-500 italic">
                       No collections assigned
                     </span>
                   )}
@@ -508,16 +502,9 @@ export function BookDetailView({
         </div>
 
         <div className="mt-2">
-          {book && book.format && (
+          {book && format && (
             <div className="w-full">
-              <NoteSection 
-                book={{
-                  ...book,
-                  format: book.format,
-                  notes: book.notes || []
-                }} 
-                onUpdateBook={handleUpdateBook} 
-              />
+              <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
             </div>
           )}
         </div>

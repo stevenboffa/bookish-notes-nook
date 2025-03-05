@@ -5,11 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Note, BookWithNotes } from "@/types/books";
 import { useToast } from "@/hooks/use-toast";
 import { NoteItem } from "./NoteItem";
-import { Book } from "./BookList";
 
 interface NoteSectionProps {
-  book: Book | BookWithNotes;
-  onUpdateBook: (book: Book | BookWithNotes) => void;
+  book: BookWithNotes;
+  onUpdateBook: (book: BookWithNotes) => void;
 }
 
 export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {

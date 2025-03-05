@@ -31,10 +31,8 @@ const formatBooks = (books: any[]): Book[] => {
     imageUrl: book.image_url || null,
     thumbnailUrl: book.thumbnail_url || null,
     format: book.format || 'physical_book',
-    description: book.description || '',  // Add the description field
     notes: book.notes || [],
     quotes: book.quotes || [],
-    collections: book.collections || []
   }));
 };
 
