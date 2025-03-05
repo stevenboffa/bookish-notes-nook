@@ -195,6 +195,7 @@ export type Database = {
       books: {
         Row: {
           author: string
+          collections: string[] | null
           created_at: string
           date_read: string
           description: string | null
@@ -212,6 +213,7 @@ export type Database = {
         }
         Insert: {
           author: string
+          collections?: string[] | null
           created_at?: string
           date_read: string
           description?: string | null
@@ -229,6 +231,7 @@ export type Database = {
         }
         Update: {
           author?: string
+          collections?: string[] | null
           created_at?: string
           date_read?: string
           description?: string | null

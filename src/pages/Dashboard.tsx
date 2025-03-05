@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -31,6 +30,11 @@ const Dashboard = () => {
   useEffect(() => {
     if (session?.user?.id) {
       fetchBooks();
+      // Load collections from localStorage
+      const savedCollections = localStorage.getItem('bookish_collections');
+      if (savedCollections) {
+        setCollections(JSON.parse(savedCollections));
+      }
     }
   }, [session?.user?.id]);
 
@@ -103,14 +107,9 @@ const Dashboard = () => {
           setSelectedBook(updatedSelectedBook);
         }
       }
-
-      // Load collections from localStorage
-      const savedCollections = localStorage.getItem('bookish_collections');
-      if (savedCollections) {
-        setCollections(JSON.parse(savedCollections));
-      }
     } catch (error) {
       console.error('Error fetching books:', error);
+      toast.error('Error loading books: ' + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -145,21 +144,30 @@ const Dashboard = () => {
       
       const status = updatedBook.status === 'In progress' ? 'In Progress' : updatedBook.status;
       
-      const { error } = await supabase
+      // Ensure collections is an array
+      const collections = Array.isArray(updatedBook.collections) ? updatedBook.collections : [];
+      
+      // Log the payload we're sending to Supabase
+      const updatePayload = {
+        title: updatedBook.title,
+        author: updatedBook.author,
+        genre: updatedBook.genre,
+        status: status,
+        rating: updatedBook.rating,
+        date_read: updatedBook.dateRead,
+        is_favorite: updatedBook.isFavorite,
+        format: updatedBook.format,
+        description: updatedBook.description,
+        collections: collections
+      };
+      
+      console.log('Update payload:', updatePayload);
+      
+      const { error, data } = await supabase
         .from('books')
-        .update({
-          title: updatedBook.title,
-          author: updatedBook.author,
-          genre: updatedBook.genre,
-          status: status,
-          rating: updatedBook.rating,
-          date_read: updatedBook.dateRead,
-          is_favorite: updatedBook.isFavorite,
-          format: updatedBook.format,
-          description: updatedBook.description,
-          collections: updatedBook.collections || [],
-        })
-        .eq('id', updatedBook.id);
+        .update(updatePayload)
+        .eq('id', updatedBook.id)
+        .select();
 
       if (error) {
         console.error('Supabase error:', error);
@@ -167,16 +175,23 @@ const Dashboard = () => {
         throw error;
       }
 
+      console.log('Supabase response:', data);
+      
       // Success notification
       toast.success('Book updated successfully');
 
+      // Update the local state
       setBooks(books.map(book => 
         book.id === updatedBook.id ? updatedBook : book
       ));
       
       setSelectedBook(updatedBook);
+      
+      // Refresh books from the database to ensure we have the latest data
+      fetchBooks();
     } catch (error) {
       console.error('Error updating book:', error);
+      toast.error('Error updating book: ' + (error as Error).message);
     }
   };
 

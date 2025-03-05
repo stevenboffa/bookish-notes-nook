@@ -31,6 +31,11 @@ export function CollectionManager({
   const [newCollectionName, setNewCollectionName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  useEffect(() => {
+    // Log the current collections for debugging
+    console.log('CollectionManager collections:', collections);
+  }, [collections]);
+
   const handleAddCollection = () => {
     if (newCollectionName.trim() === "") {
       toast.error("Collection name cannot be empty");
@@ -114,7 +119,10 @@ export function CollectionManager({
             variant={activeCollection === collection.id ? "default" : "outline"}
             size="sm"
             className="h-8 text-xs rounded-lg flex items-center"
-            onClick={() => onSelectCollection(collection.id)}
+            onClick={() => {
+              console.log('Selecting collection:', collection.id);
+              onSelectCollection(collection.id);
+            }}
           >
             <Tag className="h-3 w-3 mr-1" />
             {collection.name}

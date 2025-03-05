@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -76,6 +75,8 @@ export function BookDetailView({
       setRating(parseFloat(String(book.rating)) || 0);
       setDescription(book.description || "");
       setSelectedCollections(book.collections || []);
+      
+      console.log('Book collections loaded:', book.collections);
     }
   }, [book]);
 
@@ -90,6 +91,8 @@ export function BookDetailView({
     if (!format) {
       return;
     }
+
+    console.log('Collections being saved:', selectedCollections);
 
     if (!book) {
       const newBook: Book = {
@@ -132,10 +135,16 @@ export function BookDetailView({
   };
 
   const handleCollectionChange = (collectionId: string, isChecked: boolean) => {
+    console.log('Collection change:', { collectionId, isChecked });
+    
     if (isChecked) {
-      setSelectedCollections([...selectedCollections, collectionId]);
+      const newCollections = [...selectedCollections, collectionId];
+      console.log('Updated collections (add):', newCollections);
+      setSelectedCollections(newCollections);
     } else {
-      setSelectedCollections(selectedCollections.filter(id => id !== collectionId));
+      const newCollections = selectedCollections.filter(id => id !== collectionId);
+      console.log('Updated collections (remove):', newCollections);
+      setSelectedCollections(newCollections);
     }
   };
 
