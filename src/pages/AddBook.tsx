@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
 import { Book } from "@/components/BookList";
@@ -19,6 +20,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BookSearchResults } from "@/components/books/BookSearchResults";
+import { Collection } from "@/types/books";
 
 interface GoogleBook {
   id: string;
@@ -54,9 +56,18 @@ export default function AddBook() {
   const [hasMore, setHasMore] = useState(false);
   const [showManualAdd, setShowManualAdd] = useState(false);
   const [openDetailsForManualAdd, setOpenDetailsForManualAdd] = useState(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
+
+  // Load collections from localStorage when component mounts
+  useEffect(() => {
+    const savedCollections = localStorage.getItem('bookish_collections');
+    if (savedCollections) {
+      setCollections(JSON.parse(savedCollections));
+    }
+  }, []);
 
   const searchBooks = async (page = 1) => {
     if (!searchQuery.trim()) {
@@ -326,6 +337,7 @@ export default function AddBook() {
           onSave={handleSave} 
           onClose={handleClose} 
           initialOpenDetails={openDetailsForManualAdd}
+          collections={collections}
         />
       )}
     </div>
