@@ -139,22 +139,36 @@ const Dashboard = () => {
   const handleUpdateBook = async (updatedBook: Book) => {
     try {
       console.log('Updating book with status:', updatedBook.status);
+      console.log('Book collections:', updatedBook.collections);
+      
       const status = updatedBook.status === 'In progress' ? 'In Progress' : updatedBook.status;
       
+      const updateData = {
+        title: updatedBook.title,
+        author: updatedBook.author,
+        genre: updatedBook.genre,
+        status: status,
+        rating: updatedBook.rating,
+        date_read: updatedBook.dateRead,
+        is_favorite: updatedBook.isFavorite,
+        format: updatedBook.format,
+        description: updatedBook.description,
+      };
+      
+      const { error: schemaError } = await supabase
+        .from('books')
+        .select('collections')
+        .limit(1);
+      
+      if (!schemaError) {
+        Object.assign(updateData, { collections: updatedBook.collections || [] });
+      } else {
+        console.log('Collections field not available in database schema');
+      }
+
       const { error } = await supabase
         .from('books')
-        .update({
-          title: updatedBook.title,
-          author: updatedBook.author,
-          genre: updatedBook.genre,
-          status: status,
-          rating: updatedBook.rating,
-          date_read: updatedBook.dateRead,
-          is_favorite: updatedBook.isFavorite,
-          format: updatedBook.format,
-          description: updatedBook.description,
-          collections: updatedBook.collections || [],
-        })
+        .update(updateData)
         .eq('id', updatedBook.id);
 
       if (error) {

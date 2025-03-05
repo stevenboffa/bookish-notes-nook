@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Book } from "./BookList";
 import { BookCover } from "./BookCover";
@@ -191,8 +190,15 @@ export function BookDetailView({
     e.target.value = '';
   };
 
-  const handleUpdateBook = (updatedBook: Book) => {
-    onSave(updatedBook);
+  const handleUpdateBook = (updatedBook: Book | BookWithNotes) => {
+    if ('title' in updatedBook) {
+      onSave(updatedBook as Book);
+    } else {
+      onSave({
+        ...book,
+        notes: (updatedBook as BookWithNotes).notes,
+      });
+    }
   };
 
   const renderRatingStars = (rating: number) => {
@@ -332,7 +338,6 @@ export function BookDetailView({
                 </div>
               </div>
 
-              {/* Collections section - improved spacing and design */}
               <div className="space-y-3 p-4 bg-accent/5 rounded-lg border border-accent/10">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-gray-700 flex items-center">
@@ -503,9 +508,16 @@ export function BookDetailView({
         </div>
 
         <div className="mt-2">
-          {book && format && (
+          {book && book.format && (
             <div className="w-full">
-              <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
+              <NoteSection 
+                book={{
+                  ...book,
+                  format: book.format,
+                  notes: book.notes || []
+                }} 
+                onUpdateBook={handleUpdateBook} 
+              />
             </div>
           )}
         </div>

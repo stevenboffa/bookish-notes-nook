@@ -19,44 +19,47 @@ const Favorites = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
 
+  const fetchBooks = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('books')
+        .select('*, notes(*), quotes(*)')
+        .eq('user_id', session?.user?.id)
+        .eq('is_favorite', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedBooks = data.map((book: any) => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        genre: book.genre || 'Unknown',
+        dateRead: book.date_read,
+        rating: Number(book.rating) || 0,
+        status: book.status || 'Not started',
+        isFavorite: book.is_favorite || false,
+        imageUrl: book.image_url || null,
+        thumbnailUrl: book.thumbnail_url || null,
+        format: book.format || 'physical_book',
+        description: book.description || '',
+        notes: book.notes || [],
+        quotes: book.quotes || [],
+        collections: book.collections || []
+      }));
+
+      setBooks(formattedBooks);
+    } catch (error) {
+      console.error('Error fetching favorite books:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchFavoriteBooks = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('books')
-          .select('*')
-          .eq('user_id', session?.user?.id)
-          .eq('is_favorite', true)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const formattedBooks = data.map((book: any) => ({
-          id: book.id,
-          title: book.title,
-          author: book.author,
-          genre: book.genre,
-          dateRead: book.date_read,
-          rating: book.rating,
-          status: book.status,
-          isFavorite: book.is_favorite,
-          imageUrl: book.image_url || null,
-          thumbnailUrl: book.thumbnail_url || null,
-          format: book.format || 'physical_book',
-          notes: [],
-          quotes: [],
-        }));
-
-        setBooks(formattedBooks);
-      } catch (error) {
-        console.error('Error fetching favorite books:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (session?.user?.id) {
-      fetchFavoriteBooks();
+      fetchBooks();
     }
   }, [session?.user?.id]);
 

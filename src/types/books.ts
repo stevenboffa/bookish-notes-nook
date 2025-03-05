@@ -47,6 +47,18 @@ export interface Collection {
 
 export interface BookWithNotes {
   id: string;
+  title?: string;
+  author?: string;
+  genre?: string;
+  dateRead?: string;
+  rating?: number;
+  status?: string;
+  isFavorite?: boolean;
+  imageUrl?: string | null;
+  thumbnailUrl?: string | null;
+  description?: string;
+  format?: string;
+  collections?: string[];
   notes: Array<{
     id: string;
     content: string;
@@ -59,6 +71,4 @@ export interface BookWithNotes {
     images?: string[];
     noteType?: string;
   }>;
-  format?: string;
-  collections?: string[];
 }
