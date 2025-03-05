@@ -20,6 +20,7 @@ export const Meta = ({
       <title>{siteTitle}</title>
       <meta name="description" content={description || defaultDescription} />
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      <link rel="icon" href="/lovable-uploads/41ae37f8-6871-4b3b-ad5d-9f6cc38a795e.png" type="image/png" />
     </Helmet>
   );
 };
