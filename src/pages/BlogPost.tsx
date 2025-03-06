@@ -7,12 +7,15 @@ import { Helmet } from "react-helmet";
 import NotFound from "./NotFound";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { BlogFooter } from "@/components/blog/BlogFooter";
+import { SignUpWidget } from "@/components/blog/SignUpWidget";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function BlogPost() {
   const { slug } = useParams();
   const { session } = useAuth();
+  const isMobile = useIsMobile();
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["blog-post", slug],
@@ -86,31 +89,51 @@ export default function BlogPost() {
         />
 
         <main className="flex-1 py-12 px-4 md:px-8">
-          <div className="max-w-4xl mx-auto">
-            {post.excerpt && (
-              <p className="text-xl text-muted-foreground mb-12 leading-relaxed font-serif">
-                {post.excerpt}
-              </p>
-            )}
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-12">
+              <div className="lg:w-2/3">
+                {post.excerpt && (
+                  <div className="mb-12">
+                    <p className="text-xl text-muted-foreground leading-relaxed font-serif italic border-l-4 border-primary pl-4 py-2">
+                      {post.excerpt}
+                    </p>
+                  </div>
+                )}
 
-            <div 
-              className="prose prose-lg max-w-none dark:prose-invert
-                prose-headings:font-bold prose-headings:tracking-tight
-                prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8
-                prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
-                prose-p:leading-relaxed prose-p:mb-8
-                prose-a:text-primary hover:prose-a:text-primary/80
-                prose-blockquote:border-l-primary prose-blockquote:bg-muted/50 prose-blockquote:py-2 prose-blockquote:px-6
-                prose-img:rounded-lg prose-img:shadow-lg
-                prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
-                prose-pre:bg-muted prose-pre:text-primary-foreground
-                prose-li:mb-2"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
+                <div 
+                  className="prose prose-lg max-w-none dark:prose-invert
+                    prose-headings:font-bold prose-headings:tracking-tight
+                    prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8
+                    prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
+                    prose-p:leading-relaxed prose-p:mb-8
+                    prose-a:text-primary hover:prose-a:text-primary/80
+                    prose-blockquote:border-l-primary prose-blockquote:bg-muted/50 prose-blockquote:py-2 prose-blockquote:px-6
+                    prose-img:rounded-lg prose-img:shadow-lg
+                    prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
+                    prose-pre:bg-muted prose-pre:text-primary-foreground
+                    prose-li:mb-2"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
+              </div>
+              
+              {!isMobile && (
+                <div className="lg:w-1/3 lg:sticky lg:top-20 lg:self-start">
+                  <div className="mt-8">
+                    <SignUpWidget />
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {isMobile && (
+              <div className="mt-12">
+                <SignUpWidget />
+              </div>
+            )}
           </div>
         </main>
 
-        <BlogFooter />
+        <BlogFooter title={post.title} />
       </article>
     </>
   );
