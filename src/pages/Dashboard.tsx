@@ -350,9 +350,8 @@ const Dashboard = () => {
   return (
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Desktop: All top navigation is sticky */}
-        {/* Mobile: Collections and filters are sticky */}
-        <div className={`${!isMobile ? "sticky top-0 z-30" : ""} bg-white shadow-sm flex flex-col`}>
+        {/* Desktop: Entire top navigation is sticky */}
+        <div className={`${!isMobile ? "sticky top-0 z-30" : ""} bg-white`}>
           {/* Header */}
           <div className="bg-white border-b">
             <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -372,28 +371,31 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
-        </div>
-        
-        {/* Collections and Filters - sticky on both mobile and desktop */}
-        <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white shadow-sm`}>
-          <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
-            <CollectionManager 
-              collections={collections}
-              onAddCollection={handleAddCollection}
-              onSelectCollection={handleSelectCollection}
-              activeCollection={activeCollection}
-              onUpdateCollections={handleUpdateCollections}
-            />
+          
+          {/* Collections - inside desktop sticky container, but also sticky on mobile */}
+          <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white border-b`}>
+            <div className="px-4 pt-4 pb-2 bg-gray-50/80">
+              <CollectionManager 
+                collections={collections}
+                onAddCollection={handleAddCollection}
+                onSelectCollection={handleSelectCollection}
+                activeCollection={activeCollection}
+                onUpdateCollections={handleUpdateCollections}
+              />
+            </div>
           </div>
           
-          <BookFilters
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            currentSort={currentSort}
-            onSortChange={handleSortChange}
-            isReversed={isReversed}
-            onReverseChange={handleReverseChange}
-          />
+          {/* Filters - inside desktop sticky container, also sticky on mobile */}
+          <div className={`${isMobile ? "sticky top-14 z-10" : ""} bg-white shadow-sm`}>
+            <BookFilters
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              currentSort={currentSort}
+              onSortChange={handleSortChange}
+              isReversed={isReversed}
+              onReverseChange={handleReverseChange}
+            />
+          </div>
         </div>
         
         {/* Book List */}
