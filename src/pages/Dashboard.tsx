@@ -372,7 +372,7 @@ const Dashboard = () => {
             </div>
           </div>
           
-          {/* Collections - inside desktop sticky container, but also sticky on mobile */}
+          {/* Collections - inside desktop sticky container, also sticky on mobile */}
           <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white border-b`}>
             <div className="px-4 pt-4 pb-2 bg-gray-50/80">
               <CollectionManager 
@@ -386,7 +386,7 @@ const Dashboard = () => {
           </div>
           
           {/* Filters - inside desktop sticky container, also sticky on mobile */}
-          <div className={`${isMobile ? "sticky top-14 z-10" : ""} bg-white shadow-sm`}>
+          <div className={`${isMobile ? "sticky top-[105px] z-10" : ""} bg-white shadow-sm`}>
             <BookFilters
               activeFilter={activeFilter}
               onFilterChange={setActiveFilter}
