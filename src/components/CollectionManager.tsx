@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PlusCircle, Tag, X, GripVertical, Trash2, PenLine, BookOpenText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -170,64 +171,122 @@ export function CollectionManager({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between bg-white rounded-md px-3 py-2 border">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          {!isMobile && (
+            <div className="flex items-center gap-2 mr-2">
+              <Button 
+                variant={isEditModeActive ? "default" : "outline"}
+                size="sm" 
+                className={`h-7 px-2 ${isEditModeActive ? 'bg-primary/10 text-primary border-transparent hover:bg-primary/20' : 'hover:bg-gray-100'}`}
+                onClick={() => setIsEditModeActive(!isEditModeActive)}
+              >
+                <PenLine className="h-3.5 w-3.5 mr-1" />
+                <span className="text-xs">Edit</span>
+              </Button>
+              
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="h-7 px-2 bg-primary text-white hover:bg-primary/90"
+                  >
+                    <PlusCircle className="h-3.5 w-3.5 mr-1" />
+                    <span className="text-xs">New</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Create new collection</DialogTitle>
+                    <DialogDescription>
+                      Collections help you organize your books into custom categories.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <Input
+                      placeholder="Collection name (e.g. 'Summer 2024', 'Sci-Fi Favorites')"
+                      value={newCollectionName}
+                      onChange={(e) => setNewCollectionName(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="w-full"
+                      autoFocus
+                    />
+                    <div className="flex justify-end gap-2">
+                      <DialogClose asChild>
+                        <Button variant="outline" size="sm">Cancel</Button>
+                      </DialogClose>
+                      <Button 
+                        size="sm" 
+                        onClick={handleAddCollection}
+                        disabled={newCollectionName.trim() === ""}
+                      >
+                        Create Collection
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
           <h3 className="text-sm font-semibold text-gray-800">Collections</h3>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Button 
-            variant={isEditModeActive ? "default" : "outline"}
-            size="sm" 
-            className={`h-7 px-2 ${isEditModeActive ? 'bg-primary/10 text-primary border-transparent hover:bg-primary/20' : 'hover:bg-gray-100'}`}
-            onClick={() => setIsEditModeActive(!isEditModeActive)}
-          >
-            <PenLine className="h-3.5 w-3.5 mr-1" />
-            <span className="text-xs">Edit</span>
-          </Button>
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                variant="default" 
-                size="sm" 
-                className="h-7 px-2 bg-primary text-white hover:bg-primary/90"
-              >
-                <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">New</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create new collection</DialogTitle>
-                <DialogDescription>
-                  Collections help you organize your books into custom categories.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <Input
-                  placeholder="Collection name (e.g. 'Summer 2024', 'Sci-Fi Favorites')"
-                  value={newCollectionName}
-                  onChange={(e) => setNewCollectionName(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="w-full"
-                  autoFocus
-                />
-                <div className="flex justify-end gap-2">
-                  <DialogClose asChild>
-                    <Button variant="outline" size="sm">Cancel</Button>
-                  </DialogClose>
-                  <Button 
-                    size="sm" 
-                    onClick={handleAddCollection}
-                    disabled={newCollectionName.trim() === ""}
-                  >
-                    Create Collection
-                  </Button>
+        {isMobile && (
+          <div className="flex items-center gap-2">
+            <Button 
+              variant={isEditModeActive ? "default" : "outline"}
+              size="sm" 
+              className={`h-7 px-2 ${isEditModeActive ? 'bg-primary/10 text-primary border-transparent hover:bg-primary/20' : 'hover:bg-gray-100'}`}
+              onClick={() => setIsEditModeActive(!isEditModeActive)}
+            >
+              <PenLine className="h-3.5 w-3.5 mr-1" />
+              <span className="text-xs">Edit</span>
+            </Button>
+            
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="h-7 px-2 bg-primary text-white hover:bg-primary/90"
+                >
+                  <PlusCircle className="h-3.5 w-3.5 mr-1" />
+                  <span className="text-xs">New</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Create new collection</DialogTitle>
+                  <DialogDescription>
+                    Collections help you organize your books into custom categories.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Input
+                    placeholder="Collection name (e.g. 'Summer 2024', 'Sci-Fi Favorites')"
+                    value={newCollectionName}
+                    onChange={(e) => setNewCollectionName(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="w-full"
+                    autoFocus
+                  />
+                  <div className="flex justify-end gap-2">
+                    <DialogClose asChild>
+                      <Button variant="outline" size="sm">Cancel</Button>
+                    </DialogClose>
+                    <Button 
+                      size="sm" 
+                      onClick={handleAddCollection}
+                      disabled={newCollectionName.trim() === ""}
+                    >
+                      Create Collection
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
       </div>
 
       <div className={`${isEditModeActive ? "px-2" : ""}`}>

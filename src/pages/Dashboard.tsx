@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -359,9 +360,9 @@ const Dashboard = () => {
             <Button
               onClick={() => navigate('/add-book')}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 transform hover:translate-y-[-2px]"
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 transform hover:translate-y-[-2px] h-11 px-5 rounded-lg font-medium"
             >
-              <Plus className="h-5 w-5 mr-1" />
+              <Plus className="h-4 w-4 mr-2" strokeWidth={2.5} />
               Add Book
             </Button>
           </div>
