@@ -146,14 +146,27 @@ const Dashboard = () => {
 
   const handleDeleteBook = async (bookId: string) => {
     try {
-      // Step 1: Delete related friend_activities
-      const { error: activitiesError } = await supabase
+      // The order matters here - we need to delete dependent records first
+      
+      // Step 1: Delete all related friend_activities
+      const { data: relatedActivities, error: activitiesFetchError } = await supabase
         .from('friend_activities')
-        .delete()
+        .select('id')
         .eq('book_id', bookId);
       
-      if (activitiesError) {
-        console.error('Error deleting related activities:', activitiesError);
+      if (activitiesFetchError) {
+        console.error('Error fetching related activities:', activitiesFetchError);
+      } else if (relatedActivities && relatedActivities.length > 0) {
+        const activityIds = relatedActivities.map(activity => activity.id);
+        const { error: activitiesDeleteError } = await supabase
+          .from('friend_activities')
+          .delete()
+          .in('id', activityIds);
+        
+        if (activitiesDeleteError) {
+          console.error('Error deleting related activities:', activitiesDeleteError);
+          throw activitiesDeleteError;
+        }
       }
 
       // Step 2: Delete related notes
