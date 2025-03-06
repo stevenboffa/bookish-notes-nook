@@ -1,4 +1,3 @@
-
 export interface GoogleBook {
   id: string;
   volumeInfo: {
@@ -43,6 +42,8 @@ export interface Collection {
   id: string;
   name: string;
   createdAt: string;
+  position?: number;
+  user_id?: string;
 }
 
 export interface BookWithNotes {

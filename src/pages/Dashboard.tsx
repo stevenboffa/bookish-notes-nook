@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -30,11 +31,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (session?.user?.id) {
       fetchBooks();
-      // Load collections from localStorage
-      const savedCollections = localStorage.getItem('bookish_collections');
-      if (savedCollections) {
-        setCollections(JSON.parse(savedCollections));
-      }
+      fetchCollections();
     }
   }, [session?.user?.id]);
 
@@ -115,6 +112,37 @@ const Dashboard = () => {
     }
   };
 
+  const fetchCollections = async () => {
+    try {
+      if (!session?.user?.id) return;
+      
+      // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('position', { ascending: true });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        const formattedCollections = data.map((collection: any) => ({
+          id: collection.id,
+          name: collection.name,
+          createdAt: collection.created_at,
+          position: collection.position,
+        }));
+        
+        setCollections(formattedCollections);
+      }
+    } catch (error) {
+      console.error('Error fetching collections:', error);
+      toast.error('Error loading collections');
+    }
+  };
+
   const handleDeleteBook = async (bookId: string) => {
     try {
       const { error } = await supabase
@@ -186,28 +214,57 @@ const Dashboard = () => {
       ));
       
       setSelectedBook(updatedBook);
-      
-      // Don't call fetchBooks here to prevent UI flashing
     } catch (error) {
       console.error('Error updating book:', error);
       toast.error('Error updating book: ' + (error as Error).message);
     }
   };
 
-  const handleAddCollection = (name: string) => {
-    const newCollection: Collection = {
-      id: crypto.randomUUID(),
-      name,
-      createdAt: new Date().toISOString(),
-    };
+  const handleAddCollection = async (name: string): Promise<string> => {
+    if (!session?.user?.id) {
+      throw new Error("You must be logged in to create collections");
+    }
     
-    const updatedCollections = [...collections, newCollection];
-    setCollections(updatedCollections);
-    
-    // Save to localStorage
-    localStorage.setItem('bookish_collections', JSON.stringify(updatedCollections));
-    
-    return newCollection.id;
+    try {
+      // Find the highest position
+      const maxPosition = collections.reduce(
+        (max, collection) => Math.max(max, collection.position || 0), 
+        0
+      );
+      
+      const newCollection = {
+        name,
+        user_id: session.user.id,
+        position: maxPosition + 1
+      };
+      
+      // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
+      const { data, error } = await supabase
+        .from('collections')
+        .insert(newCollection)
+        .select();
+      
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        throw new Error("Failed to create collection");
+      }
+      
+      const createdCollection: Collection = {
+        id: data[0].id,
+        name: data[0].name, 
+        createdAt: data[0].created_at,
+        position: data[0].position,
+      };
+      
+      setCollections([...collections, createdCollection]);
+      
+      return createdCollection.id;
+    } catch (error) {
+      console.error("Error creating collection:", error);
+      toast.error("Failed to create collection");
+      throw error;
+    }
   };
 
   const handleUpdateCollections = (updatedCollections: Collection[]) => {

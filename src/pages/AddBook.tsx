@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
@@ -61,13 +60,41 @@ export default function AddBook() {
   const navigate = useNavigate();
   const { session } = useAuth();
 
-  // Load collections from localStorage when component mounts
   useEffect(() => {
-    const savedCollections = localStorage.getItem('bookish_collections');
-    if (savedCollections) {
-      setCollections(JSON.parse(savedCollections));
+    if (session?.user?.id) {
+      fetchCollections();
     }
-  }, []);
+  }, [session?.user?.id]);
+
+  const fetchCollections = async () => {
+    try {
+      if (!session?.user?.id) return;
+      
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('position', { ascending: true });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        const formattedCollections = data.map((collection: any) => ({
+          id: collection.id,
+          name: collection.name,
+          createdAt: collection.created_at,
+          position: collection.position,
+        }));
+        
+        setCollections(formattedCollections);
+      }
+    } catch (error) {
+      console.error('Error fetching collections:', error);
+      toast.error('Error loading collections');
+    }
+  };
 
   const searchBooks = async (page = 1) => {
     if (!searchQuery.trim()) {

@@ -20,10 +20,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CollectionManagerProps {
   collections: Collection[];
-  onAddCollection: (name: string) => void;
+  onAddCollection: (name: string) => Promise<string>;
   onSelectCollection: (id: string | null) => void;
   activeCollection: string | null;
   onUpdateCollections?: (collections: Collection[]) => void;
@@ -41,13 +43,14 @@ export function CollectionManager({
   const [isEditModeActive, setIsEditModeActive] = useState(false);
   const [localCollections, setLocalCollections] = useState<Collection[]>(collections);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const { session } = useAuth();
 
   useEffect(() => {
     // Update local collections when the prop changes
     setLocalCollections(collections);
   }, [collections]);
 
-  const handleAddCollection = () => {
+  const handleAddCollection = async () => {
     if (newCollectionName.trim() === "") {
       toast.error("Collection name cannot be empty");
       return;
@@ -58,10 +61,15 @@ export function CollectionManager({
       return;
     }
 
-    onAddCollection(newCollectionName);
-    setNewCollectionName("");
-    setIsDialogOpen(false);
-    toast.success(`Collection "${newCollectionName}" created`);
+    try {
+      const collectionId = await onAddCollection(newCollectionName);
+      setNewCollectionName("");
+      setIsDialogOpen(false);
+      toast.success(`Collection "${newCollectionName}" created`);
+    } catch (error) {
+      console.error("Error adding collection:", error);
+      toast.error("Failed to create collection");
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -70,24 +78,39 @@ export function CollectionManager({
     }
   };
 
-  const handleDeleteCollection = (id: string) => {
-    const updatedCollections = localCollections.filter(c => c.id !== id);
-    setLocalCollections(updatedCollections);
-    
-    // If the deleted collection is the active one, reset to "All Books"
-    if (activeCollection === id) {
-      onSelectCollection(null);
+  const handleDeleteCollection = async (id: string) => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to delete collections");
+      return;
     }
-    
-    // Save to localStorage
-    localStorage.setItem('bookish_collections', JSON.stringify(updatedCollections));
-    
-    // Notify parent component if callback exists
-    if (onUpdateCollections) {
-      onUpdateCollections(updatedCollections);
+
+    try {
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('collections')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      const updatedCollections = localCollections.filter(c => c.id !== id);
+      setLocalCollections(updatedCollections);
+      
+      // If the deleted collection is the active one, reset to "All Books"
+      if (activeCollection === id) {
+        onSelectCollection(null);
+      }
+      
+      // Notify parent component if callback exists
+      if (onUpdateCollections) {
+        onUpdateCollections(updatedCollections);
+      }
+      
+      toast.success("Collection deleted");
+    } catch (error) {
+      console.error("Error deleting collection:", error);
+      toast.error("Failed to delete collection");
     }
-    
-    toast.success("Collection deleted");
   };
 
   const handleDragStart = (index: number) => {
@@ -110,15 +133,36 @@ export function CollectionManager({
     setDraggedIndex(index);
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = async () => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to reorder collections");
+      setDraggedIndex(null);
+      return;
+    }
+    
     setDraggedIndex(null);
     
-    // Save to localStorage
-    localStorage.setItem('bookish_collections', JSON.stringify(localCollections));
-    
-    // Notify parent component if callback exists
-    if (onUpdateCollections) {
-      onUpdateCollections(localCollections);
+    try {
+      // Update positions in Supabase
+      for (let i = 0; i < localCollections.length; i++) {
+        const collection = localCollections[i];
+        
+        // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
+        const { error } = await supabase
+          .from('collections')
+          .update({ position: i })
+          .eq('id', collection.id);
+
+        if (error) throw error;
+      }
+      
+      // Notify parent component if callback exists
+      if (onUpdateCollections) {
+        onUpdateCollections(localCollections);
+      }
+    } catch (error) {
+      console.error("Error updating collection positions:", error);
+      toast.error("Failed to save collection order");
     }
   };
 
