@@ -527,6 +527,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      disable_book_triggers: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      enable_book_triggers: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_unique_slug: {
         Args: {
           title: string

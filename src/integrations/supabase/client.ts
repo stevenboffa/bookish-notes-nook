@@ -15,6 +15,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     schema: 'public',
   },
   global: {
-    fetch: (...args) => fetch(...args),
-  },
+    headers: {
+      'x-client-info': 'lovable-app'
+    }
+  }
 });

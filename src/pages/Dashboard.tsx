@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -148,7 +149,8 @@ const Dashboard = () => {
       setIsLoading(true);
       
       // First, disable triggers temporarily to avoid issues with the book_activity trigger
-      const { error: triggerError } = await supabase.rpc('disable_book_triggers');
+      // Using a void type cast to fix the TypeScript error
+      const { error: triggerError } = await supabase.rpc('disable_book_triggers' as any);
       if (triggerError) {
         console.error('Error disabling triggers:', triggerError);
         // Continue anyway - this is an optimization, not required
@@ -226,7 +228,7 @@ const Dashboard = () => {
       }
 
       // Re-enable triggers
-      const { error: reEnableTriggerError } = await supabase.rpc('enable_book_triggers');
+      const { error: reEnableTriggerError } = await supabase.rpc('enable_book_triggers' as any);
       if (reEnableTriggerError) {
         console.error('Error re-enabling triggers:', reEnableTriggerError);
         // This is also an optimization, not critical
