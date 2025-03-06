@@ -1,6 +1,6 @@
 
 import { Book } from "@/components/BookList";
-import { BookOpen, Clock, CheckCircle, ListTodo } from "lucide-react";
+import { BookOpen, Clock, CheckCircle, ListTodo, Info } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
