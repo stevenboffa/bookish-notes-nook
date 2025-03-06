@@ -112,6 +112,19 @@
   scrollbar-width: none;  /* Firefox */
 }
 
+/* Collection section animations */
+.collection-header {
+  transition: background-color 0.2s ease;
+}
+
+.collection-header:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.collection-buttons button {
+  transition: all 0.2s ease;
+}
+
 /* Collection tag animations */
 @keyframes tag-appear {
   from {

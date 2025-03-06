@@ -170,8 +170,9 @@ export function CollectionManager({
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between bg-gray-50/70 rounded-md px-2 py-1.5">
-        <h3 className="text-sm font-medium text-gray-700">Collections</h3>
+      <div className="flex items-center bg-gray-50/70 rounded-md px-2 py-1.5">
+        <h3 className="text-sm font-medium text-gray-700 mr-2">Collections</h3>
+        
         <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
@@ -180,14 +181,14 @@ export function CollectionManager({
             onClick={() => setIsEditModeActive(!isEditModeActive)}
           >
             <PenLine className="h-3.5 w-3.5 mr-1" />
-            <span className="text-xs">{isMobile ? "" : "Edit"}</span>
+            <span className="text-xs">Edit</span>
           </Button>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="secondary" size="sm" className="h-7 px-2 bg-primary/10 hover:bg-primary/20 text-primary">
                 <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">{isMobile ? "" : "New"}</span>
+                <span className="text-xs">New</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
