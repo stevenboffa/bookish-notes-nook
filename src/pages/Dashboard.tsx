@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -371,11 +370,41 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
+
+          {/* On desktop: Collections and Filters are part of the larger sticky section */}
+          {!isMobile && (
+            <>
+              {/* Collections */}
+              <div className="bg-white border-b">
+                <div className="px-4 pt-4 pb-2 bg-gray-50/80">
+                  <CollectionManager 
+                    collections={collections}
+                    onAddCollection={handleAddCollection}
+                    onSelectCollection={handleSelectCollection}
+                    activeCollection={activeCollection}
+                    onUpdateCollections={handleUpdateCollections}
+                  />
+                </div>
+              </div>
+              
+              {/* Filters */}
+              <div className="bg-white shadow-sm">
+                <BookFilters
+                  activeFilter={activeFilter}
+                  onFilterChange={setActiveFilter}
+                  currentSort={currentSort}
+                  onSortChange={handleSortChange}
+                  isReversed={isReversed}
+                  onReverseChange={handleReverseChange}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* On mobile: Create a fixed sticky section that contains collections and filters */}
         {isMobile && (
-          <div className="sticky top-0 z-20 bg-white shadow-sm">
+          <div className="sticky top-0 z-20 bg-white">
             {/* Collections */}
             <div className="bg-white border-b">
               <div className="px-4 pt-4 pb-2 bg-gray-50/80">
@@ -389,7 +418,7 @@ const Dashboard = () => {
               </div>
             </div>
             
-            {/* Filters */}
+            {/* Book status filters and sorting */}
             <div className="bg-white shadow-sm">
               <BookFilters
                 activeFilter={activeFilter}
@@ -401,36 +430,6 @@ const Dashboard = () => {
               />
             </div>
           </div>
-        )}
-        
-        {/* On desktop: Collections and Filters are part of the larger sticky section */}
-        {!isMobile && (
-          <>
-            {/* Collections */}
-            <div className="bg-white border-b">
-              <div className="px-4 pt-4 pb-2 bg-gray-50/80">
-                <CollectionManager 
-                  collections={collections}
-                  onAddCollection={handleAddCollection}
-                  onSelectCollection={handleSelectCollection}
-                  activeCollection={activeCollection}
-                  onUpdateCollections={handleUpdateCollections}
-                />
-              </div>
-            </div>
-            
-            {/* Filters */}
-            <div className="bg-white shadow-sm">
-              <BookFilters
-                activeFilter={activeFilter}
-                onFilterChange={setActiveFilter}
-                currentSort={currentSort}
-                onSortChange={handleSortChange}
-                isReversed={isReversed}
-                onReverseChange={handleReverseChange}
-              />
-            </div>
-          </>
         )}
         
         {/* Book List */}
