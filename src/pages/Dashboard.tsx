@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -211,6 +210,10 @@ const Dashboard = () => {
     return newCollection.id;
   };
 
+  const handleUpdateCollections = (updatedCollections: Collection[]) => {
+    setCollections(updatedCollections);
+  };
+
   const handleSelectCollection = (collectionId: string | null) => {
     setActiveCollection(collectionId);
   };
@@ -305,6 +308,7 @@ const Dashboard = () => {
               onAddCollection={handleAddCollection}
               onSelectCollection={handleSelectCollection}
               activeCollection={activeCollection}
+              onUpdateCollections={handleUpdateCollections}
             />
           </div>
           <BookFilters
