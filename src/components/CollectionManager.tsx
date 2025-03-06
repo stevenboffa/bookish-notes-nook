@@ -172,8 +172,10 @@ export function CollectionManager({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between bg-white rounded-md px-3 py-2 border">
         <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-gray-800">Collections</h3>
+          
           {!isMobile && (
-            <div className="flex items-center gap-2 mr-2">
+            <div className="flex items-center gap-2 ml-2">
               <Button 
                 variant={isEditModeActive ? "default" : "outline"}
                 size="sm" 
@@ -228,7 +230,6 @@ export function CollectionManager({
               </Dialog>
             </div>
           )}
-          <h3 className="text-sm font-semibold text-gray-800">Collections</h3>
         </div>
         
         {isMobile && (

@@ -360,9 +360,11 @@ const Dashboard = () => {
             <Button
               onClick={() => navigate('/add-book')}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 transform hover:translate-y-[-2px] h-11 px-5 rounded-lg font-medium"
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 
+                         transform hover:translate-y-[-1px] h-10 sm:h-11 px-4 sm:px-5 rounded-lg 
+                         font-medium flex gap-1.5 items-center"
             >
-              <Plus className="h-4 w-4 mr-2" strokeWidth={2.5} />
+              <Plus className="h-4 w-4" strokeWidth={2.5} />
               Add Book
             </Button>
           </div>
