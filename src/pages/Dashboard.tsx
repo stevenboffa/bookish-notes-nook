@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -147,73 +146,6 @@ const Dashboard = () => {
     try {
       setIsLoading(true);
       
-      // First delete records from friend_activities table
-      const { error: activitiesError } = await supabase
-        .from('friend_activities')
-        .delete()
-        .eq('book_id', bookId);
-      
-      if (activitiesError) {
-        console.error('Error deleting related activities:', activitiesError);
-        throw activitiesError;
-      }
-      
-      // Then delete notes
-      const { error: notesError } = await supabase
-        .from('notes')
-        .delete()
-        .eq('book_id', bookId);
-      
-      if (notesError) {
-        console.error('Error deleting related notes:', notesError);
-        throw notesError;
-      }
-
-      // Delete quotes
-      const { error: quotesError } = await supabase
-        .from('quotes')
-        .delete()
-        .eq('book_id', bookId);
-      
-      if (quotesError) {
-        console.error('Error deleting related quotes:', quotesError);
-        throw quotesError;
-      }
-
-      // Delete reactions
-      const { error: reactionsError } = await supabase
-        .from('book_reactions')
-        .delete()
-        .eq('book_id', bookId);
-      
-      if (reactionsError) {
-        console.error('Error deleting related reactions:', reactionsError);
-        throw reactionsError;
-      }
-
-      // Delete recommendations
-      const { error: recommendationsError } = await supabase
-        .from('book_recommendations')
-        .delete()
-        .eq('book_id', bookId);
-      
-      if (recommendationsError) {
-        console.error('Error deleting related recommendations:', recommendationsError);
-        throw recommendationsError;
-      }
-
-      // Delete reading progress
-      const { error: progressError } = await supabase
-        .from('reading_progress')
-        .delete()
-        .eq('book_id', bookId);
-      
-      if (progressError) {
-        console.error('Error deleting reading progress:', progressError);
-        throw progressError;
-      }
-      
-      // Finally delete the book itself
       const { error } = await supabase
         .from('books')
         .delete()
@@ -221,10 +153,10 @@ const Dashboard = () => {
 
       if (error) {
         console.error('Error deleting book:', error);
+        toast.error('Failed to delete book: ' + error.message);
         throw error;
       }
 
-      // Update UI state
       setBooks(books.filter((book) => book.id !== bookId));
       
       if (selectedBook?.id === bookId) {
