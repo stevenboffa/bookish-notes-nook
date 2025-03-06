@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -6,7 +5,7 @@ import { BookDetailView } from "@/components/BookDetailView";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, BookOpen, Info } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import { type SortOption } from "@/components/SortingOptions";
 import { Collection } from "@/types/books";
 import { CollectionManager } from "@/components/CollectionManager";
 import { toast } from "sonner";
+import { LibraryStats } from "@/components/LibraryStats";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -329,14 +329,19 @@ const Dashboard = () => {
   if (books.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-2xl font-semibold mb-4">No books yet</h2>
-        <p className="text-gray-600 mb-6">Start by adding your first book to your collection</p>
-        <button
+        <div className="w-16 h-16 mb-6 bg-primary/10 rounded-full flex items-center justify-center">
+          <BookOpen className="h-8 w-8 text-primary" />
+        </div>
+        <h2 className="text-2xl font-semibold mb-4">Your library is empty</h2>
+        <p className="text-gray-600 mb-8 max-w-md">Start by adding your first book to your collection and begin tracking your reading journey</p>
+        <Button
           onClick={() => navigate('/add-book')}
-          className="bg-black text-white px-6 py-2 rounded-full hover:bg-black/90 transition-colors"
+          className="bg-primary hover:bg-primary/90 transition-colors flex items-center gap-2 text-white px-6 py-5 rounded-lg shadow-md hover:shadow-lg"
+          size="lg"
         >
+          <Plus className="h-5 w-5" />
           Add your first book
-        </button>
+        </Button>
       </div>
     );
   }
@@ -345,18 +350,18 @@ const Dashboard = () => {
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header - Not sticky */}
-        <div className="bg-white border-b">
-          <div className="px-4 py-3 flex items-center justify-between">
+        <div className="bg-white border-b shadow-sm">
+          <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-xl font-semibold text-text">My Books</h1>
-              <p className="text-sm text-text-muted">{books.length} books in your library</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">My Books</h1>
+              <LibraryStats books={books} />
             </div>
             <Button
               onClick={() => navigate('/add-book')}
-              size="sm"
-              className="bg-primary hover:bg-primary/90"
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 transform hover:translate-y-[-2px]"
             >
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="h-5 w-5 mr-1" />
               Add Book
             </Button>
           </div>
@@ -364,7 +369,7 @@ const Dashboard = () => {
         
         {/* Sticky elements: Collections and Filters */}
         <div className="sticky top-0 z-20 bg-white shadow-sm">
-          <div className="px-4 pt-2 pb-0">
+          <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
             <CollectionManager 
               collections={collections}
               onAddCollection={handleAddCollection}

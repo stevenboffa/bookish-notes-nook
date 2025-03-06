@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { PlusCircle, Tag, X, GripVertical, Trash2, PenLine } from "lucide-react";
+import { PlusCircle, Tag, X, GripVertical, Trash2, PenLine, BookOpenText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -170,14 +169,16 @@ export function CollectionManager({
 
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center bg-gray-50/70 rounded-md px-2 py-1.5">
-        <h3 className="text-sm font-medium text-gray-700 mr-2">Collections</h3>
+      <div className="flex items-center justify-between bg-white rounded-md px-3 py-2 border">
+        <div className="flex items-center">
+          <h3 className="text-sm font-semibold text-gray-800">Collections</h3>
+        </div>
         
         <div className="flex items-center gap-2">
           <Button 
-            variant="ghost" 
+            variant={isEditModeActive ? "default" : "outline"}
             size="sm" 
-            className={`h-7 px-2 ${isEditModeActive ? 'bg-gray-100 text-gray-700' : ''}`}
+            className={`h-7 px-2 ${isEditModeActive ? 'bg-primary/10 text-primary border-transparent hover:bg-primary/20' : 'hover:bg-gray-100'}`}
             onClick={() => setIsEditModeActive(!isEditModeActive)}
           >
             <PenLine className="h-3.5 w-3.5 mr-1" />
@@ -186,7 +187,11 @@ export function CollectionManager({
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="secondary" size="sm" className="h-7 px-2 bg-primary/10 hover:bg-primary/20 text-primary">
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="h-7 px-2 bg-primary text-white hover:bg-primary/90"
+              >
                 <PlusCircle className="h-3.5 w-3.5 mr-1" />
                 <span className="text-xs">New</span>
               </Button>
@@ -225,13 +230,27 @@ export function CollectionManager({
         </div>
       </div>
 
-      <div className={`py-1.5 ${isEditModeActive ? "px-2" : ""}`}>
+      <div className={`${isEditModeActive ? "px-2" : ""}`}>
         {isEditModeActive ? (
-          <div className="p-2 border rounded-lg bg-gray-50/70 space-y-2">
+          <div className="p-3 border rounded-lg bg-gray-50/70 space-y-2">
             <p className="text-xs text-gray-500">Drag to reorder or click the trash icon to delete</p>
             <div className="flex flex-wrap gap-2">
               {localCollections.length === 0 ? (
-                <p className="text-xs text-gray-400 italic">No collections yet</p>
+                <div className="p-4 text-center w-full bg-white rounded-md border border-dashed">
+                  <p className="text-xs text-gray-500 mb-2">You haven't created any collections yet</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      setIsEditModeActive(false);
+                      setIsDialogOpen(true);
+                    }}
+                  >
+                    <PlusCircle className="h-3.5 w-3.5 mr-1" />
+                    Create your first collection
+                  </Button>
+                </div>
               ) : (
                 localCollections.map((collection, index) => (
                   <div 
@@ -240,7 +259,7 @@ export function CollectionManager({
                     onDragStart={() => handleDragStart(index)}
                     onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnd={handleDragEnd}
-                    className="flex items-center bg-white border rounded-md p-1.5 cursor-move group"
+                    className="flex items-center bg-white border rounded-md p-1.5 cursor-move group shadow-sm hover:shadow"
                   >
                     <GripVertical className="h-3 w-3 mr-1 text-gray-400" />
                     <span className="text-xs">{collection.name}</span>
@@ -261,26 +280,40 @@ export function CollectionManager({
             </div>
           </div>
         ) : (
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={activeCollection === null ? "default" : "outline"}
-              size="sm"
-              className="h-7 text-xs rounded-md whitespace-nowrap"
-              onClick={() => onSelectCollection(null)}
-            >
-              All Books
-            </Button>
-            
-            <div className="flex overflow-x-auto pb-1 hide-scrollbar gap-2">
+          <div className="mt-2">
+            <div className="flex items-center space-x-2 overflow-x-auto pb-1 hide-scrollbar">
+              <Button
+                variant={activeCollection === null ? "default" : "outline"}
+                size="sm"
+                className="h-8 text-xs rounded-md whitespace-nowrap shadow-sm"
+                onClick={() => onSelectCollection(null)}
+              >
+                All Books
+              </Button>
+              
               {localCollections.length === 0 ? (
-                <p className="text-xs text-gray-400 italic flex items-center">No collections yet</p>
+                <div className="flex-1 bg-gray-50 rounded-md border border-dashed p-3 text-center">
+                  <div className="flex flex-col items-center">
+                    <BookOpenText className="h-5 w-5 text-gray-400 mb-1" />
+                    <p className="text-xs text-gray-500 mb-2">Create collections to organize your books</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs bg-white"
+                      onClick={() => setIsDialogOpen(true)}
+                    >
+                      <PlusCircle className="h-3.5 w-3.5 mr-1" />
+                      New Collection
+                    </Button>
+                  </div>
+                </div>
               ) : (
                 localCollections.map((collection) => (
                   <Button
                     key={collection.id}
                     variant={activeCollection === collection.id ? "default" : "outline"}
                     size="sm"
-                    className="h-7 text-xs rounded-md flex-shrink-0 whitespace-nowrap"
+                    className="h-8 text-xs rounded-md flex-shrink-0 whitespace-nowrap shadow-sm"
                     onClick={() => onSelectCollection(collection.id)}
                   >
                     <Tag className="h-3 w-3 mr-1" />
