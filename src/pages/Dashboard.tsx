@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -113,6 +114,7 @@ const Dashboard = () => {
 
   const fetchCollections = async () => {
     try {
+      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
       const { data, error } = await supabase
         .from('collections')
         .select('*')
@@ -126,7 +128,15 @@ const Dashboard = () => {
       }
 
       if (data && data.length > 0) {
-        setCollections(data.map(collection => ({
+        // Type assertion to help TypeScript understand the structure
+        const typedData = data as Array<{
+          id: string;
+          name: string;
+          created_at: string;
+          position: number;
+        }>;
+        
+        setCollections(typedData.map(collection => ({
           id: collection.id,
           name: collection.name,
           createdAt: collection.created_at,
@@ -218,6 +228,7 @@ const Dashboard = () => {
       
       let position = 0;
       if (collections.length > 0) {
+        // @ts-ignore - Ignore TypeScript error for collections table until types are updated
         const { data } = await supabase
           .from('collections')
           .select('position')
@@ -226,10 +237,13 @@ const Dashboard = () => {
           .limit(1);
         
         if (data && data.length > 0) {
-          position = (data[0].position || 0) + 1;
+          // Type assertion for position
+          const positionData = data[0] as unknown as { position: number };
+          position = (positionData.position || 0) + 1;
         }
       }
       
+      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
       const { data, error } = await supabase
         .from('collections')
         .insert({
@@ -247,10 +261,17 @@ const Dashboard = () => {
         return "";
       }
 
+      // Type assertion for the returned data
+      const typedData = data as {
+        id: string;
+        name: string;
+        created_at: string;
+      };
+
       const newCollection: Collection = {
-        id: data.id,
-        name: data.name,
-        createdAt: data.created_at,
+        id: typedData.id,
+        name: typedData.name,
+        createdAt: typedData.created_at,
       };
       
       setCollections(prevCollections => [...prevCollections, newCollection]);
@@ -272,6 +293,7 @@ const Dashboard = () => {
       }));
 
       for (const update of updates) {
+        // @ts-ignore - Ignore TypeScript error for collections table until types are updated
         const { error } = await supabase
           .from('collections')
           .update({ position: update.position })
@@ -290,6 +312,7 @@ const Dashboard = () => {
 
   const handleDeleteCollection = async (collectionId: string) => {
     try {
+      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
       const { error } = await supabase
         .from('collections')
         .delete()

@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const migrateCollectionsToSupabase = async (userId: string) => {
     try {
       // Check if already migrated
+      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
       const { data: existingCollections } = await supabase
         .from('collections')
         .select('id')
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }));
       
       // Insert into Supabase
+      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
       const { error } = await supabase
         .from('collections')
         .insert(collectionsToInsert);

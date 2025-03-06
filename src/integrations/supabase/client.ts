@@ -11,6 +11,10 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+// Add a temporary type assertion to allow 'collections' table access until types are regenerated
+// @ts-ignore
+supabase.from('collections');
+
 // This is the SQL that needs to be run on Supabase to create the collections table and RLS policies:
 
 /*
