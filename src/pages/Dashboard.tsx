@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -351,7 +350,7 @@ const Dashboard = () => {
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
         {/* Desktop: All top navigation is sticky */}
-        {/* Mobile: Only filters are sticky */}
+        {/* Mobile: Collections and filters are sticky */}
         <div className={`${!isMobile ? "sticky top-0 z-30" : ""} bg-white shadow-sm flex flex-col`}>
           {/* Header */}
           <div className="bg-white border-b">
@@ -373,7 +372,7 @@ const Dashboard = () => {
             </div>
           </div>
           
-          {/* Collections */}
+          {/* Collections and Filters - sticky on both mobile and desktop */}
           <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white`}>
             <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
               <CollectionManager 
@@ -385,7 +384,6 @@ const Dashboard = () => {
               />
             </div>
             
-            {/* Filters - always sticky on mobile */}
             <BookFilters
               activeFilter={activeFilter}
               onFilterChange={setActiveFilter}
