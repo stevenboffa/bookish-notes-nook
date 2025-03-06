@@ -371,32 +371,67 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
-          
-          {/* Collections - inside desktop sticky container, also sticky on mobile */}
-          <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white border-b`}>
-            <div className="px-4 pt-4 pb-2 bg-gray-50/80">
-              <CollectionManager 
-                collections={collections}
-                onAddCollection={handleAddCollection}
-                onSelectCollection={handleSelectCollection}
-                activeCollection={activeCollection}
-                onUpdateCollections={handleUpdateCollections}
+        </div>
+
+        {/* On mobile: Create a fixed sticky section that contains collections and filters */}
+        {isMobile && (
+          <div className="sticky top-0 z-20 bg-white shadow-sm">
+            {/* Collections */}
+            <div className="bg-white border-b">
+              <div className="px-4 pt-4 pb-2 bg-gray-50/80">
+                <CollectionManager 
+                  collections={collections}
+                  onAddCollection={handleAddCollection}
+                  onSelectCollection={handleSelectCollection}
+                  activeCollection={activeCollection}
+                  onUpdateCollections={handleUpdateCollections}
+                />
+              </div>
+            </div>
+            
+            {/* Filters */}
+            <div className="bg-white shadow-sm">
+              <BookFilters
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                currentSort={currentSort}
+                onSortChange={handleSortChange}
+                isReversed={isReversed}
+                onReverseChange={handleReverseChange}
               />
             </div>
           </div>
-          
-          {/* Filters - inside desktop sticky container, also sticky on mobile */}
-          <div className={`${isMobile ? "sticky top-[105px] z-10" : ""} bg-white shadow-sm`}>
-            <BookFilters
-              activeFilter={activeFilter}
-              onFilterChange={setActiveFilter}
-              currentSort={currentSort}
-              onSortChange={handleSortChange}
-              isReversed={isReversed}
-              onReverseChange={handleReverseChange}
-            />
-          </div>
-        </div>
+        )}
+        
+        {/* On desktop: Collections and Filters are part of the larger sticky section */}
+        {!isMobile && (
+          <>
+            {/* Collections */}
+            <div className="bg-white border-b">
+              <div className="px-4 pt-4 pb-2 bg-gray-50/80">
+                <CollectionManager 
+                  collections={collections}
+                  onAddCollection={handleAddCollection}
+                  onSelectCollection={handleSelectCollection}
+                  activeCollection={activeCollection}
+                  onUpdateCollections={handleUpdateCollections}
+                />
+              </div>
+            </div>
+            
+            {/* Filters */}
+            <div className="bg-white shadow-sm">
+              <BookFilters
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                currentSort={currentSort}
+                onSortChange={handleSortChange}
+                isReversed={isReversed}
+                onReverseChange={handleReverseChange}
+              />
+            </div>
+          </>
+        )}
         
         {/* Book List */}
         <div className="flex-1 overflow-auto pb-20">
