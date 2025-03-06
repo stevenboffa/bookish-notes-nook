@@ -33,14 +33,14 @@ export function BookFilters({
   
   return (
     <div className="px-4 py-2 bg-gray-50/80 border-b">
-      {/* Collection tags */}
+      {/* Collection tags - Single row with horizontal scroll */}
       {collections && collections.length > 0 && onSelectCollection && (
         <div className="mb-3">
-          <div className="flex items-center space-x-2 overflow-x-auto pb-1 hide-scrollbar">
+          <div className="flex items-center space-x-2 overflow-x-auto scrollbar-none pb-1 whitespace-nowrap">
             <Button
               variant={activeCollection === null ? "default" : "outline"}
               size="sm"
-              className="h-8 text-xs rounded-md whitespace-nowrap shadow-sm"
+              className="h-8 text-xs rounded-md whitespace-nowrap shadow-sm flex-shrink-0"
               onClick={() => onSelectCollection(null)}
             >
               All Books
