@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -31,7 +30,11 @@ const Dashboard = () => {
   useEffect(() => {
     if (session?.user?.id) {
       fetchBooks();
-      fetchCollections();
+      // Load collections from localStorage
+      const savedCollections = localStorage.getItem('bookish_collections');
+      if (savedCollections) {
+        setCollections(JSON.parse(savedCollections));
+      }
     }
   }, [session?.user?.id]);
 
@@ -112,45 +115,6 @@ const Dashboard = () => {
     }
   };
 
-  const fetchCollections = async () => {
-    try {
-      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
-      const { data, error } = await supabase
-        .from('collections')
-        .select('*')
-        .eq('user_id', session?.user?.id)
-        .order('position', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching collections:', error);
-        toast.error('Failed to load collections');
-        return;
-      }
-
-      if (data && data.length > 0) {
-        // Type assertion to help TypeScript understand the structure
-        const typedData = data as Array<{
-          id: string;
-          name: string;
-          created_at: string;
-          position: number;
-        }>;
-        
-        setCollections(typedData.map(collection => ({
-          id: collection.id,
-          name: collection.name,
-          createdAt: collection.created_at,
-        })));
-      } else {
-        console.log('No collections found for this user');
-        setCollections([]);
-      }
-    } catch (error) {
-      console.error('Error in fetchCollections:', error);
-      toast.error('Error loading collections');
-    }
-  };
-
   const handleDeleteBook = async (bookId: string) => {
     try {
       const { error } = await supabase
@@ -180,8 +144,10 @@ const Dashboard = () => {
       
       const status = updatedBook.status === 'In progress' ? 'In Progress' : updatedBook.status;
       
+      // Ensure collections is an array
       const collections = Array.isArray(updatedBook.collections) ? updatedBook.collections : [];
       
+      // Log the payload we're sending to Supabase
       const updatePayload = {
         title: updatedBook.title,
         author: updatedBook.author,
@@ -194,6 +160,8 @@ const Dashboard = () => {
         description: updatedBook.description,
         collections: collections
       };
+      
+      console.log('Update payload:', updatePayload);
       
       const { error, data } = await supabase
         .from('books')
@@ -209,135 +177,41 @@ const Dashboard = () => {
 
       console.log('Supabase response:', data);
       
+      // Success notification
       toast.success('Book updated successfully');
 
+      // Update the local state
       setBooks(books.map(book => 
         book.id === updatedBook.id ? updatedBook : book
       ));
       
       setSelectedBook(updatedBook);
+      
+      // Don't call fetchBooks here to prevent UI flashing
     } catch (error) {
       console.error('Error updating book:', error);
       toast.error('Error updating book: ' + (error as Error).message);
     }
   };
 
-  const handleAddCollection = async (name: string) => {
-    try {
-      const newId = crypto.randomUUID();
-      
-      let position = 0;
-      if (collections.length > 0) {
-        // @ts-ignore - Ignore TypeScript error for collections table until types are updated
-        const { data } = await supabase
-          .from('collections')
-          .select('position')
-          .eq('user_id', session?.user?.id)
-          .order('position', { ascending: false })
-          .limit(1);
-        
-        if (data && data.length > 0) {
-          // Type assertion for position
-          const positionData = data[0] as unknown as { position: number };
-          position = (positionData.position || 0) + 1;
-        }
-      }
-      
-      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
-      const { data, error } = await supabase
-        .from('collections')
-        .insert({
-          id: newId,
-          name,
-          user_id: session?.user?.id,
-          position
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error adding collection:', error);
-        toast.error('Failed to create collection');
-        return "";
-      }
-
-      // Type assertion for the returned data
-      const typedData = data as {
-        id: string;
-        name: string;
-        created_at: string;
-      };
-
-      const newCollection: Collection = {
-        id: typedData.id,
-        name: typedData.name,
-        createdAt: typedData.created_at,
-      };
-      
-      setCollections(prevCollections => [...prevCollections, newCollection]);
-      return newCollection.id;
-    } catch (error) {
-      console.error('Error in handleAddCollection:', error);
-      toast.error('Error creating collection');
-      return "";
-    }
+  const handleAddCollection = (name: string) => {
+    const newCollection: Collection = {
+      id: crypto.randomUUID(),
+      name,
+      createdAt: new Date().toISOString(),
+    };
+    
+    const updatedCollections = [...collections, newCollection];
+    setCollections(updatedCollections);
+    
+    // Save to localStorage
+    localStorage.setItem('bookish_collections', JSON.stringify(updatedCollections));
+    
+    return newCollection.id;
   };
 
-  const handleUpdateCollections = async (updatedCollections: Collection[]) => {
-    try {
-      setCollections(updatedCollections);
-      
-      const updates = updatedCollections.map((collection, index) => ({
-        id: collection.id,
-        position: index,
-      }));
-
-      for (const update of updates) {
-        // @ts-ignore - Ignore TypeScript error for collections table until types are updated
-        const { error } = await supabase
-          .from('collections')
-          .update({ position: update.position })
-          .eq('id', update.id);
-
-        if (error) {
-          console.error('Error updating collection position:', error);
-          toast.error('Failed to update collection order');
-        }
-      }
-    } catch (error) {
-      console.error('Error in handleUpdateCollections:', error);
-      toast.error('Error updating collections');
-    }
-  };
-
-  const handleDeleteCollection = async (collectionId: string) => {
-    try {
-      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
-      const { error } = await supabase
-        .from('collections')
-        .delete()
-        .eq('id', collectionId);
-
-      if (error) {
-        console.error('Error deleting collection:', error);
-        toast.error('Failed to delete collection');
-        return false;
-      }
-
-      const updatedCollections = collections.filter(c => c.id !== collectionId);
-      setCollections(updatedCollections);
-      
-      if (activeCollection === collectionId) {
-        setActiveCollection(null);
-      }
-      
-      toast.success("Collection deleted");
-      return true;
-    } catch (error) {
-      console.error('Error in handleDeleteCollection:', error);
-      toast.error('Error deleting collection');
-      return false;
-    }
+  const handleUpdateCollections = (updatedCollections: Collection[]) => {
+    setCollections(updatedCollections);
   };
 
   const handleSelectCollection = (collectionId: string | null) => {
@@ -435,7 +309,6 @@ const Dashboard = () => {
               onSelectCollection={handleSelectCollection}
               activeCollection={activeCollection}
               onUpdateCollections={handleUpdateCollections}
-              onDeleteCollection={handleDeleteCollection}
             />
           </div>
           <BookFilters

@@ -16,62 +16,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Function to migrate collections from localStorage to Supabase
-  const migrateCollectionsToSupabase = async (userId: string) => {
-    try {
-      // Check if already migrated
-      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
-      const { data: existingCollections } = await supabase
-        .from('collections')
-        .select('id')
-        .eq('user_id', userId)
-        .limit(1);
-      
-      // If user already has collections in Supabase, don't migrate
-      if (existingCollections && existingCollections.length > 0) {
-        return;
-      }
-      
-      // Get collections from localStorage
-      const savedCollections = localStorage.getItem('bookish_collections');
-      if (!savedCollections) {
-        return;
-      }
-      
-      const collections = JSON.parse(savedCollections);
-      if (!Array.isArray(collections) || collections.length === 0) {
-        return;
-      }
-      
-      // Prepare collections for Supabase
-      const collectionsToInsert = collections.map((collection, index) => ({
-        id: collection.id,
-        name: collection.name,
-        user_id: userId,
-        position: index,
-        created_at: collection.createdAt || new Date().toISOString()
-      }));
-      
-      // Insert into Supabase
-      // @ts-ignore - Ignore TypeScript error for collections table until types are updated
-      const { error } = await supabase
-        .from('collections')
-        .insert(collectionsToInsert);
-      
-      if (error) {
-        console.error('Error migrating collections to Supabase:', error);
-        return;
-      }
-      
-      console.log('Collections migrated from localStorage to Supabase');
-      
-      // Clear localStorage collections after successful migration
-      localStorage.removeItem('bookish_collections');
-    } catch (error) {
-      console.error('Error in migrateCollectionsToSupabase:', error);
-    }
-  };
-
   useEffect(() => {
     // Set up initial session
     const initializeSession = async () => {
@@ -91,9 +35,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (data.session) {
         console.log("Found existing session");
         setSession(data.session);
-        
-        // Migrate collections if needed
-        await migrateCollectionsToSupabase(data.session.user.id);
       }
       
       setLoading(false);
@@ -102,17 +43,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initializeSession();
 
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       console.log("Auth state changed:", event);
       
       if (currentSession) {
         console.log("Setting new session");
         setSession(currentSession);
-        
-        // For new sign-ins, migrate collections
-        if (event === 'SIGNED_IN') {
-          await migrateCollectionsToSupabase(currentSession.user.id);
-        }
       } else {
         setSession(null);
       }
