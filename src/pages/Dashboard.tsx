@@ -344,7 +344,8 @@ const Dashboard = () => {
   return (
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="bg-white border-b sticky top-0 z-20">
+        {/* Header - Not sticky */}
+        <div className="bg-white border-b">
           <div className="px-4 py-3 flex items-center justify-between">
             <div>
               <h1 className="text-xl font-semibold text-text">My Books</h1>
@@ -359,24 +360,32 @@ const Dashboard = () => {
               Add Book
             </Button>
           </div>
-          <div className="px-4 py-3">
-            <CollectionManager 
-              collections={collections}
-              onAddCollection={handleAddCollection}
-              onSelectCollection={handleSelectCollection}
-              activeCollection={activeCollection}
-              onUpdateCollections={handleUpdateCollections}
+        </div>
+        
+        {/* Sticky elements: Collections and Filters */}
+        <div className="sticky top-0 z-20">
+          <div className="bg-white border-b">
+            <div className="px-4 py-3">
+              <CollectionManager 
+                collections={collections}
+                onAddCollection={handleAddCollection}
+                onSelectCollection={handleSelectCollection}
+                activeCollection={activeCollection}
+                onUpdateCollections={handleUpdateCollections}
+              />
+            </div>
+            <BookFilters
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              currentSort={currentSort}
+              onSortChange={handleSortChange}
+              isReversed={isReversed}
+              onReverseChange={handleReverseChange}
             />
           </div>
-          <BookFilters
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            currentSort={currentSort}
-            onSortChange={handleSortChange}
-            isReversed={isReversed}
-            onReverseChange={handleReverseChange}
-          />
         </div>
+        
+        {/* Book List */}
         <div className="flex-1 overflow-auto pb-20">
           <div className="pt-4 px-2">
             <BookList

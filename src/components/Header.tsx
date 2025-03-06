@@ -1,11 +1,19 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Menu, BookOpen, Users, ChevronRight, MessageCircle, Info } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  // Don't show header on mobile in dashboard view
+  if (isMobile && window.location.pathname === "/dashboard") {
+    return null;
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">

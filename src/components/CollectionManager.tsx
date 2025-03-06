@@ -22,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CollectionManagerProps {
   collections: Collection[];
@@ -44,6 +45,7 @@ export function CollectionManager({
   const [localCollections, setLocalCollections] = useState<Collection[]>(collections);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const { session } = useAuth();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Update local collections when the prop changes
@@ -167,24 +169,26 @@ export function CollectionManager({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-700">Collections</h3>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 px-2"
-            onClick={() => setIsEditModeActive(!isEditModeActive)}
-          >
-            {isEditModeActive ? "Done" : "Edit"}
-          </Button>
+          {!isMobile && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-7 px-2"
+              onClick={() => setIsEditModeActive(!isEditModeActive)}
+            >
+              {isEditModeActive ? "Done" : "Edit"}
+            </Button>
+          )}
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 px-2">
+              <Button variant="ghost" size="sm" className="h-7 px-2">
                 <PlusCircle className="h-4 w-4 mr-1" />
-                <span className="text-xs">New</span>
+                <span className="text-xs">{isMobile ? "" : "New"}</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -225,7 +229,7 @@ export function CollectionManager({
         <Button
           variant={activeCollection === null ? "default" : "outline"}
           size="sm"
-          className="h-8 text-xs rounded-lg"
+          className="h-7 text-xs rounded-lg"
           onClick={() => onSelectCollection(null)}
         >
           All Books
@@ -260,18 +264,33 @@ export function CollectionManager({
             ))}
           </div>
         ) : (
-          localCollections.map((collection) => (
-            <Button
-              key={collection.id}
-              variant={activeCollection === collection.id ? "default" : "outline"}
-              size="sm"
-              className="h-8 text-xs rounded-lg flex items-center"
-              onClick={() => onSelectCollection(collection.id)}
-            >
-              <Tag className="h-3 w-3 mr-1" />
-              {collection.name}
-            </Button>
-          ))
+          <div className="flex overflow-x-auto pb-1 max-w-full hide-scrollbar">
+            {localCollections.map((collection) => (
+              <Button
+                key={collection.id}
+                variant={activeCollection === collection.id ? "default" : "outline"}
+                size="sm"
+                className="h-7 text-xs rounded-lg mr-2 whitespace-nowrap"
+                onClick={() => onSelectCollection(collection.id)}
+              >
+                <Tag className="h-3 w-3 mr-1" />
+                {collection.name}
+                {isMobile && activeCollection === collection.id && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 w-5 p-0 ml-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCollection(collection.id);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3 text-white" />
+                  </Button>
+                )}
+              </Button>
+            ))}
+          </div>
         )}
         
         {collections.length === 0 && !isEditModeActive && (
