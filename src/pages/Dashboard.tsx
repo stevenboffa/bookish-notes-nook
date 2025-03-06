@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -146,15 +147,18 @@ const Dashboard = () => {
     try {
       setIsLoading(true);
       
-      const { error: deleteActivitiesError } = await supabase.from('friend_activities')
+      // First delete records from friend_activities table
+      const { error: activitiesError } = await supabase
+        .from('friend_activities')
         .delete()
-        .match({ book_id: bookId });
+        .eq('book_id', bookId);
       
-      if (deleteActivitiesError) {
-        console.error('Error deleting related activities:', deleteActivitiesError);
-        throw deleteActivitiesError;
+      if (activitiesError) {
+        console.error('Error deleting related activities:', activitiesError);
+        throw activitiesError;
       }
       
+      // Then delete notes
       const { error: notesError } = await supabase
         .from('notes')
         .delete()
@@ -162,8 +166,10 @@ const Dashboard = () => {
       
       if (notesError) {
         console.error('Error deleting related notes:', notesError);
+        throw notesError;
       }
 
+      // Delete quotes
       const { error: quotesError } = await supabase
         .from('quotes')
         .delete()
@@ -171,8 +177,10 @@ const Dashboard = () => {
       
       if (quotesError) {
         console.error('Error deleting related quotes:', quotesError);
+        throw quotesError;
       }
 
+      // Delete reactions
       const { error: reactionsError } = await supabase
         .from('book_reactions')
         .delete()
@@ -180,8 +188,10 @@ const Dashboard = () => {
       
       if (reactionsError) {
         console.error('Error deleting related reactions:', reactionsError);
+        throw reactionsError;
       }
 
+      // Delete recommendations
       const { error: recommendationsError } = await supabase
         .from('book_recommendations')
         .delete()
@@ -189,8 +199,10 @@ const Dashboard = () => {
       
       if (recommendationsError) {
         console.error('Error deleting related recommendations:', recommendationsError);
+        throw recommendationsError;
       }
 
+      // Delete reading progress
       const { error: progressError } = await supabase
         .from('reading_progress')
         .delete()
@@ -198,8 +210,10 @@ const Dashboard = () => {
       
       if (progressError) {
         console.error('Error deleting reading progress:', progressError);
+        throw progressError;
       }
       
+      // Finally delete the book itself
       const { error } = await supabase
         .from('books')
         .delete()
@@ -210,6 +224,7 @@ const Dashboard = () => {
         throw error;
       }
 
+      // Update UI state
       setBooks(books.filter((book) => book.id !== bookId));
       
       if (selectedBook?.id === bookId) {
