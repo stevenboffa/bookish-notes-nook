@@ -23,10 +23,11 @@ import { Badge } from "@/components/ui/badge";
 
 interface CollectionManagerProps {
   collections: Collection[];
-  onAddCollection: (name: string) => void;
+  onAddCollection: (name: string) => Promise<string> | string;
   onSelectCollection: (id: string | null) => void;
   activeCollection: string | null;
   onUpdateCollections?: (collections: Collection[]) => void;
+  onDeleteCollection?: (id: string) => Promise<boolean> | boolean;
 }
 
 export function CollectionManager({
@@ -35,6 +36,7 @@ export function CollectionManager({
   onSelectCollection,
   activeCollection,
   onUpdateCollections,
+  onDeleteCollection,
 }: CollectionManagerProps) {
   const [newCollectionName, setNewCollectionName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -47,7 +49,7 @@ export function CollectionManager({
     setLocalCollections(collections);
   }, [collections]);
 
-  const handleAddCollection = () => {
+  const handleAddCollection = async () => {
     if (newCollectionName.trim() === "") {
       toast.error("Collection name cannot be empty");
       return;
@@ -58,7 +60,7 @@ export function CollectionManager({
       return;
     }
 
-    onAddCollection(newCollectionName);
+    await onAddCollection(newCollectionName);
     setNewCollectionName("");
     setIsDialogOpen(false);
     toast.success(`Collection "${newCollectionName}" created`);
@@ -70,24 +72,29 @@ export function CollectionManager({
     }
   };
 
-  const handleDeleteCollection = (id: string) => {
-    const updatedCollections = localCollections.filter(c => c.id !== id);
-    setLocalCollections(updatedCollections);
-    
-    // If the deleted collection is the active one, reset to "All Books"
-    if (activeCollection === id) {
-      onSelectCollection(null);
+  const handleDeleteCollection = async (id: string) => {
+    if (onDeleteCollection) {
+      const success = await onDeleteCollection(id);
+      if (!success) {
+        // Error handling is done inside onDeleteCollection
+        return;
+      }
+    } else {
+      const updatedCollections = localCollections.filter(c => c.id !== id);
+      setLocalCollections(updatedCollections);
+      
+      // If the deleted collection is the active one, reset to "All Books"
+      if (activeCollection === id) {
+        onSelectCollection(null);
+      }
+      
+      // Notify parent component if callback exists
+      if (onUpdateCollections) {
+        onUpdateCollections(updatedCollections);
+      }
+      
+      toast.success("Collection deleted");
     }
-    
-    // Save to localStorage
-    localStorage.setItem('bookish_collections', JSON.stringify(updatedCollections));
-    
-    // Notify parent component if callback exists
-    if (onUpdateCollections) {
-      onUpdateCollections(updatedCollections);
-    }
-    
-    toast.success("Collection deleted");
   };
 
   const handleDragStart = (index: number) => {
@@ -112,9 +119,6 @@ export function CollectionManager({
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
-    
-    // Save to localStorage
-    localStorage.setItem('bookish_collections', JSON.stringify(localCollections));
     
     // Notify parent component if callback exists
     if (onUpdateCollections) {
