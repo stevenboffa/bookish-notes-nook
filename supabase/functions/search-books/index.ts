@@ -38,12 +38,24 @@ Deno.serve(async (req) => {
     if (bookId) {
       console.log('Fetching single book details for ID:', bookId);
       const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}?key=${apiKey}`);
-      const data = await response.json();
-
+      
       if (!response.ok) {
-        console.error('Google Books API error:', data);
-        throw new Error(data.error?.message || 'Failed to fetch book details');
+        const errorText = await response.text();
+        console.error(`Google Books API error: Status ${response.status}, Response:`, errorText);
+        
+        // Return a more descriptive error
+        return new Response(JSON.stringify({
+          error: `Failed to fetch book details. Status: ${response.status}`,
+          bookId: bookId,
+          message: errorText
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: response.status,
+        });
       }
+      
+      const data = await response.json();
+      console.log('Successfully retrieved book details. Title:', data.volumeInfo?.title);
 
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -74,11 +86,25 @@ Deno.serve(async (req) => {
     console.log('Final URL parameters:', params.toString());
 
     const response = await fetch(`${url}?${params.toString()}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Google Books API search error: Status ${response.status}, Response:`, errorText);
+      throw new Error(`Failed to fetch books. Status: ${response.status}`);
+    }
+    
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error('Google Books API error:', data);
-      throw new Error(data.error?.message || 'Failed to fetch books');
+    // Log some information about the search results
+    console.log(`Found ${data.totalItems || 0} total items`);
+    if (data.items) {
+      console.log(`Returned ${data.items.length} books in this page`);
+      // Log the first few books with their IDs for debugging
+      data.items.slice(0, 3).forEach((book: GoogleBook, index: number) => {
+        console.log(`Book ${index + 1}: ID=${book.id}, Title="${book.volumeInfo?.title}"`);
+      });
+    } else {
+      console.log('No books found in the response');
     }
 
     // Additional filtering and sorting
