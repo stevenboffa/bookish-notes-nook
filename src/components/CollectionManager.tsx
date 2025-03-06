@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -96,7 +97,7 @@ export function CollectionManager({
     }
   };
 
-  const handleDragEnd = async (event: any) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
@@ -123,8 +124,9 @@ export function CollectionManager({
 
         const updates = reorderedCollections.map((collection, index) => ({
           id: collection.id,
+          name: collection.name,
           position: index + 1,
-          user_id: session.user.id,
+          user_id: session.user.id
         }));
 
         // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
@@ -289,22 +291,28 @@ export function CollectionManager({
       </div>
       
       {isEditModeActive ? (
-        <SortableContext
-          items={collections.map(collection => collection.id)}
-          strategy={verticalListSortingStrategy}
+        <DndContext 
+          sensors={[]}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <div className="space-y-2">
-            {collections.map((collection) => (
-              <SortableItem
-                key={collection.id}
-                id={collection.id}
-                name={collection.name}
-                activeCollection={activeCollection}
-                onSelectCollection={onSelectCollection}
-              />
-            ))}
-          </div>
-        </SortableContext>
+          <SortableContext
+            items={collections.map(collection => collection.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {collections.map((collection) => (
+                <SortableItem
+                  key={collection.id}
+                  id={collection.id}
+                  name={collection.name}
+                  activeCollection={activeCollection}
+                  onSelectCollection={onSelectCollection}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       ) : (
         <div className="space-y-2">
           {collections.map((collection) => {
