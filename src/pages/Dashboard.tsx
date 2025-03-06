@@ -350,45 +350,51 @@ const Dashboard = () => {
   return (
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header - Not sticky */}
-        <div className="bg-white border-b shadow-sm">
-          <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">My Books</h1>
-              <LibraryStats books={books} />
-            </div>
-            <Button
-              onClick={() => navigate('/add-book')}
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 
+        {/* Desktop: All top navigation is sticky */}
+        {/* Mobile: Only filters are sticky */}
+        <div className={`${!isMobile ? "sticky top-0 z-30" : ""} bg-white shadow-sm flex flex-col`}>
+          {/* Header */}
+          <div className="bg-white border-b">
+            <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">My Books</h1>
+                <LibraryStats books={books} />
+              </div>
+              <Button
+                onClick={() => navigate('/add-book')}
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 
                          transform hover:translate-y-[-1px] h-10 sm:h-11 px-4 sm:px-5 rounded-lg 
                          font-medium flex gap-1.5 items-center"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
-              Add Book
-            </Button>
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.5} />
+                Add Book
+              </Button>
+            </div>
           </div>
-        </div>
-        
-        {/* Sticky elements: Collections and Filters */}
-        <div className="sticky top-0 z-20 bg-white shadow-sm">
-          <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
-            <CollectionManager 
-              collections={collections}
-              onAddCollection={handleAddCollection}
-              onSelectCollection={handleSelectCollection}
-              activeCollection={activeCollection}
-              onUpdateCollections={handleUpdateCollections}
+          
+          {/* Collections */}
+          <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white`}>
+            <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
+              <CollectionManager 
+                collections={collections}
+                onAddCollection={handleAddCollection}
+                onSelectCollection={handleSelectCollection}
+                activeCollection={activeCollection}
+                onUpdateCollections={handleUpdateCollections}
+              />
+            </div>
+            
+            {/* Filters - always sticky on mobile */}
+            <BookFilters
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              currentSort={currentSort}
+              onSortChange={handleSortChange}
+              isReversed={isReversed}
+              onReverseChange={handleReverseChange}
             />
           </div>
-          <BookFilters
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            currentSort={currentSort}
-            onSortChange={handleSortChange}
-            isReversed={isReversed}
-            onReverseChange={handleReverseChange}
-          />
         </div>
         
         {/* Book List */}
