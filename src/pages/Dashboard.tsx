@@ -146,7 +146,7 @@ const Dashboard = () => {
 
   const handleDeleteBook = async (bookId: string) => {
     try {
-      // First, delete related friend_activities
+      // Step 1: Delete related friend_activities
       const { error: activitiesError } = await supabase
         .from('friend_activities')
         .delete()
@@ -154,10 +154,59 @@ const Dashboard = () => {
       
       if (activitiesError) {
         console.error('Error deleting related activities:', activitiesError);
-        throw activitiesError;
+      }
+
+      // Step 2: Delete related notes
+      const { error: notesError } = await supabase
+        .from('notes')
+        .delete()
+        .eq('book_id', bookId);
+      
+      if (notesError) {
+        console.error('Error deleting related notes:', notesError);
+      }
+
+      // Step 3: Delete related quotes
+      const { error: quotesError } = await supabase
+        .from('quotes')
+        .delete()
+        .eq('book_id', bookId);
+      
+      if (quotesError) {
+        console.error('Error deleting related quotes:', quotesError);
+      }
+
+      // Step 4: Delete related book reactions
+      const { error: reactionsError } = await supabase
+        .from('book_reactions')
+        .delete()
+        .eq('book_id', bookId);
+      
+      if (reactionsError) {
+        console.error('Error deleting related reactions:', reactionsError);
+      }
+
+      // Step 5: Delete related book recommendations
+      const { error: recommendationsError } = await supabase
+        .from('book_recommendations')
+        .delete()
+        .eq('book_id', bookId);
+      
+      if (recommendationsError) {
+        console.error('Error deleting related recommendations:', recommendationsError);
+      }
+
+      // Step 6: Delete related reading progress entries
+      const { error: progressError } = await supabase
+        .from('reading_progress')
+        .delete()
+        .eq('book_id', bookId);
+      
+      if (progressError) {
+        console.error('Error deleting reading progress:', progressError);
       }
       
-      // Now delete the book
+      // Final step: Now delete the book
       const { error } = await supabase
         .from('books')
         .delete()
