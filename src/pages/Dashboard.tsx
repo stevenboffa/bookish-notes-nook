@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -349,7 +350,8 @@ const Dashboard = () => {
   return (
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
-        <div className={`bg-white border-b shadow-sm ${!isMobile ? "sticky top-0 z-20" : ""}`}>
+        {/* Header - Sticky on desktop only */}
+        <div className={`bg-white border-b shadow-sm ${!isMobile ? "sticky top-0 z-30" : ""}`}>
           <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">My Books</h1>
@@ -368,7 +370,8 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className={`px-4 pt-4 pb-2 bg-gray-50/80 border-b ${!isMobile ? "sticky top-16 z-20" : ""}`}>
+        {/* Collections Manager - Sticky on desktop only */}
+        <div className={`px-4 pt-4 pb-2 bg-gray-50/80 border-b ${!isMobile ? "sticky top-[73px] z-29" : ""}`}>
           <CollectionManager 
             collections={collections}
             onAddCollection={handleAddCollection}
@@ -378,6 +381,7 @@ const Dashboard = () => {
           />
         </div>
         
+        {/* Filters - Always sticky */}
         <div className="sticky top-0 z-20 bg-white shadow-sm">
           <BookFilters
             activeFilter={activeFilter}
