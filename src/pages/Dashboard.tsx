@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -145,6 +146,18 @@ const Dashboard = () => {
 
   const handleDeleteBook = async (bookId: string) => {
     try {
+      // First, delete related friend_activities
+      const { error: activitiesError } = await supabase
+        .from('friend_activities')
+        .delete()
+        .eq('book_id', bookId);
+      
+      if (activitiesError) {
+        console.error('Error deleting related activities:', activitiesError);
+        throw activitiesError;
+      }
+      
+      // Now delete the book
       const { error } = await supabase
         .from('books')
         .delete()
@@ -156,8 +169,11 @@ const Dashboard = () => {
       if (selectedBook?.id === bookId) {
         setSelectedBook(null);
       }
+      
+      toast.success('Book deleted successfully');
     } catch (error) {
       console.error('Error deleting book:', error);
+      toast.error('Failed to delete book: ' + (error as Error).message);
     }
   };
 
