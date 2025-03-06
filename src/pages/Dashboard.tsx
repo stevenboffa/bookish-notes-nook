@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -117,7 +116,6 @@ const Dashboard = () => {
     try {
       if (!session?.user?.id) return;
       
-      // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
       const { data, error } = await supabase
         .from('collections')
         .select('*')
@@ -148,25 +146,15 @@ const Dashboard = () => {
     try {
       setIsLoading(true);
       
-      // First, disable triggers temporarily to avoid issues with the book_activity trigger
-      // Using a void type cast to fix the TypeScript error
-      const { error: triggerError } = await supabase.rpc('disable_book_triggers' as any);
-      if (triggerError) {
-        console.error('Error disabling triggers:', triggerError);
-        // Continue anyway - this is an optimization, not required
-      }
-      
-      // Step 1: Delete all related friend_activities
-      const { error: activitiesError } = await supabase
-        .from('friend_activities')
+      const { error: deleteActivitiesError } = await supabase.from('friend_activities')
         .delete()
-        .eq('book_id', bookId);
+        .match({ book_id: bookId });
       
-      if (activitiesError) {
-        console.error('Error deleting related activities:', activitiesError);
+      if (deleteActivitiesError) {
+        console.error('Error deleting related activities:', deleteActivitiesError);
+        throw deleteActivitiesError;
       }
-
-      // Step 2: Delete related notes
+      
       const { error: notesError } = await supabase
         .from('notes')
         .delete()
@@ -176,7 +164,6 @@ const Dashboard = () => {
         console.error('Error deleting related notes:', notesError);
       }
 
-      // Step 3: Delete related quotes
       const { error: quotesError } = await supabase
         .from('quotes')
         .delete()
@@ -186,7 +173,6 @@ const Dashboard = () => {
         console.error('Error deleting related quotes:', quotesError);
       }
 
-      // Step 4: Delete related book reactions
       const { error: reactionsError } = await supabase
         .from('book_reactions')
         .delete()
@@ -196,7 +182,6 @@ const Dashboard = () => {
         console.error('Error deleting related reactions:', reactionsError);
       }
 
-      // Step 5: Delete related book recommendations
       const { error: recommendationsError } = await supabase
         .from('book_recommendations')
         .delete()
@@ -206,7 +191,6 @@ const Dashboard = () => {
         console.error('Error deleting related recommendations:', recommendationsError);
       }
 
-      // Step 6: Delete related reading progress entries
       const { error: progressError } = await supabase
         .from('reading_progress')
         .delete()
@@ -216,26 +200,18 @@ const Dashboard = () => {
         console.error('Error deleting reading progress:', progressError);
       }
       
-      // Final step: Delete the book itself
       const { error } = await supabase
         .from('books')
         .delete()
         .eq('id', bookId);
 
       if (error) {
-        console.error('Final error deleting book:', error);
+        console.error('Error deleting book:', error);
         throw error;
       }
 
-      // Re-enable triggers
-      const { error: reEnableTriggerError } = await supabase.rpc('enable_book_triggers' as any);
-      if (reEnableTriggerError) {
-        console.error('Error re-enabling triggers:', reEnableTriggerError);
-        // This is also an optimization, not critical
-      }
-
-      // Update local state to remove the deleted book
       setBooks(books.filter((book) => book.id !== bookId));
+      
       if (selectedBook?.id === bookId) {
         setSelectedBook(null);
       }
@@ -260,10 +236,8 @@ const Dashboard = () => {
       
       const status = updatedBook.status === 'In progress' ? 'In Progress' : updatedBook.status;
       
-      // Ensure collections is an array
       const collections = Array.isArray(updatedBook.collections) ? updatedBook.collections : [];
       
-      // Log the payload we're sending to Supabase
       const updatePayload = {
         title: updatedBook.title,
         author: updatedBook.author,
@@ -276,8 +250,6 @@ const Dashboard = () => {
         description: updatedBook.description,
         collections: collections
       };
-      
-      console.log('Update payload:', updatePayload);
       
       const { error, data } = await supabase
         .from('books')
@@ -293,10 +265,8 @@ const Dashboard = () => {
 
       console.log('Supabase response:', data);
       
-      // Success notification
       toast.success('Book updated successfully');
 
-      // Update the local state
       setBooks(books.map(book => 
         book.id === updatedBook.id ? updatedBook : book
       ));
@@ -314,7 +284,6 @@ const Dashboard = () => {
     }
     
     try {
-      // Find the highest position
       const maxPosition = collections.reduce(
         (max, collection) => Math.max(max, collection.position || 0), 
         0
@@ -326,7 +295,6 @@ const Dashboard = () => {
         position: maxPosition + 1
       };
       
-      // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
       const { data, error } = await supabase
         .from('collections')
         .insert(newCollection)
@@ -437,9 +405,7 @@ const Dashboard = () => {
   return (
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Desktop: Entire top navigation is sticky */}
         <div className={`${!isMobile ? "sticky top-0 z-30" : ""} bg-white`}>
-          {/* Header */}
           <div className="bg-white border-b">
             <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
@@ -459,10 +425,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* On desktop: Collections and Filters are part of the larger sticky section */}
           {!isMobile && (
             <>
-              {/* Collections */}
               <div className="bg-white border-b">
                 <div className="px-4 pt-4 pb-2 bg-gray-50/80">
                   <CollectionManager 
@@ -475,7 +439,6 @@ const Dashboard = () => {
                 </div>
               </div>
               
-              {/* Filters */}
               <div className="bg-white shadow-sm">
                 <BookFilters
                   activeFilter={activeFilter}
@@ -490,10 +453,8 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* On mobile: Create a fixed sticky section that contains collections and filters */}
         {isMobile && (
           <div className="sticky top-0 z-20 bg-white">
-            {/* Collections */}
             <div className="bg-white border-b">
               <div className="px-4 pt-4 pb-2 bg-gray-50/80">
                 <CollectionManager 
@@ -506,7 +467,6 @@ const Dashboard = () => {
               </div>
             </div>
             
-            {/* Book status filters and sorting */}
             <div className="bg-white shadow-sm">
               <BookFilters
                 activeFilter={activeFilter}
@@ -520,7 +480,6 @@ const Dashboard = () => {
           </div>
         )}
         
-        {/* Book List */}
         <div className="flex-1 overflow-auto pb-20">
           <div className="pt-4 px-2">
             <BookList
