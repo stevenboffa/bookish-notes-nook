@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -350,8 +349,7 @@ const Dashboard = () => {
   return (
     <div className="flex-1 flex">
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header - Not sticky */}
-        <div className="bg-white border-b shadow-sm">
+        <div className={`bg-white border-b shadow-sm ${!isMobile ? "sticky top-0 z-20" : ""}`}>
           <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-text tracking-tight">My Books</h1>
@@ -370,17 +368,17 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Sticky elements: Collections and Filters */}
+        <div className={`px-4 pt-4 pb-2 bg-gray-50/80 border-b ${!isMobile ? "sticky top-16 z-20" : ""}`}>
+          <CollectionManager 
+            collections={collections}
+            onAddCollection={handleAddCollection}
+            onSelectCollection={handleSelectCollection}
+            activeCollection={activeCollection}
+            onUpdateCollections={handleUpdateCollections}
+          />
+        </div>
+        
         <div className="sticky top-0 z-20 bg-white shadow-sm">
-          <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
-            <CollectionManager 
-              collections={collections}
-              onAddCollection={handleAddCollection}
-              onSelectCollection={handleSelectCollection}
-              activeCollection={activeCollection}
-              onUpdateCollections={handleUpdateCollections}
-            />
-          </div>
           <BookFilters
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
@@ -391,7 +389,6 @@ const Dashboard = () => {
           />
         </div>
         
-        {/* Book List */}
         <div className="flex-1 overflow-auto pb-20">
           <div className="pt-4 px-2">
             <BookList
