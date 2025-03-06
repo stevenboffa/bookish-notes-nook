@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { PlusCircle, Tag, X, GripVertical, Trash2 } from "lucide-react";
+import { PlusCircle, Tag, X, GripVertical, Trash2, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -169,25 +169,24 @@ export function CollectionManager({
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between bg-gray-50/70 rounded-md px-2 py-1.5">
         <h3 className="text-sm font-medium text-gray-700">Collections</h3>
         <div className="flex items-center gap-2">
-          {!isMobile && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-7 px-2"
-              onClick={() => setIsEditModeActive(!isEditModeActive)}
-            >
-              {isEditModeActive ? "Done" : "Edit"}
-            </Button>
-          )}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`h-7 px-2 ${isEditModeActive ? 'bg-gray-100 text-gray-700' : ''}`}
+            onClick={() => setIsEditModeActive(!isEditModeActive)}
+          >
+            <PenLine className="h-3.5 w-3.5 mr-1" />
+            <span className="text-xs">{isMobile ? "" : "Edit"}</span>
+          </Button>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 px-2">
-                <PlusCircle className="h-4 w-4 mr-1" />
+              <Button variant="secondary" size="sm" className="h-7 px-2 bg-primary/10 hover:bg-primary/20 text-primary">
+                <PlusCircle className="h-3.5 w-3.5 mr-1" />
                 <span className="text-xs">{isMobile ? "" : "New"}</span>
               </Button>
             </DialogTrigger>
@@ -225,78 +224,84 @@ export function CollectionManager({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant={activeCollection === null ? "default" : "outline"}
-          size="sm"
-          className="h-7 text-xs rounded-lg"
-          onClick={() => onSelectCollection(null)}
-        >
-          All Books
-        </Button>
-        
+      <div className={`py-1.5 ${isEditModeActive ? "px-2" : ""}`}>
         {isEditModeActive ? (
-          <div className="flex flex-wrap gap-2 items-start mt-2 w-full border p-2 rounded-lg bg-gray-50">
-            <p className="text-xs text-gray-500 w-full mb-2">Drag to reorder or click the trash icon to delete collections</p>
-            {localCollections.map((collection, index) => (
-              <div 
-                key={collection.id}
-                draggable
-                onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDragEnd={handleDragEnd}
-                className="flex items-center bg-white border rounded-lg p-1 cursor-move"
-              >
-                <GripVertical className="h-3 w-3 mr-1 text-gray-400" />
-                <span className="text-xs">{collection.name}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 ml-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteCollection(collection.id);
-                  }}
-                >
-                  <Trash2 className="h-3 w-3 text-red-500" />
-                </Button>
-              </div>
-            ))}
+          <div className="p-2 border rounded-lg bg-gray-50/70 space-y-2">
+            <p className="text-xs text-gray-500">Drag to reorder or click the trash icon to delete</p>
+            <div className="flex flex-wrap gap-2">
+              {localCollections.length === 0 ? (
+                <p className="text-xs text-gray-400 italic">No collections yet</p>
+              ) : (
+                localCollections.map((collection, index) => (
+                  <div 
+                    key={collection.id}
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragEnd={handleDragEnd}
+                    className="flex items-center bg-white border rounded-md p-1.5 cursor-move group"
+                  >
+                    <GripVertical className="h-3 w-3 mr-1 text-gray-400" />
+                    <span className="text-xs">{collection.name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 ml-1 opacity-60 hover:opacity-100 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCollection(collection.id);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3 text-red-500" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         ) : (
-          <div className="flex overflow-x-auto pb-1 max-w-full hide-scrollbar">
-            {localCollections.map((collection) => (
-              <Button
-                key={collection.id}
-                variant={activeCollection === collection.id ? "default" : "outline"}
-                size="sm"
-                className="h-7 text-xs rounded-lg mr-2 whitespace-nowrap"
-                onClick={() => onSelectCollection(collection.id)}
-              >
-                <Tag className="h-3 w-3 mr-1" />
-                {collection.name}
-                {isMobile && activeCollection === collection.id && (
+          <div className="flex items-center space-x-2">
+            <Button
+              variant={activeCollection === null ? "default" : "outline"}
+              size="sm"
+              className="h-7 text-xs rounded-md whitespace-nowrap"
+              onClick={() => onSelectCollection(null)}
+            >
+              All Books
+            </Button>
+            
+            <div className="flex overflow-x-auto pb-1 hide-scrollbar gap-2">
+              {localCollections.length === 0 ? (
+                <p className="text-xs text-gray-400 italic flex items-center">No collections yet</p>
+              ) : (
+                localCollections.map((collection) => (
                   <Button
-                    variant="ghost"
+                    key={collection.id}
+                    variant={activeCollection === collection.id ? "default" : "outline"}
                     size="sm"
-                    className="h-5 w-5 p-0 ml-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCollection(collection.id);
-                    }}
+                    className="h-7 text-xs rounded-md flex-shrink-0 whitespace-nowrap"
+                    onClick={() => onSelectCollection(collection.id)}
                   >
-                    <Trash2 className="h-3 w-3 text-white" />
+                    <Tag className="h-3 w-3 mr-1" />
+                    {collection.name}
+                    {isMobile && activeCollection === collection.id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 w-5 p-0 ml-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCollection(collection.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3 text-white" />
+                      </Button>
+                    )}
                   </Button>
-                )}
-              </Button>
-            ))}
+                ))
+              )}
+            </div>
           </div>
-        )}
-        
-        {collections.length === 0 && !isEditModeActive && (
-          <p className="text-xs text-gray-500 italic mt-1">
-            No collections yet. Create your first collection to categorize your books.
-          </p>
         )}
       </div>
     </div>

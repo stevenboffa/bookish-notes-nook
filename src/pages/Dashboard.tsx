@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -363,26 +362,24 @@ const Dashboard = () => {
         </div>
         
         {/* Sticky elements: Collections and Filters */}
-        <div className="sticky top-0 z-20">
-          <div className="bg-white border-b">
-            <div className="px-4 py-3">
-              <CollectionManager 
-                collections={collections}
-                onAddCollection={handleAddCollection}
-                onSelectCollection={handleSelectCollection}
-                activeCollection={activeCollection}
-                onUpdateCollections={handleUpdateCollections}
-              />
-            </div>
-            <BookFilters
-              activeFilter={activeFilter}
-              onFilterChange={setActiveFilter}
-              currentSort={currentSort}
-              onSortChange={handleSortChange}
-              isReversed={isReversed}
-              onReverseChange={handleReverseChange}
+        <div className="sticky top-0 z-20 bg-white shadow-sm">
+          <div className="px-4 pt-2 pb-0">
+            <CollectionManager 
+              collections={collections}
+              onAddCollection={handleAddCollection}
+              onSelectCollection={handleSelectCollection}
+              activeCollection={activeCollection}
+              onUpdateCollections={handleUpdateCollections}
             />
           </div>
+          <BookFilters
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            currentSort={currentSort}
+            onSortChange={handleSortChange}
+            isReversed={isReversed}
+            onReverseChange={handleReverseChange}
+          />
         </div>
         
         {/* Book List */}

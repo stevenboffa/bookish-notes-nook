@@ -23,10 +23,10 @@ export function BookFilters({
   const isMobile = useIsMobile();
   
   return (
-    <div className={`px-4 py-2 bg-gray-50 border-b ${isMobile ? 'py-2' : 'py-3'}`}>
+    <div className="px-4 py-2 bg-gray-50/80 border-b">
       <div className="flex flex-wrap justify-between items-center gap-2">
         <Tabs value={activeFilter} onValueChange={onFilterChange} className="w-full sm:w-auto">
-          <TabsList className="w-full grid grid-cols-4 h-9 bg-white/80 backdrop-blur-sm rounded-xl shadow-[0_2px_10px] shadow-black/5 border border-gray-100/50">
+          <TabsList className="w-full grid grid-cols-4 h-9 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100/50">
             <TabsTrigger 
               value="all" 
               className="text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:shadow-none font-medium rounded-lg transition-all duration-200 hover:bg-gray-50/70"
