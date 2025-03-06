@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -371,28 +372,28 @@ const Dashboard = () => {
               </Button>
             </div>
           </div>
-          
-          {/* Collections and Filters - sticky on both mobile and desktop */}
-          <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white`}>
-            <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
-              <CollectionManager 
-                collections={collections}
-                onAddCollection={handleAddCollection}
-                onSelectCollection={handleSelectCollection}
-                activeCollection={activeCollection}
-                onUpdateCollections={handleUpdateCollections}
-              />
-            </div>
-            
-            <BookFilters
-              activeFilter={activeFilter}
-              onFilterChange={setActiveFilter}
-              currentSort={currentSort}
-              onSortChange={handleSortChange}
-              isReversed={isReversed}
-              onReverseChange={handleReverseChange}
+        </div>
+        
+        {/* Collections and Filters - sticky on both mobile and desktop */}
+        <div className={`${isMobile ? "sticky top-0 z-20" : ""} bg-white shadow-sm`}>
+          <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
+            <CollectionManager 
+              collections={collections}
+              onAddCollection={handleAddCollection}
+              onSelectCollection={handleSelectCollection}
+              activeCollection={activeCollection}
+              onUpdateCollections={handleUpdateCollections}
             />
           </div>
+          
+          <BookFilters
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            currentSort={currentSort}
+            onSortChange={handleSortChange}
+            isReversed={isReversed}
+            onReverseChange={handleReverseChange}
+          />
         </div>
         
         {/* Book List */}
