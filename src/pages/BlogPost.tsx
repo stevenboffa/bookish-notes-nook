@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -133,7 +132,7 @@ export default function BlogPost() {
           </div>
         </main>
 
-        <BlogFooter title={post.title} />
+        <BlogFooter />
       </article>
     </>
   );
