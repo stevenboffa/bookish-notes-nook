@@ -1,35 +1,67 @@
-
-import { useState, useEffect } from "react";
-import { PlusCircle, Tag, X, GripVertical, Trash2, PenLine, BookOpenText } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
-import { Collection } from "@/types/books";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Collection } from "@/types/books";
+import { supabase } from "@/integrations/supabase/client";
+import { DragHandle } from "./DragHandle";
 
 interface CollectionManagerProps {
   collections: Collection[];
   onAddCollection: (name: string) => Promise<string>;
-  onSelectCollection: (id: string | null) => void;
+  onSelectCollection: (collectionId: string | null) => void;
   activeCollection: string | null;
-  onUpdateCollections?: (collections: Collection[]) => void;
+  onUpdateCollections: (collections: Collection[]) => void;
+}
+
+function SortableItem(props: { id: string; name: string; activeCollection: string | null; onSelectCollection: (collectionId: string | null) => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: props.id });
+
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition,
+  };
+
+  const isActive = props.activeCollection === props.id;
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} className="flex items-center justify-between rounded-md px-3 py-2 border bg-white">
+      <Button
+        variant={isActive ? "default" : "outline"}
+        size="sm"
+        onClick={() => props.onSelectCollection(props.id)}
+        className={`flex-1 h-8 text-sm font-medium rounded ${
+          isActive
+            ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+            : "bg-white text-text-muted hover:text-text hover:bg-accent/10"
+        }`}
+      >
+        {props.name}
+      </Button>
+      <DragHandle listeners={listeners} />
+    </div>
+  );
 }
 
 export function CollectionManager({
@@ -39,135 +71,89 @@ export function CollectionManager({
   activeCollection,
   onUpdateCollections,
 }: CollectionManagerProps) {
-  const [newCollectionName, setNewCollectionName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newCollectionName, setNewCollectionName] = useState("");
   const [isEditModeActive, setIsEditModeActive] = useState(false);
-  const [localCollections, setLocalCollections] = useState<Collection[]>(collections);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const { session } = useAuth();
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    // Update local collections when the prop changes
-    setLocalCollections(collections);
-  }, [collections]);
+  
+  const toggleEditMode = () => {
+    setIsEditModeActive(!isEditModeActive);
+  };
 
   const handleAddCollection = async () => {
-    if (newCollectionName.trim() === "") {
+    if (!newCollectionName.trim()) {
       toast.error("Collection name cannot be empty");
       return;
     }
-
-    if (collections.some(c => c.name.toLowerCase() === newCollectionName.toLowerCase())) {
-      toast.error("A collection with this name already exists");
-      return;
-    }
-
+    
     try {
-      const collectionId = await onAddCollection(newCollectionName);
+      await onAddCollection(newCollectionName);
       setNewCollectionName("");
       setIsDialogOpen(false);
-      toast.success(`Collection "${newCollectionName}" created`);
     } catch (error) {
       console.error("Error adding collection:", error);
-      toast.error("Failed to create collection");
+      toast.error("Failed to add collection");
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newCollectionName.trim() !== "") {
-      handleAddCollection();
-    }
-  };
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const handleDeleteCollection = async (id: string) => {
-    if (!session?.user?.id) {
-      toast.error("You must be logged in to delete collections");
-      return;
-    }
+    if (active.id !== over?.id) {
+      const oldIndex = collections.findIndex(collection => collection.id === active.id);
+      const newIndex = collections.findIndex(collection => collection.id === over?.id);
 
-    try {
-      // Delete from Supabase
-      const { error } = await supabase
-        .from('collections')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      const updatedCollections = localCollections.filter(c => c.id !== id);
-      setLocalCollections(updatedCollections);
-      
-      // If the deleted collection is the active one, reset to "All Books"
-      if (activeCollection === id) {
-        onSelectCollection(null);
+      if (oldIndex === -1 || newIndex === -1) {
+        console.error("Error: Could not find collection in array");
+        return;
       }
-      
-      // Notify parent component if callback exists
-      if (onUpdateCollections) {
-        onUpdateCollections(updatedCollections);
-      }
-      
-      toast.success("Collection deleted");
-    } catch (error) {
-      console.error("Error deleting collection:", error);
-      toast.error("Failed to delete collection");
-    }
-  };
 
-  const handleDragStart = (index: number) => {
-    setDraggedIndex(index);
-  };
+      const reorderedCollections = [...collections];
+      const [movedCollection] = reorderedCollections.splice(oldIndex, 1);
+      reorderedCollections.splice(newIndex, 0, movedCollection);
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
+      // Optimistically update the UI
+      onUpdateCollections(reorderedCollections);
 
-    const newCollections = [...localCollections];
-    const draggedCollection = newCollections[draggedIndex];
-    
-    // Remove the dragged item
-    newCollections.splice(draggedIndex, 1);
-    // Insert it at the new position
-    newCollections.splice(index, 0, draggedCollection);
-    
-    setLocalCollections(newCollections);
-    setDraggedIndex(index);
-  };
+      // Update positions in the database
+      try {
+        if (!session?.user?.id) {
+          throw new Error("You must be logged in to update collections");
+        }
 
-  const handleDragEnd = async () => {
-    if (!session?.user?.id) {
-      toast.error("You must be logged in to reorder collections");
-      setDraggedIndex(null);
-      return;
-    }
-    
-    setDraggedIndex(null);
-    
-    try {
-      // Update positions in Supabase
-      for (let i = 0; i < localCollections.length; i++) {
-        const collection = localCollections[i];
-        
+        const updates = reorderedCollections.map((collection, index) => ({
+          id: collection.id,
+          name: collection.name,
+          position: index + 1,
+          user_id: session.user.id
+        }));
+
         // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
         const { error } = await supabase
           .from('collections')
-          .update({ position: i })
-          .eq('id', collection.id);
+          .upsert(updates);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
+
+        // If the database update was successful, update local state
+        const updatedCollections = reorderedCollections.map((collection, index) => ({
+          ...collection,
+          position: index + 1,
+        }));
+        onUpdateCollections(updatedCollections);
+        toast.success("Collections reordered successfully!");
+      } catch (error) {
+        console.error("Error updating collection positions:", error);
+        toast.error("Failed to reorder collections");
+        // Revert the UI to the previous state
+        onUpdateCollections(collections);
       }
-      
-      // Notify parent component if callback exists
-      if (onUpdateCollections) {
-        onUpdateCollections(localCollections);
-      }
-    } catch (error) {
-      console.error("Error updating collection positions:", error);
-      toast.error("Failed to save collection order");
     }
   };
-
+  
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between bg-white rounded-md px-3 py-2 border">
@@ -179,53 +165,60 @@ export function CollectionManager({
               <Button 
                 variant={isEditModeActive ? "default" : "outline"}
                 size="sm" 
-                className={`h-7 px-2 ${isEditModeActive ? 'bg-primary/10 text-primary border-transparent hover:bg-primary/20' : 'hover:bg-gray-100'}`}
-                onClick={() => setIsEditModeActive(!isEditModeActive)}
+                onClick={toggleEditMode}
+                className={`px-3 py-1 h-7 text-xs font-medium rounded ${
+                  isEditModeActive 
+                    ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" 
+                    : "bg-white text-text-muted hover:text-text hover:bg-accent/10"
+                }`}
               >
-                <PenLine className="h-3.5 w-3.5 mr-1" />
-                <span className="text-xs">Edit</span>
+                {isEditModeActive ? "Done" : "Edit"}
               </Button>
               
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    className="h-7 px-2 bg-primary text-white hover:bg-primary/90"
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="px-3 py-1 h-7 text-xs font-medium rounded bg-white text-text-muted hover:text-text hover:bg-accent/10 flex items-center gap-1"
                   >
-                    <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                    <span className="text-xs">New</span>
+                    <Plus className="h-3 w-3" />
+                    New
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>Create new collection</DialogTitle>
+                    <DialogTitle>Create New Collection</DialogTitle>
                     <DialogDescription>
-                      Collections help you organize your books into custom categories.
+                      Create a new collection to organize your books.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <Input
-                      placeholder="Collection name (e.g. 'Summer 2024', 'Sci-Fi Favorites')"
-                      value={newCollectionName}
-                      onChange={(e) => setNewCollectionName(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="w-full"
-                      autoFocus
-                    />
-                    <div className="flex justify-end gap-2">
-                      <DialogClose asChild>
-                        <Button variant="outline" size="sm">Cancel</Button>
-                      </DialogClose>
-                      <Button 
-                        size="sm" 
-                        onClick={handleAddCollection}
-                        disabled={newCollectionName.trim() === ""}
-                      >
-                        Create Collection
-                      </Button>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="name" className="col-span-4">
+                        Collection Name
+                      </Label>
+                      <Input
+                        id="name"
+                        value={newCollectionName}
+                        onChange={(e) => setNewCollectionName(e.target.value)}
+                        className="col-span-4"
+                        placeholder="e.g., Science Fiction, Summer Reads"
+                      />
                     </div>
                   </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      onClick={handleAddCollection}
+                      disabled={!newCollectionName.trim()}
+                    >
+                      Create Collection
+                    </Button>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
@@ -237,167 +230,111 @@ export function CollectionManager({
             <Button 
               variant={isEditModeActive ? "default" : "outline"}
               size="sm" 
-              className={`h-7 px-2 ${isEditModeActive ? 'bg-primary/10 text-primary border-transparent hover:bg-primary/20' : 'hover:bg-gray-100'}`}
-              onClick={() => setIsEditModeActive(!isEditModeActive)}
+              onClick={toggleEditMode}
+              className={`px-3 py-1 h-7 text-xs font-medium rounded ${
+                isEditModeActive 
+                  ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" 
+                  : "bg-white text-text-muted hover:text-text hover:bg-accent/10"
+              }`}
             >
-              <PenLine className="h-3.5 w-3.5 mr-1" />
-              <span className="text-xs">Edit</span>
+              {isEditModeActive ? "Done" : "Edit"}
             </Button>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  className="h-7 px-2 bg-primary text-white hover:bg-primary/90"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="px-3 py-1 h-7 text-xs font-medium rounded bg-white text-text-muted hover:text-text hover:bg-accent/10 flex items-center gap-1"
                 >
-                  <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">New</span>
+                  <Plus className="h-3 w-3" />
+                  New
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>Create new collection</DialogTitle>
+                  <DialogTitle>Create New Collection</DialogTitle>
                   <DialogDescription>
-                    Collections help you organize your books into custom categories.
+                    Create a new collection to organize your books.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <Input
-                    placeholder="Collection name (e.g. 'Summer 2024', 'Sci-Fi Favorites')"
-                    value={newCollectionName}
-                    onChange={(e) => setNewCollectionName(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="w-full"
-                    autoFocus
-                  />
-                  <div className="flex justify-end gap-2">
-                    <DialogClose asChild>
-                      <Button variant="outline" size="sm">Cancel</Button>
-                    </DialogClose>
-                    <Button 
-                      size="sm" 
-                      onClick={handleAddCollection}
-                      disabled={newCollectionName.trim() === ""}
-                    >
-                      Create Collection
-                    </Button>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="col-span-4">
+                      Collection Name
+                    </Label>
+                    <Input
+                      id="name"
+                      value={newCollectionName}
+                      onChange={(e) => setNewCollectionName(e.target.value)}
+                      className="col-span-4"
+                      placeholder="e.g., Science Fiction, Summer Reads"
+                    />
                   </div>
                 </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    onClick={handleAddCollection}
+                    disabled={!newCollectionName.trim()}
+                  >
+                    Create Collection
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
         )}
       </div>
-
-      <div className={`${isEditModeActive ? "px-2" : ""}`}>
-        {isEditModeActive ? (
-          <div className="p-3 border rounded-lg bg-gray-50/70 space-y-2">
-            <p className="text-xs text-gray-500">Drag to reorder or click the trash icon to delete</p>
-            <div className="flex flex-wrap gap-2">
-              {localCollections.length === 0 ? (
-                <div className="p-4 text-center w-full bg-white rounded-md border border-dashed">
-                  <p className="text-xs text-gray-500 mb-2">You haven't created any collections yet</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => {
-                      setIsEditModeActive(false);
-                      setIsDialogOpen(true);
-                    }}
-                  >
-                    <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                    Create your first collection
-                  </Button>
-                </div>
-              ) : (
-                localCollections.map((collection, index) => (
-                  <div 
-                    key={collection.id}
-                    draggable
-                    onDragStart={() => handleDragStart(index)}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDragEnd={handleDragEnd}
-                    className="flex items-center bg-white border rounded-md p-1.5 cursor-move group shadow-sm hover:shadow"
-                  >
-                    <GripVertical className="h-3 w-3 mr-1 text-gray-400" />
-                    <span className="text-xs">{collection.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 ml-1 opacity-60 hover:opacity-100 hover:bg-red-50"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCollection(collection.id);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3 text-red-500" />
-                    </Button>
-                  </div>
-                ))
-              )}
+      
+      {isEditModeActive ? (
+        <DndContext 
+          sensors={[]}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={collections.map(collection => collection.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {collections.map((collection) => (
+                <SortableItem
+                  key={collection.id}
+                  id={collection.id}
+                  name={collection.name}
+                  activeCollection={activeCollection}
+                  onSelectCollection={onSelectCollection}
+                />
+              ))}
             </div>
-          </div>
-        ) : (
-          <div className="mt-2">
-            <div className="flex items-center space-x-2 overflow-x-auto pb-1 hide-scrollbar">
+          </SortableContext>
+        </DndContext>
+      ) : (
+        <div className="space-y-2">
+          {collections.map((collection) => {
+            const isActive = activeCollection === collection.id;
+            return (
               <Button
-                variant={activeCollection === null ? "default" : "outline"}
+                key={collection.id}
+                variant={isActive ? "default" : "outline"}
                 size="sm"
-                className="h-8 text-xs rounded-md whitespace-nowrap shadow-sm"
-                onClick={() => onSelectCollection(null)}
+                onClick={() => onSelectCollection(collection.id)}
+                className={`w-full h-8 text-sm font-medium rounded ${
+                  isActive
+                    ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                    : "bg-white text-text-muted hover:text-text hover:bg-accent/10"
+                }`}
               >
-                All Books
+                {collection.name}
               </Button>
-              
-              {localCollections.length === 0 ? (
-                <div className="flex-1 bg-gray-50 rounded-md border border-dashed p-3 text-center">
-                  <div className="flex flex-col items-center">
-                    <BookOpenText className="h-5 w-5 text-gray-400 mb-1" />
-                    <p className="text-xs text-gray-500 mb-2">Create collections to organize your books</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs bg-white"
-                      onClick={() => setIsDialogOpen(true)}
-                    >
-                      <PlusCircle className="h-3.5 w-3.5 mr-1" />
-                      New Collection
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                localCollections.map((collection) => (
-                  <Button
-                    key={collection.id}
-                    variant={activeCollection === collection.id ? "default" : "outline"}
-                    size="sm"
-                    className="h-8 text-xs rounded-md flex-shrink-0 whitespace-nowrap shadow-sm"
-                    onClick={() => onSelectCollection(collection.id)}
-                  >
-                    <Tag className="h-3 w-3 mr-1" />
-                    {collection.name}
-                    {isMobile && activeCollection === collection.id && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 p-0 ml-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteCollection(collection.id);
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3 text-white" />
-                      </Button>
-                    )}
-                  </Button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

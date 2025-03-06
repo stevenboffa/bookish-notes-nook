@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BookList, type Book } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
@@ -146,6 +145,19 @@ const Dashboard = () => {
 
   const handleDeleteBook = async (bookId: string) => {
     try {
+      // First try to delete related records from friend_activities
+      const { error: activitiesError } = await supabase
+        .from('friend_activities')
+        .delete()
+        .eq('book_id', bookId);
+        
+      if (activitiesError) {
+        console.error('Error deleting related activities:', activitiesError);
+        toast.error('Error deleting related activities');
+        return;
+      }
+
+      // Then delete the book
       const { error } = await supabase
         .from('books')
         .delete()
@@ -153,12 +165,14 @@ const Dashboard = () => {
 
       if (error) throw error;
 
+      toast.success('Book deleted successfully');
       setBooks(books.filter((book) => book.id !== bookId));
       if (selectedBook?.id === bookId) {
         setSelectedBook(null);
       }
     } catch (error) {
       console.error('Error deleting book:', error);
+      toast.error('Error deleting book: ' + (error as Error).message);
     }
   };
 
@@ -370,8 +384,8 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Collection management section - Non-sticky on mobile */}
-        <div className="bg-white">
+        {/* Collections section - NOT sticky on mobile */}
+        <div className={`${isMobile ? 'bg-gray-50/80 border-b' : 'sticky top-0 z-20 bg-white shadow-sm'}`}>
           <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
             <CollectionManager 
               collections={collections}
@@ -381,21 +395,18 @@ const Dashboard = () => {
               onUpdateCollections={handleUpdateCollections}
             />
           </div>
-        </div>
-        
-        {/* Sticky elements: Collection tags (inside BookFilters) and Filters */}
-        <div className="sticky top-0 z-20 bg-white shadow-sm">
-          <BookFilters
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            currentSort={currentSort}
-            onSortChange={handleSortChange}
-            isReversed={isReversed}
-            onReverseChange={handleReverseChange}
-            collections={collections}
-            activeCollection={activeCollection}
-            onSelectCollection={handleSelectCollection}
-          />
+          
+          {/* Book Filters - Always sticky */}
+          <div className={`sticky top-0 z-20 bg-white shadow-sm`}>
+            <BookFilters
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              currentSort={currentSort}
+              onSortChange={handleSortChange}
+              isReversed={isReversed}
+              onReverseChange={handleReverseChange}
+            />
+          </div>
         </div>
         
         {/* Book List */}
@@ -413,7 +424,6 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Mobile detail view */}
       {isMobile ? (
         <Sheet open={!!selectedBook} onOpenChange={(open) => !open && setSelectedBook(null)}>
           <SheetContent 
