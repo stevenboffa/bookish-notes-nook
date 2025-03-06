@@ -370,8 +370,8 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Sticky elements: Collections and Filters */}
-        <div className="sticky top-0 z-20 bg-white shadow-sm">
+        {/* Collection management section - Non-sticky on mobile */}
+        <div className="bg-white">
           <div className="px-4 pt-4 pb-2 bg-gray-50/80 border-b">
             <CollectionManager 
               collections={collections}
@@ -381,6 +381,10 @@ const Dashboard = () => {
               onUpdateCollections={handleUpdateCollections}
             />
           </div>
+        </div>
+        
+        {/* Sticky elements: Collection tags (inside BookFilters) and Filters */}
+        <div className="sticky top-0 z-20 bg-white shadow-sm">
           <BookFilters
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
@@ -388,6 +392,9 @@ const Dashboard = () => {
             onSortChange={handleSortChange}
             isReversed={isReversed}
             onReverseChange={handleReverseChange}
+            collections={collections}
+            activeCollection={activeCollection}
+            onSelectCollection={handleSelectCollection}
           />
         </div>
         
@@ -406,6 +413,7 @@ const Dashboard = () => {
         </div>
       </div>
       
+      {/* Mobile detail view */}
       {isMobile ? (
         <Sheet open={!!selectedBook} onOpenChange={(open) => !open && setSelectedBook(null)}>
           <SheetContent 

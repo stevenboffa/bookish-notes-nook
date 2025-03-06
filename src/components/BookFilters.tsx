@@ -2,6 +2,9 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SortingOptions, type SortOption } from "./SortingOptions";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Collection } from "@/types/books";
+import { Button } from "@/components/ui/button";
+import { Tag } from "lucide-react";
 
 interface BookFiltersProps {
   activeFilter: string;
@@ -10,6 +13,9 @@ interface BookFiltersProps {
   onSortChange?: (value: SortOption) => void;
   isReversed?: boolean;
   onReverseChange?: (reversed: boolean) => void;
+  collections?: Collection[];
+  activeCollection?: string | null;
+  onSelectCollection?: (id: string | null) => void;
 }
 
 export function BookFilters({ 
@@ -18,12 +24,44 @@ export function BookFilters({
   currentSort = "recently_added",
   onSortChange,
   isReversed = false,
-  onReverseChange
+  onReverseChange,
+  collections = [],
+  activeCollection,
+  onSelectCollection
 }: BookFiltersProps) {
   const isMobile = useIsMobile();
   
   return (
     <div className="px-4 py-2 bg-gray-50/80 border-b">
+      {/* Collection tags */}
+      {collections && collections.length > 0 && onSelectCollection && (
+        <div className="mb-3">
+          <div className="flex items-center space-x-2 overflow-x-auto pb-1 hide-scrollbar">
+            <Button
+              variant={activeCollection === null ? "default" : "outline"}
+              size="sm"
+              className="h-8 text-xs rounded-md whitespace-nowrap shadow-sm"
+              onClick={() => onSelectCollection(null)}
+            >
+              All Books
+            </Button>
+            
+            {collections.map((collection) => (
+              <Button
+                key={collection.id}
+                variant={activeCollection === collection.id ? "default" : "outline"}
+                size="sm"
+                className="h-8 text-xs rounded-md flex-shrink-0 whitespace-nowrap shadow-sm"
+                onClick={() => onSelectCollection(collection.id)}
+              >
+                <Tag className="h-3 w-3 mr-1" />
+                {collection.name}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap justify-between items-center gap-2">
         <Tabs value={activeFilter} onValueChange={onFilterChange} className="w-full sm:w-auto">
           <TabsList className="w-full grid grid-cols-4 h-9 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100/50">
