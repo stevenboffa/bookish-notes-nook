@@ -1,11 +1,9 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
-import { BookPreviewGrid } from "@/components/welcome/BookPreviewGrid";
 import { NotesPreview } from "@/components/welcome/NotesPreview";
 
 const SITE_CONFIG = {
@@ -30,7 +28,6 @@ const Welcome = () => {
       
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Gradient Background */}
         <div 
           className="absolute inset-0"
           style={{
@@ -41,7 +38,6 @@ const Welcome = () => {
             `
           }}
         >
-          {/* Decorative pattern */}
           <div className="absolute inset-0 opacity-10" 
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
@@ -49,23 +45,17 @@ const Welcome = () => {
           />
         </div>
 
-        {/* Floating shapes */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Top left shape */}
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-          {/* Bottom right shape */}
           <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse [animation-delay:1000ms]" />
           
-          {/* Floating circles */}
           <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-white/20 rounded-full animate-bounce-slow" />
           <div className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-white/20 rounded-full animate-bounce-slow [animation-delay:500ms]" />
           <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white/20 rounded-full animate-bounce-slow [animation-delay:1000ms]" />
         </div>
 
-        {/* Content */}
         <div className="container relative mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center text-white">
-            {/* Main heading */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in [text-wrap:balance]">
               Never Forget
               <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
@@ -73,12 +63,10 @@ const Welcome = () => {
               </span>
             </h1>
 
-            {/* Subheading */}
             <p className="text-xl md:text-2xl text-white/90 mb-12 animate-fade-in [animation-delay:200ms] max-w-2xl mx-auto leading-relaxed">
               BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come.
             </p>
 
-            {/* CTA Button */}
             <div className="animate-fade-in [animation-delay:400ms] relative z-10">
               <Button 
                 size="lg" 
@@ -92,7 +80,6 @@ const Welcome = () => {
               </Button>
             </div>
 
-            {/* Decorative elements */}
             <div className="hidden md:block absolute -bottom-24 left-1/2 transform -translate-x-1/2 opacity-10">
               <div className="relative w-[500px] h-[500px] rotate-45 border border-white/20 rounded-full">
                 <div className="absolute inset-4 border border-white/20 rounded-full" />
@@ -103,7 +90,7 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Content Preview Section - NEW */}
+      {/* Content Preview Section - UPDATED */}
       <section className="py-20 bg-background relative">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -112,11 +99,6 @@ const Welcome = () => {
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                 Join thousands of readers who use BookishNotes to save and organize their reading insights
               </p>
-            </div>
-            
-            <div className="mb-16">
-              <h3 className="text-xl font-semibold mb-6 text-center">Popular Books in Our Community</h3>
-              <BookPreviewGrid />
             </div>
             
             <div>
@@ -128,7 +110,6 @@ const Welcome = () => {
           </div>
         </div>
         
-        {/* Decorative elements */}
         <div className="absolute top-40 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
