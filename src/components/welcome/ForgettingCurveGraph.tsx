@@ -3,14 +3,14 @@ import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 // Updated data points for a more accurate forgetting curve
-// Initial learning is 100%, then rapidly drops and levels off to about 10% by day 7
+// Initial learning is 100%, then drops to 30% at day 1, followed by a decline to 10% by day 7
 const forgettingCurveData = [
   { day: 0, retention: 100, label: "Initial learning" },
-  { day: 1, retention: 40, label: "Day 1" },
-  { day: 2, retention: 30 },
-  { day: 3, retention: 25 },
-  { day: 4, retention: 20 },
-  { day: 5, retention: 15 },
+  { day: 1, retention: 30, label: "Day 1" },
+  { day: 2, retention: 25 },
+  { day: 3, retention: 20 },
+  { day: 4, retention: 17 },
+  { day: 5, retention: 14 },
   { day: 6, retention: 12 },
   { day: 7, retention: 10, label: "Day 7" },
 ];
