@@ -3,16 +3,16 @@ import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 // Data points representing Ebbinghaus's Forgetting Curve
-// Values are computed using an exponential decay model: retention = 100 * exp(-0.223 * day)
+// These values approximate the conditions: 50% retention at day 1 and 10% at day 7.
 const forgettingCurveData = [
   { day: 0, retention: 100, label: "Day 0: 100%" },
-  { day: 1, retention: 80, label: "Day 1: 80%" },
-  { day: 2, retention: 64, label: "Day 2: 64%" },
-  { day: 3, retention: 51, label: "Day 3: 51%" },
-  { day: 4, retention: 41, label: "Day 4: 41%" },
-  { day: 5, retention: 33, label: "Day 5: 33%" },
-  { day: 6, retention: 27, label: "Day 6: 27%" },
-  { day: 7, retention: 22, label: "Day 7: 22%" },
+  { day: 1, retention: 50, label: "Day 1: 50%" },
+  { day: 2, retention: 35, label: "Day 2: 35%" },
+  { day: 3, retention: 25, label: "Day 3: 25%" },
+  { day: 4, retention: 20, label: "Day 4: 20%" },
+  { day: 5, retention: 15, label: "Day 5: 15%" },
+  { day: 6, retention: 12, label: "Day 6: 12%" },
+  { day: 7, retention: 10, label: "Day 7: 10%" },
 ];
 
 // Define tooltip props interface
