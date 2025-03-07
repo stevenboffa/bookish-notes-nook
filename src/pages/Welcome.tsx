@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
@@ -72,7 +73,7 @@ const Welcome = () => {
             <div className="text-white animate-fade-in max-w-xl">
               <div className="inline-block mb-6 animate-pulse">
                 <div className="bg-white text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center shadow-lg">
-                  <span className="mr-1">✨</span> 100% FREE <span className="ml-1">✨</span>
+                  <span className="mr-1">✨</span> 100% FREE FOREVER <span className="ml-1">✨</span>
                 </div>
               </div>
               
@@ -84,7 +85,7 @@ const Welcome = () => {
               </h1>
 
               <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 md:mb-8 leading-relaxed">
-                BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come.
+                BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come. <span className="font-semibold">No payment required, ever.</span>
               </p>
 
               <div className="relative z-10">
@@ -94,7 +95,7 @@ const Welcome = () => {
                   asChild
                 >
                   <Link to="/auth/sign-up">
-                    Start Taking Notes
+                    Start Taking Notes — It's Free
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 </Button>
@@ -124,7 +125,7 @@ const Welcome = () => {
               <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
                 As avid readers, we often can't remember details of books we read years ago. 
                 BookishNotes solves this problem with a smart note-taking system that gives you 
-                a crystal clear memory of everything you read.
+                a crystal clear memory of everything you read. <span className="text-primary font-medium">And it's completely free.</span>
               </p>
             </div>
             
@@ -228,7 +229,7 @@ const Welcome = () => {
                   <p className="text-sm md:text-base text-muted-foreground">
                     By creating notes and highlights as you read, you're actively engaging with the material,
                     which significantly improves retention. Our system makes this process effortless and
-                    ensures you can revisit key insights whenever you need them.
+                    ensures you can revisit key insights whenever you need them. <span className="font-medium">All for free, with no hidden costs.</span>
                   </p>
                 </div>
               </div>
@@ -256,9 +257,12 @@ const Welcome = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 md:mb-12">
+              <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
+                100% Free Features
+              </Badge>
               <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">Powerful Features</h2>
               <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto">
-                Everything you need to remember what you read
+                Everything you need to remember what you read — all available at no cost
               </p>
             </div>
             
@@ -322,6 +326,7 @@ const Welcome = () => {
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">Remember More of What You Read</h2>
               <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
                 Our guided note-taking system helps you capture the most important elements of each book.
+                <span className="block mt-2 font-medium">No subscription needed — free for everyone.</span>
               </p>
             </div>
 
@@ -361,7 +366,8 @@ const Welcome = () => {
             <div className="text-center mb-8 md:mb-12">
               <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">From Our Readers</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Discover how BookishNotes has transformed reading experiences for book lovers worldwide
+                Discover how BookishNotes has transformed reading experiences for book lovers worldwide — 
+                <span className="text-primary font-medium">all for free</span>
               </p>
             </div>
 
@@ -374,11 +380,15 @@ const Welcome = () => {
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
+            <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
+              Free Forever
+            </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6">
               Remember Every Book You Read
             </h2>
             <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto">
-              Join BookishNotes today and transform your reading experience with our powerful note-taking system.
+              Join BookishNotes today and transform your reading experience with our powerful note-taking system. 
+              No credit card required — completely free.
             </p>
             <Button 
               size="lg"
