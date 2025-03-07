@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen } from "lucide-react";
@@ -137,54 +136,6 @@ const Welcome = () => {
                 BookishNotes solves this problem with a smart note-taking system that gives you 
                 a crystal clear memory of everything you read.
               </p>
-            </div>
-            
-            {/* Visual Storytelling: Forgetting Curve */}
-            <div className="mb-20 relative">
-              <div className="max-w-2xl mx-auto text-center mb-8">
-                <h3 className="text-2xl font-semibold mb-2">The Forgetting Curve</h3>
-                <p className="text-muted-foreground">Without active recall, we forget up to 90% of what we read within just one week</p>
-              </div>
-              
-              <div className="relative h-64 md:h-80">
-                {/* Curve Visualization */}
-                <div className="absolute inset-0 flex items-end">
-                  <div className="h-full w-full bg-gradient-to-r from-red-500/20 to-red-500/70 rounded-br-3xl rounded-tr-3xl"
-                       style={{clipPath: "polygon(0 100%, 100% 20%, 100% 100%, 0% 100%)"}}>
-                  </div>
-                </div>
-                
-                {/* Time Markers */}
-                <div className="absolute bottom-0 w-full flex justify-between px-4 text-sm text-muted-foreground">
-                  <span>Day 1</span>
-                  <span>Day 2</span>
-                  <span>Day 7</span>
-                  <span>1 Month</span>
-                  <span>1 Year</span>
-                </div>
-                
-                {/* Memory Markers with Icons */}
-                <div className="absolute top-0 left-[5%] animate-bounce-slow">
-                  <div className="bg-primary/20 p-3 rounded-full">
-                    <BrainCircuit className="h-8 w-8 text-primary" />
-                  </div>
-                  <div className="mt-2 text-center text-sm font-medium">100%</div>
-                </div>
-                
-                <div className="absolute top-[40%] left-[30%] animate-bounce-slow [animation-delay:700ms]">
-                  <div className="bg-primary/20 p-2 rounded-full">
-                    <BrainCircuit className="h-6 w-6 text-primary/60" />
-                  </div>
-                  <div className="mt-2 text-center text-sm font-medium">60%</div>
-                </div>
-                
-                <div className="absolute top-[70%] left-[70%] animate-bounce-slow [animation-delay:1400ms]">
-                  <div className="bg-primary/10 p-1 rounded-full">
-                    <BrainCircuit className="h-4 w-4 text-primary/30" />
-                  </div>
-                  <div className="mt-2 text-center text-sm font-medium">10%</div>
-                </div>
-              </div>
             </div>
             
             {/* Split-Design Layout: Before/After Comparison */}
