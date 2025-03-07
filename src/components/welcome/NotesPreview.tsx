@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
@@ -105,22 +104,15 @@ export function NotesPreview() {
   const displayNotes = [...SAMPLE_NOTES, ...SAMPLE_NOTES];
   
   return (
-    <div className="relative h-[480px] overflow-hidden">
-      {/* Clean top mask for a simpler fade transition */}
-      <div className="absolute top-0 left-0 right-0 h-24 z-10 pointer-events-none"
-        style={{
-          background: `linear-gradient(to bottom, 
-            rgba(155, 135, 245, 1) 0%, 
-            rgba(155, 135, 245, 0.95) 30%, 
-            rgba(155, 135, 245, 0) 100%)`
-        }}
-      />
-      
+    <div className="relative h-[480px] overflow-hidden bg-[#9b87f5]">
       {/* Notes container with smooth scrolling */}
-      <div className="relative overflow-hidden" style={{ height: '100%' }}>
+      <div 
+        className="relative overflow-hidden py-6" 
+        style={{ height: '100%' }}
+      >
         <div 
           ref={containerRef}
-          className="space-y-5 transition-none"
+          className="space-y-5 transition-none px-2"
           style={{ 
             transform: `translateY(-${scrollPosition}px)`,
           }}
@@ -150,16 +142,6 @@ export function NotesPreview() {
           ))}
         </div>
       </div>
-      
-      {/* Clean bottom mask for a simpler fade transition */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 z-10 pointer-events-none"
-        style={{
-          background: `linear-gradient(to top, 
-            rgba(155, 135, 245, 1) 0%, 
-            rgba(155, 135, 245, 0.95) 30%, 
-            rgba(155, 135, 245, 0) 100%)`
-        }}
-      />
     </div>
   );
 }
