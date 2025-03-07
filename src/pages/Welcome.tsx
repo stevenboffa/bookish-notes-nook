@@ -58,7 +58,7 @@ const Welcome = () => {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="text-white animate-fade-in max-w-xl">
               <div className="inline-block mb-6 animate-pulse">
-                <div className="bg-white text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center transform -rotate-2 shadow-lg">
+                <div className="bg-white text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center shadow-lg">
                   <span className="mr-1">✨</span> 100% FREE <span className="ml-1">✨</span>
                 </div>
               </div>

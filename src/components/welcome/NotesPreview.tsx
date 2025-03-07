@@ -1,9 +1,7 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
-// Updated notes data with a mix of fiction and non-fiction books
 const SAMPLE_NOTES = [
   {
     id: "1",
@@ -107,16 +105,12 @@ export function NotesPreview() {
   
   return (
     <div className="relative h-[480px] overflow-hidden">
-      {/* Enhanced top gradient overlay with multiple layers for smoother transition */}
-      <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none"
+      {/* Simplified top gradient overlay - more subtle and clean */}
+      <div className="absolute top-0 left-0 right-0 h-32 z-10 pointer-events-none"
         style={{
           background: `linear-gradient(to bottom, 
             rgba(155, 135, 245, 1) 0%, 
-            rgba(155, 135, 245, 0.95) 15%, 
-            rgba(155, 135, 245, 0.8) 30%, 
-            rgba(155, 135, 245, 0.6) 45%, 
-            rgba(155, 135, 245, 0.4) 60%, 
-            rgba(155, 135, 245, 0.2) 75%, 
+            rgba(155, 135, 245, 0.8) 40%, 
             rgba(155, 135, 245, 0) 100%)`
         }}
       />
@@ -156,16 +150,12 @@ export function NotesPreview() {
         </div>
       </div>
       
-      {/* Enhanced bottom gradient overlay with multiple layers for smoother transition */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 z-10 pointer-events-none"
+      {/* Simplified bottom gradient overlay - more subtle and clean */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 z-10 pointer-events-none"
         style={{
           background: `linear-gradient(to top, 
             rgba(155, 135, 245, 1) 0%, 
-            rgba(155, 135, 245, 0.95) 15%, 
-            rgba(155, 135, 245, 0.8) 30%, 
-            rgba(155, 135, 245, 0.6) 45%, 
-            rgba(155, 135, 245, 0.4) 60%, 
-            rgba(155, 135, 245, 0.2) 75%, 
+            rgba(155, 135, 245, 0.8) 40%, 
             rgba(155, 135, 245, 0) 100%)`
         }}
       />
