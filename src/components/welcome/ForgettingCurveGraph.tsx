@@ -65,7 +65,7 @@ export function ForgettingCurveGraph() {
         >
           <defs>
             <linearGradient id="colorRetention" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#9b87f5" stopColor="#9b87f5" />
+              <stop offset="0%" stopColor="#9b87f5" />
               <stop offset="50%" stopColor="#7c6ad6" />
               <stop offset="100%" stopColor="#6B96C3" />
             </linearGradient>
