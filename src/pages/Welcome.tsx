@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
 import { NotesPreview } from "@/components/welcome/NotesPreview";
 import { Badge } from "@/components/ui/badge";
+import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -180,6 +181,49 @@ const Welcome = () => {
         
         <div className="absolute top-40 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+      </section>
+
+      <section className="py-24 bg-muted/20 relative">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold mb-4">The Forgetting Curve</h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Research shows that we forget approximately 70% of what we learn within 24 hours 
+                and 90% within a week if we don't actively reinforce our knowledge.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <ForgettingCurveGraph />
+              </div>
+              
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-xl shadow-lg">
+                  <h3 className="text-xl font-semibold mb-3 text-primary">The Science of Forgetting</h3>
+                  <p className="text-muted-foreground">
+                    In 1885, psychologist Hermann Ebbinghaus discovered what's known as "The Forgetting Curve" - 
+                    our brains rapidly discard information they deem unimportant. Without a system to reinforce what 
+                    you read, your brain will naturally forget most of the content.
+                  </p>
+                </div>
+                
+                <div className="bg-white p-6 rounded-xl shadow-lg">
+                  <h3 className="text-xl font-semibold mb-3 text-primary">How BookishNotes Helps</h3>
+                  <p className="text-muted-foreground">
+                    By creating notes and highlights as you read, you're actively engaging with the material,
+                    which significantly improves retention. Our system makes this process effortless and
+                    ensures you can revisit key insights whenever you need them.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="absolute top-1/3 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
       <section className="py-24 relative overflow-hidden">
