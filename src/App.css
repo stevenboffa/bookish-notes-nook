@@ -99,3 +99,15 @@ body {
 .recharts-surface {
   overflow: visible;
 }
+
+/* Fix for absolutely positioned decorative elements */
+section {
+  position: relative;
+  width: 100%;
+  overflow-x: clip;
+}
+
+/* Fix for blur elements */
+.blur-3xl {
+  will-change: transform;
+}

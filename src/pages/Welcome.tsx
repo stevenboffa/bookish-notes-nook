@@ -21,7 +21,7 @@ const Welcome = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
       <Meta 
         title="Welcome"
         description="BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come."
@@ -29,7 +29,7 @@ const Welcome = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center">
+      <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0"
           style={{
@@ -106,7 +106,7 @@ const Welcome = () => {
       </section>
 
       {/* Reader's Dilemma Section */}
-      <section className="py-16 md:py-24 bg-background relative">
+      <section className="py-16 md:py-24 bg-background relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 md:mb-16">
@@ -182,12 +182,12 @@ const Welcome = () => {
           </div>
         </div>
         
-        <div className="absolute top-40 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-40 -left-20 md:-left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 -right-20 md:-right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
       {/* Forgetting Curve Section */}
-      <section className="py-16 md:py-24 bg-muted/20 relative">
+      <section className="py-16 md:py-24 bg-muted/20 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-8 md:mb-10">
@@ -226,8 +226,8 @@ const Welcome = () => {
           </div>
         </div>
         
-        <div className="absolute top-1/3 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-20 md:-right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 -left-20 md:-left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
       {/* Features Section */}
