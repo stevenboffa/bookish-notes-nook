@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const SAMPLE_NOTES = [
   {
     id: "1",
-    content: ""The ability to simplify means to eliminate the unnecessary so that the necessary may speak." This perfectly captures why I need to declutter both my space and my mind.",
+    content: "\"The ability to simplify means to eliminate the unnecessary so that the necessary may speak.\" This perfectly captures why I need to declutter both my space and my mind.",
     bookTitle: "The Life-Changing Magic of Tidying Up",
     userName: "Alex K.",
     userInitials: "AK"
