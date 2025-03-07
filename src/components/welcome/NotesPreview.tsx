@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
-// Sample notes data - in a real implementation, this would come from the database
+// Updated notes data with a mix of fiction and non-fiction books
 const SAMPLE_NOTES = [
   {
     id: "1",
@@ -14,22 +14,22 @@ const SAMPLE_NOTES = [
   },
   {
     id: "2",
-    content: "Kahneman's explanation of System 1 (fast, intuitive) and System 2 (slow, deliberate) thinking explains so much about my decision-making biases. I need to be more aware of when I'm using which system.",
-    bookTitle: "Thinking, Fast and Slow",
+    content: "\"All we have to decide is what to do with the time that is given us.\" This quote from Gandalf has guided so many of my life decisions when facing difficult choices.",
+    bookTitle: "The Lord of the Rings",
     userName: "Maria L.",
     userInitials: "ML"
   },
   {
     id: "3",
-    content: "The four stages of competence: unconscious incompetence, conscious incompetence, conscious competence, and unconscious competence. I'm definitely at stage 2 with my writing skills.",
+    content: "Four stages of competence: unconscious incompetence, conscious incompetence, conscious competence, and unconscious competence. I'm definitely at stage 2 with my writing skills.",
     bookTitle: "Ultralearning",
     userName: "James T.",
     userInitials: "JT"
   },
   {
     id: "4",
-    content: "\"We buy things we don't need with money we don't have to impress people we don't like.\" This quote hit me hard. I'm rethinking my spending habits now.",
-    bookTitle: "Your Money or Your Life",
+    content: "\"I must not fear. Fear is the mind-killer.\" The Bene Gesserit litany against fear is something I recite to myself before every public speaking event.",
+    bookTitle: "Dune",
     userName: "Sarah P.",
     userInitials: "SP"
   },
@@ -42,8 +42,8 @@ const SAMPLE_NOTES = [
   },
   {
     id: "6",
-    content: "\"It is not that we have a short time to live, but that we waste a lot of it.\" Seneca's words still ring true 2,000 years later.",
-    bookTitle: "On the Shortness of Life",
+    content: "\"So we beat on, boats against the current, borne back ceaselessly into the past.\" This final line haunts me with its beautiful imagery of struggling against inevitable nostalgia.",
+    bookTitle: "The Great Gatsby",
     userName: "Priya S.",
     userInitials: "PS"
   },
@@ -56,8 +56,8 @@ const SAMPLE_NOTES = [
   },
   {
     id: "8",
-    content: "The practice of accepting uncertainty rather than fighting it has been life-changing for managing my anxiety.",
-    bookTitle: "Comfortable with Uncertainty",
+    content: "\"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.\" Such a brilliantly ironic opening line that sets up the entire novel's examination of marriage and social status.",
+    bookTitle: "Pride and Prejudice",
     userName: "Emma J.",
     userInitials: "EJ"
   },
@@ -70,8 +70,8 @@ const SAMPLE_NOTES = [
   },
   {
     id: "10",
-    content: "Learning that willpower is a finite resource that depletes throughout the day helped me restructure my schedule for better productivity.",
-    bookTitle: "Willpower",
+    content: "\"Call me Ishmael.\" Three simple words that begin such an epic journey. I'm fascinated by how much weight a short opening line can carry.",
+    bookTitle: "Moby Dick",
     userName: "Nora H.",
     userInitials: "NH"
   }
