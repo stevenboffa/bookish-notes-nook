@@ -78,73 +78,75 @@ const SAMPLE_NOTES = [
 ];
 
 export function NotesPreview() {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [visibleNotes, setVisibleNotes] = useState<typeof SAMPLE_NOTES>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const noteHeight = 170; // Approximate height of each note card
+  const totalHeight = SAMPLE_NOTES.length * noteHeight;
   
   useEffect(() => {
-    // Initialize with first 3 notes
-    setVisibleNotes(SAMPLE_NOTES.slice(0, 3));
-    
-    // Set up the scrolling animation
-    const intervalId = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % SAMPLE_NOTES.length;
-        const endIndex = Math.min(nextIndex + 3, SAMPLE_NOTES.length);
+    const animateScroll = () => {
+      setScrollPosition(prevPosition => {
+        const newPosition = prevPosition + 1; // Smooth scrolling speed
         
-        // Handle wrapping around the array
-        const nextNotes = nextIndex + 3 <= SAMPLE_NOTES.length 
-          ? SAMPLE_NOTES.slice(nextIndex, endIndex)
-          : [
-              ...SAMPLE_NOTES.slice(nextIndex),
-              ...SAMPLE_NOTES.slice(0, 3 - (SAMPLE_NOTES.length - nextIndex))
-            ];
+        // Reset when reaching the end to create an infinite loop
+        if (newPosition >= totalHeight - noteHeight * 3) {
+          return 0;
+        }
         
-        setVisibleNotes(nextNotes);
-        return nextIndex;
+        return newPosition;
       });
-    }, 3000); // Scroll every 3 seconds
+    };
     
-    return () => clearInterval(intervalId);
-  }, []);
+    const animation = setInterval(animateScroll, 30); // Smoother animation with more frequent, smaller updates
+    
+    return () => clearInterval(animation);
+  }, [totalHeight]);
+  
+  // Create a duplicated array for seamless looping
+  const displayNotes = [...SAMPLE_NOTES, ...SAMPLE_NOTES];
   
   return (
-    <div className="relative overflow-hidden" style={{ height: '400px' }}>
-      {/* Gradient overlay at top */}
-      <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+    <div className="relative h-[500px] overflow-hidden">
+      {/* Top gradient overlay */}
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
       
-      <div 
-        ref={scrollContainerRef}
-        className="space-y-5 transition-all duration-1000 ease-in-out"
-      >
-        {visibleNotes.map((note, index) => (
-          <Card 
-            key={`${note.id}-${index}`}
-            className={cn(
-              "backdrop-blur-sm border-primary/10 animate-fade-in transition-all duration-500",
-              index % 2 === 0 ? "bg-primary/5" : "bg-white/20"
-            )}
-            style={{ animationDelay: `${index * 150}ms` }}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium text-sm shrink-0">
-                  {note.userInitials}
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm italic">{note.content}</p>
-                  <div className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">{note.userName}</span> on <span className="font-medium text-foreground">{note.bookTitle}</span>
+      {/* Notes container with smooth scrolling */}
+      <div className="relative overflow-hidden" style={{ height: '100%' }}>
+        <div 
+          ref={containerRef}
+          className="space-y-5 transition-none"
+          style={{ 
+            transform: `translateY(-${scrollPosition}px)`,
+          }}
+        >
+          {displayNotes.map((note, index) => (
+            <Card 
+              key={`${note.id}-${index}`}
+              className={cn(
+                "backdrop-blur-sm border-primary/10 transition-all duration-500",
+                index % 2 === 0 ? "bg-primary/5" : "bg-white/20"
+              )}
+            >
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium text-sm shrink-0">
+                    {note.userInitials}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm italic">{note.content}</p>
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">{note.userName}</span> on <span className="font-medium text-foreground">{note.bookTitle}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
       
-      {/* Gradient overlay at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+      {/* Bottom gradient overlay */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
     </div>
   );
 }
