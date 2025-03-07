@@ -3,7 +3,7 @@ import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ChevronDown, ChevronUp, BookOpen, Search, HelpCircle, Mail, Settings, Shield, CreditCard, BookQuestion } from "lucide-react";
+import { ChevronDown, ChevronUp, BookOpen, Search, HelpCircle, Mail, Settings, Shield, CreditCard, BookText } from "lucide-react";
 import { useState } from "react";
 
 type FaqItem = {
@@ -41,7 +41,7 @@ export default function FAQ() {
           id: 3,
           question: "Can I export my notes?",
           answer: "Yes, you can export your notes in various formats including PDF, plain text, and markdown to use them however you like.",
-          icon: <BookQuestion className="h-5 w-5" />,
+          icon: <BookText className="h-5 w-5" />,
         },
         {
           id: 4,
