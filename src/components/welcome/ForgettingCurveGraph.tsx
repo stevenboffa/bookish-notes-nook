@@ -88,7 +88,7 @@ export function ForgettingCurveGraph() {
           />
           <Tooltip content={<CustomTooltip />} />
           <Line
-            type="monotone"
+            type="natural"
             dataKey="retention"
             stroke="url(#colorRetention)"
             strokeWidth={4}
