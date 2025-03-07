@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Twitter, Instagram } from "lucide-react";
+import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
@@ -407,13 +407,13 @@ const Welcome = () => {
               <p className="text-sm text-slate-600 mb-4">Your personal reading companion that helps you remember everything you read.</p>
               <div className="flex space-x-4">
                 <a href="https://www.facebook.com/profile.php?id=61573865312172" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
-                  <Facebook className="h-5 w-5" />
+                  <Facebook className="h-5 w-5" color="#4267B2" />
                 </a>
                 <a href="https://x.com/bookishnotesapp" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
-                  <Twitter className="h-5 w-5" />
+                  <X className="h-5 w-5" color="#1DA1F2" />
                 </a>
                 <a href="https://www.instagram.com/bookishnotesapp" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
-                  <Instagram className="h-5 w-5" />
+                  <Instagram className="h-5 w-5" color="#E1306C" />
                 </a>
               </div>
             </div>
