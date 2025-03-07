@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from "recharts";
 
 // Sample data for Ebbinghaus's Forgetting Curve.
 // These values approximate a rapid initial decline that levels off over a week.
@@ -15,8 +15,15 @@ const forgettingCurveData = [
   { day: 7, retention: 25, label: "Day 7" },
 ];
 
+// Define tooltip props interface
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string | number;
+}
+
 // Custom tooltip component for displaying details of each point
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div style={{ background: "#fff", border: "1px solid #ccc", padding: "8px" }}>
