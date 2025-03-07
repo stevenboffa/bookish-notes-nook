@@ -1,18 +1,18 @@
 
 import React from "react";
-import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from "recharts";
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-// Sample data for Ebbinghaus's Forgetting Curve.
-// These values approximate a rapid initial decline that levels off over a week.
+// Data points representing Ebbinghaus's Forgetting Curve
+// Values are computed using an exponential decay model: retention = 100 * exp(-0.223 * day)
 const forgettingCurveData = [
-  { day: 0, retention: 100, label: "Initial learning" },
-  { day: 1, retention: 44, label: "Day 1" },
-  { day: 2, retention: 40, label: "Day 2" },
-  { day: 3, retention: 34, label: "Day 3" },
-  { day: 4, retention: 31, label: "Day 4" },
-  { day: 5, retention: 29, label: "Day 5" },
-  { day: 6, retention: 28, label: "Day 6" },
-  { day: 7, retention: 25, label: "Day 7" },
+  { day: 0, retention: 100, label: "Day 0: 100%" },
+  { day: 1, retention: 80, label: "Day 1: 80%" },
+  { day: 2, retention: 64, label: "Day 2: 64%" },
+  { day: 3, retention: 51, label: "Day 3: 51%" },
+  { day: 4, retention: 41, label: "Day 4: 41%" },
+  { day: 5, retention: 33, label: "Day 5: 33%" },
+  { day: 6, retention: 27, label: "Day 6: 27%" },
+  { day: 7, retention: 22, label: "Day 7: 22%" },
 ];
 
 // Define tooltip props interface
@@ -23,11 +23,11 @@ interface CustomTooltipProps {
 }
 
 // Custom tooltip component for displaying details of each point
-const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label }) => {
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
       <div style={{ background: "#fff", border: "1px solid #ccc", padding: "8px" }}>
-        <p>{label}</p>
+        <p>{payload[0].payload.label}</p>
         <p>{`Retention: ${payload[0].value}%`}</p>
       </div>
     );
@@ -57,7 +57,7 @@ export function ForgettingCurveGraph() {
           
           {/* X axis configuration */}
           <XAxis 
-            dataKey="day" 
+            dataKey="day"
             domain={[0, 7]}
             ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
             label={{ value: "Days", position: "insideBottom", offset: -20 }}
@@ -73,9 +73,9 @@ export function ForgettingCurveGraph() {
           {/* Tooltip component */}
           <Tooltip content={<CustomTooltip />} />
           
-          {/* The actual line for the graph */}
+          {/* Smooth curve for the graph */}
           <Line
-            type="monotone"
+            type="basis" // 'basis' creates a smooth spline interpolation
             dataKey="retention"
             stroke="url(#colorRetention)"
             strokeWidth={4}
