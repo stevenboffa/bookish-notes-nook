@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
@@ -106,13 +105,6 @@ export function NotesPreview() {
   
   return (
     <div className="relative h-[480px] overflow-hidden">
-      {/* Subtle fade effect at the top */}
-      <div className="absolute top-0 left-0 right-0 h-16 z-10 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)'
-        }}
-      />
-      
       {/* Notes container with smooth scrolling */}
       <div 
         className="relative overflow-hidden py-6" 
@@ -150,13 +142,6 @@ export function NotesPreview() {
           ))}
         </div>
       </div>
-      
-      {/* Subtle fade effect at the bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 z-10 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)'
-        }}
-      />
     </div>
   );
 }
