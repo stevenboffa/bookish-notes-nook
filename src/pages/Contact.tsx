@@ -6,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AtSign, Mail, MapPin, MessageCircle, Phone, HelpCircle } from "lucide-react";
+import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { BlogFooter } from "@/components/blog/BlogFooter";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -49,66 +50,8 @@ export default function Contact() {
         </section>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Contact Information Cards */}
+          {/* Information Cards */}
           <div className="space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Email Us</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Our friendly team is here to help.
-                    </p>
-                    <a href="mailto:hello@bookishnotes.app" className="text-sm font-medium text-primary mt-1 block">
-                      hello@bookishnotes.app
-                    </a>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <MapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Visit Us</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Come say hello at our office.
-                    </p>
-                    <p className="text-sm mt-1">
-                      123 Reading Lane<br />
-                      Book City, BC 10101
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Phone className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Call Us</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Mon-Fri from 8am to 5pm.
-                    </p>
-                    <a href="tel:+15555551234" className="text-sm font-medium text-primary mt-1 block">
-                      +1 (555) 555-1234
-                    </a>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
@@ -123,6 +66,37 @@ export default function Contact() {
                     <Link to="/faq" className="text-sm font-medium text-primary mt-1 block">
                       Visit our FAQ page
                     </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <AtSign className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium mb-1">Social Media</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Connect with us on social platforms.
+                    </p>
+                    <div className="flex items-center gap-4 mt-3">
+                      <a href="https://www.facebook.com/profile.php?id=61573865312172" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
+                        <Facebook className="h-5 w-5" color="#4267B2" />
+                      </a>
+                      <a href="https://x.com/bookishnotesapp" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
+                        <img 
+                          src="/lovable-uploads/414d71e0-1338-48d5-8c9d-41110af89248.png" 
+                          alt="X (Twitter)" 
+                          className="h-5 w-5" 
+                        />
+                      </a>
+                      <a href="https://www.instagram.com/bookishnotesapp" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
+                        <Instagram className="h-5 w-5" color="#E1306C" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -199,6 +173,7 @@ export default function Contact() {
           </div>
         </div>
       </div>
+      <BlogFooter />
     </div>
   );
 }

@@ -1,10 +1,10 @@
-
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ChevronDown, ChevronUp, BookOpen, Search, HelpCircle, Mail, Settings, Shield, CreditCard, BookText } from "lucide-react";
 import { useState } from "react";
+import { BlogFooter } from "@/components/blog/BlogFooter";
 
 type FaqItem = {
   id: number;
@@ -198,6 +198,7 @@ export default function FAQ() {
           </div>
         </section>
       </div>
+      <BlogFooter />
     </div>
   );
 }

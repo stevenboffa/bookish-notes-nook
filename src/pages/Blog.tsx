@@ -5,6 +5,7 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { Helmet } from "react-helmet";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
+import { BlogFooter } from "@/components/blog/BlogFooter";
 
 export default function Blog() {
   const { session } = useAuth();
@@ -67,6 +68,7 @@ export default function Blog() {
             </div>
           )}
         </div>
+        <BlogFooter />
       </div>
     </>
   );
