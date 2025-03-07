@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getBookCoverFallback } from "@/utils/bookCovers";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,7 @@ export function BookCover({
   size = "md"
 }: BookCoverProps) {
   const [error, setError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const fallbackImage = getBookCoverFallback(genre);
   
   const sizeClasses = {
@@ -28,6 +29,12 @@ export function BookCover({
     md: "w-32 h-48",
     lg: "w-48 h-72"
   };
+
+  // Reset error state when props change
+  useEffect(() => {
+    setError(false);
+    setImageLoaded(false);
+  }, [imageUrl, thumbnailUrl]);
 
   // Function to validate image URL
   const isValidImageUrl = (url?: string | null) => {
@@ -41,6 +48,16 @@ export function BookCover({
   const imageToShow = size === "sm" && validThumbnailUrl ? thumbnailUrl : 
                       validImageUrl ? imageUrl : fallbackImage;
 
+  const handleImageError = () => {
+    console.log(`Image failed to load: ${imageToShow}`);
+    setError(true);
+    setImageLoaded(false);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
   return (
     <div 
       className={cn(
@@ -51,12 +68,23 @@ export function BookCover({
       )}
     >
       {showImage ? (
-        <img
-          src={imageToShow || ''}
-          alt={`Cover of ${title}`}
-          className="w-full h-full object-cover"
-          onError={() => setError(true)}
-        />
+        <>
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-8 w-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            </div>
+          )}
+          <img
+            src={imageToShow || ''}
+            alt={`Cover of ${title}`}
+            className={cn(
+              "w-full h-full object-cover",
+              imageLoaded ? "opacity-100" : "opacity-0"
+            )}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+          />
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center p-4 text-center">
           <span className="text-gray-500 text-sm font-medium">
