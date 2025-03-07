@@ -107,8 +107,19 @@ export function NotesPreview() {
   
   return (
     <div className="relative h-[480px] overflow-hidden">
-      {/* Top gradient overlay - stronger fade effect */}
-      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#9b87f5] via-[#9b87f5]/80 to-transparent z-10 pointer-events-none" />
+      {/* Enhanced top gradient overlay with multiple layers for smoother transition */}
+      <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none"
+        style={{
+          background: `linear-gradient(to bottom, 
+            rgba(155, 135, 245, 1) 0%, 
+            rgba(155, 135, 245, 0.95) 15%, 
+            rgba(155, 135, 245, 0.8) 30%, 
+            rgba(155, 135, 245, 0.6) 45%, 
+            rgba(155, 135, 245, 0.4) 60%, 
+            rgba(155, 135, 245, 0.2) 75%, 
+            rgba(155, 135, 245, 0) 100%)`
+        }}
+      />
       
       {/* Notes container with smooth scrolling */}
       <div className="relative overflow-hidden" style={{ height: '100%' }}>
@@ -145,8 +156,19 @@ export function NotesPreview() {
         </div>
       </div>
       
-      {/* Bottom gradient overlay - stronger fade effect */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#9b87f5] via-[#9b87f5]/80 to-transparent z-10 pointer-events-none" />
+      {/* Enhanced bottom gradient overlay with multiple layers for smoother transition */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 z-10 pointer-events-none"
+        style={{
+          background: `linear-gradient(to top, 
+            rgba(155, 135, 245, 1) 0%, 
+            rgba(155, 135, 245, 0.95) 15%, 
+            rgba(155, 135, 245, 0.8) 30%, 
+            rgba(155, 135, 245, 0.6) 45%, 
+            rgba(155, 135, 245, 0.4) 60%, 
+            rgba(155, 135, 245, 0.2) 75%, 
+            rgba(155, 135, 245, 0) 100%)`
+        }}
+      />
     </div>
   );
 }

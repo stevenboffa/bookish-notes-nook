@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
 import { NotesPreview } from "@/components/welcome/NotesPreview";
+import { Badge } from "@/components/ui/badge";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -56,6 +57,12 @@ const Welcome = () => {
         <div className="container relative mx-auto px-4 py-16 md:py-24">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="text-white animate-fade-in max-w-xl">
+              <div className="inline-block mb-6 animate-pulse">
+                <div className="bg-white text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center transform -rotate-2 shadow-lg">
+                  <span className="mr-1">✨</span> 100% FREE <span className="ml-1">✨</span>
+                </div>
+              </div>
+              
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 [text-wrap:balance]">
                 Never Forget
                 <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
