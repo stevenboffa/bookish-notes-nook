@@ -1,7 +1,6 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen } from "lucide-react";
+import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
@@ -9,6 +8,15 @@ import { NotesPreview } from "@/components/welcome/NotesPreview";
 import { Badge } from "@/components/ui/badge";
 import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
 import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import useEmblaCarousel from "embla-carousel-react";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -347,27 +355,17 @@ const Welcome = () => {
       </section>
 
       {/* Testimonial Section */}
-      <section className="py-16 md:py-24 bg-muted/30">
+      <section className="py-16 md:py-24 bg-muted/30 overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="text-center mb-8 md:mb-12">
               <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">From Our Readers</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Discover how BookishNotes has transformed reading experiences for book lovers worldwide
+              </p>
             </div>
 
-            <div className="bg-background p-6 md:p-8 rounded-2xl shadow-md">
-              <p className="text-base md:text-lg italic mb-6">
-                "Before BookishNotes, I'd read a book and forget most of it within weeks. Now I have a system that helps me capture and remember the most important ideas from everything I read. It's changed how I learn from books completely."
-              </p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
-                  AK
-                </div>
-                <div className="ml-4">
-                  <div className="font-semibold">Alex Kim</div>
-                  <div className="text-sm text-muted-foreground">Reads 30+ books per year</div>
-                </div>
-              </div>
-            </div>
+            <TestimonialCarousel />
           </div>
         </div>
       </section>
@@ -475,5 +473,130 @@ const StepCard = ({
     <div className="h-1 w-20 bg-gradient-to-r from-primary/80 to-primary/20 rounded-full mt-5"></div>
   </Card>
 );
+
+const TestimonialCarousel = () => {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCurrentIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    
+    emblaApi.on('select', onSelect);
+    onSelect();
+    
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  return (
+    <div className="relative max-w-5xl mx-auto">
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {testimonials.map((testimonial, index) => (
+            <div className="flex-[0_0_100%] min-w-0 pl-4 md:pl-6" key={index}>
+              <div className="bg-background p-6 md:p-8 rounded-2xl shadow-md">
+                <div className="flex items-start mb-4">
+                  <Quote className="text-primary opacity-50 h-8 w-8 mr-2 flex-shrink-0" />
+                  <p className="text-base md:text-lg italic">
+                    {testimonial.quote}
+                  </p>
+                </div>
+                <div className="flex items-center mt-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                    {testimonial.initials}
+                  </div>
+                  <div className="ml-4">
+                    <div className="font-semibold">{testimonial.author}</div>
+                    <div className="text-sm text-muted-foreground">{testimonial.title}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <button 
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-background shadow-md rounded-full p-2 z-10 hover:bg-muted transition-colors"
+        onClick={() => emblaApi?.scrollPrev()}
+        aria-label="Previous testimonial"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      
+      <button 
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-background shadow-md rounded-full p-2 z-10 hover:bg-muted transition-colors"
+        onClick={() => emblaApi?.scrollNext()}
+        aria-label="Next testimonial"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+      
+      <div className="flex justify-center gap-1 mt-4">
+        {testimonials.map((_, index) => (
+          <button
+            key={index}
+            className={`h-2 rounded-full transition-all ${
+              currentIndex === index ? "w-4 bg-primary" : "w-2 bg-primary/30"
+            }`}
+            onClick={() => emblaApi?.scrollTo(index)}
+            aria-label={`Go to testimonial ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const testimonials = [
+  {
+    quote: "Before BookishNotes, I'd read a book and forget most of it within weeks. Now I have a system that helps me capture and remember the most important ideas from everything I read. It's changed how I learn from books completely.",
+    author: "Alex Kim",
+    title: "Reads 30+ books per year",
+    initials: "AK"
+  },
+  {
+    quote: "I used to highlight passages in my physical books, but I could never find them again when I needed them. BookishNotes lets me organize my thoughts by theme and concept. It's been a game-changer for my research.",
+    author: "Maria Rodriguez",
+    title: "PhD Student",
+    initials: "MR"
+  },
+  {
+    quote: "As someone who reads across many different subjects, I needed a way to connect ideas between books. This platform makes it so easy to create a web of knowledge that grows with every book I read.",
+    author: "James Wilson",
+    title: "Lifelong learner",
+    initials: "JW"
+  },
+  {
+    quote: "I've tried many note-taking apps, but none were specifically designed for books. The structure that BookishNotes provides—with chapters, themes, and quotes—matches exactly how I think about books.",
+    author: "Sarah Chen",
+    title: "Book club organizer",
+    initials: "SC"
+  },
+  {
+    quote: "The ability to quickly reference concepts from books I read years ago has been invaluable for my work. I can pull up specific ideas and quotes in seconds rather than trying to remember where I saw something.",
+    author: "Michael Johnson",
+    title: "Business consultant",
+    initials: "MJ"
+  },
+  {
+    quote: "I love how BookishNotes helps me see patterns in my reading over time. I've discovered themes I'm drawn to that I never noticed before, which has helped me be more intentional about what I read next.",
+    author: "Emily Patel",
+    title: "Reads across genres",
+    initials: "EP"
+  },
+  {
+    quote: "As an author, I use BookishNotes to track ideas and inspiration from other writers. It's become an essential part of my creative process and research workflow.",
+    author: "David Thompson",
+    title: "Published author",
+    initials: "DT"
+  }
+];
 
 export default Welcome;
