@@ -26,9 +26,9 @@ interface CustomTooltipProps {
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{ background: "#fff", border: "1px solid #ccc", padding: "8px" }}>
-        <p>{payload[0].payload.label}</p>
-        <p>{`Retention: ${payload[0].value}%`}</p>
+      <div className="bg-white border border-gray-200 p-2 rounded-md shadow-sm">
+        <p className="font-medium">{payload[0].payload.label}</p>
+        <p className="text-sm text-muted-foreground">{`Retention: ${payload[0].value}%`}</p>
       </div>
     );
   }
@@ -37,11 +37,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
 
 export function ForgettingCurveGraph() {
   return (
-    <div className="h-72 md:h-80 w-full">
+    <div className="h-64 sm:h-72 md:h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={forgettingCurveData}
-          margin={{ top: 10, right: 30, left: 10, bottom: 30 }}
+          margin={{ top: 10, right: 20, left: 0, bottom: 30 }}
         >
           {/* Gradient definition for the line */}
           <defs>
@@ -61,13 +61,16 @@ export function ForgettingCurveGraph() {
             domain={[0, 7]}
             ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
             label={{ value: "Days", position: "insideBottom", offset: -20 }}
+            tick={{ fontSize: 12 }}
           />
           
           {/* Y axis configuration */}
           <YAxis 
             domain={[0, 100]}
             ticks={[0, 20, 40, 60, 80, 100]}
-            label={{ value: "Retention (%)", angle: -90, position: "insideLeft" }}
+            label={{ value: "Retention (%)", angle: -90, position: "insideLeft", style: { textAnchor: 'middle' } }}
+            tick={{ fontSize: 12 }}
+            width={45}
           />
           
           {/* Tooltip component */}
@@ -78,9 +81,9 @@ export function ForgettingCurveGraph() {
             type="basis" // 'basis' creates a smooth spline interpolation
             dataKey="retention"
             stroke="url(#colorRetention)"
-            strokeWidth={4}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6, fill: "#9b87f5" }}
+            strokeWidth={3}
+            dot={{ r: 3 }}
+            activeDot={{ r: 5, fill: "#9b87f5" }}
             isAnimationActive={false}
           />
         </LineChart>

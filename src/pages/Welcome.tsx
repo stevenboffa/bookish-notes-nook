@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen } from "lucide-react";
@@ -28,6 +29,7 @@ const Welcome = () => {
       />
       <Header />
       
+      {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0"
@@ -47,6 +49,7 @@ const Welcome = () => {
         </div>
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Background decorative elements */}
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse [animation-delay:1000ms]" />
           
@@ -55,7 +58,7 @@ const Welcome = () => {
           <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white/20 rounded-full animate-bounce-slow [animation-delay:1000ms]" />
         </div>
 
-        <div className="container relative mx-auto px-4 py-16 md:py-24">
+        <div className="container mx-auto px-4 py-10 md:py-16 lg:py-24">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="text-white animate-fade-in max-w-xl">
               <div className="inline-block mb-6 animate-pulse">
@@ -64,21 +67,21 @@ const Welcome = () => {
                 </div>
               </div>
               
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 [text-wrap:balance]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight [text-wrap:balance]">
                 Never Forget
                 <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                   What You Read
                 </span>
               </h1>
 
-              <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 md:mb-8 leading-relaxed">
                 BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come.
               </p>
 
               <div className="relative z-10">
                 <Button 
                   size="lg" 
-                  className="h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
+                  className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
                   asChild
                 >
                   <Link to="/auth/sign-up">
@@ -89,7 +92,7 @@ const Welcome = () => {
               </div>
             </div>
 
-            <div className="relative z-10 animate-fade-in [animation-delay:300ms]">
+            <div className="relative z-10 animate-fade-in [animation-delay:300ms] mt-6 md:mt-0">
               <NotesPreview />
             </div>
           </div>
@@ -103,12 +106,13 @@ const Welcome = () => {
         </div>
       </section>
 
-      <section className="py-24 bg-background relative">
+      {/* Reader's Dilemma Section */}
+      <section className="py-16 md:py-24 bg-background relative">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">The Reader's Dilemma</h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <div className="text-center mb-10 md:mb-16">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">The Reader's Dilemma</h2>
+              <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
                 As avid readers, we often can't remember details of books we read years ago. 
                 BookishNotes solves this problem with a smart note-taking system that gives you 
                 a crystal clear memory of everything you read.
@@ -116,60 +120,60 @@ const Welcome = () => {
             </div>
             
             <div className="grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-lg">
-              <div className="bg-[#F1F0FB] p-8 relative">
+              <div className="bg-[#F1F0FB] p-6 md:p-8 relative">
                 <div className="absolute top-4 left-4 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
                   Before
                 </div>
                 <div className="mt-8 text-center">
-                  <div className="bg-red-50 rounded-full p-6 inline-flex mb-6">
-                    <BookOpen className="h-12 w-12 text-red-400" />
+                  <div className="bg-red-50 rounded-full p-5 md:p-6 inline-flex mb-4 md:mb-6">
+                    <BookOpen className="h-8 w-8 md:h-12 md:w-12 text-red-400" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">Forgetful Reader</h3>
-                  <ul className="text-left space-y-3 text-muted-foreground">
+                  <h3 className="text-lg md:text-xl font-semibold mb-3">Forgetful Reader</h3>
+                  <ul className="text-left space-y-2 md:space-y-3 text-muted-foreground">
                     <li className="flex items-start">
-                      <span className="mr-2 text-red-400">✗</span> 
+                      <span className="mr-2 text-red-400 mt-0.5">✗</span> 
                       <span>"I know I read about this somewhere..."</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="mr-2 text-red-400">✗</span> 
+                      <span className="mr-2 text-red-400 mt-0.5">✗</span> 
                       <span>Can't find important quotes when needed</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="mr-2 text-red-400">✗</span> 
+                      <span className="mr-2 text-red-400 mt-0.5">✗</span> 
                       <span>Insights fade within weeks of finishing</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="mr-2 text-red-400">✗</span> 
+                      <span className="mr-2 text-red-400 mt-0.5">✗</span> 
                       <span>Reading feels like temporary entertainment</span>
                     </li>
                   </ul>
                 </div>
               </div>
               
-              <div className="bg-card p-8 relative">
+              <div className="bg-card p-6 md:p-8 relative">
                 <div className="absolute top-4 left-4 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
                   After
                 </div>
                 <div className="mt-8 text-center">
-                  <div className="bg-primary/10 rounded-full p-6 inline-flex mb-6">
-                    <BookOpen className="h-12 w-12 text-primary" />
+                  <div className="bg-primary/10 rounded-full p-5 md:p-6 inline-flex mb-4 md:mb-6">
+                    <BookOpen className="h-8 w-8 md:h-12 md:w-12 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">Attentive Reader</h3>
-                  <ul className="text-left space-y-3 text-muted-foreground">
+                  <h3 className="text-lg md:text-xl font-semibold mb-3">Attentive Reader</h3>
+                  <ul className="text-left space-y-2 md:space-y-3 text-muted-foreground">
                     <li className="flex items-start">
-                      <span className="mr-2 text-green-500">✓</span> 
+                      <span className="mr-2 text-green-500 mt-0.5">✓</span> 
                       <span>Quickly retrieves exact information and references</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="mr-2 text-green-500">✓</span> 
+                      <span className="mr-2 text-green-500 mt-0.5">✓</span> 
                       <span>Saves and organizes favorite quotes by theme</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="mr-2 text-green-500">✓</span> 
+                      <span className="mr-2 text-green-500 mt-0.5">✓</span> 
                       <span>Retains key insights for years after reading</span>
                     </li>
                     <li className="flex items-start">
-                      <span className="mr-2 text-green-500">✓</span> 
+                      <span className="mr-2 text-green-500 mt-0.5">✓</span> 
                       <span>Builds a valuable knowledge system over time</span>
                     </li>
                   </ul>
@@ -183,35 +187,36 @@ const Welcome = () => {
         <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
-      <section className="py-24 bg-muted/20 relative">
+      {/* Forgetting Curve Section */}
+      <section className="py-16 md:py-24 bg-muted/20 relative">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-4">The Forgetting Curve</h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <div className="text-center mb-8 md:mb-10">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">The Forgetting Curve</h2>
+              <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
                 Research shows that we forget approximately 70% of what we learn within 24 hours 
                 and 90% within a week if we don't actively reinforce our knowledge.
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-center">
+              <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
                 <ForgettingCurveGraph />
               </div>
               
-              <div className="space-y-6">
-                <div className="bg-white p-6 rounded-xl shadow-lg">
-                  <h3 className="text-xl font-semibold mb-3 text-primary">The Science of Forgetting</h3>
-                  <p className="text-muted-foreground">
+              <div className="space-y-4 md:space-y-6">
+                <div className="bg-white p-5 md:p-6 rounded-xl shadow-lg">
+                  <h3 className="text-lg md:text-xl font-semibold mb-2 md:mb-3 text-primary">The Science of Forgetting</h3>
+                  <p className="text-sm md:text-base text-muted-foreground">
                     In 1885, psychologist Hermann Ebbinghaus discovered what's known as "The Forgetting Curve" - 
                     our brains rapidly discard information they deem unimportant. Without a system to reinforce what 
                     you read, your brain will naturally forget most of the content.
                   </p>
                 </div>
                 
-                <div className="bg-white p-6 rounded-xl shadow-lg">
-                  <h3 className="text-xl font-semibold mb-3 text-primary">How BookishNotes Helps</h3>
-                  <p className="text-muted-foreground">
+                <div className="bg-white p-5 md:p-6 rounded-xl shadow-lg">
+                  <h3 className="text-lg md:text-xl font-semibold mb-2 md:mb-3 text-primary">How BookishNotes Helps</h3>
+                  <p className="text-sm md:text-base text-muted-foreground">
                     By creating notes and highlights as you read, you're actively engaging with the material,
                     which significantly improves retention. Our system makes this process effortless and
                     ensures you can revisit key insights whenever you need them.
@@ -226,7 +231,8 @@ const Welcome = () => {
         <div className="absolute bottom-1/3 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
-      <section className="py-24 relative overflow-hidden">
+      {/* Features Section */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-white to-muted/30" style={{
           backgroundImage: `linear-gradient(109.6deg, rgba(223,234,247,1) 11.2%, rgba(244,248,252,1) 91.1%)`,
           opacity: 0.8
@@ -240,7 +246,14 @@ const Welcome = () => {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="text-center mb-10 md:mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">Powerful Features</h2>
+              <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto">
+                Everything you need to remember what you read
+              </p>
+            </div>
+            
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto">
               <Feature
                 icon={<BookText className="h-6 w-6" />}
                 title="Intelligent Note-Taking"
@@ -268,7 +281,7 @@ const Welcome = () => {
                 description="Snap photos of diagrams, charts, or important passages directly into your notes for visual reference."
               />
               <Feature
-                icon={<BookText className="h-6 w-6" />}
+                icon={<BrainCircuit className="h-6 w-6" />}
                 title="Build a Second Brain"
                 description="Transform your reading into a powerful knowledge base that grows with every book you read."
               />
@@ -277,62 +290,18 @@ const Welcome = () => {
         </div>
       </section>
 
-      <section className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Capture Everything Important</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              BookishNotes gives you powerful tools to capture and organize everything that matters in your books.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Feature
-              icon={<BookText className="h-6 w-6" />}
-              title="Intelligent Note-Taking"
-              description="Take detailed notes on chapters, concepts, and key points so you never forget what you read."
-              primary
-            />
-            <Feature
-              icon={<Quote className="h-6 w-6" />}
-              title="Save Inspiring Quotes"
-              description="Collect powerful quotes and passages that move you, and revisit them whenever you need inspiration."
-            />
-            <Feature
-              icon={<FolderKanban className="h-6 w-6" />}
-              title="Organize Your Library"
-              description="Categorize and organize books by genre, topic, or custom collections to build your personal knowledge system."
-            />
-            <Feature
-              icon={<Users className="h-6 w-6" />}
-              title="Share with Friends"
-              description="Connect with fellow readers and share book recommendations with your trusted circle."
-            />
-            <Feature
-              icon={<Camera className="h-6 w-6" />}
-              title="Capture Visual Content"
-              description="Snap photos of diagrams, charts, or important passages directly into your notes for visual reference."
-            />
-            <Feature
-              icon={<BookText className="h-6 w-6" />}
-              title="Build a Second Brain"
-              description="Transform your reading into a powerful knowledge base that grows with every book you read."
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 bg-background">
+      {/* Steps Section */}
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Remember More of What You Read</h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            <div className="text-center mb-10 md:mb-16">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">Remember More of What You Read</h2>
+              <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
                 Our guided note-taking system helps you capture the most important elements of each book.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
               <Step 
                 number="01" 
                 title="Capture Key Insights" 
@@ -353,19 +322,20 @@ const Welcome = () => {
         </div>
       </section>
 
-      <section className="py-24 bg-muted/30">
+      {/* Testimonial Section */}
+      <section className="py-16 md:py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">From Our Readers</h2>
+            <div className="text-center mb-8 md:mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">From Our Readers</h2>
             </div>
 
-            <div className="bg-background p-8 rounded-2xl shadow-md">
-              <p className="text-lg italic mb-6">
+            <div className="bg-background p-6 md:p-8 rounded-2xl shadow-md">
+              <p className="text-base md:text-lg italic mb-6">
                 "Before BookishNotes, I'd read a book and forget most of it within weeks. Now I have a system that helps me capture and remember the most important ideas from everything I read. It's changed how I learn from books completely."
               </p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
                   AK
                 </div>
                 <div className="ml-4">
@@ -378,18 +348,19 @@ const Welcome = () => {
         </div>
       </section>
 
-      <section className="py-24 bg-background">
+      {/* CTA Section */}
+      <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6">
               Remember Every Book You Read
             </h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto">
               Join BookishNotes today and transform your reading experience with our powerful note-taking system.
             </p>
             <Button 
               size="lg"
-              className="h-12 px-8 text-base"
+              className="h-12 px-6 sm:px-8 text-base"
               asChild
             >
               <Link to="/auth/sign-up">
@@ -401,13 +372,14 @@ const Welcome = () => {
         </div>
       </section>
 
-      <footer className="py-12 border-t">
+      {/* Footer */}
+      <footer className="py-8 md:py-12 border-t">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 md:gap-6">
               <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground">
                 Privacy Policy
               </Link>
@@ -439,22 +411,22 @@ const Feature = ({
   description: string;
   primary?: boolean;
 }) => (
-  <div className={`p-6 rounded-lg border ${primary ? 'border-primary/20 bg-primary/5' : 'bg-card'} hover:shadow-lg transition-shadow`}>
-    <div className={`w-12 h-12 rounded-lg ${primary ? 'bg-primary/20' : 'bg-primary/10'} flex items-center justify-center text-primary mb-4`}>
+  <div className={`p-5 md:p-6 rounded-lg border ${primary ? 'border-primary/20 bg-primary/5' : 'bg-card'} hover:shadow-lg transition-shadow h-full`}>
+    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg ${primary ? 'bg-primary/20' : 'bg-primary/10'} flex items-center justify-center text-primary mb-4`}>
       {icon}
     </div>
-    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-muted-foreground">{description}</p>
+    <h3 className="text-lg md:text-xl font-semibold mb-2">{title}</h3>
+    <p className="text-muted-foreground text-sm md:text-base">{description}</p>
   </div>
 );
 
 const Step = ({ number, title, description }: { number: string; title: string; description: string }) => (
-  <div className="flex flex-col items-center text-center p-6">
-    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-4">
+  <div className="flex flex-col items-center text-center p-4 md:p-6">
+    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg md:text-xl mb-4">
       {number}
     </div>
-    <h3 className="text-xl font-semibold mb-2">{title}</h3>
-    <p className="text-muted-foreground">{description}</p>
+    <h3 className="text-lg md:text-xl font-semibold mb-2">{title}</h3>
+    <p className="text-sm md:text-base text-muted-foreground">{description}</p>
   </div>
 );
 
