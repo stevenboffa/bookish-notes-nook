@@ -81,11 +81,7 @@ const Welcome = () => {
               </div>
             </div>
 
-            <div className="relative z-10 bg-white/10 backdrop-blur-sm rounded-2xl p-4 shadow-xl animate-fade-in [animation-delay:300ms] border border-white/20">
-              <div className="text-white text-center mb-4">
-                <h3 className="text-xl font-semibold">Community Insights</h3>
-                <p className="text-white/80 text-sm">See what readers are capturing</p>
-              </div>
+            <div className="relative z-10 animate-fade-in [animation-delay:300ms]">
               <NotesPreview />
             </div>
           </div>

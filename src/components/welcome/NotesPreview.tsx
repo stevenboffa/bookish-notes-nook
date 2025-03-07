@@ -123,7 +123,7 @@ export function NotesPreview() {
             <Card 
               key={`${note.id}-${index}`}
               className={cn(
-                "backdrop-blur-sm border-white/20 shadow-lg transition-all duration-500",
+                "backdrop-blur-sm shadow-lg transition-all duration-500",
                 index % 2 === 0 ? "bg-white/20" : "bg-primary/20"
               )}
             >
