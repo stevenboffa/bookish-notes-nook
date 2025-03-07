@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera } from "lucide-react";
@@ -97,12 +98,11 @@ const Welcome = () => {
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold mb-4">See What Readers Are Capturing</h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Join thousands of readers who use BookishNotes to save and organize their reading insights
+                Join our community of readers who use BookishNotes to save and organize their reading insights, thoughts, quotes, and more.
               </p>
             </div>
             
             <div>
-              <h3 className="text-xl font-semibold mb-6 text-center">Insightful Notes from Readers</h3>
               <div className="max-w-2xl mx-auto">
                 <NotesPreview />
               </div>
