@@ -410,12 +410,25 @@ const Feature = ({
   description: string;
   primary?: boolean;
 }) => (
-  <div className={`p-5 md:p-6 rounded-lg border ${primary ? 'border-primary/20 bg-primary/5' : 'bg-card'} hover:shadow-lg transition-shadow h-full`}>
-    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg ${primary ? 'bg-primary/20' : 'bg-primary/10'} flex items-center justify-center text-primary mb-4`}>
+  <div 
+    className={`p-5 md:p-6 rounded-lg border transition-all duration-300 hover:shadow-xl 
+      ${primary ? 'border-primary/20 bg-primary/5' : 'bg-card border-muted/20'} 
+      group relative overflow-hidden h-full flex flex-col`}
+  >
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+    
+    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-primary mb-4 transition-all duration-300
+      ${primary ? 'bg-primary/20 group-hover:bg-primary/30' : 'bg-primary/10 group-hover:bg-primary/20'}`}
+    >
       {icon}
     </div>
-    <h3 className="text-lg md:text-xl font-semibold mb-2">{title}</h3>
+    
+    <h3 className="text-lg md:text-xl font-semibold mb-2 group-hover:text-primary transition-colors duration-300">{title}</h3>
     <p className="text-muted-foreground text-sm md:text-base">{description}</p>
+    
+    <div className="mt-4 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center text-sm text-primary font-medium">
+      Learn more <ArrowRight className="ml-1 h-4 w-4" />
+    </div>
   </div>
 );
 
