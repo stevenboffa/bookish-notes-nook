@@ -1,7 +1,5 @@
-
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
 interface AuthLayoutProps {
   children: React.ReactNode;
   title: string;
@@ -11,42 +9,28 @@ interface AuthLayoutProps {
     href: string;
   };
 }
-
-export function AuthLayout({ 
-  children, 
-  title, 
+export function AuthLayout({
+  children,
+  title,
   subtitle,
-  backTo 
+  backTo
 }: AuthLayoutProps) {
-  return (
-    <div className="min-h-screen flex">
+  return <div className="min-h-screen flex">
       {/* Content side */}
       <div className="flex-1 flex flex-col justify-center items-center p-8">
         {/* Logo header */}
-        <Link 
-          to="/" 
-          className="mb-16 text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent hover:opacity-90 transition-opacity"
-        >
-          BookNotes
-        </Link>
+        <Link to="/" className="mb-16 text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent hover:opacity-90 transition-opacity">BookishNotes</Link>
 
         <div className="w-full max-w-[440px] space-y-8">
-          {backTo && (
-            <Link
-              to={backTo.href}
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
+          {backTo && <Link to={backTo.href} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
               ← {backTo.text}
-            </Link>
-          )}
+            </Link>}
           
           <div className="space-y-3 text-center">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
-            {subtitle && (
-              <p className="text-muted-foreground text-base sm:text-lg">
+            {subtitle && <p className="text-muted-foreground text-base sm:text-lg">
                 {subtitle}
-              </p>
-            )}
+              </p>}
           </div>
           
           {children}
@@ -74,10 +58,7 @@ export function AuthLayout({
         <footer className="mt-16 text-center space-y-4">
           <div className="text-sm text-muted-foreground">
             Need help?{" "}
-            <a 
-              href="mailto:support@booknotes.com" 
-              className="text-primary hover:text-primary/90 font-medium"
-            >
+            <a href="mailto:support@booknotes.com" className="text-primary hover:text-primary/90 font-medium">
               Contact our support team
             </a>
           </div>
@@ -90,11 +71,9 @@ export function AuthLayout({
       {/* Image side */}
       <div className="hidden lg:block relative w-1/2 overflow-hidden bg-gradient-to-b from-purple-600 to-indigo-600">
         <div className="absolute inset-0 w-full h-full">
-          <div className="absolute inset-0" 
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
+          <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`
+        }} />
           <div className="absolute inset-0 backdrop-blur-[1px]" />
           
           {/* Content overlay */}
@@ -130,6 +109,5 @@ export function AuthLayout({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
