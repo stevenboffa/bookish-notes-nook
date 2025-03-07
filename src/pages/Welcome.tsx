@@ -1,6 +1,7 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, X } from "lucide-react";
+import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
@@ -410,7 +411,11 @@ const Welcome = () => {
                   <Facebook className="h-5 w-5" color="#4267B2" />
                 </a>
                 <a href="https://x.com/bookishnotesapp" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
-                  <X className="h-5 w-5" color="#1DA1F2" />
+                  <img 
+                    src="/lovable-uploads/414d71e0-1338-48d5-8c9d-41110af89248.png" 
+                    alt="X (Twitter)" 
+                    className="h-5 w-5" 
+                  />
                 </a>
                 <a href="https://www.instagram.com/bookishnotesapp" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-primary transition-colors">
                   <Instagram className="h-5 w-5" color="#E1306C" />
