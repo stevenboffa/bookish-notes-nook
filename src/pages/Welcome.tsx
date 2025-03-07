@@ -134,7 +134,7 @@ const Welcome = () => {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8 rounded-2xl overflow-hidden shadow-lg">
+            <div className="grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-lg">
               <div className="bg-[#F1F0FB] p-8 relative">
                 <div className="absolute top-4 left-4 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
                   Before
