@@ -1,13 +1,11 @@
-
 import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 // Data points representing Ebbinghaus's Forgetting Curve
-// Adjusted to show a steeper decay from day 1 (50%) to day 2 (30%) while reaching 10% by day 7.
 const forgettingCurveData = [
   { day: 0, retention: 100, label: "Day 0: 100%" },
   { day: 1, retention: 50, label: "Day 1: 50%" },
-  { day: 2, retention: 30, label: "Day 2: 30%" }, // Increased decay between day 1 and day 2
+  { day: 2, retention: 30, label: "Day 2: 30%" },
   { day: 3, retention: 25, label: "Day 3: 25%" },
   { day: 4, retention: 20, label: "Day 4: 20%" },
   { day: 5, retention: 16, label: "Day 5: 16%" },
@@ -86,11 +84,11 @@ export function ForgettingCurveGraph() {
           
           {/* Smooth curve for the graph */}
           <Line
-            type="basis" // 'basis' creates a smooth spline interpolation
+            type="monotone"
             dataKey="retention"
             stroke="url(#colorRetention)"
             strokeWidth={2}
-            dot={{ r: 2 }}
+            dot={{ r: 2, fill: "#9b87f5" }}
             activeDot={{ r: 4, fill: "#9b87f5" }}
             isAnimationActive={false}
           />
