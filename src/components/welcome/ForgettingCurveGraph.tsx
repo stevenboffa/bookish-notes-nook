@@ -58,8 +58,8 @@ export function ForgettingCurveGraph() {
           <XAxis 
             dataKey="day" 
             domain={[0, 7]}
-            ticks={[0, 1, 2, 3, 4, 5, 6, 7]} // Explicitly set all ticks from 0-7
-            tickFormatter={(value) => `${value}`} // Format each tick as its number value
+            ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
+            tickFormatter={(value) => value.toString()}
             label={{ 
               value: "ELAPSED TIME (DAYS)", 
               position: "insideBottom", 
@@ -68,6 +68,9 @@ export function ForgettingCurveGraph() {
               fontWeight: "bold"
             }}
             padding={{ left: 20, right: 20 }}
+            allowDecimals={false}
+            type="number"
+            interval={0}
           />
           <YAxis 
             domain={[0, 100]}
