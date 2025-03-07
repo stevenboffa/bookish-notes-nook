@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera } from "lucide-react";
+import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
@@ -114,16 +114,143 @@ const Welcome = () => {
         <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
-      {/* Main Pain Point Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">The Reader's Dilemma</h2>
-            <p className="text-xl text-muted-foreground">
-              As avid readers, we often can't remember details of books we read years ago. 
-              BookishNotes solves this problem with a smart note-taking system that gives you 
-              a crystal clear memory of everything you read.
-            </p>
+      {/* Main Pain Point Section - REDESIGNED */}
+      <section className="py-24 relative overflow-hidden">
+        {/* Custom Background Treatment */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white to-muted/30" style={{
+          backgroundImage: `linear-gradient(109.6deg, rgba(223,234,247,1) 11.2%, rgba(244,248,252,1) 91.1%)`,
+          opacity: 0.8
+        }}>
+          <div className="absolute inset-0 opacity-10" 
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236B7280' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">The Reader's Dilemma</h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                As avid readers, we often can't remember details of books we read years ago. 
+                BookishNotes solves this problem with a smart note-taking system that gives you 
+                a crystal clear memory of everything you read.
+              </p>
+            </div>
+            
+            {/* Visual Storytelling: Forgetting Curve */}
+            <div className="mb-20 relative">
+              <div className="max-w-2xl mx-auto text-center mb-8">
+                <h3 className="text-2xl font-semibold mb-2">The Forgetting Curve</h3>
+                <p className="text-muted-foreground">Without active recall, we forget up to 90% of what we read within just one week</p>
+              </div>
+              
+              <div className="relative h-64 md:h-80">
+                {/* Curve Visualization */}
+                <div className="absolute inset-0 flex items-end">
+                  <div className="h-full w-full bg-gradient-to-r from-red-500/20 to-red-500/70 rounded-br-3xl rounded-tr-3xl"
+                       style={{clipPath: "polygon(0 100%, 100% 20%, 100% 100%, 0% 100%)"}}>
+                  </div>
+                </div>
+                
+                {/* Time Markers */}
+                <div className="absolute bottom-0 w-full flex justify-between px-4 text-sm text-muted-foreground">
+                  <span>Day 1</span>
+                  <span>Day 2</span>
+                  <span>Day 7</span>
+                  <span>1 Month</span>
+                  <span>1 Year</span>
+                </div>
+                
+                {/* Memory Markers with Icons */}
+                <div className="absolute top-0 left-[5%] animate-bounce-slow">
+                  <div className="bg-primary/20 p-3 rounded-full">
+                    <BrainCircuit className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="mt-2 text-center text-sm font-medium">100%</div>
+                </div>
+                
+                <div className="absolute top-[40%] left-[30%] animate-bounce-slow [animation-delay:700ms]">
+                  <div className="bg-primary/20 p-2 rounded-full">
+                    <BrainCircuit className="h-6 w-6 text-primary/60" />
+                  </div>
+                  <div className="mt-2 text-center text-sm font-medium">60%</div>
+                </div>
+                
+                <div className="absolute top-[70%] left-[70%] animate-bounce-slow [animation-delay:1400ms]">
+                  <div className="bg-primary/10 p-1 rounded-full">
+                    <BrainCircuit className="h-4 w-4 text-primary/30" />
+                  </div>
+                  <div className="mt-2 text-center text-sm font-medium">10%</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Split-Design Layout: Before/After Comparison */}
+            <div className="grid md:grid-cols-2 gap-8 rounded-2xl overflow-hidden shadow-lg">
+              {/* Before Side */}
+              <div className="bg-muted/50 p-8 relative">
+                <div className="absolute top-4 left-4 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
+                  Before
+                </div>
+                <div className="mt-8 text-center">
+                  <div className="bg-red-50 rounded-full p-6 inline-flex mb-6">
+                    <BookOpen className="h-12 w-12 text-red-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">Frustrated Reader</h3>
+                  <ul className="text-left space-y-3 text-muted-foreground">
+                    <li className="flex items-start">
+                      <span className="mr-2 text-red-400">✗</span> 
+                      <span>"I know I read about this somewhere..."</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 text-red-400">✗</span> 
+                      <span>Can't find important quotes when needed</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 text-red-400">✗</span> 
+                      <span>Insights fade within weeks of finishing</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 text-red-400">✗</span> 
+                      <span>Reading feels like temporary entertainment</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              {/* After Side */}
+              <div className="bg-card p-8 relative">
+                <div className="absolute top-4 left-4 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+                  After
+                </div>
+                <div className="mt-8 text-center">
+                  <div className="bg-primary/10 rounded-full p-6 inline-flex mb-6">
+                    <BookOpen className="h-12 w-12 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">Confident BookishNotes User</h3>
+                  <ul className="text-left space-y-3 text-muted-foreground">
+                    <li className="flex items-start">
+                      <span className="mr-2 text-green-500">✓</span> 
+                      <span>Quickly retrieves exact information and references</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 text-green-500">✓</span> 
+                      <span>Saves and organizes favorite quotes by theme</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 text-green-500">✓</span> 
+                      <span>Retains key insights for years after reading</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2 text-green-500">✓</span> 
+                      <span>Builds a valuable knowledge system over time</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
