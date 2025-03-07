@@ -24,7 +24,7 @@ export function BookCover({
   const fallbackImage = getBookCoverFallback(genre);
   
   const sizeClasses = {
-    sm: "w-16 h-24",
+    sm: "w-28 h-40",
     md: "w-32 h-48",
     lg: "w-48 h-72"
   };
@@ -35,8 +35,11 @@ export function BookCover({
     return url.startsWith('http://') || url.startsWith('https://');
   };
 
-  const validImageUrl = !error && isValidImageUrl(size === "sm" ? thumbnailUrl : imageUrl);
-  const fallbackAvailable = !!fallbackImage;
+  const validImageUrl = !error && isValidImageUrl(imageUrl);
+  const validThumbnailUrl = !error && isValidImageUrl(thumbnailUrl);
+  const showImage = validImageUrl || validThumbnailUrl || !!fallbackImage;
+  const imageToShow = size === "sm" && validThumbnailUrl ? thumbnailUrl : 
+                      validImageUrl ? imageUrl : fallbackImage;
 
   return (
     <div 
@@ -47,9 +50,9 @@ export function BookCover({
         className
       )}
     >
-      {validImageUrl || fallbackAvailable ? (
+      {showImage ? (
         <img
-          src={validImageUrl ? (size === "sm" ? thumbnailUrl : imageUrl) : fallbackImage}
+          src={imageToShow || ''}
           alt={`Cover of ${title}`}
           className="w-full h-full object-cover"
           onError={() => setError(true)}
