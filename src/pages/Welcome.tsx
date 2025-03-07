@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen } from "lucide-react";
@@ -30,7 +29,7 @@ const Welcome = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center">
         <div 
           className="absolute inset-0"
           style={{
