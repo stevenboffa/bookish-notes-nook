@@ -53,80 +53,57 @@ const Welcome = () => {
           <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white/20 rounded-full animate-bounce-slow [animation-delay:1000ms]" />
         </div>
 
-        <div className="container relative mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in [text-wrap:balance]">
-              Never Forget
-              <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                What You Read
-              </span>
-            </h1>
+        <div className="container relative mx-auto px-4 py-16 md:py-24">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="text-white animate-fade-in max-w-xl">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 [text-wrap:balance]">
+                Never Forget
+                <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                  What You Read
+                </span>
+              </h1>
 
-            <p className="text-xl md:text-2xl text-white/90 mb-12 animate-fade-in [animation-delay:200ms] max-w-2xl mx-auto leading-relaxed">
-              BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come.
-            </p>
+              <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
+                BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come.
+              </p>
 
-            <div className="animate-fade-in [animation-delay:400ms] relative z-10">
-              <Button 
-                size="lg" 
-                className="h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
-                asChild
-              >
-                <Link to="/auth/sign-up">
-                  Start Taking Notes
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </Button>
+              <div className="relative z-10">
+                <Button 
+                  size="lg" 
+                  className="h-14 px-8 text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
+                  asChild
+                >
+                  <Link to="/auth/sign-up">
+                    Start Taking Notes
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                </Button>
+              </div>
             </div>
 
-            <div className="hidden md:block absolute -bottom-24 left-1/2 transform -translate-x-1/2 opacity-10">
-              <div className="relative w-[500px] h-[500px] rotate-45 border border-white/20 rounded-full">
-                <div className="absolute inset-4 border border-white/20 rounded-full" />
-                <div className="absolute inset-8 border border-white/20 rounded-full" />
+            <div className="relative z-10 bg-white/10 backdrop-blur-sm rounded-2xl p-4 shadow-xl animate-fade-in [animation-delay:300ms] border border-white/20">
+              <div className="text-white text-center mb-4">
+                <h3 className="text-xl font-semibold">Community Insights</h3>
+                <p className="text-white/80 text-sm">See what readers are capturing</p>
               </div>
+              <NotesPreview />
+            </div>
+          </div>
+
+          <div className="hidden md:block absolute -bottom-24 left-1/2 transform -translate-x-1/2 opacity-10">
+            <div className="relative w-[500px] h-[500px] rotate-45 border border-white/20 rounded-full">
+              <div className="absolute inset-4 border border-white/20 rounded-full" />
+              <div className="absolute inset-8 border border-white/20 rounded-full" />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 bg-background relative">
+      <section className="py-24 bg-background relative">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-4">See What Readers Are Capturing</h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Join our community of readers who use BookishNotes to save and organize their reading insights, thoughts, quotes, and more.
-              </p>
-            </div>
-            
-            <div>
-              <div className="max-w-2xl mx-auto">
-                <NotesPreview />
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="absolute top-40 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
-      </section>
-
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-white to-muted/30" style={{
-          backgroundImage: `linear-gradient(109.6deg, rgba(223,234,247,1) 11.2%, rgba(244,248,252,1) 91.1%)`,
-          opacity: 0.8
-        }}>
-          <div className="absolute inset-0 opacity-10" 
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236B7280' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
-        </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">The Reader's Dilemma</h2>
+              <h2 className="text-3xl font-bold mb-4">The Reader's Dilemma</h2>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 As avid readers, we often can't remember details of books we read years ago. 
                 BookishNotes solves this problem with a smart note-taking system that gives you 
@@ -194,6 +171,60 @@ const Welcome = () => {
                   </ul>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="absolute top-40 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+      </section>
+
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-white to-muted/30" style={{
+          backgroundImage: `linear-gradient(109.6deg, rgba(223,234,247,1) 11.2%, rgba(244,248,252,1) 91.1%)`,
+          opacity: 0.8
+        }}>
+          <div className="absolute inset-0 opacity-10" 
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236B7280' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <Feature
+                icon={<BookText className="h-6 w-6" />}
+                title="Intelligent Note-Taking"
+                description="Take detailed notes on chapters, concepts, and key points so you never forget what you read."
+                primary
+              />
+              <Feature
+                icon={<Quote className="h-6 w-6" />}
+                title="Save Inspiring Quotes"
+                description="Collect powerful quotes and passages that move you, and revisit them whenever you need inspiration."
+              />
+              <Feature
+                icon={<FolderKanban className="h-6 w-6" />}
+                title="Organize Your Library"
+                description="Categorize and organize books by genre, topic, or custom collections to build your personal knowledge system."
+              />
+              <Feature
+                icon={<Users className="h-6 w-6" />}
+                title="Share with Friends"
+                description="Connect with fellow readers and share book recommendations with your trusted circle."
+              />
+              <Feature
+                icon={<Camera className="h-6 w-6" />}
+                title="Capture Visual Content"
+                description="Snap photos of diagrams, charts, or important passages directly into your notes for visual reference."
+              />
+              <Feature
+                icon={<BookText className="h-6 w-6" />}
+                title="Build a Second Brain"
+                description="Transform your reading into a powerful knowledge base that grows with every book you read."
+              />
             </div>
           </div>
         </div>

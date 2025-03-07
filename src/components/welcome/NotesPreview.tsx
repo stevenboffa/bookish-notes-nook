@@ -106,9 +106,9 @@ export function NotesPreview() {
   const displayNotes = [...SAMPLE_NOTES, ...SAMPLE_NOTES];
   
   return (
-    <div className="relative h-[500px] overflow-hidden">
+    <div className="relative h-[420px] overflow-hidden">
       {/* Top gradient overlay */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white/10 to-transparent z-10 pointer-events-none" />
       
       {/* Notes container with smooth scrolling */}
       <div className="relative overflow-hidden" style={{ height: '100%' }}>
@@ -123,19 +123,19 @@ export function NotesPreview() {
             <Card 
               key={`${note.id}-${index}`}
               className={cn(
-                "backdrop-blur-sm border-primary/10 transition-all duration-500",
-                index % 2 === 0 ? "bg-primary/5" : "bg-white/20"
+                "backdrop-blur-sm border-white/20 shadow-lg transition-all duration-500",
+                index % 2 === 0 ? "bg-white/20" : "bg-primary/20"
               )}
             >
               <CardContent className="p-5">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium text-sm shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-white font-medium text-sm shrink-0">
                     {note.userInitials}
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm italic">{note.content}</p>
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">{note.userName}</span> on <span className="font-medium text-foreground">{note.bookTitle}</span>
+                    <p className="text-sm italic text-white">{note.content}</p>
+                    <div className="text-xs text-white/70">
+                      <span className="font-medium text-white/90">{note.userName}</span> on <span className="font-medium text-white/90">{note.bookTitle}</span>
                     </div>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export function NotesPreview() {
       </div>
       
       {/* Bottom gradient overlay */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/10 to-transparent z-10 pointer-events-none" />
     </div>
   );
 }
