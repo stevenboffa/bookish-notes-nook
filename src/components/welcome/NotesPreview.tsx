@@ -109,7 +109,7 @@ export function NotesPreview() {
       {/* Subtle fade effect at the top */}
       <div className="absolute top-0 left-0 right-0 h-16 z-10 pointer-events-none"
         style={{
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%)'
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)'
         }}
       />
       
@@ -154,7 +154,7 @@ export function NotesPreview() {
       {/* Subtle fade effect at the bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-16 z-10 pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 100%)'
+          background: 'linear-gradient(to top, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)'
         }}
       />
     </div>
