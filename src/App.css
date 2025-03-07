@@ -89,3 +89,13 @@ body {
     max-width: 1280px;
   }
 }
+
+/* Fix for chart components */
+.recharts-wrapper {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.recharts-surface {
+  overflow: visible;
+}

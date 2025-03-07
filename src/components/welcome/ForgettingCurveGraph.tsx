@@ -37,11 +37,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
 
 export function ForgettingCurveGraph() {
   return (
-    <div className="h-64 sm:h-72 md:h-80 w-full">
+    <div className="h-64 sm:h-72 md:h-80 w-full max-w-full overflow-hidden">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={forgettingCurveData}
-          margin={{ top: 10, right: 20, left: 0, bottom: 30 }}
+          margin={{ top: 10, right: 5, left: -10, bottom: 30 }}
         >
           {/* Gradient definition for the line */}
           <defs>
@@ -55,22 +55,30 @@ export function ForgettingCurveGraph() {
           {/* Grid lines */}
           <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.2} />
           
-          {/* X axis configuration */}
+          {/* X axis configuration - adjusted for mobile */}
           <XAxis 
             dataKey="day"
             domain={[0, 7]}
             ticks={[0, 1, 2, 3, 4, 5, 6, 7]}
             label={{ value: "Days", position: "insideBottom", offset: -20 }}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 10 }}
+            tickMargin={5}
           />
           
-          {/* Y axis configuration */}
+          {/* Y axis configuration - adjusted for mobile */}
           <YAxis 
             domain={[0, 100]}
             ticks={[0, 20, 40, 60, 80, 100]}
-            label={{ value: "Retention (%)", angle: -90, position: "insideLeft", style: { textAnchor: 'middle' } }}
-            tick={{ fontSize: 12 }}
-            width={45}
+            label={{ 
+              value: "Retention (%)", 
+              angle: -90, 
+              position: "insideLeft", 
+              style: { textAnchor: 'middle' }, 
+              offset: 0 
+            }}
+            tick={{ fontSize: 10 }}
+            width={30}
+            tickFormatter={(value) => value === 0 ? "0" : `${value}`}
           />
           
           {/* Tooltip component */}
@@ -81,9 +89,9 @@ export function ForgettingCurveGraph() {
             type="basis" // 'basis' creates a smooth spline interpolation
             dataKey="retention"
             stroke="url(#colorRetention)"
-            strokeWidth={3}
-            dot={{ r: 3 }}
-            activeDot={{ r: 5, fill: "#9b87f5" }}
+            strokeWidth={2}
+            dot={{ r: 2 }}
+            activeDot={{ r: 4, fill: "#9b87f5" }}
             isAnimationActive={false}
           />
         </LineChart>
