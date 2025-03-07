@@ -58,65 +58,74 @@ export function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-full p-0">
-            <div className="flex flex-col h-full bg-gradient-to-br from-[#2B2930] to-[#403E43] text-white">
-              <div className="p-6 border-b border-white/10">
+            <div className="flex flex-col h-full bg-gradient-to-br from-white to-slate-50 text-slate-800">
+              <div className="p-6 border-b border-slate-200">
                 <Link 
                   to="/" 
-                  className="text-xl font-bold text-white"
+                  className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"
                   onClick={() => setIsOpen(false)}
                 >
                   BookishNotes
                 </Link>
               </div>
               <nav className="flex-1 px-6 py-8">
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <Link
                     to="/blog"
-                    className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                    className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
                     onClick={() => setIsOpen(false)}
                   >
                     <BookOpen className="h-5 w-5 mr-3" />
                     Blog
-                    <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
+                    <ChevronRight className="ml-auto h-5 w-5 text-slate-400 group-hover:text-white" />
                   </Link>
                   <Link
                     to="/about"
-                    className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                    className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
                     onClick={() => setIsOpen(false)}
                   >
                     <Info className="h-5 w-5 mr-3" />
                     About
-                    <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
+                    <ChevronRight className="ml-auto h-5 w-5 text-slate-400 group-hover:text-white" />
                   </Link>
                   <Link
                     to="/contact"
-                    className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
+                    className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
                     onClick={() => setIsOpen(false)}
                   >
                     <MessageCircle className="h-5 w-5 mr-3" />
                     Contact
-                    <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
+                    <ChevronRight className="ml-auto h-5 w-5 text-slate-400 group-hover:text-white" />
                   </Link>
 
-                  <div className="h-px bg-white/10 my-8" />
+                  <div className="h-px bg-slate-200 my-6" />
 
-                  <Link
-                    to="/auth/sign-in"
-                    className="flex items-center px-4 py-3 text-lg font-medium text-white/90 hover:text-white rounded-lg bg-white/5 hover:bg-white/10 transition-colors group"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Users className="h-5 w-5 mr-3" />
-                    Sign In
-                    <ChevronRight className="ml-auto h-5 w-5 text-white/50 group-hover:text-white/80" />
-                  </Link>
-                  <Link
-                    to="/auth/sign-up"
-                    className="flex items-center px-4 py-3 text-lg font-medium text-white rounded-lg bg-white/20 hover:bg-white/30 transition-colors group"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Create Account
-                    <ChevronRight className="ml-auto h-5 w-5" />
-                  </Link>
+                  <div className="bg-primary/5 rounded-xl p-5">
+                    <h3 className="font-medium text-lg mb-3 text-slate-800">Ready to start your journey?</h3>
+                    <p className="text-slate-600 text-sm mb-4">Create your free account and start organizing your reading notes today.</p>
+                    <div className="space-y-3">
+                      <Button
+                        className="w-full bg-white text-slate-800 border border-slate-200 hover:bg-slate-50"
+                        onClick={() => setIsOpen(false)}
+                        asChild
+                      >
+                        <Link to="/auth/sign-in">
+                          <Users className="h-4 w-4 mr-2" />
+                          Sign In
+                        </Link>
+                      </Button>
+                      <Button
+                        className="w-full"
+                        onClick={() => setIsOpen(false)}
+                        asChild
+                      >
+                        <Link to="/auth/sign-up">
+                          Create Account
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </nav>
             </div>
