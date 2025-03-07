@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen } from "lucide-react";
@@ -7,6 +8,7 @@ import { Meta } from "@/components/Meta";
 import { NotesPreview } from "@/components/welcome/NotesPreview";
 import { Badge } from "@/components/ui/badge";
 import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
+import { Card, CardContent } from "@/components/ui/card";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -289,32 +291,56 @@ const Welcome = () => {
       </section>
 
       {/* Steps Section */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-primary/5 to-primary/10 relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-background to-transparent opacity-40" />
+          <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-background to-transparent opacity-40" />
+          <div className="absolute top-1/4 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          
+          {/* Connect the dots design */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-10">
+            <div className="w-full max-w-4xl h-0.5 bg-primary" />
+          </div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 md:mb-16">
-              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">Remember More of What You Read</h2>
-              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+              <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
+                Three Simple Steps
+              </Badge>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">Remember More of What You Read</h2>
+              <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
                 Our guided note-taking system helps you capture the most important elements of each book.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-              <Step 
-                number="01" 
-                title="Capture Key Insights" 
-                description="Take smart notes on the most important concepts and ideas while you read."
-              />
-              <Step 
-                number="02" 
-                title="Organize Your Notes" 
-                description="Categorize your notes by chapter, theme, or concept for easy reference."
-              />
-              <Step 
-                number="03" 
-                title="Build Your Knowledge" 
-                description="Revisit and connect ideas across books to deepen your understanding."
-              />
+            <div className="relative">
+              {/* Connection lines for desktop */}
+              <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-primary/20 -translate-y-1/2 z-0" />
+              
+              <div className="grid md:grid-cols-3 gap-6 md:gap-8 relative z-10">
+                <StepCard 
+                  number="01" 
+                  title="Capture Key Insights" 
+                  description="Take smart notes on the most important concepts and ideas while you read."
+                  icon="📝"
+                />
+                <StepCard 
+                  number="02" 
+                  title="Organize Your Notes" 
+                  description="Categorize your notes by chapter, theme, or concept for easy reference."
+                  icon="🗂️"
+                />
+                <StepCard 
+                  number="03" 
+                  title="Build Your Knowledge" 
+                  description="Revisit and connect ideas across books to deepen your understanding."
+                  icon="🧠"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -421,21 +447,33 @@ const Feature = ({
     
     <h3 className="text-lg md:text-xl font-semibold mb-2 group-hover:text-primary transition-colors duration-300">{title}</h3>
     <p className="text-muted-foreground text-sm md:text-base">{description}</p>
-    
-    <div className="mt-4 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center text-sm text-primary font-medium">
-      Learn more <ArrowRight className="ml-1 h-4 w-4" />
-    </div>
   </div>
 );
 
-const Step = ({ number, title, description }: { number: string; title: string; description: string }) => (
-  <div className="flex flex-col items-center text-center p-4 md:p-6">
-    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg md:text-xl mb-4">
-      {number}
+const StepCard = ({ 
+  number, 
+  title, 
+  description, 
+  icon 
+}: { 
+  number: string; 
+  title: string; 
+  description: string;
+  icon: string;
+}) => (
+  <Card className="flex flex-col items-center text-center p-6 md:p-8 border-primary/10 bg-background hover:shadow-lg transition-all duration-300 relative">
+    <div className="absolute -top-5 bg-background border border-primary/20 rounded-full p-1 shadow-lg">
+      <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary font-bold text-lg md:text-xl">
+        {number}
+      </div>
     </div>
-    <h3 className="text-lg md:text-xl font-semibold mb-2">{title}</h3>
+    
+    <div className="mt-10 mb-3 text-4xl">{icon}</div>
+    <h3 className="text-lg md:text-xl font-semibold mb-2 text-primary">{title}</h3>
     <p className="text-sm md:text-base text-muted-foreground">{description}</p>
-  </div>
+    
+    <div className="h-1 w-20 bg-gradient-to-r from-primary/80 to-primary/20 rounded-full mt-5"></div>
+  </Card>
 );
 
 export default Welcome;
