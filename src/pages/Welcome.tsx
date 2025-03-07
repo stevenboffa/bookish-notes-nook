@@ -5,6 +5,8 @@ import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera } from "lucide
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
+import { BookPreviewGrid } from "@/components/welcome/BookPreviewGrid";
+import { NotesPreview } from "@/components/welcome/NotesPreview";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -99,6 +101,36 @@ const Welcome = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Content Preview Section - NEW */}
+      <section className="py-20 bg-background relative">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold mb-4">See What Readers Are Capturing</h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Join thousands of readers who use BookishNotes to save and organize their reading insights
+              </p>
+            </div>
+            
+            <div className="mb-16">
+              <h3 className="text-xl font-semibold mb-6 text-center">Popular Books in Our Community</h3>
+              <BookPreviewGrid />
+            </div>
+            
+            <div>
+              <h3 className="text-xl font-semibold mb-6 text-center">Insightful Notes from Readers</h3>
+              <div className="max-w-2xl mx-auto">
+                <NotesPreview />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-40 -left-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
       {/* Main Pain Point Section */}
