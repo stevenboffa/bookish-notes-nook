@@ -106,9 +106,9 @@ export function NotesPreview() {
   const displayNotes = [...SAMPLE_NOTES, ...SAMPLE_NOTES];
   
   return (
-    <div className="relative h-[420px] overflow-hidden">
-      {/* Top gradient overlay */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white/10 to-transparent z-10 pointer-events-none" />
+    <div className="relative h-[480px] overflow-hidden">
+      {/* Top gradient overlay - stronger fade effect */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#9b87f5] via-[#9b87f5]/80 to-transparent z-10 pointer-events-none" />
       
       {/* Notes container with smooth scrolling */}
       <div className="relative overflow-hidden" style={{ height: '100%' }}>
@@ -145,8 +145,8 @@ export function NotesPreview() {
         </div>
       </div>
       
-      {/* Bottom gradient overlay */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/10 to-transparent z-10 pointer-events-none" />
+      {/* Bottom gradient overlay - stronger fade effect */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#9b87f5] via-[#9b87f5]/80 to-transparent z-10 pointer-events-none" />
     </div>
   );
 }
