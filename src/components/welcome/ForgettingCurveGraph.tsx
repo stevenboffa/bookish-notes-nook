@@ -2,17 +2,17 @@
 import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
+// Updated data points for a more accurate forgetting curve
+// Initial learning is 100%, then rapidly drops and levels off to about 10% by day 7
 const forgettingCurveData = [
-  { day: 0, retention: 100, label: "Immediate recall" },
-  { day: 0.014, retention: 60, label: "20 minutes" },
-  { day: 0.042, retention: 50, label: "1 hour" },
-  { day: 1, retention: 33 },
-  { day: 2, retention: 28 },
-  { day: 3, retention: 23 },
-  { day: 4, retention: 19 },
-  { day: 5, retention: 16 },
-  { day: 6, retention: 14 },
-  { day: 7, retention: 12 },
+  { day: 0, retention: 100, label: "Initial learning" },
+  { day: 1, retention: 40, label: "Day 1" },
+  { day: 2, retention: 30 },
+  { day: 3, retention: 25 },
+  { day: 4, retention: 20 },
+  { day: 5, retention: 15 },
+  { day: 6, retention: 12 },
+  { day: 7, retention: 10, label: "Day 7" },
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -22,16 +22,7 @@ const CustomTooltip = ({ active, payload }: any) => {
     // Format the day value
     let dayDisplay;
     if (data.day === 0) {
-      dayDisplay = "Immediate";
-    } else if (data.day < 1) {
-      // Convert to hours or minutes
-      const hours = Math.floor(data.day * 24);
-      if (hours < 1) {
-        const minutes = Math.round(data.day * 24 * 60);
-        dayDisplay = `${minutes} minutes`;
-      } else {
-        dayDisplay = `${hours} hours`;
-      }
+      dayDisplay = "Initial learning";
     } else {
       dayDisplay = `Day ${data.day}`;
     }
@@ -49,13 +40,6 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 export function ForgettingCurveGraph() {
-  // Generate custom gradient for the line
-  const gradientOffset = () => {
-    return 0;
-  };
-  
-  const offset = gradientOffset();
-  
   return (
     <div className="h-72 md:h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -74,7 +58,7 @@ export function ForgettingCurveGraph() {
           <XAxis 
             dataKey="day" 
             domain={[0, 7]}
-            tickFormatter={(value) => value === 0 ? "0" : Math.floor(value).toString()}
+            ticks={[0, 1, 2, 3, 4, 5, 6, 7]} // Display all days 0-7
             label={{ 
               value: "ELAPSED TIME (DAYS)", 
               position: "insideBottom", 
@@ -108,7 +92,7 @@ export function ForgettingCurveGraph() {
             activeDot={{ r: 6, fill: "#9b87f5" }}
           />
           
-          {/* Add annotation markers */}
+          {/* Add annotation markers only for specific points */}
           {forgettingCurveData
             .filter(point => point.label)
             .map((point, index) => (
