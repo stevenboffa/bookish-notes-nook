@@ -26,7 +26,6 @@ const Welcome = () => {
       />
       <Header />
       
-      {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0"
@@ -90,7 +89,6 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Content Preview Section - UPDATED */}
       <section className="py-20 bg-background relative">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -113,9 +111,7 @@ const Welcome = () => {
         <div className="absolute bottom-40 -right-28 w-56 h-56 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
-      {/* Main Pain Point Section - REDESIGNED */}
       <section className="py-24 relative overflow-hidden">
-        {/* Custom Background Treatment */}
         <div className="absolute inset-0 bg-gradient-to-b from-white to-muted/30" style={{
           backgroundImage: `linear-gradient(109.6deg, rgba(223,234,247,1) 11.2%, rgba(244,248,252,1) 91.1%)`,
           opacity: 0.8
@@ -138,10 +134,8 @@ const Welcome = () => {
               </p>
             </div>
             
-            {/* Split-Design Layout: Before/After Comparison */}
             <div className="grid md:grid-cols-2 gap-8 rounded-2xl overflow-hidden shadow-lg">
-              {/* Before Side */}
-              <div className="bg-muted/50 p-8 relative">
+              <div className="bg-[#F1F0FB] p-8 relative">
                 <div className="absolute top-4 left-4 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
                   Before
                 </div>
@@ -149,7 +143,7 @@ const Welcome = () => {
                   <div className="bg-red-50 rounded-full p-6 inline-flex mb-6">
                     <BookOpen className="h-12 w-12 text-red-400" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">Frustrated Reader</h3>
+                  <h3 className="text-xl font-semibold mb-3">Forgetful Reader</h3>
                   <ul className="text-left space-y-3 text-muted-foreground">
                     <li className="flex items-start">
                       <span className="mr-2 text-red-400">✗</span> 
@@ -171,7 +165,6 @@ const Welcome = () => {
                 </div>
               </div>
               
-              {/* After Side */}
               <div className="bg-card p-8 relative">
                 <div className="absolute top-4 left-4 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
                   After
@@ -180,7 +173,7 @@ const Welcome = () => {
                   <div className="bg-primary/10 rounded-full p-6 inline-flex mb-6">
                     <BookOpen className="h-12 w-12 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">Confident BookishNotes User</h3>
+                  <h3 className="text-xl font-semibold mb-3">Attentive Reader</h3>
                   <ul className="text-left space-y-3 text-muted-foreground">
                     <li className="flex items-start">
                       <span className="mr-2 text-green-500">✓</span> 
@@ -206,7 +199,6 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -252,7 +244,6 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -284,7 +275,6 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Testimonial Section */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -310,7 +300,6 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -334,7 +323,6 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-12 border-t">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
