@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AtSign, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { AtSign, Mail, MapPin, MessageCircle, Phone, HelpCircle } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -42,6 +43,7 @@ export default function Contact() {
             </h1>
             <p className="text-slate-600 text-lg md:text-xl max-w-2xl mx-auto">
               Have questions about BookishNotes? We're here to help with any inquiries about our reading notes platform.
+              Check our <Link to="/faq" className="text-primary hover:underline">FAQ page</Link> for quick answers.
             </p>
           </div>
         </section>
@@ -102,6 +104,25 @@ export default function Contact() {
                     <a href="tel:+15555551234" className="text-sm font-medium text-primary mt-1 block">
                       +1 (555) 555-1234
                     </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium mb-1">FAQ</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Find quick answers to common questions.
+                    </p>
+                    <Link to="/faq" className="text-sm font-medium text-primary mt-1 block">
+                      Visit our FAQ page
+                    </Link>
                   </div>
                 </div>
               </CardContent>
@@ -177,54 +198,6 @@ export default function Contact() {
             </Card>
           </div>
         </div>
-
-        {/* FAQ Section */}
-        <section className="mt-16">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
-            <p className="text-muted-foreground mt-2">
-              Quick answers to common questions
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-medium text-lg mb-2">Is BookishNotes really free to use?</h3>
-                <p className="text-muted-foreground text-sm">
-                  Yes! BookishNotes is completely free to use. We believe in making reading tools accessible to everyone without paywalls.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-medium text-lg mb-2">How do I get started?</h3>
-                <p className="text-muted-foreground text-sm">
-                  Simply create an account, add books to your library, and start taking notes. Our intuitive interface makes it easy to organize your reading.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-medium text-lg mb-2">Can I export my notes?</h3>
-                <p className="text-muted-foreground text-sm">
-                  Yes, you can export your notes in various formats including PDF, plain text, and markdown to use them however you like.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="font-medium text-lg mb-2">How secure are my notes?</h3>
-                <p className="text-muted-foreground text-sm">
-                  Your data security is our priority. We use industry-standard encryption and secure servers to keep your reading notes safe.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
       </div>
     </div>
   );
