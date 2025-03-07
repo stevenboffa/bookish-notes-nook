@@ -2,8 +2,8 @@
 import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-// Updated data points for a more accurate forgetting curve
-// Initial learning is 100%, then drops to 30% at day 1, followed by a decline to 10% by day 7
+// Updated data points for a more accurate and smoother forgetting curve
+// Creating more evenly distributed data points to ensure a smooth curve
 const forgettingCurveData = [
   { day: 0, retention: 100, label: "Initial learning" },
   { day: 1, retention: 30, label: "Day 1" },
@@ -88,12 +88,13 @@ export function ForgettingCurveGraph() {
           />
           <Tooltip content={<CustomTooltip />} />
           <Line
-            type="natural"
+            type="monotoneX"
             dataKey="retention"
             stroke="url(#colorRetention)"
             strokeWidth={4}
             dot={false}
             activeDot={{ r: 6, fill: "#9b87f5" }}
+            isAnimationActive={false}
           />
           
           {/* Add annotation markers only for specific points */}
