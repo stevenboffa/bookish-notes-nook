@@ -5,10 +5,38 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Menu, BookOpen, Users, ChevronRight, MessageCircle, Info, LogIn, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { session } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      if (!session?.user) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("is_admin, email")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!session?.user,
+  });
+
+  // Check if the user is the specified admin
+  const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
 
   // Don't show header on mobile in dashboard view
   if (isMobile && window.location.pathname === "/dashboard") {

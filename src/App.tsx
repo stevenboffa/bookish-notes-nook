@@ -23,6 +23,8 @@ import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,48 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!session) {
     return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
+  }
+  
+  return children;
+};
+
+// Create a special admin route for Buy Books page
+const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, loading } = useAuth();
+  const location = useLocation();
+  
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["profile", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!session?.user,
+  });
+  
+  if (loading || profileLoading) {
+    return null;
+  }
+  
+  if (!session) {
+    return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
+  }
+  
+  // Only allow a specific admin user to access the BuyBooks page
+  if (profile?.email !== "hi@stevenboffa.com") {
+    return <Navigate to="/dashboard" replace />;
   }
   
   return children;
@@ -106,14 +150,14 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 <Route path="/buy-books" element={
-                  <ProtectedRoute>
+                  <BuyBooksRoute>
                     <BuyBooks />
-                  </ProtectedRoute>
+                  </BuyBooksRoute>
                 } />
                 <Route path="/book/:id" element={
-                  <ProtectedRoute>
+                  <BuyBooksRoute>
                     <GoogleBookDetail />
-                  </ProtectedRoute>
+                  </BuyBooksRoute>
                 } />
                 <Route path="/add-book" element={
                   <ProtectedRoute>

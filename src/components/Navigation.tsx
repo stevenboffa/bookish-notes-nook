@@ -39,6 +39,9 @@ export function Navigation() {
     enabled: !!session?.user,
   });
 
+  // Check if the user is the specified admin
+  const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
+
   return (
     <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
       <div className="container max-w-lg mx-auto px-4">
@@ -54,16 +57,19 @@ export function Navigation() {
             <span>Home</span>
           </Link>
 
-          <Link
-            to="/buy-books"
-            className={cn(
-              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-              location.pathname === "/buy-books" && "text-primary"
-            )}
-          >
-            <ShoppingCartIcon className="h-6 w-6" />
-            <span>Buy</span>
-          </Link>
+          {/* Only show Buy Books link for the specific admin */}
+          {isSpecificAdmin && (
+            <Link
+              to="/buy-books"
+              className={cn(
+                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                location.pathname === "/buy-books" && "text-primary"
+              )}
+            >
+              <ShoppingCartIcon className="h-6 w-6" />
+              <span>Buy</span>
+            </Link>
+          )}
 
           {profile?.is_admin && (
             <Link
