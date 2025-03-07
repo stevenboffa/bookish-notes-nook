@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
@@ -105,12 +106,12 @@ export function NotesPreview() {
   
   return (
     <div className="relative h-[480px] overflow-hidden">
-      {/* Simplified top gradient overlay - more subtle and clean */}
-      <div className="absolute top-0 left-0 right-0 h-32 z-10 pointer-events-none"
+      {/* Clean top mask for a simpler fade transition */}
+      <div className="absolute top-0 left-0 right-0 h-24 z-10 pointer-events-none"
         style={{
           background: `linear-gradient(to bottom, 
             rgba(155, 135, 245, 1) 0%, 
-            rgba(155, 135, 245, 0.8) 40%, 
+            rgba(155, 135, 245, 0.95) 30%, 
             rgba(155, 135, 245, 0) 100%)`
         }}
       />
@@ -150,12 +151,12 @@ export function NotesPreview() {
         </div>
       </div>
       
-      {/* Simplified bottom gradient overlay - more subtle and clean */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 z-10 pointer-events-none"
+      {/* Clean bottom mask for a simpler fade transition */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 z-10 pointer-events-none"
         style={{
           background: `linear-gradient(to top, 
             rgba(155, 135, 245, 1) 0%, 
-            rgba(155, 135, 245, 0.8) 40%, 
+            rgba(155, 135, 245, 0.95) 30%, 
             rgba(155, 135, 245, 0) 100%)`
         }}
       />
