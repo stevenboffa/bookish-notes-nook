@@ -359,6 +359,7 @@ export type Database = {
       }
       notes: {
         Row: {
+          audio_url: string | null
           book_id: string
           category: string | null
           chapter: string | null
@@ -374,6 +375,7 @@ export type Database = {
           timestamp_seconds: number | null
         }
         Insert: {
+          audio_url?: string | null
           book_id: string
           category?: string | null
           chapter?: string | null
@@ -389,6 +391,7 @@ export type Database = {
           timestamp_seconds?: number | null
         }
         Update: {
+          audio_url?: string | null
           book_id?: string
           category?: string | null
           chapter?: string | null
