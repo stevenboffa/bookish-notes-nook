@@ -18,7 +18,7 @@ export interface Book {
   readingProgress?: number;
 }
 
-export interface BookWithNotes extends Book {
+export interface BookWithNotes extends Omit<Book, 'notes'> {
   notes: Note[];
 }
 
@@ -70,4 +70,39 @@ export interface Friend {
   id: string;
   user: User;
   friendSince: string;
+}
+
+export interface GoogleBook {
+  id: string;
+  volumeInfo: {
+    title: string;
+    authors?: string[];
+    description?: string;
+    categories?: string[];
+    imageLinks?: {
+      thumbnail?: string;
+      smallThumbnail?: string;
+    };
+    industryIdentifiers?: Array<{
+      type: string;
+      identifier: string;
+    }>;
+    publishedDate?: string;
+    publisher?: string;
+    pageCount?: number;
+    language?: string;
+    maturityRating?: string;
+  };
+}
+
+export interface AIBookRecommendation {
+  title: string;
+  author: string;
+  description: string;
+  publicationYear: string;
+  imageUrl?: string;
+  rating?: number;
+  amazonUrl?: string;
+  themes?: string[];
+  genre?: string;
 }

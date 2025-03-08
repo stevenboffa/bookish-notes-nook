@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Book } from "./BookList";
+import { Book, BookWithNotes, Note, Collection } from "@/types/books";
 import { BookCover } from "./BookCover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,14 +18,6 @@ import { NoteSection } from "./NoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Collection } from "@/types/books";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -205,8 +197,11 @@ export function BookDetailView({
     e.target.value = '';
   };
 
-  const handleUpdateBook = (updatedBook: Book) => {
-    onSave(updatedBook);
+  const handleUpdateBook = (updatedBook: BookWithNotes) => {
+    const bookWithUpdatedNotes: Book = {
+      ...updatedBook
+    };
+    onSave(bookWithUpdatedNotes);
   };
 
   const renderRatingStars = (rating: number) => {
@@ -346,7 +341,6 @@ export function BookDetailView({
                 </div>
               </div>
 
-              {/* Collections section */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-gray-700 flex items-center">
@@ -517,9 +511,16 @@ export function BookDetailView({
         </div>
 
         <div className="mt-2">
-          {book && format && (
+          {book && book.format && (
             <div className="w-full">
-              <NoteSection book={{...book, format}} onUpdateBook={handleUpdateBook} />
+              <NoteSection 
+                book={{
+                  ...book,
+                  format: book.format as BookFormat,
+                  notes: book.notes || []
+                }} 
+                onUpdateBook={handleUpdateBook} 
+              />
             </div>
           )}
         </div>

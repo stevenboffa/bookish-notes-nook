@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Note } from "@/types/books";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -27,23 +27,23 @@ export function NoteItem({ note, onDelete, onTogglePin }: NoteItemProps) {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const audioRef = useState<HTMLAudioElement | null>(null)[1];
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const toggleAudio = () => {
     if (!note.audioUrl) return;
     
-    if (!audioRef) {
+    if (!audioRef.current) {
       const audio = new Audio(note.audioUrl);
       audio.onplay = () => setIsAudioPlaying(true);
       audio.onpause = () => setIsAudioPlaying(false);
       audio.onended = () => setIsAudioPlaying(false);
-      audioRef = audio;
+      audioRef.current = audio;
     }
     
     if (isAudioPlaying) {
-      audioRef.pause();
+      audioRef.current.pause();
     } else {
-      audioRef.play();
+      audioRef.current.play();
     }
   };
 
