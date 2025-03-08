@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,8 +90,8 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       recognition.interimResults = true; // Show intermediate results
       recognition.lang = 'en-US';
       
-      // Increase the duration/timeout for recognition
-      recognition.maxAlternatives = 3; // Get multiple alternatives
+      // Set maximum number of alternatives for better word recognition
+      recognition.maxAlternatives = 3;
 
       recognition.onresult = (event) => {
         let interimTranscript = '';
