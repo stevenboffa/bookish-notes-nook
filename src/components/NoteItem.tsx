@@ -1,120 +1,228 @@
 
+import { useState } from "react";
 import { Note } from "@/types/books";
-import { Button } from "@/components/ui/button";
-import { Pin, Trash2, Tag } from "lucide-react";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardFooter } from "./ui/card";
+import { 
+  Pin, Trash2, Image as ImageIcon, Calendar, 
+  MessageSquare, FileText, Lightbulb, HelpCircle, 
+  Quote, Bookmark, PlayCircle 
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 interface NoteItemProps {
   note: Note;
   onDelete: (id: string) => void;
-  onTogglePin: (id: string, isPinned: boolean) => void;
+  onTogglePin: (id: string, currentPinned: boolean) => void;
 }
 
-export const NoteItem = ({ note, onDelete, onTogglePin }: NoteItemProps) => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+export function NoteItem({ note, onDelete, onTogglePin }: NoteItemProps) {
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const audioRef = useState<HTMLAudioElement | null>(null)[1];
 
-  const getNoteTypeColor = (type: string | undefined) => {
-    switch (type) {
-      case 'quote':
-        return 'bg-blue-500 hover:bg-blue-600';
-      case 'summary':
-        return 'bg-green-500 hover:bg-green-600';
-      case 'insight':
-        return 'bg-purple-500 hover:bg-purple-600';
-      case 'question':
-        return 'bg-yellow-500 hover:bg-yellow-600';
-      default:
-        return 'bg-gray-500 hover:bg-gray-600';
+  const toggleAudio = () => {
+    if (!note.audioUrl) return;
+    
+    if (!audioRef) {
+      const audio = new Audio(note.audioUrl);
+      audio.onplay = () => setIsAudioPlaying(true);
+      audio.onpause = () => setIsAudioPlaying(false);
+      audio.onended = () => setIsAudioPlaying(false);
+      audioRef = audio;
+    }
+    
+    if (isAudioPlaying) {
+      audioRef.pause();
+    } else {
+      audioRef.play();
     }
   };
 
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this note?")) {
+      onDelete(note.id);
+    }
+  };
+
+  const getNoteTypeIcon = () => {
+    switch (note.noteType) {
+      case 'quote':
+        return <Quote className="h-5 w-5 text-blue-500" />;
+      case 'summary':
+        return <FileText className="h-5 w-5 text-green-500" />;
+      case 'insight':
+        return <Lightbulb className="h-5 w-5 text-yellow-500" />;
+      case 'question':
+        return <HelpCircle className="h-5 w-5 text-purple-500" />;
+      case 'voice':
+        return <PlayCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <MessageSquare className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "MMM d, yyyy");
+    } catch (e) {
+      console.error("Date formatting error:", e);
+      return dateString;
+    }
+  };
+
+  const showImages = note.images && note.images.length > 0;
+  const showAudio = note.audioUrl && note.audioUrl.length > 0;
+
   return (
-    <>
-      <div className="p-4 border rounded-lg bg-white shadow-sm">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex-1">
-            {note.noteType && (
-              <Badge 
-                className={`mb-2 ${getNoteTypeColor(note.noteType)}`}
-                variant="secondary"
+    <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <CardContent className="pt-4">
+        <div className="flex flex-col space-y-2">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center space-x-2">
+              {getNoteTypeIcon()}
+              <span className="text-sm font-medium capitalize">
+                {note.noteType || "General Note"}
+              </span>
+              
+              {note.isPinned && (
+                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                  Pinned
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`h-8 w-8 ${note.isPinned ? 'text-yellow-600' : 'text-gray-400'}`}
+                onClick={() => onTogglePin(note.id, note.isPinned)}
               >
-                <Tag className="w-3 h-3 mr-1" />
-                {note.noteType.charAt(0).toUpperCase() + note.noteType.slice(1)}
-              </Badge>
+                <Pin className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="prose prose-sm max-w-none mt-1">
+            {note.content && (
+              <p className="text-gray-700 whitespace-pre-wrap">{note.content}</p>
             )}
-            <p className="text-sm text-gray-900">{note.content}</p>
-            {note.pageNumber && (
-              <span className="text-xs text-gray-500 mt-1 block">
-                Page: {note.pageNumber}
-              </span>
-            )}
-            {note.chapter && (
-              <span className="text-xs text-gray-500 block">
-                Chapter: {note.chapter}
-              </span>
-            )}
-            {note.category && (
-              <span className="text-xs text-gray-500 block">
-                Category: {note.category}
-              </span>
-            )}
-            {note.images && note.images.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {note.images.map((imageUrl, index) => (
-                  <img
-                    key={index}
-                    src={imageUrl}
-                    alt={`Note image ${index + 1}`}
-                    className="w-20 h-20 object-cover rounded cursor-pointer transition-transform hover:scale-105"
-                    onClick={() => setSelectedImage(imageUrl)}
+
+            {showAudio && (
+              <div className="mt-3">
+                <div className="flex items-center p-2 bg-red-50 rounded-md">
+                  <audio 
+                    src={note.audioUrl} 
+                    className="w-full h-8" 
+                    controls
                   />
-                ))}
+                </div>
+              </div>
+            )}
+
+            {showImages && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {note.images.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative bg-gray-100 rounded-md overflow-hidden cursor-pointer h-20 w-20"
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      setImageDialogOpen(true);
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt={`Note image ${index + 1}`}
+                      className="object-cover h-full w-full"
+                    />
+                    {note.images.length > 1 && index === 3 && note.images.length > 4 && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
+                        +{note.images.length - 4}
+                      </div>
+                    )}
+                  </div>
+                )).slice(0, 4)}
               </div>
             )}
           </div>
-          <div className="flex gap-2 ml-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onTogglePin(note.id, note.isPinned || false)}
-              className={`hover:bg-gray-100 ${
-                note.isPinned ? "text-primary" : "text-gray-500"
-              }`}
-            >
-              <Pin className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete(note.id)}
-              className="hover:bg-red-100 hover:text-red-600 text-gray-500"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
-        <div className="text-xs text-gray-400">
-          {new Date(note.createdAt).toLocaleDateString()}
+      </CardContent>
+      
+      <CardFooter className="pt-0 pb-3 px-6 flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center">
+          <Calendar className="h-3 w-3 mr-1" /> 
+          {formatDate(note.createdAt)}
         </div>
-      </div>
+        
+        <div className="flex space-x-2">
+          {note.pageNumber && (
+            <Badge variant="outline" className="rounded-sm h-5 px-1 text-xs">
+              Page {note.pageNumber}
+            </Badge>
+          )}
+          {note.timestampSeconds !== null && note.timestampSeconds !== undefined && (
+            <Badge variant="outline" className="rounded-sm h-5 px-1 text-xs">
+              {Math.floor(note.timestampSeconds / 60)}:{(note.timestampSeconds % 60).toString().padStart(2, '0')}
+            </Badge>
+          )}
+          {note.chapter && (
+            <Badge variant="outline" className="rounded-sm h-5 px-1 text-xs">
+              Ch: {note.chapter}
+            </Badge>
+          )}
+        </div>
+      </CardFooter>
 
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden">
-          {selectedImage && (
+      <Dialog
+        open={imageDialogOpen}
+        onOpenChange={setImageDialogOpen}
+      >
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Note Images</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center">
             <img
-              src={selectedImage}
-              alt="Expanded view"
-              className="w-full h-auto"
+              src={note.images[selectedImageIndex]}
+              alt={`Note image ${selectedImageIndex + 1}`}
+              className="max-h-[70vh] object-contain"
             />
+          </div>
+          {note.images.length > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              {note.images.map((_, index) => (
+                <Button
+                  key={index}
+                  variant={selectedImageIndex === index ? "default" : "outline"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setSelectedImageIndex(index)}
+                >
+                  {index + 1}
+                </Button>
+              ))}
+            </div>
           )}
         </DialogContent>
       </Dialog>
-    </>
+    </Card>
   );
-};
-
+}

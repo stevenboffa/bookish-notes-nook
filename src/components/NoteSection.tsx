@@ -46,6 +46,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
             isPinned: note.is_pinned,
             images: note.images || [],
             noteType: note.note_type,
+            audioUrl: note.audio_url,
             book_id: note.book_id
           }));
           setNotes(formattedNotes);
@@ -67,6 +68,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     chapter?: string;
     images?: string[];
     noteType?: string;
+    audioUrl?: string;
   }) => {
     try {
       console.log('Creating note with data:', note);
@@ -80,6 +82,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
           chapter: note.chapter,
           images: note.images || [],
           note_type: note.noteType,
+          audio_url: note.audioUrl,
           is_pinned: false
         })
         .select('*')
@@ -99,6 +102,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         isPinned: newNote.is_pinned,
         images: newNote.images || [],
         noteType: newNote.note_type,
+        audioUrl: newNote.audio_url,
         book_id: newNote.book_id
       };
 
@@ -126,12 +130,13 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     try {
       const { data: noteToDelete, error: fetchError } = await supabase
         .from("notes")
-        .select('images')
+        .select('images, audio_url')
         .eq("id", noteId)
         .single();
 
       if (fetchError) throw fetchError;
 
+      // Delete images if any
       if (noteToDelete?.images && noteToDelete.images.length > 0) {
         const imagePaths = noteToDelete.images.map(url => {
           try {
@@ -151,6 +156,24 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
           if (storageError) {
             console.error('Error deleting images:', storageError);
           }
+        }
+      }
+
+      // Delete audio if any
+      if (noteToDelete?.audio_url) {
+        try {
+          const audioPath = new URL(noteToDelete.audio_url).pathname.split('/').pop();
+          if (audioPath) {
+            const { error: audioStorageError } = await supabase.storage
+              .from('note-audios')
+              .remove([audioPath]);
+
+            if (audioStorageError) {
+              console.error('Error deleting audio:', audioStorageError);
+            }
+          }
+        } catch (e) {
+          console.error('Invalid audio URL:', noteToDelete.audio_url);
         }
       }
 
@@ -220,7 +243,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   return (
     <div className="space-y-5 px-4 sm:px-6">
       <h3 className="text-gray-900 tracking-tight text-base text-center font-medium">
-        Add meaningful notes, quotes, and upload images you find interesting
+        Add meaningful notes, quotes, and upload images and voice recordings you find interesting
       </h3>
       
       <AddNoteForm bookId={book.id} bookFormat={book.format} onSubmit={handleAddNote} />
