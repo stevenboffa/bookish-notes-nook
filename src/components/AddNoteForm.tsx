@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [interimText, setInterimText] = useState("");
   const { toast } = useToast();
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -81,50 +83,64 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       const recognition = new window.webkitSpeechRecognition();
       recognitionRef.current = recognition;
       
+      // Store the existing content as our starting point
       finalTranscriptRef.current = content;
       
-      recognition.continuous = false;
-      recognition.interimResults = true;
+      // Configure speech recognition settings for better accuracy
+      recognition.continuous = false; // Use discrete recognition sessions
+      recognition.interimResults = true; // Show intermediate results
       recognition.lang = 'en-US';
+      
+      // Increase the duration/timeout for recognition
+      recognition.maxAlternatives = 3; // Get multiple alternatives
 
       recognition.onresult = (event) => {
         let interimTranscript = '';
         let finalTranscript = '';
         
+        // Process all results
         for (let i = 0; i < event.results.length; i++) {
+          // Take the transcript with highest confidence
           const transcript = event.results[i][0].transcript;
           
           if (event.results[i].isFinal) {
-            finalTranscript += transcript;
+            finalTranscript += transcript + ' ';
           } else {
             interimTranscript += transcript;
           }
         }
         
+        // If we have final text, add it to our saved transcript
         if (finalTranscript) {
-          finalTranscriptRef.current += ' ' + finalTranscript;
+          finalTranscriptRef.current += finalTranscript;
           setContent(finalTranscriptRef.current.trim());
         }
         
-        if (interimTranscript && textareaRef.current) {
-          const displayValue = finalTranscriptRef.current + ' ' + interimTranscript;
-          textareaRef.current.value = displayValue.trim();
-        }
+        // Display interim results in real time for user feedback
+        setInterimText(interimTranscript);
       };
 
       recognition.onend = () => {
-        if (isListening) {
+        // When a recognition session ends, update the content with final transcript
+        if (textareaRef.current) {
+          textareaRef.current.value = finalTranscriptRef.current.trim();
+        }
+        
+        // Only restart listening if the user hasn't canceled
+        if (isListening && recognitionRef.current) {
+          // Brief pause between recognition sessions for better phrase separation
           setTimeout(() => {
             if (isListening && recognitionRef.current) {
               recognitionRef.current.start();
             }
-          }, 100);
+          }, 300);
         }
       };
 
       recognition.onerror = (event) => {
         console.error('Speech recognition error', event);
         setIsListening(false);
+        setInterimText("");
         toast({
           title: "Error",
           description: `Speech recognition error: ${event.error}`,
@@ -137,10 +153,12 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       
       toast({
         title: "Listening",
-        description: "Speak clearly to convert your voice to text"
+        description: "Speak clearly to convert your voice to text. Try to speak in complete phrases."
       });
     } catch (error) {
       console.error('Speech recognition error:', error);
+      setIsListening(false);
+      setInterimText("");
       toast({
         title: "Error",
         description: "Could not start speech recognition. Please check your browser permissions.",
@@ -153,11 +171,15 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
-    setIsListening(false);
     
-    if (textareaRef.current?.value) {
-      setContent(textareaRef.current.value);
+    // Merge any interim text into the final content
+    if (interimText) {
+      finalTranscriptRef.current += " " + interimText;
+      setContent(finalTranscriptRef.current.trim());
     }
+    
+    setIsListening(false);
+    setInterimText("");
     
     toast({
       title: "Stopped Listening",
@@ -227,6 +249,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       setChapter("");
       setNoteType("");
       setSelectedImages([]);
+      setInterimText("");
       finalTranscriptRef.current = "";
     } catch (error) {
       console.error('Error submitting note:', error);
@@ -240,18 +263,25 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
     }
   };
 
+  // Displayed content combines final transcript and interim results
+  const displayContent = content + (interimText ? ` ${interimText}` : '');
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-lg p-4 border mb-4">
       <div className="space-y-4">
         <div className="relative">
           <Textarea
             ref={textareaRef}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            value={displayContent}
+            onChange={(e) => {
+              setContent(e.target.value);
+              finalTranscriptRef.current = e.target.value;
+              setInterimText("");
+            }}
             placeholder="Write your note here..."
             required
             disabled={isSubmitting}
-            className="min-h-[100px] pr-10"
+            className={`min-h-[100px] pr-10 ${isListening ? 'border-red-400 shadow-sm shadow-red-200' : ''}`}
           />
           <Button
             type="button"
@@ -264,6 +294,13 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
             {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
           </Button>
         </div>
+        
+        {isListening && (
+          <div className="text-xs text-red-500 flex items-center">
+            <div className="w-2 h-2 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+            Recording... Speak clearly and conversationally
+          </div>
+        )}
         
         <Select value={noteType} onValueChange={setNoteType}>
           <SelectTrigger className="w-full">
