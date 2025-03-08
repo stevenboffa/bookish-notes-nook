@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BlogFooter } from "@/components/blog/BlogFooter";
+import { Footer } from "@/components/Footer";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -173,7 +173,7 @@ export default function Contact() {
           </div>
         </div>
       </div>
-      <BlogFooter />
+      <Footer />
     </div>
   );
 }
