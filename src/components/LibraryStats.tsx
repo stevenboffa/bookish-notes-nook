@@ -1,5 +1,5 @@
 
-import { Book } from "@/components/BookList";
+import { Book } from "@/types/books";
 import { BookOpen, Clock, CheckCircle, ListTodo, Info } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

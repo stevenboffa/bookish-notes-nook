@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Book, Note, Quote } from "@/types/books";
+import { Book } from "@/types/books";
 
 interface BookListProps {
   books: Book[];

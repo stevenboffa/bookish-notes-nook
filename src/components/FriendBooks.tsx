@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { BookCover } from "@/components/BookCover";
-import { Book } from "@/components/BookList";
+import { Book } from "@/types/books";
 import {
   Card,
   CardContent,

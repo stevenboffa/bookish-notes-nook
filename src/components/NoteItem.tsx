@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter } from "./ui/card";
 import { 
   Pin, Trash2, Image as ImageIcon, Calendar, 
   MessageSquare, FileText, Lightbulb, HelpCircle, 
-  Quote, Bookmark, PlayCircle 
+  Quote, Bookmark 
 } from "lucide-react";
 import {
   Dialog,
@@ -26,26 +26,6 @@ interface NoteItemProps {
 export function NoteItem({ note, onDelete, onTogglePin }: NoteItemProps) {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const toggleAudio = () => {
-    if (!note.audioUrl) return;
-    
-    if (!audioRef.current) {
-      const audio = new Audio(note.audioUrl);
-      audio.onplay = () => setIsAudioPlaying(true);
-      audio.onpause = () => setIsAudioPlaying(false);
-      audio.onended = () => setIsAudioPlaying(false);
-      audioRef.current = audio;
-    }
-    
-    if (isAudioPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-  };
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this note?")) {
@@ -63,8 +43,6 @@ export function NoteItem({ note, onDelete, onTogglePin }: NoteItemProps) {
         return <Lightbulb className="h-5 w-5 text-yellow-500" />;
       case 'question':
         return <HelpCircle className="h-5 w-5 text-purple-500" />;
-      case 'voice':
-        return <PlayCircle className="h-5 w-5 text-red-500" />;
       default:
         return <MessageSquare className="h-5 w-5 text-gray-500" />;
     }
@@ -80,7 +58,6 @@ export function NoteItem({ note, onDelete, onTogglePin }: NoteItemProps) {
   };
 
   const showImages = note.images && note.images.length > 0;
-  const showAudio = note.audioUrl && note.audioUrl.length > 0;
 
   return (
     <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -123,18 +100,6 @@ export function NoteItem({ note, onDelete, onTogglePin }: NoteItemProps) {
           <div className="prose prose-sm max-w-none mt-1">
             {note.content && (
               <p className="text-gray-700 whitespace-pre-wrap">{note.content}</p>
-            )}
-
-            {showAudio && (
-              <div className="mt-3">
-                <div className="flex items-center p-2 bg-red-50 rounded-md">
-                  <audio 
-                    src={note.audioUrl} 
-                    className="w-full h-8" 
-                    controls
-                  />
-                </div>
-              </div>
             )}
 
             {showImages && (

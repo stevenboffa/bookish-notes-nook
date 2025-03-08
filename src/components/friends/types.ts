@@ -1,5 +1,4 @@
-
-import { Book } from "@/components/BookList";
+import { Book } from "@/types/books";
 
 export interface Friend {
   id: string;

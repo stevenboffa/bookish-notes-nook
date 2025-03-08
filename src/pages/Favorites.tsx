@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Book } from "@/components/BookList";
+import { Book } from "@/types/books";
+import { BookList } from "@/components/BookList";
 import { Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {

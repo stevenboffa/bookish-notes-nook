@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Book } from "./BookList";
+import { Book } from "@/types/books";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +14,6 @@ export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
   const [newQuote, setNewQuote] = useState("");
   const [localQuotes, setLocalQuotes] = useState(book.quotes || []);
 
-  // Sync local quotes with book quotes when they change
   useEffect(() => {
     setLocalQuotes(book.quotes || []);
   }, [book.quotes]);
@@ -41,11 +39,9 @@ export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
         createdAt: quoteData.created_at,
       };
 
-      // Update local state
       const updatedQuotes = [newQuoteObject, ...localQuotes];
       setLocalQuotes(updatedQuotes);
 
-      // Update parent component with new quotes array
       const updatedBook = {
         ...book,
         quotes: updatedQuotes,
@@ -67,11 +63,9 @@ export function QuoteSection({ book, onUpdateBook }: QuoteSectionProps) {
 
       if (error) throw error;
 
-      // Update local state immediately
       const updatedQuotes = localQuotes.filter(quote => quote.id !== quoteId);
       setLocalQuotes(updatedQuotes);
 
-      // Update parent component
       const updatedBook = {
         ...book,
         quotes: updatedQuotes,
