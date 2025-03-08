@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BookDetailView } from "@/components/BookDetailView";
-import { Book } from "@/components/BookList";
+import { Book, Collection, GoogleBook, Note, Quote } from "@/types/books";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,22 +19,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BookSearchResults } from "@/components/books/BookSearchResults";
-import { Collection } from "@/types/books";
-
-interface GoogleBook {
-  id: string;
-  volumeInfo: {
-    title: string;
-    authors?: string[];
-    categories?: string[];
-    publishedDate?: string;
-    description?: string;
-    imageLinks?: {
-      thumbnail?: string;
-      smallThumbnail?: string;
-    };
-  };
-}
 
 interface GoogleBooksResponse {
   items?: GoogleBook[];

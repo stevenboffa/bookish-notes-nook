@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BookList, type Book } from "@/components/BookList";
+import { BookList } from "@/components/BookList";
 import { BookFilters } from "@/components/BookFilters";
 import { BookDetailView } from "@/components/BookDetailView";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { type SortOption } from "@/components/SortingOptions";
-import { Collection } from "@/types/books";
+import { Book, Collection, Note, Quote } from "@/types/books";
 import { CollectionManager } from "@/components/CollectionManager";
 import { toast } from "sonner";
 import { LibraryStats } from "@/components/LibraryStats";
@@ -88,6 +88,7 @@ const Dashboard = () => {
           category: note.category,
           isPinned: note.is_pinned,
           readingProgress: note.reading_progress,
+          book_id: book.id
         })),
         quotes: book.quotes.map((quote: any) => ({
           id: quote.id,
