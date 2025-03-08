@@ -1,9 +1,9 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, X, Loader2, Mic, Square, FileAudio } from "lucide-react";
+import { ImagePlus, X, Loader2, Mic, MicOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -24,7 +24,6 @@ interface AddNoteFormProps {
     chapter?: string;
     images?: string[];
     noteType?: string;
-    audioUrl?: string;
   }) => void;
 }
 
@@ -36,14 +35,21 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
   const [noteType, setNoteType] = useState<string>("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [recordingTime, setRecordingTime] = useState(0);
+  const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
   
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<number | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    return () => {
+      // Clean up speech recognition when component unmounts
+      if (recognitionRef.current) {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -54,87 +60,95 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = (seconds % 60).toString().padStart(2, '0');
-    return `${mins}:${secs}`;
+  const toggleSpeechRecognition = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
   };
 
-  const startRecording = async () => {
+  const startListening = () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      audioChunksRef.current = [];
+      if (!('webkitSpeechRecognition' in window)) {
+        toast({
+          title: "Not Supported",
+          description: "Speech recognition is not supported in your browser. Try using Chrome.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
+      const recognition = new window.webkitSpeechRecognition();
+      recognitionRef.current = recognition;
+      
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0].transcript)
+          .join('');
+        
+        setContent(prev => {
+          const newContent = prev + ' ' + transcript;
+          return newContent.trim();
+        });
+        
+        // Force recognition to restart if it stops
+        if (event.results[0].isFinal) {
+          recognition.stop();
+          setTimeout(() => {
+            if (isListening) {
+              recognition.start();
+            }
+          }, 50);
         }
       };
 
-      mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setAudioBlob(audioBlob);
-        
-        // Stop all tracks in the stream to release the microphone
-        stream.getTracks().forEach(track => track.stop());
+      recognition.onend = () => {
+        if (isListening) {
+          recognition.start();
+        }
       };
 
-      mediaRecorderRef.current.start();
-      setIsRecording(true);
-      
-      // Start timer
-      let seconds = 0;
-      timerRef.current = window.setInterval(() => {
-        seconds++;
-        setRecordingTime(seconds);
-      }, 1000);
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error', event);
+        setIsListening(false);
+        toast({
+          title: "Error",
+          description: `Speech recognition error: ${event.error}`,
+          variant: "destructive"
+        });
+      };
 
+      recognition.start();
+      setIsListening(true);
+      
       toast({
-        title: "Recording started",
-        description: "Speak clearly into your microphone"
+        title: "Listening",
+        description: "Speak clearly to convert your voice to text"
       });
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error('Speech recognition error:', error);
       toast({
-        title: "Recording failed",
-        description: "Could not access your microphone. Please check permissions.",
+        title: "Error",
+        description: "Could not start speech recognition. Please check your browser permissions.",
         variant: "destructive"
       });
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      
-      // Clear timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      
-      toast({
-        title: "Recording finished",
-        description: "Your voice note has been recorded"
-      });
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
     }
-  };
-
-  const cancelRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setAudioBlob(null);
-      
-      // Clear timer
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      setRecordingTime(0);
-    } else {
-      setAudioBlob(null);
-    }
+    setIsListening(false);
+    toast({
+      title: "Stopped Listening",
+      description: "Voice-to-text conversion stopped"
+    });
   };
 
   const uploadImages = async (): Promise<string[]> => {
@@ -167,50 +181,20 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
     return uploadedUrls;
   };
 
-  const uploadAudio = async (): Promise<string | null> => {
-    if (!audioBlob) return null;
-
-    try {
-      const fileName = `${crypto.randomUUID()}.webm`;
-      const filePath = `${bookId}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('note-audios')
-        .upload(filePath, audioBlob, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: 'audio/webm',
-        });
-
-      if (uploadError) {
-        console.error('Error uploading audio:', uploadError);
-        throw new Error(`Failed to upload audio: ${uploadError.message}`);
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('note-audios')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Error in uploadAudio:', error);
-      throw error;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Stop listening if active
+    if (isListening) {
+      stopListening();
+    }
+    
     setIsSubmitting(true);
 
     try {
       let imageUrls: string[] = [];
       if (selectedImages.length > 0) {
         imageUrls = await uploadImages();
-      }
-
-      let audioUrl = null;
-      if (audioBlob) {
-        audioUrl = await uploadAudio();
       }
 
       const noteData = {
@@ -220,7 +204,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
         chapter: chapter || undefined,
         images: imageUrls,
         noteType: noteType || undefined,
-        audioUrl,
       };
 
       await onSubmit(noteData);
@@ -231,8 +214,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       setChapter("");
       setNoteType("");
       setSelectedImages([]);
-      setAudioBlob(null);
-      setRecordingTime(0);
     } catch (error) {
       console.error('Error submitting note:', error);
       toast({
@@ -248,16 +229,29 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-lg p-4 border mb-4">
       <div className="space-y-4">
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your note here..."
-          required={!audioBlob}
-          disabled={isSubmitting || isRecording}
-          className="min-h-[100px]"
-        />
+        <div className="relative">
+          <Textarea
+            ref={textareaRef}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Write your note here..."
+            required
+            disabled={isSubmitting}
+            className="min-h-[100px] pr-10"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={`absolute right-2 bottom-2 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-500 hover:text-primary'}`}
+            onClick={toggleSpeechRecognition}
+            disabled={isSubmitting}
+          >
+            {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+          </Button>
+        </div>
         
-        <Select value={noteType} onValueChange={setNoteType} disabled={isRecording}>
+        <Select value={noteType} onValueChange={setNoteType}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select note type" />
           </SelectTrigger>
@@ -267,7 +261,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
             <SelectItem value="summary">Summary</SelectItem>
             <SelectItem value="insight">Insight</SelectItem>
             <SelectItem value="question">Question</SelectItem>
-            <SelectItem value="voice">Voice Note</SelectItem>
           </SelectContent>
         </Select>
 
@@ -279,7 +272,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
                 value={pageNumber}
                 onChange={(e) => setPageNumber(e.target.value)}
                 placeholder="Page number"
-                disabled={isSubmitting || isRecording}
+                disabled={isSubmitting}
               />
             </div>
           )}
@@ -290,7 +283,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
                 value={timestampSeconds}
                 onChange={(e) => setTimestampSeconds(e.target.value)}
                 placeholder="Timestamp"
-                disabled={isSubmitting || isRecording}
+                disabled={isSubmitting}
               />
             </div>
           )}
@@ -299,89 +292,32 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
               value={chapter}
               onChange={(e) => setChapter(e.target.value)}
               placeholder="Chapter"
-              disabled={isSubmitting || isRecording}
+              disabled={isSubmitting}
             />
           </div>
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        <div className="space-y-2 flex-1">
-          <Input
-            type="file"
-            onChange={handleImageSelect}
-            accept="image/*"
-            multiple
-            className="hidden"
-            id="image-upload"
-            disabled={isSubmitting || isRecording}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={() => document.getElementById('image-upload')?.click()}
-            disabled={isSubmitting || isRecording}
-          >
-            <ImagePlus className="w-4 h-4 mr-2" />
-            Add Images
-          </Button>
-        </div>
-
-        <div className="space-y-2 flex-1">
-          {!isRecording && !audioBlob ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
-              onClick={startRecording}
-              disabled={isSubmitting}
-            >
-              <Mic className="w-4 h-4 mr-2" />
-              Record Voice
-            </Button>
-          ) : isRecording ? (
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="destructive"
-                className="flex-1"
-                onClick={stopRecording}
-              >
-                <Square className="w-4 h-4 mr-2" />
-                Stop ({formatTime(recordingTime)})
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={cancelRecording}
-                className="px-2"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 bg-green-50 border-green-200 text-green-700"
-                disabled={true}
-              >
-                <FileAudio className="w-4 h-4 mr-2" />
-                Audio Ready
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={cancelRecording}
-                className="px-2"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-        </div>
+      <div className="space-y-2">
+        <Input
+          type="file"
+          onChange={handleImageSelect}
+          accept="image/*"
+          multiple
+          className="hidden"
+          id="image-upload"
+          disabled={isSubmitting}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => document.getElementById('image-upload')?.click()}
+          disabled={isSubmitting}
+        >
+          <ImagePlus className="w-4 h-4 mr-2" />
+          Add Images
+        </Button>
       </div>
 
       {selectedImages.length > 0 && (
@@ -410,7 +346,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       <div className="flex justify-end">
         <Button 
           type="submit" 
-          disabled={isSubmitting || isRecording || (!content && !audioBlob)}
+          disabled={isSubmitting || !content.trim()}
         >
           {isSubmitting ? (
             <>
@@ -425,4 +361,3 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
     </form>
   );
 };
-

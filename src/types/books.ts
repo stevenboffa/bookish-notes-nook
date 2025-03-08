@@ -1,4 +1,3 @@
-
 export interface Book {
   id: string;
   title: string;
@@ -33,7 +32,6 @@ export interface Note {
   isPinned: boolean;
   images?: string[];
   noteType?: string;
-  audioUrl?: string;
   book_id: string;
   readingProgress?: number;
 }

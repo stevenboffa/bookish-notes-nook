@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,7 +45,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
             isPinned: note.is_pinned,
             images: note.images || [],
             noteType: note.note_type,
-            audioUrl: note.audio_url,
             book_id: note.book_id
           }));
           setNotes(formattedNotes);
@@ -68,7 +66,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     chapter?: string;
     images?: string[];
     noteType?: string;
-    audioUrl?: string;
   }) => {
     try {
       console.log('Creating note with data:', note);
@@ -82,7 +79,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
           chapter: note.chapter,
           images: note.images || [],
           note_type: note.noteType,
-          audio_url: note.audioUrl,
           is_pinned: false
         })
         .select('*')
@@ -102,7 +98,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         isPinned: newNote.is_pinned,
         images: newNote.images || [],
         noteType: newNote.note_type,
-        audioUrl: newNote.audio_url,
         book_id: newNote.book_id
       };
 
@@ -243,7 +238,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   return (
     <div className="space-y-5 px-4 sm:px-6">
       <h3 className="text-gray-900 tracking-tight text-base text-center font-medium">
-        Add meaningful notes, quotes, and upload images and voice recordings you find interesting
+        Add meaningful notes, quotes, and upload images you find interesting
       </h3>
       
       <AddNoteForm bookId={book.id} bookFormat={book.format} onSubmit={handleAddNote} />
