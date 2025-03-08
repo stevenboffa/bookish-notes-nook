@@ -1,3 +1,4 @@
+
 import { Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookCover } from "@/components/BookCover";
@@ -19,51 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-export interface Book {
-  id: string;
-  title: string;
-  author: string;
-  genre: string;
-  dateRead: string;
-  rating: number;
-  status: string;
-  isFavorite: boolean;
-  imageUrl: string | null;
-  thumbnailUrl: string | null;
-  format: 'physical_book' | 'ebook' | 'audiobook';
-  description?: string;
-  collections?: string[];
-  notes: {
-    id: string;
-    content: string;
-    createdAt: string;
-    pageNumber?: number;
-    timestampSeconds?: number;
-    chapter?: string;
-    category?: string;
-    isPinned: boolean;
-    readingProgress?: number;
-    images?: string[];
-  }[];
-  quotes: {
-    id: string;
-    content: string;
-    createdAt: string;
-  }[];
-}
-
-export interface Note {
-  id: string;
-  content: string;
-  createdAt: string;
-}
-
-export interface Quote {
-  id: string;
-  content: string;
-  createdAt: string;
-}
+import { Book, Note, Quote } from "@/types/books";
 
 interface BookListProps {
   books: Book[];
@@ -132,7 +89,7 @@ export function BookList({
               <BookCover
                 imageUrl={book.imageUrl}
                 thumbnailUrl={book.thumbnailUrl}
-                genre={book.genre}
+                genre={book.genre || "Unknown"}
                 title={book.title}
                 size="sm"
               />
@@ -151,7 +108,7 @@ export function BookList({
                     </CardDescription>
                     <div className="flex flex-wrap gap-2 mt-3">
                       <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-text">
-                        {book.genre}
+                        {book.genre || "Unknown"}
                       </span>
                       <span 
                         className={`text-xs px-2 py-1 rounded-full ${getStatusColor(book.status)}`}
