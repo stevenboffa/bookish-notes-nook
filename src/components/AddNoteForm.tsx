@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,10 +39,10 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const finalTranscriptRef = useRef<string>("");
 
   useEffect(() => {
     return () => {
-      // Clean up speech recognition when component unmounts
       if (recognitionRef.current) {
         recognitionRef.current.onend = null;
         recognitionRef.current.stop();
@@ -82,34 +81,44 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       const recognition = new window.webkitSpeechRecognition();
       recognitionRef.current = recognition;
       
-      recognition.continuous = true;
+      finalTranscriptRef.current = content;
+      
+      recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
       recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
+        let interimTranscript = '';
+        let finalTranscript = '';
         
-        setContent(prev => {
-          const newContent = prev + ' ' + transcript;
-          return newContent.trim();
-        });
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
         
-        // Force recognition to restart if it stops
-        if (event.results[0].isFinal) {
-          recognition.stop();
-          setTimeout(() => {
-            if (isListening) {
-              recognition.start();
-            }
-          }, 50);
+        if (finalTranscript) {
+          finalTranscriptRef.current += ' ' + finalTranscript;
+          setContent(finalTranscriptRef.current.trim());
+        }
+        
+        if (interimTranscript && textareaRef.current) {
+          const displayValue = finalTranscriptRef.current + ' ' + interimTranscript;
+          textareaRef.current.value = displayValue.trim();
         }
       };
 
       recognition.onend = () => {
         if (isListening) {
-          recognition.start();
+          setTimeout(() => {
+            if (isListening && recognitionRef.current) {
+              recognitionRef.current.start();
+            }
+          }, 100);
         }
       };
 
@@ -145,6 +154,11 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       recognitionRef.current.stop();
     }
     setIsListening(false);
+    
+    if (textareaRef.current?.value) {
+      setContent(textareaRef.current.value);
+    }
+    
     toast({
       title: "Stopped Listening",
       description: "Voice-to-text conversion stopped"
@@ -184,7 +198,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Stop listening if active
     if (isListening) {
       stopListening();
     }
@@ -214,6 +227,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       setChapter("");
       setNoteType("");
       setSelectedImages([]);
+      finalTranscriptRef.current = "";
     } catch (error) {
       console.error('Error submitting note:', error);
       toast({
