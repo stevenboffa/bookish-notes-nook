@@ -19,6 +19,7 @@ interface SpeechRecognitionErrorEvent extends Event {
 }
 
 interface SpeechRecognitionEvent extends Event {
+  resultIndex?: number; // Made optional since we're not relying on it
   results: SpeechRecognitionResultList;
 }
 
