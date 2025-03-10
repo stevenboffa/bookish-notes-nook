@@ -221,6 +221,11 @@ const App = () => (
                     <Friends />
                   </ProtectedRoute>
                 } />
+                <Route path="/admin" element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                } />
                 <Route path="/admin/posts" element={
                   <AdminRoute>
                     <BlogPosts />

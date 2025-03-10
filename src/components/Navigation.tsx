@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import {
   HomeIcon,
@@ -8,6 +7,7 @@ import {
   ShoppingCartIcon,
   FileTextIcon,
   MailIcon,
+  LayoutDashboardIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -104,33 +104,18 @@ export function Navigation() {
             </Link>
           )}
 
-          {/* Show admin links if profile is_admin is true */}
+          {/* Show admin dashboard link if profile is_admin is true */}
           {isAdmin && (
-            <div className="flex gap-4">
-              {/* Admin Posts link */}
-              <Link
-                to="/admin/posts"
-                className={cn(
-                  "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-                  location.pathname.includes("/admin/posts") && "text-primary"
-                )}
-              >
-                <FileTextIcon className="h-6 w-6" />
-                <span>Posts</span>
-              </Link>
-              
-              {/* Admin Email Campaigns link */}
-              <Link
-                to="/admin/email-campaigns"
-                className={cn(
-                  "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-                  location.pathname.includes("/admin/email-campaigns") && "text-primary"
-                )}
-              >
-                <MailIcon className="h-6 w-6" />
-                <span>Emails</span>
-              </Link>
-            </div>
+            <Link
+              to="/admin"
+              className={cn(
+                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                location.pathname.startsWith("/admin") && "text-primary"
+              )}
+            >
+              <LayoutDashboardIcon className="h-6 w-6" />
+              <span>Admin</span>
+            </Link>
           )}
 
           <Link
