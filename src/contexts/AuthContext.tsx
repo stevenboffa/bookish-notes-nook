@@ -43,12 +43,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initializeSession();
 
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event);
       
       if (currentSession) {
         console.log("Setting new session");
         setSession(currentSession);
+        
+        // Send welcome email on first sign up
+        if (event === 'SIGNED_IN' && !session) {
+          try {
+            const isNewUser = event === 'SIGNED_UP' || (event === 'SIGNED_IN' && !session);
+            
+            if (isNewUser) {
+              await supabase.functions.invoke("send-welcome-email", {
+                body: { 
+                  email: currentSession.user.email,
+                  name: currentSession.user.email?.split('@')[0] // Use part of the email as the name
+                }
+              });
+            }
+          } catch (error) {
+            console.error("Error sending welcome email:", error);
+            // Don't throw here as this is not critical to the auth flow
+          }
+        }
       } else {
         setSession(null);
       }
@@ -73,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast]);
+  }, [toast, session]);
 
   // Set up automatic session refresh
   useEffect(() => {
