@@ -28,7 +28,10 @@ export const Meta = ({
       <meta property="og:url" content={canonicalUrl || "https://bookishnotes.com"} />
       <meta property="og:title" content={siteTitle} />
       <meta property="og:description" content={description || defaultDescription} />
+      <meta property="og:image:secure_url" content={ogImage} />
       <meta property="og:image" content={ogImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
