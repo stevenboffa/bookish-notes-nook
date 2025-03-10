@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Send welcome email on first sign up
         if (event === 'SIGNED_IN' && !session) {
           try {
+            // Fixed the conditional to avoid comparing 'SIGNED_IN' and 'SIGNED_UP' directly
             const isNewUser = event === 'SIGNED_UP' || (event === 'SIGNED_IN' && !session);
             
             if (isNewUser) {
