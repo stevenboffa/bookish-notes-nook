@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type AuthContextType = {
   session: Session | null;
@@ -21,10 +21,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Sign out function that will be exposed through context
   const signOut = async () => {
     try {
+      setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Error signing out:", error);
@@ -35,7 +38,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         return;
       }
-      // Session will be updated by the auth state listener
+      
+      // Force navigation to sign-in page
+      navigate("/auth/sign-in");
+      
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",
@@ -47,6 +53,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         title: "Sign out error",
         description: "An unexpected error occurred during sign out.",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,6 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Authentication Error",
           description: "There was a problem with your session. Please try logging in again.",
         });
+        setLoading(false);
         return;
       }
 
@@ -105,6 +114,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } else {
         setSession(null);
+        // Redirect to sign-in page if not already there
+        if (!location.pathname.includes('/auth/')) {
+          navigate("/auth/sign-in");
+        }
       }
       
       setLoading(false);
@@ -115,6 +128,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Welcome!",
           description: "You have successfully signed in.",
         });
+        
+        // Navigate to dashboard after sign in
+        if (location.pathname.includes('/auth/')) {
+          navigate("/dashboard");
+        }
       } else if (event === 'SIGNED_OUT') {
         toast({
           title: "Signed out",
@@ -127,7 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast, session]);
+  }, [toast, session, navigate, location]);
 
   // Set up automatic session refresh
   useEffect(() => {
