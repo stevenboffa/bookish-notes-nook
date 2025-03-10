@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom";
 import {
   HomeIcon,
@@ -18,7 +19,14 @@ import { toast } from "sonner";
 
 export function Navigation() {
   const location = useLocation();
-  const { session } = useAuth();
+  const { session, refreshSession } = useAuth();
+
+  // Attempt to refresh session when navigation component mounts
+  useEffect(() => {
+    if (!session) {
+      refreshSession();
+    }
+  }, [session, refreshSession]);
 
   const { data: profile, isLoading, refetch, error } = useQuery({
     queryKey: ["profile", session?.user?.id],
@@ -72,8 +80,55 @@ export function Navigation() {
     if (error) {
       toast.error("Error loading profile data. Some features may be unavailable.");
       console.error("Profile query error:", error);
+      
+      // Try to refresh the session if there's an error
+      refreshSession();
     }
-  }, [error]);
+  }, [error, refreshSession]);
+
+  // If loading or no session, render a simplified navigation
+  if (isLoading && !profile) {
+    return (
+      <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
+        <div className="container max-w-lg mx-auto px-4">
+          <div className="flex justify-between items-center">
+            <Link
+              to="/dashboard"
+              className={cn(
+                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                location.pathname === "/dashboard" && "text-primary"
+              )}
+            >
+              <HomeIcon className="h-6 w-6" />
+              <span>Home</span>
+            </Link>
+
+            <Link
+              to="/friends"
+              className={cn(
+                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                location.pathname === "/friends" && "text-primary"
+              )}
+            >
+              <UsersIcon className="h-6 w-6" />
+              <span>Friends</span>
+            </Link>
+
+            <Link
+              to="/profile"
+              className={cn(
+                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                location.pathname === "/profile" && "text-primary"
+              )}
+            >
+              <UserCircleIcon className="h-6 w-6" />
+              <span>Profile</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-white border-t py-2 fixed bottom-0 w-full">

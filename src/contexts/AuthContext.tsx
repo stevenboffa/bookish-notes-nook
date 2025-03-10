@@ -9,12 +9,14 @@ type AuthContextType = {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({ 
   session: null, 
   loading: true,
-  signOut: async () => {} 
+  signOut: async () => {},
+  refreshSession: async () => {}
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -23,6 +25,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Function to refresh the session
+  const refreshSession = async () => {
+    try {
+      console.log("Manually refreshing session...");
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error refreshing session:", error);
+        return;
+      }
+      
+      if (data.session) {
+        console.log("Session refreshed successfully");
+        setSession(data.session);
+      } else {
+        console.log("No session found during refresh");
+        // If no session found during explicit refresh, we might need to redirect
+        if (location.pathname !== '/' && 
+            !location.pathname.includes('/auth/') &&
+            !location.pathname.includes('/blog') &&
+            !location.pathname.includes('/contact') &&
+            !location.pathname.includes('/faq') &&
+            !location.pathname.includes('/terms') &&
+            !location.pathname.includes('/privacy')) {
+          navigate("/auth/sign-in");
+        }
+      }
+    } catch (error) {
+      console.error("Unexpected error during session refresh:", error);
+    }
+  };
 
   // Sign out function that will be exposed through context
   const signOut = async () => {
@@ -64,6 +98,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up initial session
     const initializeSession = async () => {
       try {
+        console.log("Initializing session...");
+        setLoading(true);
         // Get the current session
         const { data, error } = await supabase.auth.getSession();
         
@@ -79,8 +115,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         if (data.session) {
-          console.log("Found existing session");
+          console.log("Found existing session during initialization");
           setSession(data.session);
+        } else {
+          console.log("No session found during initialization");
         }
         
         setLoading(false);
@@ -92,12 +130,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeSession();
 
-    // Subscribe to auth changes
+    // Subscribe to auth changes with improved error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event);
       
       if (currentSession) {
-        console.log("Setting new session");
+        console.log("Setting new session from auth state change");
         setSession(currentSession);
         
         // Send welcome email on sign up or first sign in
@@ -133,17 +171,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       } else {
+        console.log("No session in auth state change, setting to null");
         setSession(null);
         
         // Only redirect to sign-in page if trying to access protected routes
         const isProtectedRoute = !location.pathname.includes('/auth/') && 
-                                 location.pathname !== '/' &&
-                                 !location.pathname.includes('/blog') &&
-                                 !location.pathname.includes('/contact') &&
-                                 !location.pathname.includes('/faq') &&
-                                 !location.pathname.includes('/terms') &&
-                                 !location.pathname.includes('/privacy');
-                                 
+                                location.pathname !== '/' &&
+                                !location.pathname.includes('/blog') &&
+                                !location.pathname.includes('/contact') &&
+                                !location.pathname.includes('/faq') &&
+                                !location.pathname.includes('/terms') &&
+                                !location.pathname.includes('/privacy');
+                                
         if (isProtectedRoute && event === 'SIGNED_OUT') {
           navigate("/auth/sign-in");
         }
@@ -160,28 +199,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    // Cleanup subscription
+    // Set up more aggressive session refresh interval
+    const refreshInterval = setInterval(refreshSession, 1000 * 60 * 2); // Refresh every 2 minutes
+    
+    // Set up activity monitoring to refresh session
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    let activityTimeout: ReturnType<typeof setTimeout>;
+    
+    const handleUserActivity = () => {
+      clearTimeout(activityTimeout);
+      activityTimeout = setTimeout(refreshSession, 1000 * 10); // Refresh session 10 seconds after activity
+    };
+    
+    // Add activity listeners
+    activityEvents.forEach(eventName => {
+      window.addEventListener(eventName, handleUserActivity);
+    });
+
+    // Cleanup event listeners, interval and subscription
     return () => {
       subscription.unsubscribe();
+      clearInterval(refreshInterval);
+      clearTimeout(activityTimeout);
+      activityEvents.forEach(eventName => {
+        window.removeEventListener(eventName, handleUserActivity);
+      });
     };
-  }, [toast, navigate, location]);
+  }, [toast, navigate, location, session]);
 
-  // Set up automatic session refresh
+  // Add visibility change listener to refresh session when tab becomes visible again
   useEffect(() => {
-    if (!session) return;
-
-    const refreshInterval = setInterval(async () => {
-      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
-      if (refreshedSession) {
-        setSession(refreshedSession);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log("Tab became visible, refreshing session");
+        refreshSession();
       }
-    }, 1000 * 60 * 4); // Refresh every 4 minutes
+    };
 
-    return () => clearInterval(refreshInterval);
-  }, [session]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ session, loading, signOut }}>
+    <AuthContext.Provider value={{ session, loading, signOut, refreshSession }}>
       {children}
     </AuthContext.Provider>
   );
