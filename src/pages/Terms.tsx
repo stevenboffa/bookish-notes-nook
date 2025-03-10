@@ -7,6 +7,7 @@ export default function Terms() {
       <Meta 
         title="Terms of Service"
         description="Read our terms of service to understand the rules and guidelines for using BookishNotes, including user responsibilities and our content policies."
+        canonicalUrl="https://bookishnotes.com/terms"
       />
       <Header />
       <main className="container max-w-4xl mx-auto px-4 py-24">

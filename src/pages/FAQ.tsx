@@ -113,6 +113,7 @@ export default function FAQ() {
       <Meta 
         title="Frequently Asked Questions"
         description="Get answers to common questions about BookishNotes features, account setup, note-taking functionality, and more in our comprehensive FAQ."
+        canonicalUrl="https://bookishnotes.com/faq"
       />
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">

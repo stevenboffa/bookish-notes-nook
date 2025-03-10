@@ -94,6 +94,7 @@ export default function Contact() {
       <Meta 
         title="Contact Us"
         description="Have questions about BookishNotes? Our team is here to help. Reach out through our contact form or find other ways to connect with us."
+        canonicalUrl="https://bookishnotes.com/contact"
       />
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">

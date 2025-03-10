@@ -7,6 +7,7 @@ export default function PrivacyPolicy() {
       <Meta 
         title="Privacy Policy"
         description="Our privacy policy explains how we collect, use, and protect your personal information when you use BookishNotes to ensure your data remains secure."
+        canonicalUrl="https://bookishnotes.com/privacy"
       />
       <Header />
       <main className="container max-w-4xl mx-auto px-4 py-24">

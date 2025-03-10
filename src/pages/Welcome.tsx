@@ -36,6 +36,7 @@ function Welcome() {
       <Meta 
         title="Never Forget What You Read"
         description="BookishNotes helps you retain more from your reading by capturing insights, organizing notes, and reviewing key concepts from your favorite books."
+        canonicalUrl="https://bookishnotes.com"
       />
       <Header />
       

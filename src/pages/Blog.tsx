@@ -32,6 +32,7 @@ export default function Blog() {
       <Meta 
         title="Welcome to our Blog"
         description="Explore articles on reading strategies, book summaries, and tips to improve your reading retention and note-taking skills from the BookishNotes team."
+        canonicalUrl="https://bookishnotes.com/blog"
       />
       
       {!session && <Header />}
