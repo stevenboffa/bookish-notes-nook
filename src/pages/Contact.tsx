@@ -3,10 +3,10 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram, AlertCircle } from "lucide-react";
+import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/Footer";
@@ -65,8 +65,10 @@ export default function Contact() {
       if (error) throw new Error(error.message);
       
       toast({
-        title: "Message sent",
+        title: "Message sent successfully",
         description: "We'll get back to you as soon as possible.",
+        variant: "default",
+        className: "bg-green-50 border-green-200 text-green-800",
       });
       
       // Reset form
