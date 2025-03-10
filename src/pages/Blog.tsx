@@ -1,11 +1,10 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogCard } from "@/components/blog/BlogCard";
-import { Helmet } from "react-helmet";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Meta } from "@/components/Meta";
 
 export default function Blog() {
   const { session } = useAuth();
@@ -30,13 +29,10 @@ export default function Blog() {
 
   return (
     <>
-      <Helmet>
-        <title>Blog - BookishNotes</title>
-        <meta
-          name="description"
-          content="Explore our latest articles about books, reading, and personal growth."
-        />
-      </Helmet>
+      <Meta 
+        title="Welcome to our Blog"
+        description="Explore articles on reading strategies, book summaries, and tips to improve your reading retention and note-taking skills from the BookishNotes team."
+      />
       
       {!session && <Header />}
       

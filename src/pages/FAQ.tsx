@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Link } from "react-router-dom";
 import { ChevronDown, ChevronUp, BookOpen, Search, HelpCircle, Mail, Settings, Shield, CreditCard, BookText } from "lucide-react";
 import { useState } from "react";
 import { BlogFooter } from "@/components/blog/BlogFooter";
+import { Meta } from "@/components/Meta";
 
 type FaqItem = {
   id: number;
@@ -109,6 +111,10 @@ export default function FAQ() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      <Meta 
+        title="Frequently Asked Questions"
+        description="Get answers to common questions about BookishNotes features, account setup, note-taking functionality, and more in our comprehensive FAQ."
+      />
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">
         {/* Hero Section */}
