@@ -29,17 +29,44 @@ export default function EmailCampaigns() {
   const { data: scheduledEmails, isLoading: loadingEmails } = useQuery({
     queryKey: ['scheduled-emails'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, fetch scheduled emails
+      const { data: emails, error: emailsError } = await supabase
         .from('scheduled_emails')
         .select(`
           *,
-          email_templates (name, subject),
-          profiles:user_id (email)
+          email_templates (name, subject)
         `)
         .order('scheduled_for', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (emailsError) throw emailsError;
+      
+      // If we have emails, fetch user emails separately and merge them
+      if (emails && emails.length > 0) {
+        const userIds = emails.map(email => email.user_id);
+        
+        const { data: userProfiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, email')
+          .in('id', userIds);
+          
+        if (profilesError) throw profilesError;
+        
+        // Create a map of user_id to email
+        const profileMap = new Map();
+        userProfiles?.forEach(profile => {
+          profileMap.set(profile.id, profile.email);
+        });
+        
+        // Merge the profile emails with the scheduled emails data
+        const emailsWithUserData = emails.map(email => ({
+          ...email,
+          user_email: profileMap.get(email.user_id) || 'Unknown email'
+        }));
+        
+        return emailsWithUserData;
+      }
+      
+      return emails || [];
     },
   });
 
@@ -151,7 +178,7 @@ export default function EmailCampaigns() {
                       <div>
                         <h3 className="font-medium">{email.email_templates?.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          To: {email.profiles?.email}
+                          To: {email.user_email}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           Scheduled for: {new Date(email.scheduled_for).toLocaleString()}

@@ -18,8 +18,8 @@ export function Navigation() {
   const location = useLocation();
   const { session } = useAuth();
 
-  const { data: profile } = useQuery({
-    queryKey: ["profile"],
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
       if (!session?.user) return null;
       
@@ -34,7 +34,7 @@ export function Navigation() {
         return null;
       }
       
-      console.log("Profile data:", data); // This will help us debug
+      console.log("Profile data:", data); // Debug log
       return data;
     },
     enabled: !!session?.user,
@@ -42,6 +42,13 @@ export function Navigation() {
 
   // Check if the user is the specified admin
   const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
+  const isAdmin = profile?.is_admin === true;
+
+  // Debug logs to help diagnose the issue
+  console.log("Session:", !!session);
+  console.log("Is loading:", isLoading);
+  console.log("Is admin:", isAdmin);
+  console.log("Current path:", location.pathname);
 
   return (
     <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
@@ -72,7 +79,7 @@ export function Navigation() {
             </Link>
           )}
 
-          {profile?.is_admin && (
+          {isAdmin && (
             <div className="flex gap-4">
               {/* Admin Posts link */}
               <Link
