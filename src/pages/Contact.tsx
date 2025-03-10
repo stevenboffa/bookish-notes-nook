@@ -1,4 +1,3 @@
-
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -27,7 +27,6 @@ export default function Contact() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear error when user types
     if (formErrors[name]) {
       setFormErrors(prev => {
         const newErrors = { ...prev };
@@ -71,7 +70,6 @@ export default function Contact() {
         className: "bg-green-50 border-green-200 text-green-800",
       });
       
-      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -94,7 +92,6 @@ export default function Contact() {
     <div className="min-h-screen bg-white">
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">
-        {/* Hero Section */}
         <section className="text-center mb-12 md:mb-16">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
@@ -108,7 +105,6 @@ export default function Contact() {
         </section>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* Information Cards */}
           <div className="space-y-6">
             <Card>
               <CardContent className="pt-6">
@@ -161,7 +157,6 @@ export default function Contact() {
             </Card>
           </div>
 
-          {/* Contact Form */}
           <div className="md:col-span-2">
             <Card className="shadow-md">
               <CardHeader>
@@ -259,6 +254,7 @@ export default function Contact() {
         </div>
       </div>
       <Footer />
+      <Toaster />
     </div>
   );
 }
