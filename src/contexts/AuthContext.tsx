@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Only redirect to sign-in page if trying to access protected routes
         const isProtectedRoute = !location.pathname.includes('/auth/') && 
-                                 !location.pathname === '/' &&
+                                 location.pathname !== '/' &&
                                  !location.pathname.includes('/blog') &&
                                  !location.pathname.includes('/contact') &&
                                  !location.pathname.includes('/faq') &&
