@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram } from "lucide-react";
@@ -24,7 +23,7 @@ const SITE_CONFIG = {
   description: "Your personal reading companion",
 };
 
-const Welcome = () => {
+export default function Welcome() {
   const { session } = useAuth();
 
   if (session) {
@@ -32,12 +31,12 @@ const Welcome = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background">
       <Meta 
-        title="Welcome"
-        description="BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come."
+        title="Never Forget What You Read"
+        description="Track your reading journey, take notes on books, and connect with other readers on BookishNotes."
+        canonicalUrl="https://bookishnotes.com"
       />
-      <Header />
       
       {/* Hero Section */}
       <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">

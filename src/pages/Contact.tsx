@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/toaster";
+import { Meta } from "@/components/Meta";
 
 export default function Contact() {
   const { toast } = useToast();
@@ -90,6 +91,12 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Meta 
+        title="Contact Us"
+        description="Get in touch with us about BookishNotes. We're here to help with any questions about our reading notes platform."
+        canonicalUrl="https://bookishnotes.com/contact"
+      />
+      
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">
         <section className="text-center mb-12 md:mb-16">
@@ -280,4 +287,3 @@ export default function Contact() {
     </div>
   );
 }
-
