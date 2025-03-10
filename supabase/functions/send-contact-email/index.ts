@@ -52,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Forward message to team
     const teamEmailResponse = await resend.emails.send({
       from: "BookishNotes Contact Form <no-reply@resend.dev>",
-      to: ["team@bookishnotes.app"], // Replace with your actual team email
+      to: ["read@bookishnotes.com"], // Updated email address here
       replyTo: email,
       subject: `New Contact Form: ${subject}`,
       html: `
