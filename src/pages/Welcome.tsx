@@ -24,7 +24,7 @@ const SITE_CONFIG = {
   description: "Your personal reading companion",
 };
 
-export default function Welcome() {
+function Welcome() {
   const { session } = useAuth();
 
   if (session) {
