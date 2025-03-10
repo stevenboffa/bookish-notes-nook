@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,11 +6,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Database } from "@/integrations/supabase/types";
+
+// Define types for our data structures
+type EmailTemplate = Database['public']['Tables']['email_templates']['Row'];
+type ScheduledEmail = Database['public']['Tables']['scheduled_emails']['Row'] & {
+  email_templates: Pick<EmailTemplate, 'name' | 'subject'> | null;
+  user_email: string;
+};
 
 export default function EmailCampaigns() {
   const { toast } = useToast();
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
-  const [editedTemplate, setEditedTemplate] = useState<any>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
+  const [editedTemplate, setEditedTemplate] = useState<EmailTemplate | null>(null);
 
   const { data: templates, isLoading: loadingTemplates } = useQuery({
     queryKey: ['email-templates'],
@@ -63,10 +70,10 @@ export default function EmailCampaigns() {
           user_email: profileMap.get(email.user_id) || 'Unknown email'
         }));
         
-        return emailsWithUserData;
+        return emailsWithUserData as ScheduledEmail[];
       }
       
-      return emails || [];
+      return (emails || []) as ScheduledEmail[];
     },
   });
 
