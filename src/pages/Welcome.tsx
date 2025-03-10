@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram } from "lucide-react";
@@ -664,4 +665,4 @@ const testimonials = [
   }
 ];
 
-export default Welcome;
+// Removed second "export default Welcome;"
