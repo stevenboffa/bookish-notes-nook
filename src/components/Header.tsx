@@ -53,27 +53,54 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-4">
-          {/* Auth buttons with enhanced styling */}
+          {/* Regular navigation links for both authenticated/unauthenticated users */}
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
-              className="flex items-center gap-2 text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
+              className="text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
               asChild
             >
-              <Link to="/auth/sign-in">
-                <LogIn className="h-4 w-4" />
-                Sign In
-              </Link>
+              <Link to="/blog">Blog</Link>
             </Button>
             <Button 
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200"
+              variant="ghost" 
+              className="text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
               asChild
             >
-              <Link to="/auth/sign-up">
-                <UserPlus className="h-4 w-4" />
-                Create Account
-              </Link>
+              <Link to="/contact">Contact</Link>
             </Button>
+            <Button 
+              variant="ghost" 
+              className="text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
+              asChild
+            >
+              <Link to="/faq">FAQ</Link>
+            </Button>
+            
+            {/* Auth buttons with enhanced styling for non-authenticated users */}
+            {!session && (
+              <>
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-2 text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
+                  asChild
+                >
+                  <Link to="/auth/sign-in">
+                    <LogIn className="h-4 w-4" />
+                    Sign In
+                  </Link>
+                </Button>
+                <Button 
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200"
+                  asChild
+                >
+                  <Link to="/auth/sign-up">
+                    <UserPlus className="h-4 w-4" />
+                    Create Account
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
