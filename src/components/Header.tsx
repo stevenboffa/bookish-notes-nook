@@ -38,7 +38,7 @@ export function Header() {
   // Check if the user is the specified admin
   const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
 
-  // Don't show header on mobile in dashboard view
+  // Only hide header on mobile in dashboard view
   if (isMobile && window.location.pathname === "/dashboard") {
     return null;
   }
