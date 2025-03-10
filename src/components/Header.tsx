@@ -129,6 +129,15 @@ export function Header() {
               <nav className="flex-1 px-6 py-8">
                 <div className="space-y-5">
                   <Link
+                    to="/blog"
+                    className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <BookOpen className="h-5 w-5 mr-3" />
+                    Blog
+                    <ChevronRight className="ml-auto h-5 w-5 text-slate-400 group-hover:text-white" />
+                  </Link>
+                  <Link
                     to="/contact"
                     className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
                     onClick={() => setIsOpen(false)}
