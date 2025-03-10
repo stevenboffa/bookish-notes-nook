@@ -21,8 +21,12 @@ export function Navigation() {
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
-      if (!session?.user) return null;
+      if (!session?.user) {
+        console.log("No session found for profile query");
+        return null;
+      }
       
+      console.log("Fetching profile for user:", session.user.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("is_admin, email")
@@ -38,16 +42,19 @@ export function Navigation() {
       return data;
     },
     enabled: !!session?.user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3, // Retry failed queries 3 times
   });
 
   // Check if the user is the specified admin
   const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
   const isAdmin = profile?.is_admin === true;
 
-  // Debug logs to help diagnose the issue
-  console.log("Session:", !!session);
-  console.log("Is loading:", isLoading);
-  console.log("Is admin:", isAdmin);
+  // More detailed debug logs
+  console.log("Session user ID:", session?.user?.id);
+  console.log("Profile loading:", isLoading);
+  console.log("Admin status:", isAdmin);
+  console.log("Profile data:", profile);
   console.log("Current path:", location.pathname);
 
   return (
@@ -79,6 +86,7 @@ export function Navigation() {
             </Link>
           )}
 
+          {/* Always display admin links if profile is_admin is true */}
           {isAdmin && (
             <div className="flex gap-4">
               {/* Admin Posts link */}
