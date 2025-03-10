@@ -26,7 +26,7 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#0EA5E9", // Ocean Blue
+          DEFAULT: "#9b87f5",
           foreground: "hsl(var(--primary-foreground))",
         },
         success: {
@@ -34,18 +34,8 @@ export default {
           foreground: "#2D3B1F",
         },
         accent: {
-          DEFAULT: "#FDE1D3", // Soft Peach
-          foreground: "#552718",
-        },
-        teal: {
-          DEFAULT: "#1EAEDB",
-          light: "#D3EFFA",
-          dark: "#0A7A9D",
-        },
-        peach: {
-          DEFAULT: "#FDE1D3",
-          light: "#FFF5F0",
-          dark: "#F97316", // Bright Orange
+          DEFAULT: "#D3E4FD",
+          foreground: "#1A2B3C",
         },
         text: {
           DEFAULT: "#221F26",
