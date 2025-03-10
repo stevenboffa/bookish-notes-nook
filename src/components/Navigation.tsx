@@ -13,12 +13,14 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 export function Navigation() {
   const location = useLocation();
   const { session } = useAuth();
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, refetch, error } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
       if (!session?.user) {
@@ -43,8 +45,16 @@ export function Navigation() {
     },
     enabled: !!session?.user,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 3, // Retry failed queries 3 times
+    retry: 5, // Retry failed queries 5 times
+    retryDelay: (attempt) => Math.min(attempt > 1 ? 2 ** attempt * 1000 : 1000, 30 * 1000),
   });
+
+  // Refetch profile data when the component mounts or session changes
+  useEffect(() => {
+    if (session?.user) {
+      refetch();
+    }
+  }, [session?.user, refetch]);
 
   // Check if the user is the specified admin
   const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
@@ -56,6 +66,14 @@ export function Navigation() {
   console.log("Admin status:", isAdmin);
   console.log("Profile data:", profile);
   console.log("Current path:", location.pathname);
+  
+  // Handle error if needed
+  useEffect(() => {
+    if (error) {
+      toast.error("Error loading profile data. Some features may be unavailable.");
+      console.error("Profile query error:", error);
+    }
+  }, [error]);
 
   return (
     <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
@@ -86,7 +104,7 @@ export function Navigation() {
             </Link>
           )}
 
-          {/* Always display admin links if profile is_admin is true */}
+          {/* Show admin links if profile is_admin is true */}
           {isAdmin && (
             <div className="flex gap-4">
               {/* Admin Posts link */}
