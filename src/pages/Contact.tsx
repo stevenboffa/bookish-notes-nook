@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/Footer";
@@ -93,10 +93,9 @@ export default function Contact() {
     <div className="min-h-screen bg-white">
       <Meta 
         title="Contact Us"
-        description="Get in touch with us about BookishNotes. We're here to help with any questions about our reading notes platform."
+        description="Have questions about BookishNotes? Our team is here to help. Reach out through our contact form or find other ways to connect with us."
         canonicalUrl="https://bookishnotes.com/contact"
       />
-      
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">
         <section className="text-center mb-12 md:mb-16">

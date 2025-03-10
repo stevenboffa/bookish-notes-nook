@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,12 +20,26 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // Sign up the user with Supabase
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // Send welcome email
+      const welcomeEmailResponse = await supabase.functions.invoke("send-welcome-email", {
+        body: { 
+          email,
+          name: email.split('@')[0] // Use part of the email as the name
+        }
+      });
+
+      if (welcomeEmailResponse.error) {
+        console.error("Welcome email error:", welcomeEmailResponse.error);
+        // Don't throw here, as we don't want to block the sign-up process if the email fails
+      }
 
       toast.success("Success! Please check your email to verify your account.");
       navigate("/auth/sign-in");

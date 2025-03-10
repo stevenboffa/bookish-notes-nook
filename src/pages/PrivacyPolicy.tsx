@@ -6,7 +6,7 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen bg-background">
       <Meta 
         title="Privacy Policy"
-        description="Our privacy policy explains how we collect, use, and protect your personal information when you use BookishNotes."
+        description="Our privacy policy explains how we collect, use, and protect your personal information when you use BookishNotes to ensure your data remains secure."
         canonicalUrl="https://bookishnotes.com/privacy"
       />
       <Header />

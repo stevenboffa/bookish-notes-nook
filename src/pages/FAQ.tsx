@@ -112,10 +112,9 @@ export default function FAQ() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <Meta 
         title="Frequently Asked Questions"
-        description="Find answers to common questions about BookishNotes. Learn how to use our platform and get the most out of your reading experience."
+        description="Get answers to common questions about BookishNotes features, account setup, note-taking functionality, and more in our comprehensive FAQ."
         canonicalUrl="https://bookishnotes.com/faq"
       />
-      
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">
         {/* Hero Section */}

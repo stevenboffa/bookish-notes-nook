@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogCard } from "@/components/blog/BlogCard";
-import { Helmet } from "react-helmet";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -32,7 +31,7 @@ export default function Blog() {
     <>
       <Meta 
         title="Welcome to our Blog"
-        description="Explore our latest articles about books, reading, and personal growth."
+        description="Explore articles on reading strategies, book summaries, and tips to improve your reading retention and note-taking skills from the BookishNotes team."
         canonicalUrl="https://bookishnotes.com/blog"
       />
       

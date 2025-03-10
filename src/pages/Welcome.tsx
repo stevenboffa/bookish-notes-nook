@@ -1,13 +1,13 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
+import { BookPreviewGrid } from "@/components/welcome/BookPreviewGrid";
+import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
 import { NotesPreview } from "@/components/welcome/NotesPreview";
 import { Badge } from "@/components/ui/badge";
-import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
@@ -24,7 +24,7 @@ const SITE_CONFIG = {
   description: "Your personal reading companion",
 };
 
-export default function Welcome() {
+function Welcome() {
   const { session } = useAuth();
 
   if (session) {
@@ -32,12 +32,13 @@ export default function Welcome() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
       <Meta 
         title="Never Forget What You Read"
-        description="Track your reading journey, take notes on books, and connect with other readers on BookishNotes."
+        description="BookishNotes helps you retain more from your reading by capturing insights, organizing notes, and reviewing key concepts from your favorite books."
         canonicalUrl="https://bookishnotes.com"
       />
+      <Header />
       
       {/* Hero Section */}
       <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
@@ -665,4 +666,4 @@ const testimonials = [
   }
 ];
 
-// Removed second "export default Welcome;"
+export default Welcome;
