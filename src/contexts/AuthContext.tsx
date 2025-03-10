@@ -3,18 +3,52 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 type AuthContextType = {
   session: Session | null;
   loading: boolean;
+  signOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType>({ session: null, loading: true });
+const AuthContext = createContext<AuthContextType>({ 
+  session: null, 
+  loading: true,
+  signOut: async () => {} 
+});
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Sign out function that will be exposed through context
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+        toast({
+          variant: "destructive",
+          title: "Sign out error",
+          description: error.message,
+        });
+        return;
+      }
+      // Session will be updated by the auth state listener
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error);
+      toast({
+        variant: "destructive",
+        title: "Sign out error",
+        description: "An unexpected error occurred during sign out.",
+      });
+    }
+  };
 
   useEffect(() => {
     // Set up initial session
@@ -110,7 +144,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [session]);
 
   return (
-    <AuthContext.Provider value={{ session, loading }}>
+    <AuthContext.Provider value={{ session, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

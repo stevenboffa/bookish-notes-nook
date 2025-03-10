@@ -36,7 +36,7 @@ type Profile = {
 };
 
 export default function Profile() {
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [stats, setStats] = useState<ReadingStats>({ notStarted: 0, inProgress: 0, finished: 0 });
@@ -270,8 +270,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate("/");
+      await signOut();
     } catch (error) {
       console.error("Error logging out:", error);
     }
