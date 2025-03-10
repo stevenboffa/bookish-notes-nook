@@ -37,6 +37,16 @@ export default {
           DEFAULT: "#D3E4FD",
           foreground: "#1A2B3C",
         },
+        teal: {
+          DEFAULT: "#5CE1E6",
+          light: "#CEFBFC", 
+          dark: "#38B6BB",
+        },
+        peach: {
+          DEFAULT: "#FEC6A1",
+          light: "#FDE1D3",
+          dark: "#E5A37B",
+        },
         text: {
           DEFAULT: "#221F26",
           muted: "#6B7280",

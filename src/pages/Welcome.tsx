@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram } from "lucide-react";
@@ -42,56 +41,49 @@ const Welcome = () => {
       {/* Hero Section */}
       <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 20% 150%, rgba(156, 39, 176, 0.15) 0%, rgba(156, 39, 176, 0) 50%),
-              radial-gradient(circle at 80% -50%, rgba(64, 76, 234, 0.2) 0%, rgba(64, 76, 234, 0) 50%),
-              linear-gradient(135deg, #9b87f5 0%, #7c6ad6 100%)
-            `
-          }}
+          className="absolute inset-0 bg-gradient-to-br from-teal-light to-peach-light"
         >
           <div className="absolute inset-0 opacity-10" 
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
             }}
           />
         </div>
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Background decorative elements */}
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse [animation-delay:1000ms]" />
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-teal/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-peach/20 rounded-full blur-3xl animate-pulse [animation-delay:1000ms]" />
           
-          <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-white/20 rounded-full animate-bounce-slow" />
-          <div className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-white/20 rounded-full animate-bounce-slow [animation-delay:500ms]" />
-          <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white/20 rounded-full animate-bounce-slow [animation-delay:1000ms]" />
+          <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-teal/30 rounded-full animate-bounce-slow" />
+          <div className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-peach/30 rounded-full animate-bounce-slow [animation-delay:500ms]" />
+          <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-primary/30 rounded-full animate-bounce-slow [animation-delay:1000ms]" />
         </div>
 
         <div className="container mx-auto px-4 py-10 md:py-16 lg:py-24">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="text-white animate-fade-in max-w-xl">
+            <div className="text-text animate-fade-in max-w-xl">
               <div className="inline-block mb-6 animate-pulse">
-                <div className="bg-white text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center shadow-lg">
+                <div className="bg-white text-teal-dark px-4 py-2 rounded-full font-bold text-sm flex items-center shadow-lg">
                   <span className="mr-1">✨</span> 100% FREE FOREVER <span className="ml-1">✨</span>
                 </div>
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight [text-wrap:balance]">
                 Never Forget
-                <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                <span className="block mt-2 bg-gradient-to-r from-text to-text/80 bg-clip-text text-transparent">
                   What You Read
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 md:mb-8 leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-text/90 mb-6 md:mb-8 leading-relaxed">
                 BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come. <span className="font-semibold">No payment required, ever.</span>
               </p>
 
               <div className="relative z-10">
                 <Button 
                   size="lg" 
-                  className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
+                  className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg bg-teal text-white hover:bg-teal-dark shadow-lg hover:shadow-xl transition-all duration-200 group"
                   asChild
                 >
                   <Link to="/auth/sign-up">
@@ -108,9 +100,9 @@ const Welcome = () => {
           </div>
 
           <div className="hidden md:block absolute -bottom-24 left-1/2 transform -translate-x-1/2 opacity-10">
-            <div className="relative w-[500px] h-[500px] rotate-45 border border-white/20 rounded-full">
-              <div className="absolute inset-4 border border-white/20 rounded-full" />
-              <div className="absolute inset-8 border border-white/20 rounded-full" />
+            <div className="relative w-[500px] h-[500px] rotate-45 border border-text/20 rounded-full">
+              <div className="absolute inset-4 border border-text/20 rounded-full" />
+              <div className="absolute inset-8 border border-text/20 rounded-full" />
             </div>
           </div>
         </div>
@@ -257,7 +249,7 @@ const Welcome = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 md:mb-12">
-              <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
+              <Badge variant="outline" className="mb-4 px-4 py-1 border-teal/20 bg-teal/5 text-teal-dark font-medium">
                 Powerful Features
               </Badge>
               <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">Powerful Features</h2>
@@ -304,8 +296,7 @@ const Welcome = () => {
 
       {/* Steps Section */}
       <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10" style={{
-          backgroundImage: `linear-gradient(109.6deg, rgba(223,234,247,1) 11.2%, rgba(244,248,252,1) 91.1%)`,
+        <div className="absolute inset-0 bg-gradient-to-br from-peach-light to-teal-light" style={{
           opacity: 0.8
         }}>
           <div className="absolute inset-0 opacity-10" 
@@ -318,7 +309,7 @@ const Welcome = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10 md:mb-12">
-              <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
+              <Badge variant="outline" className="mb-4 px-4 py-1 border-peach/20 bg-peach/10 text-peach-dark font-medium">
                 Three Simple Steps
               </Badge>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">Remember More of What You Read</h2>
@@ -329,7 +320,7 @@ const Welcome = () => {
 
             <div className="relative">
               {/* Connection lines for desktop */}
-              <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-primary/20 -translate-y-1/2 z-0" />
+              <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-teal/20 -translate-y-1/2 z-0" />
               
               <div className="grid md:grid-cols-3 gap-6 md:gap-8 relative z-10">
                 <StepCard 
@@ -376,7 +367,7 @@ const Welcome = () => {
       <section className="py-16 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
+            <Badge variant="outline" className="mb-4 px-4 py-1 border-teal/20 bg-teal/5 text-teal-dark font-medium">
               Free Forever
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6">
@@ -387,7 +378,7 @@ const Welcome = () => {
             </p>
             <Button 
               size="lg"
-              className="h-12 px-6 sm:px-8 text-base"
+              className="h-12 px-6 sm:px-8 text-base bg-gradient-to-r from-teal to-teal-dark text-white hover:opacity-90"
               asChild
             >
               <Link to="/auth/sign-up">
