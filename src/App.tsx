@@ -1,3 +1,4 @@
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
@@ -33,7 +34,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   
   if (loading) {
-    return null;
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
   
   if (!session) {
@@ -70,7 +73,9 @@ const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
   });
   
   if (loading || profileLoading) {
-    return null;
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
   
   if (!session) {
@@ -85,12 +90,14 @@ const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// Create a public route component that redirects authenticated users
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+// Create a public route component that redirects authenticated users to dashboard
+const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   
   if (loading) {
-    return null;
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
 
   if (session) {
@@ -113,27 +120,14 @@ const AuthenticatedLayout = ({ children, hideNav = false }: { children: React.Re
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+    <BrowserRouter>
       <HelmetProvider>
-        <TooltipProvider>
-          <BrowserRouter>
+        <AuthProvider>
+          <TooltipProvider>
             <Routes>
+              {/* Public routes that don't require authentication */}
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
-                <Route path="/" element={
-                  <PublicRoute>
-                    <Welcome />
-                  </PublicRoute>
-                } />
-                <Route path="/auth/sign-in" element={
-                  <PublicRoute>
-                    <SignIn />
-                  </PublicRoute>
-                } />
-                <Route path="/auth/sign-up" element={
-                  <PublicRoute>
-                    <SignUp />
-                  </PublicRoute>
-                } />
+                <Route path="/" element={<Welcome />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/contact" element={<Contact />} />
@@ -142,6 +136,21 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicy />} />
               </Route>
 
+              {/* Auth routes - redirect to dashboard if already authenticated */}
+              <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
+                <Route path="/auth/sign-in" element={
+                  <PublicAuthRoute>
+                    <SignIn />
+                  </PublicAuthRoute>
+                } />
+                <Route path="/auth/sign-up" element={
+                  <PublicAuthRoute>
+                    <SignUp />
+                  </PublicAuthRoute>
+                } />
+              </Route>
+
+              {/* Protected routes - require authentication */}
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
@@ -192,10 +201,10 @@ const App = () => (
               
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+          </TooltipProvider>
+        </AuthProvider>
       </HelmetProvider>
-    </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

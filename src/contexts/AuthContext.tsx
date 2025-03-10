@@ -39,6 +39,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       
+      setSession(null);
+      
       // Force navigation to sign-in page
       navigate("/auth/sign-in");
       
@@ -61,26 +63,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Set up initial session
     const initializeSession = async () => {
-      // Get the current session
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Error getting session:", error);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: "There was a problem with your session. Please try logging in again.",
-        });
-        setLoading(false);
-        return;
-      }
+      try {
+        // Get the current session
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "There was a problem with your session. Please try logging in again.",
+          });
+          setLoading(false);
+          return;
+        }
 
-      if (data.session) {
-        console.log("Found existing session");
-        setSession(data.session);
+        if (data.session) {
+          console.log("Found existing session");
+          setSession(data.session);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Unexpected error initializing session:", error);
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     initializeSession();
@@ -112,40 +119,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             // Don't throw here as this is not critical to the auth flow
           }
         }
+        
+        // Show signin toast
+        if (event === 'SIGNED_IN') {
+          toast({
+            title: "Welcome!",
+            description: "You have successfully signed in.",
+          });
+          
+          // Navigate to dashboard after sign in if on auth page
+          if (location.pathname.includes('/auth/')) {
+            navigate("/dashboard");
+          }
+        }
       } else {
         setSession(null);
-        // Redirect to sign-in page if not already there
-        if (!location.pathname.includes('/auth/')) {
+        
+        // Only redirect to sign-in page if trying to access protected routes
+        const isProtectedRoute = !location.pathname.includes('/auth/') && 
+                                 !location.pathname === '/' &&
+                                 !location.pathname.includes('/blog') &&
+                                 !location.pathname.includes('/contact') &&
+                                 !location.pathname.includes('/faq') &&
+                                 !location.pathname.includes('/terms') &&
+                                 !location.pathname.includes('/privacy');
+                                 
+        if (isProtectedRoute && event === 'SIGNED_OUT') {
           navigate("/auth/sign-in");
+        }
+        
+        // Show signout toast
+        if (event === 'SIGNED_OUT') {
+          toast({
+            title: "Signed out",
+            description: "You have been signed out successfully.",
+          });
         }
       }
       
       setLoading(false);
-
-      // Show appropriate toasts
-      if (event === 'SIGNED_IN') {
-        toast({
-          title: "Welcome!",
-          description: "You have successfully signed in.",
-        });
-        
-        // Navigate to dashboard after sign in
-        if (location.pathname.includes('/auth/')) {
-          navigate("/dashboard");
-        }
-      } else if (event === 'SIGNED_OUT') {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
-        });
-      }
     });
 
     // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast, session, navigate, location]);
+  }, [toast, navigate, location]);
 
   // Set up automatic session refresh
   useEffect(() => {
