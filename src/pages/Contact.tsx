@@ -129,6 +129,28 @@ export default function Contact() {
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium mb-1">Email</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Contact us directly via email.
+                    </p>
+                    <a 
+                      href="mailto:read@bookishnotes.com" 
+                      className="text-sm font-medium text-primary mt-1 block hover:underline"
+                    >
+                      read@bookishnotes.com
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <AtSign className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -258,3 +280,4 @@ export default function Contact() {
     </div>
   );
 }
+
