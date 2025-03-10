@@ -14,7 +14,7 @@ export const Meta = ({
 }: MetaProps) => {
   const siteTitle = title ? `${title} | BookishNotes.com` : "BookishNotes.com";
   const defaultDescription = "Track your reading journey, take notes on books, and connect with other readers.";
-  const ogImage = "/lovable-uploads/a86f382a-f265-4e32-8b2f-29ce02995a74.png";
+  const ogImage = "https://bookishnotes.com/lovable-uploads/a86f382a-f265-4e32-8b2f-29ce02995a74.png";
   
   return (
     <Helmet>
@@ -25,18 +25,17 @@ export const Meta = ({
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
-      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:url" content={canonicalUrl || "https://bookishnotes.com"} />
       <meta property="og:title" content={siteTitle} />
       <meta property="og:description" content={description || defaultDescription} />
       <meta property="og:image" content={ogImage} />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={canonicalUrl} />
+      <meta property="twitter:url" content={canonicalUrl || "https://bookishnotes.com"} />
       <meta property="twitter:title" content={siteTitle} />
       <meta property="twitter:description" content={description || defaultDescription} />
       <meta property="twitter:image" content={ogImage} />
     </Helmet>
   );
 };
-
