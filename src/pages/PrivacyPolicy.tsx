@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
 
@@ -6,8 +7,7 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen bg-background">
       <Meta 
         title="Privacy Policy"
-        description="Our privacy policy explains how we collect, use, and protect your personal information when you use BookishNotes to ensure your data remains secure."
-        canonicalUrl="https://bookishnotes.com/privacy"
+        description="Our privacy policy explains how we collect, use, and protect your personal information when you use BookishNotes."
       />
       <Header />
       <main className="container max-w-4xl mx-auto px-4 py-24">

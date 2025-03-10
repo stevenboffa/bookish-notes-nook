@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { Menu, BookOpen, Users, ChevronRight, MessageCircle, Info, LogIn, UserPlus, LogOut } from "lucide-react";
+import { Menu, BookOpen, Users, ChevronRight, MessageCircle, Info, LogIn, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { session, signOut } = useAuth();
+  const { session } = useAuth();
 
   const { data: profile } = useQuery({
     queryKey: ["profile"],
@@ -43,11 +43,6 @@ export function Header() {
     return null;
   }
 
-  const handleSignOut = async () => {
-    await signOut();
-    setIsOpen(false);
-  };
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b w-full">
       <div className="flex items-center justify-between h-16 px-4 max-w-6xl mx-auto">
@@ -58,38 +53,28 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-4">
-          {session ? (
+          {/* Auth buttons with enhanced styling */}
+          <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
               className="flex items-center gap-2 text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
-              onClick={handleSignOut}
+              asChild
             >
-              <LogOut className="h-4 w-4" />
-              Sign Out
+              <Link to="/auth/sign-in">
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </Link>
             </Button>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                className="flex items-center gap-2 text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
-                asChild
-              >
-                <Link to="/auth/sign-in">
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Link>
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200"
-                asChild
-              >
-                <Link to="/auth/sign-up">
-                  <UserPlus className="h-4 w-4" />
-                  Create Account
-                </Link>
-              </Button>
-            </div>
-          )}
+            <Button 
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200"
+              asChild
+            >
+              <Link to="/auth/sign-up">
+                <UserPlus className="h-4 w-4" />
+                Create Account
+              </Link>
+            </Button>
+          </div>
         </nav>
 
         {/* Mobile Menu Trigger */}
@@ -133,42 +118,32 @@ export function Header() {
 
                   <div className="h-px bg-slate-200 my-6" />
 
-                  {session ? (
-                    <Button
-                      className="w-full bg-white text-slate-800 border border-slate-200 hover:bg-slate-50"
-                      onClick={handleSignOut}
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  ) : (
-                    <div className="bg-primary/5 rounded-xl p-5">
-                      <h3 className="font-medium text-lg mb-3 text-slate-800">Ready to start your journey?</h3>
-                      <p className="text-slate-600 text-sm mb-4">Create your free account and start organizing your reading notes today.</p>
-                      <div className="space-y-3">
-                        <Button
-                          className="w-full bg-white text-slate-800 border border-slate-200 hover:bg-slate-50"
-                          onClick={() => setIsOpen(false)}
-                          asChild
-                        >
-                          <Link to="/auth/sign-in">
-                            <LogIn className="h-4 w-4 mr-2" />
-                            Sign In
-                          </Link>
-                        </Button>
-                        <Button
-                          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-                          onClick={() => setIsOpen(false)}
-                          asChild
-                        >
-                          <Link to="/auth/sign-up">
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Create Account
-                          </Link>
-                        </Button>
-                      </div>
+                  <div className="bg-primary/5 rounded-xl p-5">
+                    <h3 className="font-medium text-lg mb-3 text-slate-800">Ready to start your journey?</h3>
+                    <p className="text-slate-600 text-sm mb-4">Create your free account and start organizing your reading notes today.</p>
+                    <div className="space-y-3">
+                      <Button
+                        className="w-full bg-white text-slate-800 border border-slate-200 hover:bg-slate-50"
+                        onClick={() => setIsOpen(false)}
+                        asChild
+                      >
+                        <Link to="/auth/sign-in">
+                          <LogIn className="h-4 w-4 mr-2" />
+                          Sign In
+                        </Link>
+                      </Button>
+                      <Button
+                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+                        onClick={() => setIsOpen(false)}
+                        asChild
+                      >
+                        <Link to="/auth/sign-up">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Create Account
+                        </Link>
+                      </Button>
                     </div>
-                  )}
+                  </div>
                 </div>
               </nav>
             </div>
