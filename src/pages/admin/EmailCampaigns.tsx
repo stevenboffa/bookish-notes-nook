@@ -34,7 +34,7 @@ export default function EmailCampaigns() {
         .select(`
           *,
           email_templates (name, subject),
-          profiles (email)
+          profiles:user_id (email)
         `)
         .order('scheduled_for', { ascending: false });
 
