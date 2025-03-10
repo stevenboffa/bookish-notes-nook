@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram } from "lucide-react";
@@ -38,41 +39,59 @@ const Welcome = () => {
       />
       <Header />
       
-      {/* Hero Section - Updated with white background and black text */}
-      <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-white">
-          {/* Clean white background with subtle pattern */}
-          <div className="absolute inset-0 opacity-5" 
+      {/* Hero Section */}
+      <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 20% 150%, rgba(156, 39, 176, 0.15) 0%, rgba(156, 39, 176, 0) 50%),
+              radial-gradient(circle at 80% -50%, rgba(64, 76, 234, 0.2) 0%, rgba(64, 76, 234, 0) 50%),
+              linear-gradient(135deg, #9b87f5 0%, #7c6ad6 100%)
+            `
+          }}
+        >
+          <div className="absolute inset-0 opacity-10" 
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239b87f5' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E")`,
             }}
           />
         </div>
 
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Background decorative elements */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse [animation-delay:1000ms]" />
+          
+          <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-white/20 rounded-full animate-bounce-slow" />
+          <div className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-white/20 rounded-full animate-bounce-slow [animation-delay:500ms]" />
+          <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-white/20 rounded-full animate-bounce-slow [animation-delay:1000ms]" />
+        </div>
+
         <div className="container mx-auto px-4 py-10 md:py-16 lg:py-24">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="animate-fade-in max-w-xl">
+            <div className="text-white animate-fade-in max-w-xl">
               <div className="inline-block mb-6 animate-pulse">
-                <div className="bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center shadow-sm">
+                <div className="bg-white text-primary px-4 py-2 rounded-full font-bold text-sm flex items-center shadow-lg">
                   <span className="mr-1">✨</span> 100% FREE FOREVER <span className="ml-1">✨</span>
                 </div>
               </div>
               
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight [text-wrap:balance] text-text">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight [text-wrap:balance]">
                 Never Forget
-                <span className="block mt-2 text-primary">
+                <span className="block mt-2 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
                   What You Read
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-text/90 mb-6 md:mb-8 leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 md:mb-8 leading-relaxed">
                 BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come. <span className="font-semibold">No payment required, ever.</span>
               </p>
 
               <div className="relative z-10">
                 <Button 
                   size="lg" 
-                  className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-200 group"
+                  className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-200 group"
                   asChild
                 >
                   <Link to="/auth/sign-up">
@@ -88,11 +107,10 @@ const Welcome = () => {
             </div>
           </div>
 
-          {/* Subtle decorative elements with purple accents */}
           <div className="hidden md:block absolute -bottom-24 left-1/2 transform -translate-x-1/2 opacity-10">
-            <div className="relative w-[500px] h-[500px] rotate-45 border border-primary/20 rounded-full">
-              <div className="absolute inset-4 border border-primary/20 rounded-full" />
-              <div className="absolute inset-8 border border-primary/20 rounded-full" />
+            <div className="relative w-[500px] h-[500px] rotate-45 border border-white/20 rounded-full">
+              <div className="absolute inset-4 border border-white/20 rounded-full" />
+              <div className="absolute inset-8 border border-white/20 rounded-full" />
             </div>
           </div>
         </div>
