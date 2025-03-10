@@ -50,11 +50,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Setting new session");
         setSession(currentSession);
         
-        // Send welcome email on first sign up
+        // Send welcome email on sign up or first sign in
         if (event === 'SIGNED_IN' && !session) {
           try {
-            // Fixed the conditional to avoid comparing 'SIGNED_IN' and 'SIGNED_UP' directly
-            const isNewUser = event === 'SIGNED_UP' || (event === 'SIGNED_IN' && !session);
+            // Check if this is a new user
+            const isNewUser = !session; // If there was no previous session, treat as new user
             
             if (isNewUser) {
               await supabase.functions.invoke("send-welcome-email", {

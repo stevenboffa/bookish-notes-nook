@@ -30,28 +30,59 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "BookishNotes <no-reply@resend.dev>",
       to: [email],
-      subject: "Welcome to BookishNotes!",
+      subject: "Welcome to BookishNotes - Your Reading Journey Begins!",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #9b87f5;">Welcome to BookishNotes!</h2>
-          <p>Hello ${name},</p>
-          <p>Thank you for joining BookishNotes! We're excited to have you as part of our reading community.</p>
-          <p>With BookishNotes, you can:</p>
-          <ul style="padding-left: 20px;">
-            <li>Track your reading progress</li>
-            <li>Take organized notes from your favorite books</li>
-            <li>Save memorable quotes</li>
-            <li>Connect with other readers</li>
-          </ul>
-          <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p><strong>Ready to get started?</strong></p>
-            <p>Add your first book and start taking notes. The more you read, the more you'll get out of BookishNotes!</p>
-            <a href="${Deno.env.get("PUBLIC_SITE_URL") || "https://bookishnotes.com"}/dashboard" style="background-color: #9b87f5; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">Go to My Dashboard</a>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <div style="background-color: #9b87f5; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0;">Welcome to BookishNotes!</h1>
           </div>
-          <p>Happy reading!</p>
-          <p>The BookishNotes Team</p>
-          <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
-            <p>If you have any questions, please don't hesitate to <a href="${Deno.env.get("PUBLIC_SITE_URL") || "https://bookishnotes.com"}/contact" style="color: #9b87f5;">contact us</a>.</p>
+          
+          <div style="padding: 30px; border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;">
+            <p style="font-size: 16px; line-height: 1.5;">Hello ${name},</p>
+            
+            <p style="font-size: 16px; line-height: 1.5;">Thank you for joining BookishNotes! We're thrilled to have you as part of our reading community. Your journey of capturing reading insights starts now.</p>
+            
+            <h2 style="color: #9b87f5; margin-top: 25px;">What you can do with BookishNotes:</h2>
+            
+            <div style="background-color: #f9f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <div style="display: flex; margin-bottom: 15px;">
+                <div style="min-width: 30px; color: #9b87f5; font-weight: bold;">📚</div>
+                <div><strong>Track Books</strong> - Keep a digital record of your entire reading collection</div>
+              </div>
+              
+              <div style="display: flex; margin-bottom: 15px;">
+                <div style="min-width: 30px; color: #9b87f5; font-weight: bold;">✏️</div>
+                <div><strong>Take Notes</strong> - Capture thoughts, insights, and key concepts</div>
+              </div>
+              
+              <div style="display: flex; margin-bottom: 15px;">
+                <div style="min-width: 30px; color: #9b87f5; font-weight: bold;">💬</div>
+                <div><strong>Save Quotes</strong> - Never lose those meaningful passages again</div>
+              </div>
+              
+              <div style="display: flex; margin-bottom: 0;">
+                <div style="min-width: 30px; color: #9b87f5; font-weight: bold;">👥</div>
+                <div><strong>Connect</strong> - Share your reading journey with like-minded readers</div>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${Deno.env.get("PUBLIC_SITE_URL") || "https://bookishnotes.com"}/dashboard" 
+                style="background-color: #9b87f5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; display: inline-block;">
+                Get Started Now
+              </a>
+            </div>
+            
+            <p style="font-size: 16px; line-height: 1.5;">We can't wait to see what you'll discover through your reading journey!</p>
+            
+            <p style="font-size: 16px; line-height: 1.5;">Happy reading!</p>
+            
+            <p style="font-size: 16px; line-height: 1.5; margin-bottom: 0;">The BookishNotes Team</p>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
+            <p>If you have any questions, please <a href="${Deno.env.get("PUBLIC_SITE_URL") || "https://bookishnotes.com"}/contact" style="color: #9b87f5; text-decoration: none;">contact us</a>.</p>
+            <p>© ${new Date().getFullYear()} BookishNotes. All rights reserved.</p>
           </div>
         </div>
       `,
