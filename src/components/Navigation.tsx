@@ -7,6 +7,7 @@ import {
   UsersIcon,
   ShoppingCartIcon,
   FileTextIcon,
+  MailIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -72,16 +73,31 @@ export function Navigation() {
           )}
 
           {profile?.is_admin && (
-            <Link
-              to="/admin/posts"
-              className={cn(
-                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-                location.pathname.startsWith("/admin") && "text-primary"
-              )}
-            >
-              <FileTextIcon className="h-6 w-6" />
-              <span>Admin</span>
-            </Link>
+            <div className="flex gap-4">
+              {/* Admin Posts link */}
+              <Link
+                to="/admin/posts"
+                className={cn(
+                  "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                  location.pathname.includes("/admin/posts") && "text-primary"
+                )}
+              >
+                <FileTextIcon className="h-6 w-6" />
+                <span>Posts</span>
+              </Link>
+              
+              {/* Admin Email Campaigns link */}
+              <Link
+                to="/admin/email-campaigns"
+                className={cn(
+                  "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
+                  location.pathname.includes("/admin/email-campaigns") && "text-primary"
+                )}
+              >
+                <MailIcon className="h-6 w-6" />
+                <span>Emails</span>
+              </Link>
+            </div>
           )}
 
           <Link

@@ -1,4 +1,3 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
@@ -17,6 +16,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogPosts from "./pages/admin/BlogPosts";
 import EditBlogPost from "./pages/admin/EditBlogPost";
+import EmailCampaigns from "./pages/admin/EmailCampaigns";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import Contact from "./pages/Contact";
@@ -28,7 +28,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
-// Create a protected route component that handles loading state and authenticated redirects
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   const location = useLocation();
@@ -46,7 +45,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// Create a special admin route for Buy Books page
 const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   const location = useLocation();
@@ -82,7 +80,6 @@ const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
   }
   
-  // Only allow a specific admin user to access the BuyBooks page
   if (profile?.email !== "hi@stevenboffa.com") {
     return <Navigate to="/dashboard" replace />;
   }
@@ -90,7 +87,6 @@ const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// Create a public route component that redirects authenticated users to dashboard
 const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   
@@ -107,7 +103,6 @@ const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// Create a layout component that only shows Navigation for authenticated routes
 const AuthenticatedLayout = ({ children, hideNav = false }: { children: React.ReactNode, hideNav?: boolean }) => {
   const { session } = useAuth();
   return (
@@ -118,6 +113,48 @@ const AuthenticatedLayout = ({ children, hideNav = false }: { children: React.Re
   );
 };
 
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, loading } = useAuth();
+  const location = useLocation();
+  
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["admin-profile", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!session?.user,
+  });
+  
+  if (loading || profileLoading) {
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
+  }
+  
+  if (!session) {
+    return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
+  }
+  
+  if (!profile?.is_admin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return children;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
@@ -125,7 +162,6 @@ const App = () => (
         <AuthProvider>
           <TooltipProvider>
             <Routes>
-              {/* Public routes that don't require authentication */}
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
                 <Route path="/" element={<Welcome />} />
                 <Route path="/blog" element={<Blog />} />
@@ -136,7 +172,6 @@ const App = () => (
                 <Route path="/privacy" element={<PrivacyPolicy />} />
               </Route>
 
-              {/* Auth routes - redirect to dashboard if already authenticated */}
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
                 <Route path="/auth/sign-in" element={
                   <PublicAuthRoute>
@@ -150,7 +185,6 @@ const App = () => (
                 } />
               </Route>
 
-              {/* Protected routes - require authentication */}
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
@@ -188,14 +222,19 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 <Route path="/admin/posts" element={
-                  <ProtectedRoute>
+                  <AdminRoute>
                     <BlogPosts />
-                  </ProtectedRoute>
+                  </AdminRoute>
                 } />
                 <Route path="/admin/posts/:id" element={
-                  <ProtectedRoute>
+                  <AdminRoute>
                     <EditBlogPost />
-                  </ProtectedRoute>
+                  </AdminRoute>
+                } />
+                <Route path="/admin/email-campaigns" element={
+                  <AdminRoute>
+                    <EmailCampaigns />
+                  </AdminRoute>
                 } />
               </Route>
               
