@@ -6,34 +6,90 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram } from "lucide-react";
+import { AtSign, Mail, MessageCircle, HelpCircle, Facebook, Instagram, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Contact() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user types
+    if (formErrors[name]) {
+      setFormErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) errors.name = "Name is required";
+    if (!formData.email.trim()) errors.email = "Email is required";
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email)) errors.email = "Email is invalid";
+    if (!formData.subject.trim()) errors.subject = "Subject is required";
+    if (!formData.message.trim()) errors.message = "Message is required";
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsSubmitting(false);
-    toast({
-      title: "Message sent",
-      description: "We'll get back to you as soon as possible.",
-    });
-    
-    // Reset form
-    (e.target as HTMLFormElement).reset();
+    try {
+      const { data, error } = await supabase.functions.invoke("send-contact-email", {
+        body: formData
+      });
+
+      if (error) throw new Error(error.message);
+      
+      toast({
+        title: "Message sent",
+        description: "We'll get back to you as soon as possible.",
+      });
+      
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error sending message",
+        description: "Please try again later or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-white">
       <Header />
       <div className="container max-w-6xl mx-auto px-4 pt-24 pb-16">
         {/* Hero Section */}
@@ -122,8 +178,15 @@ export default function Contact() {
                         name="name"
                         type="text"
                         placeholder="Jane Smith"
-                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        className={formErrors.name ? "border-red-500" : ""}
                       />
+                      {formErrors.name && (
+                        <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                          <AlertCircle className="h-3 w-3" /> {formErrors.name}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email address</Label>
@@ -132,8 +195,15 @@ export default function Contact() {
                         name="email"
                         type="email"
                         placeholder="jane@example.com"
-                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={formErrors.email ? "border-red-500" : ""}
                       />
+                      {formErrors.email && (
+                        <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                          <AlertCircle className="h-3 w-3" /> {formErrors.email}
+                        </p>
+                      )}
                     </div>
                   </div>
                   
@@ -144,8 +214,15 @@ export default function Contact() {
                       name="subject"
                       type="text"
                       placeholder="How can we help you?"
-                      required
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className={formErrors.subject ? "border-red-500" : ""}
                     />
+                    {formErrors.subject && (
+                      <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3" /> {formErrors.subject}
+                      </p>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
@@ -154,9 +231,15 @@ export default function Contact() {
                       id="message"
                       name="message"
                       placeholder="Tell us what you need help with..."
-                      className="min-h-[150px]"
-                      required
+                      className={`min-h-[150px] ${formErrors.message ? "border-red-500" : ""}`}
+                      value={formData.message}
+                      onChange={handleChange}
                     />
+                    {formErrors.message && (
+                      <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3" /> {formErrors.message}
+                      </p>
+                    )}
                   </div>
                   
                   <Button 
