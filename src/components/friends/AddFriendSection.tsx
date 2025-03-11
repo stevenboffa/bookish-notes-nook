@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function AddFriendSection() {
+interface AddFriendSectionProps {
+  onAddFriend?: (email: string) => Promise<void>;
+  isLoading?: boolean;
+}
+
+export function AddFriendSection({ onAddFriend, isLoading: externalLoading }: AddFriendSectionProps = {}) {
   const { session } = useAuth();
   const [friendEmail, setFriendEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,6 +23,14 @@ export function AddFriendSection() {
     if (!session?.user?.id) return;
     if (!friendEmail.trim()) return;
     
+    // If the parent component provided an onAddFriend handler, use that
+    if (onAddFriend) {
+      await onAddFriend(friendEmail);
+      setFriendEmail('');
+      return;
+    }
+    
+    // Otherwise use the default implementation
     setIsSubmitting(true);
     
     try {
@@ -101,6 +113,9 @@ export function AddFriendSection() {
     }
   };
 
+  // Determine if loading state should come from parent or local state
+  const isLoading = externalLoading !== undefined ? externalLoading : isSubmitting;
+
   return (
     <form onSubmit={handleAddFriend} className="flex items-center gap-2 mb-6" data-tour="friends">
       <div className="relative flex-1">
@@ -111,12 +126,12 @@ export function AddFriendSection() {
           className="pl-8"
           value={friendEmail}
           onChange={(e) => setFriendEmail(e.target.value)}
-          disabled={isSubmitting}
+          disabled={isLoading}
           required
         />
       </div>
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Adding..." : "Add Friend"}
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? "Adding..." : "Add Friend"}
       </Button>
     </form>
   );
