@@ -57,15 +57,20 @@ export function useWelcomeTour() {
           .single();
 
         if (error) {
-          throw error;
+          console.error("Error fetching tour status:", error);
+          setIsLoading(false);
+          return;
         }
 
-        setTourCompleted(data?.tour_completed || false);
+        const completed = data?.tour_completed || false;
+        setTourCompleted(completed);
+        console.log("Tour completed status:", completed);
         
         // Auto-open tour for new users who haven't completed it
         if (data && data.tour_completed === false) {
           // Small delay to ensure the page is fully rendered
           setTimeout(() => {
+            console.log("Auto-opening tour for new user");
             setIsTourOpen(true);
           }, 1500);
         }
@@ -134,8 +139,9 @@ export function useWelcomeTour() {
     }
   };
 
-  // Restart the tour
+  // Restart the tour - this is the function called by the button in the Profile page
   const restartTour = () => {
+    console.log("Restarting tour...");
     setIsTourOpen(true);
   };
 
