@@ -279,7 +279,7 @@ export function BookDetailView({
         </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
+      <div className={`flex-1 overflow-y-auto pb-20 ${isMobile ? '' : 'px-6'}`}>
         <div className="p-6 bg-white border-b shadow-sm">
           <div className="flex flex-col sm:flex-row gap-8">
             <div className="flex justify-center sm:justify-start">
@@ -517,7 +517,7 @@ export function BookDetailView({
           </div>
         </div>
 
-        <div className="mt-2">
+        <div className="mt-2 pb-24">
           {book && book.format && (
             <div className="w-full">
               <NoteSection 
