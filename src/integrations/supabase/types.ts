@@ -276,33 +276,6 @@ export type Database = {
         }
         Relationships: []
       }
-      email_templates: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          name: string
-          subject: string
-          updated_at: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: string
-          name: string
-          subject: string
-          updated_at?: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          name?: string
-          subject?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       friend_activities: {
         Row: {
           activity_type: string
@@ -531,50 +504,6 @@ export type Database = {
           },
         ]
       }
-      scheduled_emails: {
-        Row: {
-          created_at: string
-          error_message: string | null
-          id: string
-          scheduled_for: string
-          sent_at: string | null
-          status: Database["public"]["Enums"]["email_sequence_status"]
-          template_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          scheduled_for: string
-          sent_at?: string | null
-          status?: Database["public"]["Enums"]["email_sequence_status"]
-          template_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          scheduled_for?: string
-          sent_at?: string | null
-          status?: Database["public"]["Enums"]["email_sequence_status"]
-          template_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scheduled_emails_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "email_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       secrets: {
         Row: {
           created_at: string
@@ -615,15 +544,8 @@ export type Database = {
         }
         Returns: string
       }
-      schedule_welcome_sequence: {
-        Args: {
-          user_id: string
-        }
-        Returns: undefined
-      }
     }
     Enums: {
-      email_sequence_status: "pending" | "sent" | "failed"
       friendship_status: "pending" | "accepted"
     }
     CompositeTypes: {
