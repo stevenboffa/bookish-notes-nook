@@ -7,17 +7,19 @@ import {
   UsersIcon,
   ShoppingCartIcon,
   FileTextIcon,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Navigation() {
   const location = useLocation();
   const { session } = useAuth();
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       if (!session?.user) return null;
@@ -42,8 +44,18 @@ export function Navigation() {
   // Check if the user is the specified admin
   const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
 
+  // Don't show navigation on authentication pages
+  if (location.pathname.startsWith("/auth/")) {
+    return null;
+  }
+
+  // Don't show navigation on landing page
+  if (location.pathname === "/") {
+    return null;
+  }
+
   return (
-    <nav className="bg-white border-t py-2 fixed bottom-0 w-full">
+    <nav className="bg-white border-t py-2 fixed bottom-0 w-full z-50">
       <div className="container max-w-lg mx-auto px-4">
         <div className="flex justify-between items-center">
           <Link
@@ -58,7 +70,12 @@ export function Navigation() {
           </Link>
 
           {/* Only show Buy Books link for the specific admin */}
-          {isSpecificAdmin && (
+          {isLoading ? (
+            <div className="flex flex-col items-center gap-1">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+          ) : isSpecificAdmin && (
             <Link
               to="/buy-books"
               className={cn(
@@ -71,7 +88,12 @@ export function Navigation() {
             </Link>
           )}
 
-          {profile?.is_admin && (
+          {isLoading ? (
+            <div className="flex flex-col items-center gap-1">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+          ) : profile?.is_admin && (
             <Link
               to="/admin/posts"
               className={cn(
