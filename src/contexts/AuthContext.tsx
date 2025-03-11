@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const hasShownWelcomeToast = useRef(false);
+  const processingAuthChange = useRef(false);
 
   useEffect(() => {
     // Set up initial session
@@ -45,6 +46,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      // Prevent duplicate event processing
+      if (processingAuthChange.current) return;
+      
+      processingAuthChange.current = true;
+      
       console.log("Auth state changed:", event);
       
       if (currentSession) {
@@ -81,6 +87,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         }
       }
+      
+      // Allow processing of the next auth event after a delay
+      setTimeout(() => {
+        processingAuthChange.current = false;
+      }, 1000);
     });
 
     // Cleanup subscription

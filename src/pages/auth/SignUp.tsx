@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,13 @@ export default function SignUp() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          // Disable any email confirmation to prevent duplicate emails
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            email_subscribe: false, // Ensure we're not subscribing users to emails by default
+          }
+        }
       });
 
       if (error) throw error;
@@ -40,7 +48,11 @@ export default function SignUp() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            // Disable any email subscriptions for Google sign-in
+            subscribe: 'false',
+          }
         }
       });
 

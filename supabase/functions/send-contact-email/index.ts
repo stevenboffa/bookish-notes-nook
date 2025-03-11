@@ -19,6 +19,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check if the request is specifically for the contact form
+    const url = new URL(req.url);
+    if (!url.pathname.includes("/send-contact-email")) {
+      throw new Error("Invalid endpoint");
+    }
+
     // Parse request body
     const { name, email, subject, message }: ContactFormData = await req.json();
 
