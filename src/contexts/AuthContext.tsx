@@ -66,11 +66,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Signed out",
           description: "You have been signed out successfully.",
         });
-      } else if (event === 'USER_DELETED') {
-        toast({
-          title: "Account deleted",
-          description: "Your account has been successfully deleted.",
-        });
+      }
+      
+      // We can't use USER_DELETED directly in the comparison since it's not in the type
+      // Instead, check if the event is a custom event we might receive after account deletion
+      if (event === 'SIGNED_OUT' && !currentSession) {
+        // Check if this sign out was due to account deletion
+        // This is a workaround since USER_DELETED isn't a standard event type
+        const wasAccountDeleted = localStorage.getItem('account_deleted');
+        if (wasAccountDeleted === 'true') {
+          localStorage.removeItem('account_deleted');
+          toast({
+            title: "Account deleted",
+            description: "Your account has been successfully deleted.",
+          });
+        }
       }
     });
 
