@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Welcome!",
           description: "You have successfully signed in.",
         });
-      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      } else if (event === 'SIGNED_OUT') {
         // Check if this sign out was due to account deletion
         const wasAccountDeleted = localStorage.getItem('account_deleted');
         
