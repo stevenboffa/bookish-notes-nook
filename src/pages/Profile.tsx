@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { Meta } from "@/components/Meta";
 
 type ReadingStats = {
   notStarted: number;
@@ -299,35 +299,30 @@ export default function Profile() {
       
       console.log("Deleting user data for ID:", userId);
       
-      // Delete user account from auth.users
-      // This will cascade delete profile due to references
+      // Set a flag in localStorage to notify about account deletion after sign-out
+      localStorage.setItem('account_deleted', 'true');
+      
+      // Delete user from Supabase Auth
       const { error } = await supabase.auth.admin.deleteUser(userId);
       
       if (error) {
+        console.error("Error using admin.deleteUser:", error);
+        
         // If admin deletion fails, try user-initiated deletion
-        const { error: userDeleteError } = await supabase.auth.signOut({ 
-          scope: 'local' 
-        });
+        const { error: userDeleteError } = await supabase.rpc('delete_user');
         
-        if (userDeleteError) throw userDeleteError;
+        if (userDeleteError) {
+          throw userDeleteError;
+        }
         
-        // User logged out but account still exists
-        // Let them know they need to contact support
-        toast({
-          title: "Partial success",
-          description: "You've been logged out, but account deletion requires administrator assistance. Please contact support.",
-          variant: "destructive",
-        });
-        
+        // User deleted successfully via RPC
+        await supabase.auth.signOut();
         navigate("/");
         return;
       }
       
-      toast({
-        title: "Account deleted",
-        description: "Your account has been successfully deleted. We're sorry to see you go.",
-      });
-      
+      // If we successfully deleted via admin method
+      await supabase.auth.signOut();
       navigate("/");
     } catch (error: any) {
       console.error("Error deleting account:", error);
@@ -336,6 +331,7 @@ export default function Profile() {
         description: error.message || "Failed to delete account",
         variant: "destructive",
       });
+      localStorage.removeItem('account_deleted');
     } finally {
       setIsDeletingAccount(false);
       setIsDeleteAccountOpen(false);
@@ -344,6 +340,7 @@ export default function Profile() {
 
   return (
     <div className="container max-w-md mx-auto p-4 pb-24 space-y-4 mb-16">
+      <Meta title="Profile" />
       <Card>
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
