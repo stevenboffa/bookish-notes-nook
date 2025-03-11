@@ -16,12 +16,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const hasShownWelcomeToast = useRef(false);
-  const processingAuthChange = useRef(false);
+  const lastAuthEvent = useRef<string | null>(null);
+  const lastEventTime = useRef<number>(0);
 
   useEffect(() => {
     // Set up initial session
     const initializeSession = async () => {
-      // Get the current session
       const { data, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -46,12 +46,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      // Prevent duplicate event processing
-      if (processingAuthChange.current) return;
-      
-      processingAuthChange.current = true;
-      
       console.log("Auth state changed:", event);
+
+      // Prevent duplicate events within 2 seconds and identical consecutive events
+      const now = Date.now();
+      if (
+        (now - lastEventTime.current < 2000 && lastAuthEvent.current === event) ||
+        (event === 'TOKEN_REFRESHED' && lastAuthEvent.current === 'SIGNED_IN')
+      ) {
+        console.log("Skipping duplicate auth event:", event);
+        return;
+      }
+
+      lastAuthEvent.current = event;
+      lastEventTime.current = now;
       
       if (currentSession) {
         console.log("Setting new session");
@@ -87,11 +95,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         }
       }
-      
-      // Allow processing of the next auth event after a delay
-      setTimeout(() => {
-        processingAuthChange.current = false;
-      }, 1000);
     });
 
     // Cleanup subscription
