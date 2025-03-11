@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Book, BookIcon, Lock, LogOut, User, Camera, AlertTriangle, Info } from "lucide-react";
+import { Book, BookIcon, Lock, LogOut, User, Camera, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,7 +25,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { Meta } from "@/components/Meta";
-import { useWelcomeTour } from "@/hooks/use-welcome-tour";
 
 type ReadingStats = {
   notStarted: number;
@@ -42,7 +41,6 @@ export default function Profile() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { restartTour } = useWelcomeTour();
   const [stats, setStats] = useState<ReadingStats>({ notStarted: 0, inProgress: 0, finished: 0 });
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
@@ -331,7 +329,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8 pb-20">
+    <div className="container max-w-md mx-auto p-4 pb-24 space-y-4 mb-16">
       <Meta title="Profile" />
       <Card>
         <CardHeader className="space-y-1">
@@ -442,26 +440,6 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
-
-      <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">App Preferences</h2>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="font-medium">App Tour</h3>
-              <p className="text-sm text-gray-500">Restart the guided tour of the app</p>
-            </div>
-            <Button 
-              variant="outline" 
-              onClick={restartTour}
-              className="flex items-center gap-2"
-            >
-              <Info className="h-4 w-4" />
-              Start Tour
-            </Button>
-          </div>
-        </div>
-      </div>
 
       <Button
         variant="outline"

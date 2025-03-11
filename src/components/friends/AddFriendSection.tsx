@@ -1,138 +1,108 @@
-import React, { useState } from 'react';
+
+import { useState } from "react";
+import { UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { Search } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface AddFriendSectionProps {
-  onAddFriend?: (email: string) => Promise<void>;
-  isLoading?: boolean;
+  onAddFriend: (email: string) => Promise<void>;
+  isLoading: boolean;
 }
 
-export function AddFriendSection({ onAddFriend, isLoading: externalLoading }: AddFriendSectionProps = {}) {
-  const { session } = useAuth();
-  const [friendEmail, setFriendEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+export function AddFriendSection({ onAddFriend, isLoading }: AddFriendSectionProps) {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
-  const handleAddFriend = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!session?.user?.id) return;
-    if (!friendEmail.trim()) return;
-    
-    // If the parent component provided an onAddFriend handler, use that
-    if (onAddFriend) {
-      await onAddFriend(friendEmail);
-      setFriendEmail('');
+    // Basic email validation
+    if (!email || !email.trim()) {
+      setError("Email is required");
       return;
     }
     
-    // Otherwise use the default implementation
-    setIsSubmitting(true);
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    
+    setError(null);
     
     try {
-      // Check if the user exists
-      const { data: users, error: userError } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .eq('email', friendEmail.trim())
-        .maybeSingle();
-      
-      if (userError) throw userError;
-      
-      if (!users) {
-        toast({
-          title: "User not found",
-          description: "No user found with that email address.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-      
-      // Check if it's the user's own email
-      if (users.id === session.user.id) {
-        toast({
-          title: "Cannot add yourself",
-          description: "You cannot add yourself as a friend.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-      
-      // Check if a friend request already exists
-      const { data: existingRequest, error: requestError } = await supabase
-        .from('friends')
-        .select('id, status')
-        .or(`sender_id.eq.${session.user.id},receiver_id.eq.${session.user.id}`)
-        .or(`sender_id.eq.${users.id},receiver_id.eq.${users.id}`)
-        .maybeSingle();
-      
-      if (requestError) throw requestError;
-      
-      if (existingRequest) {
-        toast({
-          title: "Request exists",
-          description: "A friend request with this user already exists.",
-          variant: "default",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-      
-      // Add friend request
-      const { error: insertError } = await supabase
-        .from('friends')
-        .insert({
-          sender_id: session.user.id,
-          receiver_id: users.id,
-          status: 'pending'
-        });
-      
-      if (insertError) throw insertError;
-      
-      toast({
-        title: "Friend request sent",
-        description: "Your friend request has been sent successfully.",
-      });
-      
-      setFriendEmail('');
+      await onAddFriend(email);
+      setEmail("");
     } catch (error) {
       console.error("Error adding friend:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add friend. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+      toast("Failed to add friend. Please try again.");
     }
   };
 
-  // Determine if loading state should come from parent or local state
-  const isLoading = externalLoading !== undefined ? externalLoading : isSubmitting;
-
   return (
-    <form onSubmit={handleAddFriend} className="flex items-center gap-2 mb-6" data-tour="friends">
-      <div className="relative flex-1">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="email"
-          placeholder="Add friend by email"
-          className="pl-8"
-          value={friendEmail}
-          onChange={(e) => setFriendEmail(e.target.value)}
-          disabled={isLoading}
-          required
-        />
-      </div>
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? "Adding..." : "Add Friend"}
-      </Button>
-    </form>
+    <Card className="mb-8 animate-fade-in">
+      <CardHeader className={cn(isMobile ? "p-4" : "")}>
+        <CardTitle className="text-xl">Add a Friend</CardTitle>
+        <CardDescription>
+          Enter your friend's email to send them a friend request
+        </CardDescription>
+      </CardHeader>
+      <CardContent className={cn(isMobile ? "p-4" : "")}>
+        <form 
+          className="flex flex-col sm:flex-row gap-4"
+          onSubmit={handleSubmit}
+        >
+          <div className="flex-1">
+            <Input
+              type="email"
+              placeholder="friend@example.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error) setError(null);
+              }}
+              className={cn(error ? "border-red-500" : "")}
+              disabled={isLoading}
+              aria-invalid={!!error}
+            />
+            {error && (
+              <p className="text-red-500 text-sm mt-1">{error}</p>
+            )}
+          </div>
+          <Button 
+            type="submit"
+            disabled={isLoading || !email}
+            className={cn(
+              "min-w-[100px]",
+              isMobile ? "w-full" : ""
+            )}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add
+              </>
+            )}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
