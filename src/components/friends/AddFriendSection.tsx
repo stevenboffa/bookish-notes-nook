@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 interface AddFriendSectionProps {
   onAddFriend: (email: string) => Promise<void>;

@@ -64,6 +64,7 @@ export function Navigation() {
               "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
               location.pathname === "/dashboard" && "text-primary"
             )}
+            data-tour="dashboard"
           >
             <HomeIcon className="h-6 w-6" />
             <span>Home</span>
@@ -112,6 +113,7 @@ export function Navigation() {
               "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
               location.pathname === "/friends" && "text-primary"
             )}
+            data-tour="friends"
           >
             <UsersIcon className="h-6 w-6" />
             <span>Friends</span>
@@ -123,6 +125,7 @@ export function Navigation() {
               "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
               location.pathname === "/profile" && "text-primary"
             )}
+            data-tour="profile"
           >
             <UserCircleIcon className="h-6 w-6" />
             <span>Profile</span>

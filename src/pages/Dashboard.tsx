@@ -14,6 +14,7 @@ import { Book, Collection, Note, Quote } from "@/types/books";
 import { CollectionManager } from "@/components/CollectionManager";
 import { toast } from "sonner";
 import { LibraryStats } from "@/components/LibraryStats";
+import { WelcomeTour } from "@/components/WelcomeTour";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -342,6 +343,7 @@ const Dashboard = () => {
           onClick={() => navigate('/add-book')}
           className="bg-primary hover:bg-primary/90 transition-colors flex items-center gap-2 text-white px-6 py-5 rounded-lg shadow-md hover:shadow-lg"
           size="lg"
+          data-tour="add-book"
         >
           <Plus className="h-5 w-5" />
           Add your first book
@@ -352,6 +354,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex-1 flex">
+      <WelcomeTour />
       <div className="flex-1 flex flex-col min-w-0">
         <div className={`${!isMobile ? "sticky top-0 z-30" : ""} bg-white`}>
           <div className="bg-white border-b">
@@ -366,6 +369,7 @@ const Dashboard = () => {
                 className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-200 
                          transform hover:translate-y-[-1px] h-10 sm:h-11 px-4 sm:px-5 rounded-lg 
                          font-medium flex gap-1.5 items-center"
+                data-tour="add-book"
               >
                 <Plus className="h-4 w-4" strokeWidth={2.5} />
                 Add Book
@@ -429,7 +433,7 @@ const Dashboard = () => {
         )}
         
         <div className="flex-1 overflow-auto pb-20">
-          <div className="pt-4 px-2">
+          <div className="pt-4 px-2" data-tour="book-collection">
             <BookList
               books={books}
               selectedBook={selectedBook}
