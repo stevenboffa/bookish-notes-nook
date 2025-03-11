@@ -1,8 +1,9 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Book, BookIcon, Lock, LogOut, User, Camera } from "lucide-react";
+import { Book, BookIcon, Lock, LogOut, User, Camera, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +18,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,12 +43,15 @@ export default function Profile() {
   const { toast } = useToast();
   const [stats, setStats] = useState<ReadingStats>({ notStarted: 0, inProgress: 0, finished: 0 });
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile>({ username: null, avatar_url: null });
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (!session) {
@@ -277,6 +282,66 @@ export default function Profile() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== session?.user.email) {
+      toast({
+        title: "Error",
+        description: "Please type your email correctly to confirm account deletion",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDeletingAccount(true);
+    try {
+      // First delete user's data from public tables
+      const userId = session?.user.id;
+      
+      console.log("Deleting user data for ID:", userId);
+      
+      // Delete user account from auth.users
+      // This will cascade delete profile due to references
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+      
+      if (error) {
+        // If admin deletion fails, try user-initiated deletion
+        const { error: userDeleteError } = await supabase.auth.signOut({ 
+          scope: 'local' 
+        });
+        
+        if (userDeleteError) throw userDeleteError;
+        
+        // User logged out but account still exists
+        // Let them know they need to contact support
+        toast({
+          title: "Partial success",
+          description: "You've been logged out, but account deletion requires administrator assistance. Please contact support.",
+          variant: "destructive",
+        });
+        
+        navigate("/");
+        return;
+      }
+      
+      toast({
+        title: "Account deleted",
+        description: "Your account has been successfully deleted. We're sorry to see you go.",
+      });
+      
+      navigate("/");
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete account",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingAccount(false);
+      setIsDeleteAccountOpen(false);
+    }
+  };
+
   return (
     <div className="container max-w-md mx-auto p-4 pb-24 space-y-4 mb-16">
       <Card>
@@ -406,6 +471,18 @@ export default function Profile() {
         <LogOut className="mr-2 h-4 w-4" />
         Log Out
       </Button>
+      
+      <div className="pt-8 border-t border-border mt-8">
+        <h3 className="text-lg font-semibold text-destructive mb-2">Danger Zone</h3>
+        <Button
+          variant="outline"
+          className="w-full border-destructive text-destructive hover:bg-destructive/10"
+          onClick={() => setIsDeleteAccountOpen(true)}
+        >
+          <AlertTriangle className="mr-2 h-4 w-4" />
+          Delete Account
+        </Button>
+      </div>
 
       <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
         <DialogContent>
@@ -426,6 +503,55 @@ export default function Profile() {
             <Button onClick={handleChangePassword} className="w-full">
               Update Password
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isDeleteAccountOpen} onOpenChange={setIsDeleteAccountOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Delete Account
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="confirm-email">
+                Type <span className="font-medium">{session?.user.email}</span> to confirm
+              </Label>
+              <Input
+                id="confirm-email"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="your@email.com"
+              />
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsDeleteAccountOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount || deleteConfirmation !== session?.user.email}
+              >
+                {isDeletingAccount ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete Account"
+                )}
+              </Button>
+            </DialogFooter>
           </div>
         </DialogContent>
       </Dialog>
