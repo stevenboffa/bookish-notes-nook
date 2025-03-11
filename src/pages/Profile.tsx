@@ -302,27 +302,15 @@ export default function Profile() {
       // Set a flag in localStorage to notify about account deletion after sign-out
       localStorage.setItem('account_deleted', 'true');
       
-      // Delete user from Supabase Auth
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      // Call the delete_user RPC function we created
+      const { error } = await supabase.rpc('delete_user');
       
       if (error) {
-        console.error("Error using admin.deleteUser:", error);
-        
-        // If admin deletion fails, try user-initiated deletion
-        const { error: userDeleteError } = await supabase.rpc('delete_user');
-        
-        if (userDeleteError) {
-          throw userDeleteError;
-        }
-        
-        // User deleted successfully via RPC
-        await supabase.auth.signOut();
-        navigate("/");
-        return;
+        throw error;
       }
       
-      // If we successfully deleted via admin method
-      await supabase.auth.signOut();
+      // If deletion was successful, the user will be signed out automatically
+      // due to the deletion of their auth record
       navigate("/");
     } catch (error: any) {
       console.error("Error deleting account:", error);

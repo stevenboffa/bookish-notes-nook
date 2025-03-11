@@ -601,6 +601,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       disable_book_triggers: {
         Args: Record<PropertyKey, never>
         Returns: undefined
