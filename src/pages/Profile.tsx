@@ -294,35 +294,37 @@ export default function Profile() {
 
     setIsDeletingAccount(true);
     try {
-      // First delete user's data from public tables
-      const userId = session?.user.id;
-      
-      console.log("Deleting user data for ID:", userId);
-      
       // Set a flag in localStorage to notify about account deletion after sign-out
       localStorage.setItem('account_deleted', 'true');
       
-      // Call the delete_user RPC function we created
+      console.log("Starting account deletion process...");
+      
+      // Call the delete_user RPC function 
       const { error } = await supabase.rpc('delete_user');
       
       if (error) {
+        console.error("Error calling delete_user RPC:", error);
         throw error;
       }
       
-      // If deletion was successful, the user will be signed out automatically
-      // due to the deletion of their auth record
+      console.log("Account deletion successful, redirecting...");
+      
+      // If deletion was successful, we need to sign out and redirect
+      // The auth system may have already signed the user out, but let's make sure
+      await supabase.auth.signOut();
+      
+      // Navigate to home page
       navigate("/");
     } catch (error: any) {
       console.error("Error deleting account:", error);
+      setIsDeletingAccount(false);
+      setIsDeleteAccountOpen(false);
       toast({
         title: "Error",
         description: error.message || "Failed to delete account",
         variant: "destructive",
       });
       localStorage.removeItem('account_deleted');
-    } finally {
-      setIsDeletingAccount(false);
-      setIsDeleteAccountOpen(false);
     }
   };
 

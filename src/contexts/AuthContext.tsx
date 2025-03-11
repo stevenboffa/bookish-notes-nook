@@ -61,19 +61,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           title: "Welcome!",
           description: "You have successfully signed in.",
         });
-      } else if (event === 'SIGNED_OUT') {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
-        });
-        
+      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
         // Check if this sign out was due to account deletion
         const wasAccountDeleted = localStorage.getItem('account_deleted');
+        
         if (wasAccountDeleted === 'true') {
           localStorage.removeItem('account_deleted');
           toast({
             title: "Account deleted",
             description: "Your account has been successfully deleted.",
+          });
+        } else {
+          toast({
+            title: "Signed out",
+            description: "You have been signed out successfully.",
           });
         }
       }
