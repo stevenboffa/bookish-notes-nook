@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram } from "lucide-react";
@@ -33,10 +32,7 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
-      <Meta 
-        title="Welcome"
-        description="BookishNotes helps you take smart notes on everything you read, so you can remember and reference your books for years to come."
-      />
+      <Meta customTitle="Never Forget What You Read | BookishNotes.com" />
       <Header />
       
       {/* Hero Section */}

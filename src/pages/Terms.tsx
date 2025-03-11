@@ -5,10 +5,7 @@ import { Meta } from "@/components/Meta";
 export default function Terms() {
   return (
     <div className="min-h-screen bg-background">
-      <Meta 
-        title="Terms of Service"
-        description="Our terms of service outline the rules and guidelines for using BookishNotes. Read about our policies and user agreements."
-      />
+      <Meta customTitle="Terms of Service | BookishNotes.com" />
       <Header />
       <main className="container max-w-4xl mx-auto px-4 py-24">
         <div className="prose prose-gray max-w-none">

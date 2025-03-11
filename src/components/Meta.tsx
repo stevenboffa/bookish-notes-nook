@@ -5,14 +5,16 @@ interface MetaProps {
   title?: string;
   description?: string;
   canonicalUrl?: string;
+  customTitle?: string;
 }
 
 export const Meta = ({
   title,
   description,
   canonicalUrl,
+  customTitle,
 }: MetaProps) => {
-  const siteTitle = title ? `${title} | BookishNotes.com` : "BookishNotes.com";
+  const siteTitle = customTitle || (title ? `${title} | BookishNotes.com` : "BookishNotes.com");
   const defaultDescription = "Track your reading journey, take notes on books, and connect with other readers.";
   
   return (
