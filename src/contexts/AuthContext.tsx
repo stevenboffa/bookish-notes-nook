@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const hasShownWelcomeToast = useRef(false);
 
   useEffect(() => {
     // Set up initial session
@@ -56,12 +57,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
 
       // Show appropriate toasts
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && !hasShownWelcomeToast.current) {
+        hasShownWelcomeToast.current = true;
         toast({
           title: "Welcome back!",
           description: "You have successfully signed in.",
         });
       } else if (event === 'SIGNED_OUT') {
+        hasShownWelcomeToast.current = false;
         // Check if this sign out was due to account deletion
         const wasAccountDeleted = localStorage.getItem('account_deleted');
         
