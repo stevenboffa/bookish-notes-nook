@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Show appropriate toasts
       if (event === 'SIGNED_IN') {
         toast({
-          title: "Welcome!",
+          title: "Welcome back!",
           description: "You have successfully signed in.",
         });
       } else if (event === 'SIGNED_OUT') {
