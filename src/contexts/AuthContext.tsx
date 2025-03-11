@@ -7,9 +7,14 @@ import { useToast } from "@/components/ui/use-toast";
 type AuthContextType = {
   session: Session | null;
   loading: boolean;
+  deleteAccount: () => Promise<{ success: boolean; error: string | null }>;
 };
 
-const AuthContext = createContext<AuthContextType>({ session: null, loading: true });
+const AuthContext = createContext<AuthContextType>({ 
+  session: null, 
+  loading: true,
+  deleteAccount: async () => ({ success: false, error: 'AuthContext not initialized' }) 
+});
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -135,8 +140,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => clearInterval(refreshInterval);
   }, [session]);
 
+  // Account deletion function
+  const deleteAccount = async () => {
+    try {
+      // Call our delete_user() function we created in SQL
+      const { error: functionError } = await supabase.rpc('delete_user');
+      
+      if (functionError) {
+        console.error("Error deleting user:", functionError);
+        return { 
+          success: false, 
+          error: functionError.message || "Failed to delete account" 
+        };
+      }
+      
+      // Mark account as deleted in localStorage so we can show the right toast
+      localStorage.setItem('account_deleted', 'true');
+      
+      // Sign out the user after account deletion
+      await supabase.auth.signOut();
+      
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Error in deleteAccount:", error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "An unknown error occurred" 
+      };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ session, loading }}>
+    <AuthContext.Provider value={{ session, loading, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

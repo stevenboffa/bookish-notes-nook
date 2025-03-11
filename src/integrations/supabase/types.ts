@@ -548,6 +548,10 @@ export type Database = {
         }
         Returns: string
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       email_sequence_status: "pending" | "sent" | "failed"
