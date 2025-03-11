@@ -18,6 +18,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const hasShownWelcomeToast = useRef(false);
   const lastAuthEvent = useRef<string | null>(null);
   const lastEventTime = useRef<number>(0);
+  const signOutToastShown = useRef(false);
+  const signedOutTimestamp = useRef<number>(0);
 
   useEffect(() => {
     // Set up initial session
@@ -79,20 +81,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       } else if (event === 'SIGNED_OUT') {
         hasShownWelcomeToast.current = false;
-        // Check if this sign out was due to account deletion
-        const wasAccountDeleted = localStorage.getItem('account_deleted');
         
-        if (wasAccountDeleted === 'true') {
-          localStorage.removeItem('account_deleted');
-          toast({
-            title: "Account deleted",
-            description: "Your account has been successfully deleted.",
-          });
+        // Only show the sign-out toast if we haven't shown it recently
+        // and make sure we don't show duplicate sign-out toasts
+        const now = Date.now();
+        if (!signOutToastShown.current || (now - signedOutTimestamp.current > 5000)) {
+          signOutToastShown.current = true;
+          signedOutTimestamp.current = now;
+          
+          // Check if this sign out was due to account deletion
+          const wasAccountDeleted = localStorage.getItem('account_deleted');
+          
+          if (wasAccountDeleted === 'true') {
+            localStorage.removeItem('account_deleted');
+            toast({
+              title: "Account deleted",
+              description: "Your account has been successfully deleted.",
+            });
+          } else {
+            toast({
+              title: "Signed out",
+              description: "You have been signed out successfully.",
+            });
+          }
+          
+          // Reset the flag after a delay
+          setTimeout(() => {
+            signOutToastShown.current = false;
+          }, 5000);
         } else {
-          toast({
-            title: "Signed out",
-            description: "You have been signed out successfully.",
-          });
+          console.log("Skipping duplicate sign-out toast");
         }
       }
     });
