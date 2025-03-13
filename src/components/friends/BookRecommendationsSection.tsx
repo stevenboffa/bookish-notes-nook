@@ -50,8 +50,7 @@ export function BookRecommendationsSection() {
           message,
           created_at,
           book_id,
-          from_user_id,
-          sender:profiles!book_recommendations_from_user_id_fkey(id, email, username, avatar_url)
+          from_user_id
         `)
         .eq('to_user_id', session?.user.id)
         .eq('status', 'pending')
@@ -63,6 +62,21 @@ export function BookRecommendationsSection() {
         setRecommendations([]);
         return;
       }
+      
+      // Fetch the sender profiles separately
+      const senderIds = [...new Set(data.map(item => item.from_user_id))];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, email, username, avatar_url')
+        .in('id', senderIds);
+        
+      if (profilesError) throw profilesError;
+      
+      // Map profiles by ID for easy lookup
+      const profilesMap = new Map();
+      profilesData?.forEach(profile => {
+        profilesMap.set(profile.id, profile);
+      });
       
       // Fetch the book details for each recommendation
       const recommendationsWithBooks = await Promise.all(
@@ -78,11 +92,18 @@ export function BookRecommendationsSection() {
             return null;
           }
           
+          const senderProfile = profilesMap.get(rec.from_user_id);
+          
           return {
             id: rec.id,
             message: rec.message,
             created_at: rec.created_at,
-            sender: rec.sender,
+            sender: {
+              id: senderProfile?.id || '',
+              email: senderProfile?.email || '',
+              username: senderProfile?.username,
+              avatar_url: senderProfile?.avatar_url
+            },
             book: {
               id: bookData.id,
               title: bookData.title,
