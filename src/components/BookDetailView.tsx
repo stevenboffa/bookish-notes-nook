@@ -261,74 +261,76 @@ export function BookDetailView({
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-white via-gray-50 to-white">
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b shadow-sm">
-        {/* Title and Author Bar */}
-        <div className="p-4 pb-2">
-          <div className="flex justify-between items-start">
-            <div className="flex-1 pr-2">
-              <h2 className="text-xl font-serif font-semibold text-text break-words animate-fade-in">
+      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b shadow-sm">
+        {/* Compact header for mobile */}
+        <div className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex-1 min-w-0 mr-2">
+              <h2 className="text-lg font-serif font-semibold text-text break-words line-clamp-2 hover:line-clamp-none transition-all">
                 {title}
               </h2>
-              <p className="text-sm text-text-muted italic mt-0.5">{author}</p>
             </div>
             <Button 
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 -mt-1 -mr-1 hover:bg-gray-100 transition-colors"
+              className="h-8 w-8 shrink-0 hover:bg-gray-100 transition-colors rounded-full"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
-        </div>
-        
-        {/* Action buttons */}
-        <div className="flex items-center justify-end gap-2 px-4 pb-3">
-          {book && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-1 h-9 border-primary/10 text-primary hover:bg-primary/5 hover:text-primary/90 transition-colors"
-                    asChild
-                  >
-                    <RecommendBookDialog 
-                      book={book} 
-                      buttonVariant="outline" 
-                      buttonLabel="Share"
-                      buttonSize="sm"
-                    >
-                      <div className="flex items-center gap-1">
-                        <Share2 className="h-4 w-4" />
-                        <span className="hidden sm:inline">Share</span>
-                      </div>
-                    </RecommendBookDialog>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Share this book with a friend</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          <Button 
-            variant="ghost"
-            size="sm"
-            onClick={handleSave}
-            className="h-9 px-4 bg-gradient-to-r from-success to-success/90 text-success-foreground hover:opacity-90 transition-opacity relative"
-            disabled={!format}
-          >
-            <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-100' : 'opacity-0'}`}>
-              <Check className="h-4 w-4" />
+          
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-text-muted italic truncate mr-2">
+              {author}
+            </p>
+            
+            <div className="flex items-center gap-1.5">
+              {book && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <RecommendBookDialog 
+                        book={book} 
+                        buttonVariant="ghost" 
+                        buttonLabel="Share"
+                        buttonSize="sm"
+                        className="h-8 px-2 text-primary hover:bg-primary/5"
+                      >
+                        <div className="flex items-center gap-1">
+                          <Share2 className="h-4 w-4" />
+                          <span className="sr-only sm:not-sr-only sm:inline">Share</span>
+                        </div>
+                      </RecommendBookDialog>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Share this book with a friend</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              
+              <Button 
+                variant="ghost"
+                size="sm"
+                onClick={handleSave}
+                disabled={!format}
+                className={`h-8 px-2.5 ${
+                  format ? 'bg-success/90 text-success-foreground hover:bg-success/80' : 
+                  'bg-gray-100 text-gray-400'
+                } transition-colors relative rounded-full`}
+              >
+                <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-100' : 'opacity-0'}`}>
+                  <Check className="h-4 w-4" />
+                </div>
+                <div className={`flex items-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-0' : 'opacity-100'}`}>
+                  <Save className="h-3.5 w-3.5 mr-1" />
+                  Save
+                </div>
+              </Button>
             </div>
-            <div className={`flex items-center transition-opacity duration-300 ${showSaveConfirmation ? 'opacity-0' : 'opacity-100'}`}>
-              <Save className="h-4 w-4 mr-1" />
-              Save
-            </div>
-          </Button>
+          </div>
         </div>
       </div>
 
