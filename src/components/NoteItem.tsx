@@ -151,7 +151,7 @@ export function NoteItem({ note, onDelete, onTogglePin, onUpdateNote, bookFormat
             {isEditing ? (
               <div className="space-y-3">
                 <Textarea 
-                  value={editedContent} 
+                  value={editedContent || ""} 
                   onChange={(e) => setEditedContent(e.target.value)}
                   className="min-h-[100px] w-full border-gray-300 focus:border-primary focus:ring-primary"
                   placeholder="Enter your note..."
@@ -161,14 +161,14 @@ export function NoteItem({ note, onDelete, onTogglePin, onUpdateNote, bookFormat
                   <div>
                     <Label htmlFor="noteType" className="text-xs mb-1 block">Note Type</Label>
                     <Select
-                      value={editedNoteType}
-                      onValueChange={setEditedNoteType}
+                      value={editedNoteType || "none"}
+                      onValueChange={(value) => setEditedNoteType(value === "none" ? "" : value)}
                     >
                       <SelectTrigger id="noteType" className="w-full h-8 text-xs">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">General Note</SelectItem>
+                        <SelectItem value="none">General Note</SelectItem>
                         <SelectItem value="quote">Quote</SelectItem>
                         <SelectItem value="summary">Summary</SelectItem>
                         <SelectItem value="insight">Insight</SelectItem>
