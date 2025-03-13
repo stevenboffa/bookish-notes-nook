@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "rea
 import { Navigation } from "@/components/Navigation";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { HelmetProvider } from 'react-helmet-async';
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -118,6 +119,7 @@ const App = () => (
       <HelmetProvider>
         <TooltipProvider>
           <BrowserRouter>
+            <GoogleAnalytics />
             <Routes>
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
                 <Route path="/" element={
