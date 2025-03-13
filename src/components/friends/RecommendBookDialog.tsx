@@ -32,6 +32,7 @@ interface RecommendBookDialogProps {
   buttonSize?: "default" | "sm" | "lg" | "icon";
   buttonLabel?: string | null;
   children?: React.ReactNode;
+  className?: string; // Added className prop
 }
 
 export function RecommendBookDialog({
@@ -40,6 +41,7 @@ export function RecommendBookDialog({
   buttonSize = "icon",
   buttonLabel = null,
   children,
+  className, // Added className prop
 }: RecommendBookDialogProps) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriendId, setSelectedFriendId] = useState<string>("");
@@ -173,7 +175,7 @@ export function RecommendBookDialog({
           <Button 
             variant={buttonVariant} 
             size={buttonSize}
-            className="relative group hover:text-primary"
+            className={`relative group hover:text-primary ${className || ''}`}
             aria-label="Recommend book"
           >
             {buttonSize === "icon" ? <Share2 className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
