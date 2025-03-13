@@ -1,10 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
 import { Note, BookWithNotes } from "@/types/books";
 import { useToast } from "@/hooks/use-toast";
 import { NoteItem } from "./NoteItem";
+import { FilterNotes } from "./FilterNotes";
 
 interface NoteSectionProps {
   book: BookWithNotes;
@@ -13,6 +14,12 @@ interface NoteSectionProps {
 
 export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [filter, setFilter] = useState<{
+    type?: string;
+    chapter?: string;
+    timestampStart?: number;
+    timestampEnd?: number;
+  }>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,6 +66,51 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
 
     loadNotes();
   }, [book.id]);
+
+  // Extract unique note types and chapters for filter options
+  const noteTypes = useMemo(() => {
+    const types = new Set<string>();
+    notes.forEach(note => {
+      if (note.noteType) types.add(note.noteType);
+    });
+    return Array.from(types);
+  }, [notes]);
+
+  const chapters = useMemo(() => {
+    const chapterSet = new Set<string>();
+    notes.forEach(note => {
+      if (note.chapter) chapterSet.add(note.chapter);
+    });
+    return Array.from(chapterSet);
+  }, [notes]);
+
+  // Apply filters to notes
+  const filteredNotes = useMemo(() => {
+    return notes.filter(note => {
+      // Filter by note type
+      if (filter.type && note.noteType !== filter.type) {
+        return false;
+      }
+      
+      // Filter by chapter
+      if (filter.chapter && note.chapter !== filter.chapter) {
+        return false;
+      }
+      
+      // Filter by timestamp range (for audiobooks)
+      if (filter.timestampStart !== undefined && 
+          (note.timestampSeconds === undefined || note.timestampSeconds < filter.timestampStart)) {
+        return false;
+      }
+      
+      if (filter.timestampEnd !== undefined && 
+          (note.timestampSeconds === undefined || note.timestampSeconds > filter.timestampEnd)) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [notes, filter]);
 
   const handleAddNote = async (note: {
     content: string;
@@ -131,6 +183,61 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       toast({
         title: "Error",
         description: "Failed to add note. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const updateNote = async (noteId: string, updates: Partial<Note>) => {
+    try {
+      console.log('Updating note with data:', updates);
+      
+      const updatePayload: any = {};
+      if (updates.content !== undefined) updatePayload.content = updates.content;
+      if (updates.noteType !== undefined) updatePayload.note_type = updates.noteType;
+      if (updates.pageNumber !== undefined) updatePayload.page_number = updates.pageNumber;
+      if (updates.timestampSeconds !== undefined) updatePayload.timestamp_seconds = updates.timestampSeconds;
+      if (updates.chapter !== undefined) updatePayload.chapter = updates.chapter;
+      
+      const { data, error } = await supabase
+        .from("notes")
+        .update(updatePayload)
+        .eq("id", noteId)
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      console.log('Updated note:', data);
+      const updatedNotes = notes.map(note => {
+        if (note.id === noteId) {
+          return {
+            ...note,
+            content: updates.content !== undefined ? updates.content : note.content,
+            noteType: updates.noteType !== undefined ? updates.noteType : note.noteType,
+            pageNumber: updates.pageNumber !== undefined ? updates.pageNumber : note.pageNumber,
+            timestampSeconds: updates.timestampSeconds !== undefined ? updates.timestampSeconds : note.timestampSeconds,
+            chapter: updates.chapter !== undefined ? updates.chapter : note.chapter,
+          };
+        }
+        return note;
+      });
+
+      setNotes(updatedNotes);
+      onUpdateBook({
+        ...book,
+        notes: updatedNotes
+      });
+
+      toast({
+        title: "Success",
+        description: "Note updated successfully"
+      });
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update note. Please try again.",
         variant: "destructive"
       });
     }
@@ -250,9 +357,8 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     }
   };
 
-  useEffect(() => {
-    console.log('Book format in NoteSection changed to:', book.format);
-  }, [book.format]);
+  const hasFiltersApplied = Object.values(filter).some(Boolean);
+  const clearFilters = () => setFilter({});
 
   return (
     <div className="space-y-5 px-4 sm:px-6">
@@ -262,12 +368,33 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       
       <AddNoteForm bookId={book.id} bookFormat={book.format} onSubmit={handleAddNote} />
 
-      {notes.length === 0 ? (
-        <p className="text-sm text-gray-500 font-normal">No notes added yet.</p>
+      {notes.length > 0 && (
+        <FilterNotes
+          filter={filter}
+          onFilterChange={setFilter}
+          noteTypes={noteTypes}
+          chapters={chapters}
+          bookFormat={book.format}
+          hasFiltersApplied={hasFiltersApplied}
+          onClearFilters={clearFilters}
+        />
+      )}
+
+      {filteredNotes.length === 0 ? (
+        <p className="text-sm text-gray-500 font-normal">
+          {notes.length === 0 ? "No notes added yet." : "No notes match your filters."}
+        </p>
       ) : (
         <div className="space-y-4">
-          {notes.map(note => (
-            <NoteItem key={note.id} note={note} onDelete={deleteNote} onTogglePin={togglePin} />
+          {filteredNotes.map(note => (
+            <NoteItem 
+              key={note.id} 
+              note={note} 
+              onDelete={deleteNote} 
+              onTogglePin={togglePin} 
+              onUpdateNote={updateNote}
+              bookFormat={book.format}
+            />
           ))}
         </div>
       )}
