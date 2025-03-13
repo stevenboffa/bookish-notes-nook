@@ -80,6 +80,11 @@ export function BookList({
     return map;
   }, {} as Record<string, string>);
 
+  // Helper function to get collection name from ID
+  const getCollectionName = (collectionId: string): string => {
+    return collectionMap[collectionId] || "Unknown Collection";
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pb-28">
       {filteredBooks.map((book) => (
@@ -140,7 +145,7 @@ export function BookList({
                             key={`${book.id}-collection-${index}`}
                             className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-800"
                           >
-                            {collectionMap[collectionId] || collectionId}
+                            {getCollectionName(collectionId)}
                           </span>
                         ))}
                       </div>
