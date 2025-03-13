@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,12 +87,12 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   const filteredNotes = useMemo(() => {
     return notes.filter(note => {
       // Filter by note type
-      if (filter.type && note.noteType !== filter.type) {
+      if (filter.type && filter.type !== "none" && note.noteType !== filter.type) {
         return false;
       }
       
       // Filter by chapter
-      if (filter.chapter && note.chapter !== filter.chapter) {
+      if (filter.chapter && filter.chapter !== "none" && note.chapter !== filter.chapter) {
         return false;
       }
       
@@ -357,7 +356,7 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     }
   };
 
-  const hasFiltersApplied = Object.values(filter).some(Boolean);
+  const hasFiltersApplied = Object.values(filter).some(val => val !== undefined && val !== "none");
   const clearFilters = () => setFilter({});
 
   return (

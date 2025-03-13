@@ -102,7 +102,7 @@ export function FilterNotes({
                   <SelectValue placeholder="Any type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any type</SelectItem>
+                  <SelectItem value="none">Any type</SelectItem>
                   {noteTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -123,7 +123,7 @@ export function FilterNotes({
                     <SelectValue placeholder="Any chapter" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any chapter</SelectItem>
+                    <SelectItem value="none">Any chapter</SelectItem>
                     {chapters.map((chapter) => (
                       <SelectItem key={chapter} value={chapter}>
                         {chapter}
