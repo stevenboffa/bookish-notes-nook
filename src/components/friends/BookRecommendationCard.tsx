@@ -39,6 +39,7 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
   const handleAccept = async () => {
     try {
       setIsLoading(true);
+      console.log('Accepting recommendation:', recommendation.id);
       
       // 1. Create a new book entry in the user's library
       const newBook = {
@@ -86,7 +87,7 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
         description: `"${book.title}" has been added to your library`,
       });
       
-      // Refresh recommendations list
+      // Call the onUpdate callback to refresh the recommendations list
       onUpdate();
       
     } catch (error) {
@@ -104,6 +105,7 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
   const handleDecline = async () => {
     try {
       setIsLoading(true);
+      console.log('Declining recommendation:', recommendation.id);
       
       const { error } = await supabase
         .from('book_recommendations')
@@ -117,7 +119,7 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
         description: "The recommendation has been removed from your list"
       });
       
-      // Refresh recommendations list
+      // Call the onUpdate callback to refresh the recommendations list
       onUpdate();
       
     } catch (error) {

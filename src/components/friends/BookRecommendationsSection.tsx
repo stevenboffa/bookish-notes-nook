@@ -50,13 +50,16 @@ export function BookRecommendationsSection() {
           message,
           created_at,
           book_id,
-          from_user_id
+          from_user_id,
+          status
         `)
         .eq('to_user_id', session?.user.id)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
         
       if (error) throw error;
+      
+      console.log('Fetched recommendations:', data);
       
       if (!data || data.length === 0) {
         setRecommendations([]);
@@ -128,6 +131,7 @@ export function BookRecommendationsSection() {
       
       // Filter out any null values (failed book fetches)
       const filteredRecommendations = recommendationsWithBooks.filter(Boolean) as Recommendation[];
+      console.log('Setting recommendations to:', filteredRecommendations);
       setRecommendations(filteredRecommendations);
       
     } catch (error) {
@@ -140,6 +144,14 @@ export function BookRecommendationsSection() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRecommendationAction = (recommendationId: string) => {
+    console.log('Recommendation action for ID:', recommendationId);
+    // Remove the recommendation from the local state immediately
+    setRecommendations(prev => prev.filter(rec => rec.id !== recommendationId));
+    // Also refresh the data from the server to ensure we're in sync
+    fetchRecommendations();
   };
 
   const handleSelectBook = (book: Book) => {
@@ -209,7 +221,7 @@ export function BookRecommendationsSection() {
                       key={rec.id}
                       recommendation={rec}
                       onViewBook={setSelectedBook}
-                      onUpdate={fetchRecommendations}
+                      onUpdate={() => handleRecommendationAction(rec.id)}
                     />
                   ))}
                 </div>
