@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,9 +11,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookPlus, BookOpen, BookCheck, Star, Clock } from "lucide-react";
+import { BookPlus, BookOpen, BookCheck, Star, Clock, ChevronDown } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { getBookCoverFallback } from "@/utils/bookCovers";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger 
+} from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 interface ActivityItem {
   id: string;
@@ -43,8 +49,10 @@ interface ActivityItem {
 export function FriendActivityFeed() {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(true);
   const { session } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -74,7 +82,6 @@ export function FriendActivityFeed() {
           return;
         }
         
-        // Fetch friend activities with books information
         const { data, error } = await supabase
           .from('friend_activities')
           .select(`
@@ -87,12 +94,10 @@ export function FriendActivityFeed() {
 
         if (error) throw error;
 
-        // Collect book IDs from activities to fetch book details
         const bookIds = data
           .filter((activity: any) => activity.book_id)
           .map((activity: any) => activity.book_id);
 
-        // Fetch book details in a single query if there are any book IDs
         let booksMap = new Map();
         if (bookIds.length > 0) {
           const { data: booksData, error: booksError } = await supabase
@@ -102,17 +107,14 @@ export function FriendActivityFeed() {
 
           if (booksError) throw booksError;
           
-          // Create a map of book data for faster lookup
           booksData?.forEach(book => {
             booksMap.set(book.id, book);
           });
         }
 
-        // Process the activities to include book cover information
         const activitiesWithCovers = data.map((activity: any) => {
           const activityItem = activity as ActivityItem;
           
-          // Add book cover information if available in our map
           if (activity.book_id && booksMap.has(activity.book_id)) {
             const bookData = booksMap.get(activity.book_id);
             activityItem.details.image_url = bookData.image_url || null;
@@ -146,7 +148,6 @@ export function FriendActivityFeed() {
         table: 'friend_activities'
       }, (payload) => {
         if (payload.new.user_id !== session?.user.id) {
-          // Get book info for this activity
           Promise.all([
             supabase
               .from('profiles')
@@ -161,12 +162,10 @@ export function FriendActivityFeed() {
           ]).then(([profileResult, bookResult]) => {
             const activityItem = payload.new as ActivityItem;
             
-            // Add profile data
             if (profileResult.data) {
               activityItem.profile = profileResult.data;
             }
             
-            // Add book cover information if available
             if (bookResult.data) {
               activityItem.details.image_url = bookResult.data.image_url || null;
               activityItem.details.thumbnail_url = bookResult.data.thumbnail_url || null;
@@ -234,12 +233,10 @@ export function FriendActivityFeed() {
   };
 
   const getGenreFromActivity = (activity: ActivityItem) => {
-    // First try to use the genre from the book data if it exists
     if (activity.details.genre) {
       return activity.details.genre;
     }
     
-    // If not available, use a simple algorithm based on title for a fallback
     const title = activity.details.title || "";
     if (title.length % 5 === 0) return "Fantasy";
     if (title.length % 4 === 0) return "Science Fiction";
@@ -272,40 +269,58 @@ export function FriendActivityFeed() {
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-3">
-        <CardTitle>Recent Activity</CardTitle>
-        <CardDescription>See what your friends are reading</CardDescription>
-      </CardHeader>
-      <CardContent className="max-h-[500px] overflow-y-auto space-y-4">
-        {activities.length > 0 ? (
-          activities.map((activity) => (
-            <div key={activity.id} className="flex gap-3 pb-3 border-b last:border-0">
-              <div className="flex-shrink-0 mt-1">
-                {getActivityIcon(activity.activity_type)}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">{getActivityText(activity)}</p>
-                <span className="text-xs text-muted-foreground">{formatTime(activity.created_at)}</span>
-              </div>
-              
-              {activity.book_id && (
-                <div className="flex-shrink-0">
-                  <BookCover
-                    imageUrl={activity.details.image_url || null}
-                    thumbnailUrl={activity.details.thumbnail_url || null}
-                    genre={getGenreFromActivity(activity)}
-                    title={activity.details.title || "Unknown Book"}
-                    size="sm"
-                  />
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex justify-between items-center">
+          <CardHeader className="pb-3">
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>See what your friends are reading</CardDescription>
+          </CardHeader>
+          <CollapsibleTrigger asChild>
+            <button className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-muted mr-4">
+              <ChevronDown className={cn("h-5 w-5 transition-transform duration-200", {
+                "transform rotate-180": isOpen
+              })} />
+              <span className="sr-only">Toggle activity feed</span>
+            </button>
+          </CollapsibleTrigger>
+        </div>
+        
+        <CollapsibleContent>
+          <CardContent className={cn("space-y-4", {
+            "max-h-[250px] overflow-y-auto": isMobile,
+            "max-h-[500px] overflow-y-auto": !isMobile
+          })}>
+            {activities.length > 0 ? (
+              activities.map((activity) => (
+                <div key={activity.id} className="flex gap-3 pb-3 border-b last:border-0">
+                  <div className="flex-shrink-0 mt-1">
+                    {getActivityIcon(activity.activity_type)}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{getActivityText(activity)}</p>
+                    <span className="text-xs text-muted-foreground">{formatTime(activity.created_at)}</span>
+                  </div>
+                  
+                  {activity.book_id && (
+                    <div className="flex-shrink-0">
+                      <BookCover
+                        imageUrl={activity.details.image_url || null}
+                        thumbnailUrl={activity.details.thumbnail_url || null}
+                        genre={getGenreFromActivity(activity)}
+                        title={activity.details.title || "Unknown Book"}
+                        size="sm"
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <p className="text-center py-6 text-muted-foreground">No recent activity to show</p>
-        )}
-      </CardContent>
+              ))
+            ) : (
+              <p className="text-center py-6 text-muted-foreground">No recent activity to show</p>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formatBooks = (books: any[]): Book[] => {
   return books.map(book => ({
@@ -44,6 +44,7 @@ export default function Friends() {
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("recent");
+  const [activeTab, setActiveTab] = useState("friends");
   const [lastSentRequest, setLastSentRequest] = useState<{ email: string; timestamp: number } | null>(null);
   const { session } = useAuth();
   const { toast } = useToast();
@@ -387,7 +388,6 @@ export default function Friends() {
         </div>
       )}
 
-      {/* Activity Feed Section (Desktop - side panel, Mobile - full width) */}
       {!isMobile && !selectedFriend ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="col-span-1 lg:col-span-2">
@@ -437,51 +437,58 @@ export default function Friends() {
           </div>
         </div>
       ) : isMobile && !selectedFriend ? (
-        <>
-          <div className="mt-6">
-            <FriendActivityFeed />
-          </div>
-        
-          <FriendSearch
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-          />
+        <Tabs defaultValue="activity" className="w-full">
+          <TabsList className="w-full grid grid-cols-2 mb-4">
+            <TabsTrigger value="activity">Recent Activity</TabsTrigger>
+            <TabsTrigger value="friends">Friends List</TabsTrigger>
+          </TabsList>
           
-          <div className="grid gap-6 animate-fade-in grid-cols-1">
-            {isLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="p-4">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[200px]" />
-                      <Skeleton className="h-4 w-[100px]" />
+          <TabsContent value="activity" className="mt-0">
+            <FriendActivityFeed />
+          </TabsContent>
+          
+          <TabsContent value="friends" className="mt-0">
+            <FriendSearch
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+            />
+            
+            <div className="grid gap-6 animate-fade-in grid-cols-1 mt-6">
+              {isLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <Card key={i} className="p-4">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-12 w-12 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-[200px]" />
+                        <Skeleton className="h-4 w-[100px]" />
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              ))
-            ) : (
-              <>
-                {filteredFriends.map((friend) => (
-                  <FriendCard
-                    key={friend.id}
-                    friend={friend}
-                    isSelected={selectedFriend?.id === friend.id}
-                    onSelect={setSelectedFriend}
-                    onRemove={removeFriend}
-                  />
-                ))}
-                {!isLoading && filteredFriends.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground">
-                    {searchTerm ? 'No friends match your search' : 'No friends added yet. Add your first friend above!'}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </>
+                  </Card>
+                ))
+              ) : (
+                <>
+                  {filteredFriends.map((friend) => (
+                    <FriendCard
+                      key={friend.id}
+                      friend={friend}
+                      isSelected={selectedFriend?.id === friend.id}
+                      onSelect={setSelectedFriend}
+                      onRemove={removeFriend}
+                    />
+                  ))}
+                  {!isLoading && filteredFriends.length === 0 && (
+                    <div className="text-center py-12 text-muted-foreground">
+                      {searchTerm ? 'No friends match your search' : 'No friends added yet. Add your first friend above!'}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       ) : null}
 
       {isMobile && selectedFriend ? (
