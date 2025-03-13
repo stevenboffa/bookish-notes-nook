@@ -260,12 +260,14 @@ export function BookDetailView({
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-white via-gray-50 to-white">
-      <div className="flex justify-between items-center p-4 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
-        <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-serif font-semibold truncate text-text animate-fade-in">{title}</h2>
-          <p className="text-sm text-text-muted truncate italic">{author}</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+        <div className="flex-1 min-w-0 mb-2 sm:mb-0">
+          <h2 className="text-xl font-serif font-semibold text-text break-words animate-fade-in pr-10 sm:pr-0">
+            {title}
+          </h2>
+          <p className="text-sm text-text-muted italic">{author}</p>
         </div>
-        <div className="flex gap-2 ml-2">
+        <div className="flex gap-2 ml-auto">
           {book && (
             <TooltipProvider>
               <Tooltip>
