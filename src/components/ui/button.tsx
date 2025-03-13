@@ -2,7 +2,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-
+import { trackButtonClick } from "@/components/GoogleAnalytics"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
@@ -37,16 +37,34 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  asChild?: boolean;
+  trackingId?: string; // Add a tracking ID prop
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, trackingId, onClick, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    
+    // Handle click with tracking
+    const handleClick = React.useCallback(
+      (event: React.MouseEvent<HTMLButtonElement>) => {
+        // Track the button click if trackingId is provided
+        if (trackingId) {
+          const location = window.location.pathname;
+          trackButtonClick(trackingId, location);
+        }
+        
+        // Call the original onClick handler if provided
+        onClick?.(event);
+      },
+      [onClick, trackingId]
+    );
+    
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        onClick={handleClick}
         {...props}
       />
     )

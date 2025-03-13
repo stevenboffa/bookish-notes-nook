@@ -1,132 +1,83 @@
 
 import { Link, useLocation } from "react-router-dom";
-import {
-  HomeIcon,
-  BookOpenIcon,
-  UserCircleIcon,
-  UsersIcon,
-  ShoppingCartIcon,
-  FileTextIcon,
-  Loader2,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Grid, ShoppingCart, PlusCircle, User, Users } from "lucide-react";
+import { useEffect } from "react";
+import { trackNavigation } from "@/components/GoogleAnalytics";
 
 export function Navigation() {
   const location = useLocation();
   const { session } = useAuth();
 
-  const { data: profile, isLoading, error } = useQuery({
-    queryKey: ["profile"],
-    queryFn: async () => {
-      if (!session?.user) return null;
-      
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("is_admin, email")
-        .eq("id", session.user.id)
-        .single();
+  // Only show navigation when user is authenticated
+  if (!session) {
+    return null;
+  }
 
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return null;
+  const links = [
+    { href: "/dashboard", label: "Dashboard", icon: Grid },
+    { href: "/buy-books", label: "Buy Books", icon: ShoppingCart },
+    { href: "/add-book", label: "Add Book", icon: PlusCircle },
+    { href: "/friends", label: "Friends", icon: Users },
+    { href: "/profile", label: "Profile", icon: User },
+  ];
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "d" && e.altKey) {
+        window.location.href = "/dashboard";
+        trackNavigation("dashboard", "keyboard_shortcut");
+      } else if (e.key === "a" && e.altKey) {
+        window.location.href = "/add-book";
+        trackNavigation("add_book", "keyboard_shortcut");
       }
-      
-      console.log("Profile data:", data); // This will help us debug
-      return data;
-    },
-    enabled: !!session?.user,
-  });
+    };
 
-  // Check if the user is the specified admin
-  const isSpecificAdmin = profile?.email === "hi@stevenboffa.com";
-
-  // Don't show navigation on authentication pages
-  if (location.pathname.startsWith("/auth/")) {
-    return null;
-  }
-
-  // Don't show navigation on landing page
-  if (location.pathname === "/") {
-    return null;
-  }
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, []);
 
   return (
-    <nav className="bg-white border-t py-2 fixed bottom-0 w-full z-50">
-      <div className="container max-w-lg mx-auto px-4">
-        <div className="flex justify-between items-center">
-          <Link
-            to="/dashboard"
-            className={cn(
-              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-              location.pathname === "/dashboard" && "text-primary"
-            )}
-          >
-            <HomeIcon className="h-6 w-6" />
-            <span>Home</span>
-          </Link>
-
-          {/* Only show Buy Books link for the specific admin */}
-          {isLoading ? (
-            <div className="flex flex-col items-center gap-1">
-              <Skeleton className="h-6 w-6 rounded-full" />
-              <Skeleton className="h-4 w-12" />
-            </div>
-          ) : isSpecificAdmin && (
-            <Link
-              to="/buy-books"
-              className={cn(
-                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-                location.pathname === "/buy-books" && "text-primary"
-              )}
-            >
-              <ShoppingCartIcon className="h-6 w-6" />
-              <span>Buy</span>
-            </Link>
-          )}
-
-          {isLoading ? (
-            <div className="flex flex-col items-center gap-1">
-              <Skeleton className="h-6 w-6 rounded-full" />
-              <Skeleton className="h-4 w-12" />
-            </div>
-          ) : profile?.is_admin && (
-            <Link
-              to="/admin/posts"
-              className={cn(
-                "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-                location.pathname.startsWith("/admin") && "text-primary"
-              )}
-            >
-              <FileTextIcon className="h-6 w-6" />
-              <span>Admin</span>
-            </Link>
-          )}
-
-          <Link
-            to="/friends"
-            className={cn(
-              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-              location.pathname === "/friends" && "text-primary"
-            )}
-          >
-            <UsersIcon className="h-6 w-6" />
-            <span>Friends</span>
-          </Link>
-
-          <Link
-            to="/profile"
-            className={cn(
-              "flex flex-col items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors",
-              location.pathname === "/profile" && "text-primary"
-            )}
-          >
-            <UserCircleIcon className="h-6 w-6" />
-            <span>Profile</span>
-          </Link>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg pb-safe-bottom">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-around items-center py-2">
+          {links.map((link) => {
+            const Icon = link.icon;
+            const isActive = location.pathname === link.href;
+            
+            return (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="flex flex-col items-center group relative min-w-[64px] min-h-[64px] justify-center"
+                onClick={() => trackNavigation(link.href, location.pathname)}
+              >
+                <Button
+                  variant={isActive ? "default" : "ghost"}
+                  size="icon"
+                  className={cn(
+                    "rounded-xl transition-all duration-300",
+                    isActive 
+                      ? "bg-primary text-white shadow-lg scale-110" 
+                      : "text-text hover:text-primary hover:scale-105"
+                  )}
+                >
+                  {Icon && <Icon className="h-5 w-5" />}
+                </Button>
+                <span className={cn(
+                  "text-xs mt-1 font-medium transition-colors duration-300",
+                  isActive ? "text-primary" : "text-text-muted"
+                )}>
+                  {link.label}
+                </span>
+                {isActive && (
+                  <div className="absolute -top-1 w-1.5 h-1.5 bg-primary rounded-full" />
+                )}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>

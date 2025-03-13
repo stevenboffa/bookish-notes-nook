@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Note, BookWithNotes } from "@/types/books";
 import { useToast } from "@/hooks/use-toast";
 import { NoteItem } from "./NoteItem";
+import { trackFeatureUsage, trackEvent } from "./GoogleAnalytics";
 
 interface NoteSectionProps {
   book: BookWithNotes;
@@ -122,6 +123,15 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         notes: [formattedNote, ...notes]
       });
 
+      // Track note creation
+      trackFeatureUsage('note_creation', `book_id:${book.id}`);
+      trackEvent('note', 'create', 'new_note', undefined, {
+        book_id: book.id,
+        book_title: book.title,
+        has_images: (note.images?.length || 0) > 0,
+        note_type: note.noteType || 'standard'
+      });
+
       toast({
         title: "Success",
         description: "Note added successfully"
@@ -175,6 +185,13 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       onUpdateBook({
         ...book,
         notes: updatedNotes
+      });
+
+      // Track note update
+      trackEvent('note', 'update', 'edit_note', undefined, {
+        book_id: book.id,
+        book_title: book.title,
+        note_id: noteId
       });
 
       toast({
@@ -256,6 +273,12 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         notes: updatedNotes
       });
 
+      // Track note deletion
+      trackEvent('note', 'delete', 'delete_note', undefined, {
+        book_id: book.id,
+        book_title: book.title
+      });
+
       toast({
         title: "Success",
         description: "Note deleted successfully"
@@ -291,6 +314,13 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         notes: updatedNotes
       });
 
+      // Track pin toggle
+      trackEvent('note', updatedNote.is_pinned ? 'pin' : 'unpin', 'toggle_pin', undefined, {
+        book_id: book.id,
+        book_title: book.title,
+        note_id: noteId
+      });
+
       toast({
         title: "Success",
         description: `Note ${updatedNote.is_pinned ? 'pinned' : 'unpinned'} successfully`
@@ -304,6 +334,13 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       });
     }
   };
+
+  // Track when users view the notes section
+  useEffect(() => {
+    if (book?.id) {
+      trackFeatureUsage('view_notes', `book_id:${book.id}`);
+    }
+  }, [book?.id]);
 
   return (
     <div className="space-y-5 px-4 sm:px-6">
