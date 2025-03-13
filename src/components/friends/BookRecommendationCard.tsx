@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Book, Check, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";

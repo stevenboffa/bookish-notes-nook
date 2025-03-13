@@ -127,7 +127,8 @@ export function BookRecommendationsSection() {
       );
       
       // Filter out any null values (failed book fetches)
-      setRecommendations(recommendationsWithBooks.filter(Boolean) as Recommendation[]);
+      const filteredRecommendations = recommendationsWithBooks.filter(Boolean) as Recommendation[];
+      setRecommendations(filteredRecommendations);
       
     } catch (error) {
       console.error('Error fetching recommendations:', error);
