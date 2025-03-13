@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -73,16 +74,18 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
 
       if (bookError) throw bookError;
       
-      // 2. Update recommendation status - FIX: Removing the updated_at trigger issue
-      const { error: updateError } = await supabase
+      // 2. Delete the recommendation after accepting it - consistent with decline behavior
+      const { error: deleteError } = await supabase
         .from('book_recommendations')
-        .update({ status: 'accepted' })
+        .delete()
         .eq('id', recommendation.id);
         
-      if (updateError) {
-        console.error('Error updating recommendation status:', updateError);
-        throw updateError;
+      if (deleteError) {
+        console.error('Error removing recommendation after accepting:', deleteError);
+        throw deleteError;
       }
+      
+      console.log('Successfully removed recommendation after accepting');
       
       toast({
         title: "Book Added",
