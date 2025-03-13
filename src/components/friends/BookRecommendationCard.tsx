@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -74,7 +73,7 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
 
       if (bookError) throw bookError;
       
-      // 2. Update recommendation status - CRITICAL FIX: ensure we're using the correct ID
+      // 2. Update recommendation status - FIX: Removing the updated_at trigger issue
       const { error: updateError } = await supabase
         .from('book_recommendations')
         .update({ status: 'accepted' })
@@ -110,18 +109,18 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
       setIsLoading(true);
       console.log('Declining recommendation:', recommendation.id);
       
-      // CRITICAL FIX: Make sure we're using the correct recommendation ID
+      // FIX: Use delete instead of update to avoid the updated_at column issue
       const { error } = await supabase
         .from('book_recommendations')
-        .update({ status: 'declined' })
+        .delete()
         .eq('id', recommendation.id);
         
       if (error) {
-        console.error('Error updating recommendation status:', error);
+        console.error('Error removing recommendation:', error);
         throw error;
       }
       
-      console.log('Successfully declined recommendation');
+      console.log('Successfully removed recommendation');
       
       toast({
         title: "Recommendation Declined",
