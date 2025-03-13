@@ -1,10 +1,10 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
 import { Note, BookWithNotes } from "@/types/books";
 import { useToast } from "@/hooks/use-toast";
 import { NoteItem } from "./NoteItem";
-import { FilterNotes } from "./FilterNotes";
 
 interface NoteSectionProps {
   book: BookWithNotes;
@@ -13,12 +13,6 @@ interface NoteSectionProps {
 
 export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [filter, setFilter] = useState<{
-    type?: string;
-    chapter?: string;
-    timestampStart?: number;
-    timestampEnd?: number;
-  }>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,51 +59,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
 
     loadNotes();
   }, [book.id]);
-
-  // Extract unique note types and chapters for filter options
-  const noteTypes = useMemo(() => {
-    const types = new Set<string>();
-    notes.forEach(note => {
-      if (note.noteType) types.add(note.noteType);
-    });
-    return Array.from(types);
-  }, [notes]);
-
-  const chapters = useMemo(() => {
-    const chapterSet = new Set<string>();
-    notes.forEach(note => {
-      if (note.chapter) chapterSet.add(note.chapter);
-    });
-    return Array.from(chapterSet);
-  }, [notes]);
-
-  // Apply filters to notes
-  const filteredNotes = useMemo(() => {
-    return notes.filter(note => {
-      // Filter by note type
-      if (filter.type && filter.type !== "none" && note.noteType !== filter.type) {
-        return false;
-      }
-      
-      // Filter by chapter
-      if (filter.chapter && filter.chapter !== "none" && note.chapter !== filter.chapter) {
-        return false;
-      }
-      
-      // Filter by timestamp range (for audiobooks)
-      if (filter.timestampStart !== undefined && 
-          (note.timestampSeconds === undefined || note.timestampSeconds < filter.timestampStart)) {
-        return false;
-      }
-      
-      if (filter.timestampEnd !== undefined && 
-          (note.timestampSeconds === undefined || note.timestampSeconds > filter.timestampEnd)) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [notes, filter]);
 
   const handleAddNote = async (note: {
     content: string;
@@ -356,9 +305,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     }
   };
 
-  const hasFiltersApplied = Object.values(filter).some(val => val !== undefined && val !== "none");
-  const clearFilters = () => setFilter({});
-
   return (
     <div className="space-y-5 px-4 sm:px-6">
       <h3 className="text-gray-900 tracking-tight text-base text-center font-medium">
@@ -367,25 +313,13 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       
       <AddNoteForm bookId={book.id} bookFormat={book.format} onSubmit={handleAddNote} />
 
-      {notes.length > 0 && (
-        <FilterNotes
-          filter={filter}
-          onFilterChange={setFilter}
-          noteTypes={noteTypes}
-          chapters={chapters}
-          bookFormat={book.format}
-          hasFiltersApplied={hasFiltersApplied}
-          onClearFilters={clearFilters}
-        />
-      )}
-
-      {filteredNotes.length === 0 ? (
+      {notes.length === 0 ? (
         <p className="text-sm text-gray-500 font-normal">
-          {notes.length === 0 ? "No notes added yet." : "No notes match your filters."}
+          No notes added yet.
         </p>
       ) : (
         <div className="space-y-4">
-          {filteredNotes.map(note => (
+          {notes.map(note => (
             <NoteItem 
               key={note.id} 
               note={note} 
