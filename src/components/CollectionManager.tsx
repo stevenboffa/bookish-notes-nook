@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PlusCircle, Tag, X, GripVertical, Trash2, PenLine, BookOpenText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,6 @@ export function CollectionManager({
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Update local collections when the prop changes
     setLocalCollections(collections);
   }, [collections]);
 
@@ -87,7 +85,6 @@ export function CollectionManager({
     }
 
     try {
-      // Delete from Supabase
       const { error } = await supabase
         .from('collections')
         .delete()
@@ -98,12 +95,10 @@ export function CollectionManager({
       const updatedCollections = localCollections.filter(c => c.id !== id);
       setLocalCollections(updatedCollections);
       
-      // If the deleted collection is the active one, reset to "All Books"
       if (activeCollection === id) {
         onSelectCollection(null);
       }
       
-      // Notify parent component if callback exists
       if (onUpdateCollections) {
         onUpdateCollections(updatedCollections);
       }
@@ -126,9 +121,7 @@ export function CollectionManager({
     const newCollections = [...localCollections];
     const draggedCollection = newCollections[draggedIndex];
     
-    // Remove the dragged item
     newCollections.splice(draggedIndex, 1);
-    // Insert it at the new position
     newCollections.splice(index, 0, draggedCollection);
     
     setLocalCollections(newCollections);
@@ -145,11 +138,9 @@ export function CollectionManager({
     setDraggedIndex(null);
     
     try {
-      // Update positions in Supabase
       for (let i = 0; i < localCollections.length; i++) {
         const collection = localCollections[i];
         
-        // @ts-ignore - collections table exists but TypeScript doesn't know about it yet
         const { error } = await supabase
           .from('collections')
           .update({ position: i })
@@ -158,7 +149,6 @@ export function CollectionManager({
         if (error) throw error;
       }
       
-      // Notify parent component if callback exists
       if (onUpdateCollections) {
         onUpdateCollections(localCollections);
       }
@@ -378,19 +368,6 @@ export function CollectionManager({
                   >
                     <Tag className="h-3 w-3 mr-1" />
                     {collection.name}
-                    {isMobile && activeCollection === collection.id && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 p-0 ml-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteCollection(collection.id);
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3 text-white" />
-                      </Button>
-                    )}
                   </Button>
                 ))
               )}
