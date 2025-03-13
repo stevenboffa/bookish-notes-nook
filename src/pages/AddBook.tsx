@@ -40,6 +40,7 @@ export default function AddBook() {
   const [showManualAdd, setShowManualAdd] = useState(false);
   const [openDetailsForManualAdd, setOpenDetailsForManualAdd] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [existingBooks, setExistingBooks] = useState<Set<string>>(new Set());
   const { id } = useParams();
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -47,6 +48,7 @@ export default function AddBook() {
   useEffect(() => {
     if (session?.user?.id) {
       fetchCollections();
+      fetchExistingBooks();
     }
   }, [session?.user?.id]);
 
@@ -77,6 +79,31 @@ export default function AddBook() {
     } catch (error) {
       console.error('Error fetching collections:', error);
       toast.error('Error loading collections');
+    }
+  };
+
+  const fetchExistingBooks = async () => {
+    try {
+      if (!session?.user?.id) return;
+      
+      const { data, error } = await supabase
+        .from('books')
+        .select('title, author')
+        .eq('user_id', session.user.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        const bookSet = new Set<string>();
+        data.forEach((book: any) => {
+          bookSet.add(`${book.title}-${book.author}`);
+        });
+        setExistingBooks(bookSet);
+      }
+    } catch (error) {
+      console.error('Error fetching existing books:', error);
     }
   };
 
@@ -129,6 +156,13 @@ export default function AddBook() {
   };
 
   const selectBook = (googleBook: GoogleBook) => {
+    const bookKey = `${googleBook.volumeInfo.title}-${googleBook.volumeInfo.authors?.[0] || 'Unknown Author'}`;
+    
+    if (existingBooks.has(bookKey)) {
+      toast.error(`"${googleBook.volumeInfo.title}" already exists in your library.`);
+      return;
+    }
+
     const imageUrl = googleBook.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:');
     const thumbnailUrl = googleBook.volumeInfo.imageLinks?.smallThumbnail?.replace('http:', 'https:');
     
@@ -161,6 +195,12 @@ export default function AddBook() {
 
     if (!updatedBook.title || !updatedBook.author) {
       toast.error('Book title and author are required');
+      return;
+    }
+
+    const bookKey = `${updatedBook.title}-${updatedBook.author}`;
+    if (existingBooks.has(bookKey) && !updatedBook.id) {
+      toast.error(`"${updatedBook.title}" already exists in your library.`);
       return;
     }
 
@@ -304,6 +344,7 @@ export default function AddBook() {
               <h3 className="text-lg font-semibold font-serif tracking-tight">Search Results</h3>
               <BookSearchResults 
                 books={searchResults} 
+                existingBooks={existingBooks}
                 onBookClick={(bookId) => {
                   const selectedBook = searchResults.find(book => book.id === bookId);
                   if (selectedBook) {
