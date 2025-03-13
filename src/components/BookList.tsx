@@ -82,7 +82,13 @@ export function BookList({
 
   // Helper function to get collection name from ID
   const getCollectionName = (collectionId: string): string => {
-    return collectionMap[collectionId] || "Unknown Collection";
+    return collectionMap[collectionId] || null; // Return null instead of "Unknown Collection"
+  };
+
+  // Clean up collections to only show ones we know about
+  const sanitizeCollections = (collectionIds: string[] | undefined): string[] => {
+    if (!collectionIds) return [];
+    return collectionIds.filter(id => collectionMap[id] !== undefined);
   };
 
   return (
@@ -140,14 +146,18 @@ export function BookList({
                     {/* Display collections */}
                     {book.collections && book.collections.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {book.collections.map((collectionId, index) => (
-                          <span 
-                            key={`${book.id}-collection-${index}`}
-                            className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-800"
-                          >
-                            {getCollectionName(collectionId)}
-                          </span>
-                        ))}
+                        {sanitizeCollections(book.collections).map((collectionId, index) => {
+                          const name = getCollectionName(collectionId);
+                          if (!name) return null; // Skip if collection doesn't exist
+                          return (
+                            <span 
+                              key={`${book.id}-collection-${index}`}
+                              className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-800"
+                            >
+                              {name}
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
