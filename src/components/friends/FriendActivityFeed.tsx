@@ -68,31 +68,56 @@ export function FriendActivityFeed() {
               : friend.sender_id
           );
 
-        const userIds = [...friendIds];
+        if (friendIds.length === 0) {
+          setActivities([]);
+          setLoading(false);
+          return;
+        }
         
         // Fetch friend activities with books information
         const { data, error } = await supabase
           .from('friend_activities')
           .select(`
             *,
-            profile:profiles(username, email, avatar_url),
-            book:books(image_url, thumbnail_url, genre)
+            profile:profiles(username, email, avatar_url)
           `)
-          .in('user_id', userIds)
+          .in('user_id', friendIds)
           .order('created_at', { ascending: false })
           .limit(20);
 
         if (error) throw error;
 
+        // Collect book IDs from activities to fetch book details
+        const bookIds = data
+          .filter((activity: any) => activity.book_id)
+          .map((activity: any) => activity.book_id);
+
+        // Fetch book details in a single query if there are any book IDs
+        let booksMap = new Map();
+        if (bookIds.length > 0) {
+          const { data: booksData, error: booksError } = await supabase
+            .from('books')
+            .select('id, image_url, thumbnail_url, genre')
+            .in('id', bookIds);
+
+          if (booksError) throw booksError;
+          
+          // Create a map of book data for faster lookup
+          booksData?.forEach(book => {
+            booksMap.set(book.id, book);
+          });
+        }
+
         // Process the activities to include book cover information
         const activitiesWithCovers = data.map((activity: any) => {
           const activityItem = activity as ActivityItem;
           
-          // Add book cover information if available
-          if (activity.book) {
-            activityItem.details.image_url = activity.book.image_url || null;
-            activityItem.details.thumbnail_url = activity.book.thumbnail_url || null;
-            activityItem.details.genre = activity.book.genre || activityItem.details.genre || 'Fiction';
+          // Add book cover information if available in our map
+          if (activity.book_id && booksMap.has(activity.book_id)) {
+            const bookData = booksMap.get(activity.book_id);
+            activityItem.details.image_url = bookData.image_url || null;
+            activityItem.details.thumbnail_url = bookData.thumbnail_url || null;
+            activityItem.details.genre = bookData.genre || activityItem.details.genre || 'Fiction';
           }
           
           return activityItem;
@@ -121,29 +146,35 @@ export function FriendActivityFeed() {
         table: 'friend_activities'
       }, (payload) => {
         if (payload.new.user_id !== session?.user.id) {
-          supabase
-            .from('friend_activities')
-            .select(`
-              *, 
-              profile:profiles(username, email, avatar_url),
-              book:books(image_url, thumbnail_url, genre)
-            `)
-            .eq('id', payload.new.id)
-            .single()
-            .then(({ data }) => {
-              if (data) {
-                const activityItem = data as unknown as ActivityItem;
-                
-                // Add book cover information if available
-                if (data.book) {
-                  activityItem.details.image_url = data.book.image_url || null;
-                  activityItem.details.thumbnail_url = data.book.thumbnail_url || null;
-                  activityItem.details.genre = data.book.genre || activityItem.details.genre || 'Fiction';
-                }
-                
-                setActivities(current => [activityItem, ...current].slice(0, 20));
-              }
-            });
+          // Get book info for this activity
+          Promise.all([
+            supabase
+              .from('profiles')
+              .select('username, email, avatar_url')
+              .eq('id', payload.new.user_id)
+              .single(),
+            payload.new.book_id ? supabase
+              .from('books')
+              .select('image_url, thumbnail_url, genre')
+              .eq('id', payload.new.book_id)
+              .single() : Promise.resolve({ data: null })
+          ]).then(([profileResult, bookResult]) => {
+            const activityItem = payload.new as ActivityItem;
+            
+            // Add profile data
+            if (profileResult.data) {
+              activityItem.profile = profileResult.data;
+            }
+            
+            // Add book cover information if available
+            if (bookResult.data) {
+              activityItem.details.image_url = bookResult.data.image_url || null;
+              activityItem.details.thumbnail_url = bookResult.data.thumbnail_url || null;
+              activityItem.details.genre = bookResult.data.genre || activityItem.details.genre || 'Fiction';
+            }
+            
+            setActivities(current => [activityItem, ...current].slice(0, 20));
+          });
         }
       })
       .subscribe();
@@ -203,7 +234,7 @@ export function FriendActivityFeed() {
   };
 
   const getGenreFromActivity = (activity: ActivityItem) => {
-    // First try to use the genre from the book data
+    // First try to use the genre from the book data if it exists
     if (activity.details.genre) {
       return activity.details.genre;
     }

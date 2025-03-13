@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Book, Check, X, Eye } from "lucide-react";
+import { Book, Check, X } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -185,19 +185,9 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
       
       <CardFooter className="flex justify-between pt-0 gap-2">
         <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex-1"
-          onClick={() => onViewBook?.(book)} 
-          disabled={isLoading}
-        >
-          <Eye className="h-3 w-3 mr-1" />
-          Details
-        </Button>
-        <Button 
           variant="default" 
           size="sm" 
-          className="flex-1 bg-success hover:bg-success/90"
+          className="flex-1 bg-success hover:bg-success/90 text-black font-medium"
           onClick={handleAccept}
           disabled={isLoading}
         >

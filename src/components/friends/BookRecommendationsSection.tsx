@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ChevronDown, BookPlus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,6 +59,7 @@ export function BookRecommendationsSection() {
       
       if (!data || data.length === 0) {
         setRecommendations([]);
+        setIsLoading(false);
         return;
       }
       
@@ -206,7 +206,7 @@ export function BookRecommendationsSection() {
                     <BookRecommendationCard
                       key={rec.id}
                       recommendation={rec}
-                      onViewBook={handleSelectBook}
+                      onViewBook={setSelectedBook}
                       onUpdate={fetchRecommendations}
                     />
                   ))}
