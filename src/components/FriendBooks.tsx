@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ChevronLeft, BookPlus, CheckCircle } from "lucide-react";
+import { ChevronLeft, BookPlus, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -39,16 +39,26 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
   const { toast } = useToast();
   const { session } = useAuth();
   const [addedBooks, setAddedBooks] = useState<Set<string>>(new Set());
+  const [existingBooks, setExistingBooks] = useState<Set<string>>(new Set());
 
   const genres = [...new Set(books.map(book => book.genre))];
 
   const addToCollection = async (book: Book) => {
     try {
+      if (!session?.user?.id) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "Please sign in to add books to your collection.",
+        });
+        return;
+      }
+
       // Check if the book already exists in user's collection
       const { data: existingBook, error: checkError } = await supabase
         .from('books')
-        .select('id, status')
-        .eq('user_id', session?.user.id)
+        .select('id, title, author, status')
+        .eq('user_id', session.user.id)
         .eq('title', book.title)
         .eq('author', book.author)
         .maybeSingle();
@@ -56,6 +66,9 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
       if (checkError) throw checkError;
 
       if (existingBook) {
+        // Mark as existing to show different icon
+        setExistingBooks(prev => new Set(prev).add(book.id));
+        
         // If book exists but isn't in Not started, update its status
         if (existingBook.status !== 'Not started') {
           const { error: updateError } = await supabase
@@ -74,6 +87,7 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
           });
         } else {
           toast({
+            variant: "destructive",
             title: "Already in Collection",
             description: `"${book.title}" is already in your Not started list.`,
           });
@@ -100,10 +114,10 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
           title: "Book Added",
           description: `"${book.title}" has been added to your Not started list.`,
         });
+        
+        // Add book to the added set to show checkmark
+        setAddedBooks(prev => new Set(prev).add(book.id));
       }
-      
-      // Add book to the added set to show checkmark
-      setAddedBooks(prev => new Set(prev).add(book.id));
     } catch (error) {
       console.error('Error adding to collection:', error);
       toast({
@@ -241,18 +255,31 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="mt-4 w-full"
+                    className={cn(
+                      "mt-4 w-full",
+                      existingBooks.has(book.id) && "border-amber-200 text-amber-700 hover:text-amber-800 hover:bg-amber-50"
+                    )}
                     onClick={(e) => {
                       e.stopPropagation();
                       addToCollection(book);
                     }}
                   >
-                    {addedBooks.has(book.id) ? (
-                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                    {existingBooks.has(book.id) ? (
+                      <>
+                        <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
+                        Already in Collection
+                      </>
+                    ) : addedBooks.has(book.id) ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                        Added to Collection
+                      </>
                     ) : (
-                      <BookPlus className="mr-2 h-4 w-4" />
+                      <>
+                        <BookPlus className="mr-2 h-4 w-4" />
+                        Add Book
+                      </>
                     )}
-                    {addedBooks.has(book.id) ? 'Added to Collection' : 'Add Book'}
                   </Button>
                 </div>
               </div>
