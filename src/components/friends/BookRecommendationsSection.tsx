@@ -39,8 +39,11 @@ export function BookRecommendationsSection() {
   }, [session?.user.id]);
 
   const fetchRecommendations = async () => {
+    if (!session?.user.id) return;
+    
     try {
       setIsLoading(true);
+      console.log('Fetching recommendations for user:', session.user.id);
       
       // Get all pending recommendations for the current user
       const { data, error } = await supabase
@@ -53,11 +56,14 @@ export function BookRecommendationsSection() {
           from_user_id,
           status
         `)
-        .eq('to_user_id', session?.user.id)
+        .eq('to_user_id', session.user.id)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching recommendations:', error);
+        throw error;
+      }
       
       console.log('Fetched recommendations:', data);
       
@@ -74,7 +80,10 @@ export function BookRecommendationsSection() {
         .select('id, email, username, avatar_url')
         .in('id', senderIds);
         
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
       
       // Map profiles by ID for easy lookup
       const profilesMap = new Map();
@@ -146,10 +155,17 @@ export function BookRecommendationsSection() {
     }
   };
 
-  const handleRecommendationAction = (recommendationId: string) => {
+  const handleRecommendationAction = async (recommendationId: string) => {
     console.log('Recommendation action for ID:', recommendationId);
-    // Remove the recommendation from the local state immediately for better UX
+    
+    // 1. Remove the recommendation from the local state immediately for better UX
     setRecommendations(prev => prev.filter(rec => rec.id !== recommendationId));
+    
+    // 2. Refresh recommendations from the server to ensure we're in sync
+    // Delay this slightly to ensure the database has time to update
+    setTimeout(() => {
+      fetchRecommendations();
+    }, 500);
   };
 
   const handleSelectBook = (book: Book) => {

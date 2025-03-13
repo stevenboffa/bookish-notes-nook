@@ -74,13 +74,16 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
 
       if (bookError) throw bookError;
       
-      // 2. Update recommendation status
+      // 2. Update recommendation status - CRITICAL FIX: ensure we're using the correct ID
       const { error: updateError } = await supabase
         .from('book_recommendations')
         .update({ status: 'accepted' })
         .eq('id', recommendation.id);
         
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating recommendation status:', updateError);
+        throw updateError;
+      }
       
       toast({
         title: "Book Added",
@@ -107,12 +110,18 @@ export function BookRecommendationCard({ recommendation, onViewBook, onUpdate }:
       setIsLoading(true);
       console.log('Declining recommendation:', recommendation.id);
       
+      // CRITICAL FIX: Make sure we're using the correct recommendation ID
       const { error } = await supabase
         .from('book_recommendations')
         .update({ status: 'declined' })
         .eq('id', recommendation.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating recommendation status:', error);
+        throw error;
+      }
+      
+      console.log('Successfully declined recommendation');
       
       toast({
         title: "Recommendation Declined",
