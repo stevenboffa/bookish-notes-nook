@@ -150,8 +150,6 @@ export function BookRecommendationsSection() {
     console.log('Recommendation action for ID:', recommendationId);
     // Remove the recommendation from the local state immediately for better UX
     setRecommendations(prev => prev.filter(rec => rec.id !== recommendationId));
-    // Also refresh the data from the server to ensure we're in sync
-    fetchRecommendations();
   };
 
   const handleSelectBook = (book: Book) => {
