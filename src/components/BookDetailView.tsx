@@ -271,13 +271,13 @@ export function BookDetailView({
               </h2>
             </div>
             <Button 
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 shrink-0 hover:bg-gray-100 transition-colors rounded-full"
-              aria-label="Close"
+              className="h-10 w-10 shrink-0 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors rounded-full flex items-center justify-center shadow-sm"
+              aria-label="Close book details"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
           
