@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Send } from "lucide-react";
+import { Send, Share2 } from "lucide-react";
 import { Book } from "@/types/books";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,7 @@ interface RecommendBookDialogProps {
   buttonVariant?: "default" | "outline" | "ghost" | "link";
   buttonSize?: "default" | "sm" | "lg" | "icon";
   buttonLabel?: string | null;
+  children?: React.ReactNode;
 }
 
 export function RecommendBookDialog({
@@ -38,6 +39,7 @@ export function RecommendBookDialog({
   buttonVariant = "ghost",
   buttonSize = "icon",
   buttonLabel = null,
+  children,
 }: RecommendBookDialogProps) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriendId, setSelectedFriendId] = useState<string>("");
@@ -165,21 +167,25 @@ export function RecommendBookDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant={buttonVariant} 
-          size={buttonSize}
-          className="relative group hover:text-primary"
-          aria-label="Recommend book"
-        >
-          <Send className="h-4 w-4" />
-          {buttonLabel && <span className="ml-2">{buttonLabel}</span>}
-          <span className="sr-only">Recommend book to a friend</span>
-        </Button>
+        {children ? (
+          children
+        ) : (
+          <Button 
+            variant={buttonVariant} 
+            size={buttonSize}
+            className="relative group hover:text-primary"
+            aria-label="Recommend book"
+          >
+            {buttonSize === "icon" ? <Share2 className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+            {buttonLabel && <span className="ml-2">{buttonLabel}</span>}
+            <span className="sr-only">Recommend book to a friend</span>
+          </Button>
+        )}
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Recommend This Book</DialogTitle>
+          <DialogTitle>Share This Book</DialogTitle>
           <DialogDescription>
             Share "{book.title}" by {book.author} with a friend.
           </DialogDescription>

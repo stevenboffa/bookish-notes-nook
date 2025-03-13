@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Save, Star, StarHalf, Check, ChevronDown, Tag } from "lucide-react";
+import { X, Save, Star, StarHalf, Check, ChevronDown, Tag, Send, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,6 +26,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RecommendBookDialog } from "./friends/RecommendBookDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -260,7 +266,35 @@ export function BookDetailView({
           <p className="text-sm text-text-muted truncate italic">{author}</p>
         </div>
         <div className="flex gap-2 ml-2">
-          {book && <RecommendBookDialog book={book} />}
+          {book && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1 h-9 border-primary/10 text-primary hover:bg-primary/5 hover:text-primary/90 transition-colors"
+                    asChild
+                  >
+                    <RecommendBookDialog 
+                      book={book} 
+                      buttonVariant="outline" 
+                      buttonLabel="Share"
+                      buttonSize="sm"
+                    >
+                      <div className="flex items-center gap-1">
+                        <Share2 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Share</span>
+                      </div>
+                    </RecommendBookDialog>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Share this book with a friend</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <Button 
             variant="ghost"
             size="sm"
