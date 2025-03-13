@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { BookCover } from "@/components/BookCover";
 import { Book } from "@/types/books";
@@ -137,12 +138,13 @@ export function FriendBooks({ books, email, userId, onBack }: FriendBooksProps) 
       <Card className="mb-6 bg-accent/10">
         <CardHeader className="py-3">
           <div className="flex items-center gap-2">
-            {isMobile && onBack && (
+            {onBack && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={onBack}
                 className="flex-shrink-0 -ml-2"
+                aria-label="Go back to friends list"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>

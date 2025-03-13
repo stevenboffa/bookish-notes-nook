@@ -509,6 +509,7 @@ export default function Friends() {
             books={selectedFriend.books} 
             email={selectedFriend.email}
             userId={selectedFriend.id}
+            onBack={handleBack}
           />
         </div>
       )}
