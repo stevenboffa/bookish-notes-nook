@@ -235,6 +235,10 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     }
   };
 
+  useEffect(() => {
+    console.log('Book format in NoteSection changed to:', book.format);
+  }, [book.format]);
+
   return (
     <div className="space-y-5 px-4 sm:px-6">
       <h3 className="text-gray-900 tracking-tight text-base text-center font-medium">

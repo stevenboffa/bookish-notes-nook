@@ -246,6 +246,11 @@ export function BookDetailView({
     return stars;
   };
 
+  const currentBookWithFormat = book ? {
+    ...book,
+    format: format as BookFormat || book.format,
+  } : null;
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-white via-gray-50 to-white">
       <div className="flex justify-between items-center p-4 border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
@@ -518,13 +523,13 @@ export function BookDetailView({
         </div>
 
         <div className="mt-2 pb-24">
-          {book && book.format && (
+          {currentBookWithFormat && format && (
             <div className="w-full">
               <NoteSection 
                 book={{
-                  ...book,
-                  format: book.format as BookFormat,
-                  notes: book.notes || []
+                  ...currentBookWithFormat,
+                  format: format as BookFormat,
+                  notes: currentBookWithFormat.notes || []
                 }} 
                 onUpdateBook={handleUpdateBook} 
               />
