@@ -123,6 +123,20 @@ export function BookList({
                         </span>
                       )}
                     </div>
+                    
+                    {/* Display collections */}
+                    {book.collections && book.collections.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {book.collections.map((collection, index) => (
+                          <span 
+                            key={`${book.id}-collection-${index}`}
+                            className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-800"
+                          >
+                            {collection}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

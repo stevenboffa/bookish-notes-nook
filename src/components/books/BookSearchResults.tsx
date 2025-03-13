@@ -46,7 +46,7 @@ export function BookSearchResults({ books, onBookClick, isLoading, existingBooks
             key={book.id} 
             className={cn(
               "flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px] group overflow-hidden border-gray-200 animate-slide-up",
-              bookExists && "border-amber-200"
+              bookExists ? "border-amber-200 bg-amber-50/50" : ""
             )}
             onClick={() => onBookClick(book.id)}
             style={{ animationDelay: `${index * 50}ms` }}
