@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RecommendBookDialog } from "./friends/RecommendBookDialog";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -259,6 +260,7 @@ export function BookDetailView({
           <p className="text-sm text-text-muted truncate italic">{author}</p>
         </div>
         <div className="flex gap-2 ml-2">
+          {book && <RecommendBookDialog book={book} />}
           <Button 
             variant="ghost"
             size="sm"

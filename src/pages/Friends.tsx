@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +10,7 @@ import { FriendRequestCard } from "@/components/friends/FriendRequestCard";
 import { AddFriendSection } from "@/components/friends/AddFriendSection";
 import { FriendSearch } from "@/components/friends/FriendSearch";
 import { FriendActivityFeed } from "@/components/friends/FriendActivityFeed";
+import { BookRecommendationsSection } from "@/components/friends/BookRecommendationsSection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Friend, FriendRequest } from "@/components/friends/types";
@@ -360,6 +362,10 @@ export default function Friends() {
             You sent a friend request to <span className="font-medium">{lastSentRequest.email}</span>. They will need to approve it.
           </AlertDescription>
         </Alert>
+      )}
+
+      {session?.user.id && !selectedFriend && (
+        <BookRecommendationsSection />
       )}
 
       {pendingRequests.length > 0 && (
