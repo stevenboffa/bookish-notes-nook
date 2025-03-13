@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Book } from "@/types/books";
+import { Book, Collection } from "@/types/books";
 
 interface BookListProps {
   books: Book[];
@@ -29,6 +29,7 @@ interface BookListProps {
   onDeleteBook: (bookId: string) => void;
   activeFilter: string;
   activeCollection?: string;
+  collections?: Collection[];
 }
 
 const getStatusColor = (status: string) => {
@@ -59,6 +60,7 @@ export function BookList({
   onDeleteBook,
   activeFilter,
   activeCollection,
+  collections = [],
 }: BookListProps) {
   const filteredBooks = books.filter((book) => {
     const statusMatch = activeFilter === "all" || 
@@ -71,6 +73,12 @@ export function BookList({
     
     return statusMatch && collectionMatch;
   });
+
+  // Create a map of collection IDs to names for quick lookup
+  const collectionMap = collections.reduce((map, collection) => {
+    map[collection.id] = collection.name;
+    return map;
+  }, {} as Record<string, string>);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 pb-28">
@@ -127,12 +135,12 @@ export function BookList({
                     {/* Display collections */}
                     {book.collections && book.collections.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {book.collections.map((collection, index) => (
+                        {book.collections.map((collectionId, index) => (
                           <span 
                             key={`${book.id}-collection-${index}`}
                             className="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-800"
                           >
-                            {collection}
+                            {collectionMap[collectionId] || collectionId}
                           </span>
                         ))}
                       </div>

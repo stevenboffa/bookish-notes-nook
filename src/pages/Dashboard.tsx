@@ -437,6 +437,7 @@ const Dashboard = () => {
               onDeleteBook={handleDeleteBook}
               activeFilter={activeFilter}
               activeCollection={activeCollection || undefined}
+              collections={collections}
             />
           </div>
         </div>
