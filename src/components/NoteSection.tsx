@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,10 +70,24 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   }) => {
     try {
       console.log('Creating note with data:', note);
+      
+      // Use empty string for content if only images are provided
+      const content = note.content.trim() || (note.images && note.images.length > 0 ? "" : null);
+      
+      // Validate that at least images or content is provided
+      if (!content && (!note.images || note.images.length === 0)) {
+        toast({
+          title: "Error",
+          description: "Please add text or at least one image to create a note.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       const { data: newNote, error: createNoteError } = await supabase
         .from("notes")
         .insert({
-          content: note.content,
+          content: content,
           book_id: book.id,
           page_number: note.pageNumber,
           timestamp_seconds: note.timestampSeconds,

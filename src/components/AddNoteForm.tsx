@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -223,6 +224,16 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       stopListening();
     }
     
+    // Validate that either content or images are provided
+    if (!content.trim() && selectedImages.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add text or at least one image to create a note.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -278,7 +289,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
               setInterimText("");
             }}
             placeholder="Write your note here..."
-            required
+            required={selectedImages.length === 0}
             disabled={isSubmitting}
             className={`min-h-[100px] pr-10 ${isListening ? 'border-red-400 shadow-sm shadow-red-200' : ''}`}
           />
@@ -396,7 +407,7 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       <div className="flex justify-end">
         <Button 
           type="submit" 
-          disabled={isSubmitting || !content.trim()}
+          disabled={isSubmitting || (content.trim() === "" && selectedImages.length === 0)}
         >
           {isSubmitting ? (
             <>
