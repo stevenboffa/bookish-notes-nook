@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -437,15 +438,11 @@ export default function Friends() {
           </div>
         </div>
       ) : isMobile && !selectedFriend ? (
-        <Tabs defaultValue="activity" className="w-full">
+        <Tabs defaultValue="friends" className="w-full">
           <TabsList className="w-full grid grid-cols-2 mb-4">
-            <TabsTrigger value="activity">Recent Activity</TabsTrigger>
             <TabsTrigger value="friends">Friends List</TabsTrigger>
+            <TabsTrigger value="activity">Recent Activity</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="activity" className="mt-0">
-            <FriendActivityFeed />
-          </TabsContent>
           
           <TabsContent value="friends" className="mt-0">
             <FriendSearch
@@ -487,6 +484,10 @@ export default function Friends() {
                 </>
               )}
             </div>
+          </TabsContent>
+          
+          <TabsContent value="activity" className="mt-0">
+            <FriendActivityFeed />
           </TabsContent>
         </Tabs>
       ) : null}

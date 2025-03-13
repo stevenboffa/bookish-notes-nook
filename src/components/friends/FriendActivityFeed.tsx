@@ -287,12 +287,12 @@ export function FriendActivityFeed() {
         
         <CollapsibleContent>
           <CardContent className={cn("space-y-4", {
-            "max-h-[250px] overflow-y-auto": isMobile,
-            "max-h-[500px] overflow-y-auto": !isMobile
+            "max-h-[350px] overflow-y-auto pb-6": isMobile,
+            "max-h-[650px] overflow-y-auto pb-6": !isMobile
           })}>
             {activities.length > 0 ? (
               activities.map((activity) => (
-                <div key={activity.id} className="flex gap-3 pb-3 border-b last:border-0">
+                <div key={activity.id} className="flex gap-3 pb-4 border-b last:border-0">
                   <div className="flex-shrink-0 mt-1">
                     {getActivityIcon(activity.activity_type)}
                   </div>
@@ -324,3 +324,4 @@ export function FriendActivityFeed() {
     </Card>
   );
 }
+
