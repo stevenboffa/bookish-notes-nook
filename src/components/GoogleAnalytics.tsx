@@ -8,6 +8,7 @@ const GA_MEASUREMENT_ID = 'G-7BZ2L8FHZJ';
 
 declare global {
   interface Window {
+    dataLayer: any[];
     gtag: (
       type: string,
       action: string,
@@ -21,26 +22,37 @@ export const GoogleAnalytics = () => {
   const { session } = useAuth();
   
   useEffect(() => {
-    // Initialize Google Analytics script
-    const script1 = document.createElement('script');
-    script1.async = true;
-    script1.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    // Add Google Tag Manager script to head
+    const scriptTag = document.createElement('script');
+    scriptTag.async = true;
+    scriptTag.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
     
-    const script2 = document.createElement('script');
-    script2.innerHTML = `
+    const inlineScript = document.createElement('script');
+    inlineScript.innerHTML = `
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
     `;
     
-    document.head.appendChild(script1);
-    document.head.appendChild(script2);
+    // Only add the scripts if they don't already exist
+    if (!document.querySelector(`script[src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"]`)) {
+      document.head.appendChild(scriptTag);
+      document.head.appendChild(inlineScript);
+    }
 
     return () => {
-      // Clean up scripts when component unmounts
-      document.head.removeChild(script1);
-      document.head.removeChild(script2);
+      // Only remove the scripts if they exist and the component is unmounting
+      const existingScriptTag = document.querySelector(`script[src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"]`);
+      const existingInlineScript = document.querySelector('script:not([src])');
+      
+      if (existingScriptTag && existingScriptTag.parentNode) {
+        existingScriptTag.parentNode.removeChild(existingScriptTag);
+      }
+      
+      if (existingInlineScript && existingInlineScript.textContent?.includes(`gtag('config', '${GA_MEASUREMENT_ID}'`)) {
+        existingInlineScript.parentNode?.removeChild(existingInlineScript);
+      }
     };
   }, []);
 
@@ -100,4 +112,3 @@ export const trackSearch = (query: string, resultsCount: number) => {
 export const trackFeatureUsage = (featureName: string, detail?: string) => {
   trackEvent('feature', 'use', featureName, undefined, { detail });
 };
-
