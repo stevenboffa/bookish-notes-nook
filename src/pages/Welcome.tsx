@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check } from "lucide-react";
@@ -579,7 +580,7 @@ const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: s
   );
 };
 
-// Step Card Component
+// Step Card Component - Fixed the incomplete component
 const StepCard = ({ number, title, description, icon }: { number: string; title: string; description: string; icon: string }) => {
   return (
     <Card className="border-0 shadow-lg bg-white relative hover:shadow-xl transition-shadow duration-300">
@@ -589,4 +590,12 @@ const StepCard = ({ number, title, description, icon }: { number: string; title:
             {number}
           </div>
         </div>
-        <div className
+        <div className="text-4xl mb-4">{icon}</div>
+        <h3 className="font-semibold text-lg mb-2">{title}</h3>
+        <p className="text-muted-foreground text-sm">{description}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default Welcome;
