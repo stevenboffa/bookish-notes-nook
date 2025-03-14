@@ -1,6 +1,7 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check, Play } from "lucide-react";
+import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
@@ -25,20 +26,6 @@ const SITE_CONFIG = {
 
 const Welcome = () => {
   const { session } = useAuth();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-
-  const toggleVideo = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsVideoPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsVideoPlaying(false);
-      }
-    }
-  };
 
   if (session) {
     return <Link to="/dashboard" replace />;
@@ -117,22 +104,6 @@ const Welcome = () => {
                   </div>
                 </div>
 
-                {/* Watch video button */}
-                <div className="mt-6 mb-6">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      document.getElementById('video-section')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="flex items-center gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center">
-                      <Play className="h-3 w-3 text-indigo-600 ml-0.5" />
-                    </div>
-                    Watch how it works
-                  </Button>
-                </div>
-
                 {/* CTA Button */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8">
                   <Button 
@@ -194,59 +165,6 @@ const Welcome = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Video Section - NEW */}
-      <section id="video-section" className="py-16 md:py-24 bg-slate-50 relative overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center mb-10">
-            <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
-              See it in action
-            </Badge>
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">How BookishNotes Works</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
-              Watch this quick video to see how BookishNotes can transform your reading experience
-              and help you remember everything you read.
-            </p>
-          </div>
-          
-          <div className="relative max-w-3xl mx-auto rounded-xl overflow-hidden shadow-2xl">
-            {/* Video placeholder - Replace the src with your actual video */}
-            <div className="aspect-w-16 aspect-h-9 bg-slate-900 relative">
-              <video 
-                ref={videoRef}
-                className="w-full h-full object-cover"
-                poster="/lovable-uploads/video-thumbnail.jpg" 
-                controls
-                preload="metadata"
-              >
-                <source src="/path-to-your-video.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              
-              {!isVideoPlaying && (
-                <div 
-                  className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black bg-opacity-30"
-                  onClick={toggleVideo}
-                >
-                  <div className="w-20 h-20 rounded-full bg-white bg-opacity-80 flex items-center justify-center transition-transform duration-300 hover:scale-110">
-                    <Play className="h-8 w-8 text-indigo-600 ml-1.5" />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="mt-8 text-center">
-            <p className="text-sm text-slate-500 max-w-md mx-auto">
-              Join thousands of readers who are already using BookishNotes to enhance their reading experience.
-            </p>
-          </div>
-        </div>
-        
-        {/* Background decorative elements */}
-        <div className="absolute top-20 -left-20 w-64 h-64 rounded-full bg-indigo-50 mix-blend-multiply blur-3xl opacity-70"></div>
-        <div className="absolute bottom-20 -right-20 w-64 h-64 rounded-full bg-purple-50 mix-blend-multiply blur-3xl opacity-70"></div>
       </section>
 
       {/* Rest of existing sections */}
@@ -587,3 +505,203 @@ const Welcome = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/privacy-policy" className="text-sm text-slate-600 hover:text-primary transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4">Company</h3>
+              <ul className="space-y-3">
+                <li>
+                  <Link to="/about" className="text-sm text-slate-600 hover:text-primary transition-colors">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <a href="mailto:hello@bookishnotes.com" className="text-sm text-slate-600 hover:text-primary transition-colors">
+                    hello@bookishnotes.com
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-slate-200 pt-6 text-center">
+            <p className="text-sm text-slate-500">
+              &copy; {new Date().getFullYear()} BookishNotes. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+// Feature Card Component
+const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => {
+  return (
+    <Card className="border-0 shadow-lg">
+      <CardContent className="p-6">
+        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+          {icon}
+        </div>
+        <h3 className="font-semibold text-lg mb-2">{title}</h3>
+        <p className="text-muted-foreground text-sm">{description}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Step Card Component
+const StepCard = ({ number, title, description, icon }: { number: string; title: string; description: string; icon: string }) => {
+  return (
+    <Card className="border-0 shadow-lg bg-white relative hover:shadow-xl transition-shadow duration-300">
+      <CardContent className="p-6 pt-10 text-center">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
+            {number}
+          </div>
+        </div>
+        <div className="text-4xl mb-4">{icon}</div>
+        <h3 className="font-semibold text-lg mb-2">{title}</h3>
+        <p className="text-muted-foreground text-sm">{description}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Testimonial Carousel
+const TestimonialCarousel = () => {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(true);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setActiveIndex(emblaApi.selectedScrollSnap());
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    
+    // Auto-scroll every 6 seconds
+    const autoplayInterval = setInterval(() => {
+      if (emblaApi.canScrollNext()) {
+        emblaApi.scrollNext();
+      } else {
+        emblaApi.scrollTo(0);
+      }
+    }, 6000);
+    
+    return () => {
+      clearInterval(autoplayInterval);
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const testimonials = [
+    {
+      quote: "I've read hundreds of books but always struggled to remember the key points later. BookishNotes has completely changed how I retain information.",
+      name: "Sarah K.",
+      title: "Literature Professor",
+      avatar: "/placeholder.svg"
+    },
+    {
+      quote: "As a medical student, I need to absorb and recall massive amounts of information. This app has become an essential part of my study routine.",
+      name: "Michael T.",
+      title: "Medical Student",
+      avatar: "/placeholder.svg"
+    },
+    {
+      quote: "The ability to connect ideas across different books has given me insights I would have missed otherwise. It's like having a second brain.",
+      name: "David L.",
+      title: "Business Consultant",
+      avatar: "/placeholder.svg"
+    },
+    {
+      quote: "I've tried many note-taking apps, but BookishNotes is specifically designed for readers. It's exactly what I've been looking for.",
+      name: "Aisha J.",
+      title: "Book Club Organizer",
+      avatar: "/placeholder.svg"
+    },
+  ];
+
+  return (
+    <div className="relative">
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {testimonials.map((testimonial, index) => (
+            <div className="flex-[0_0_100%] min-w-0 pl-4 first:pl-0" key={index}>
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 h-full">
+                <CardContent className="p-8 md:p-10 flex flex-col justify-between h-full">
+                  <div className="mb-6">
+                    <div className="text-2xl text-primary mb-2">❝</div>
+                    <p className="text-lg italic mb-8">{testimonial.quote}</p>
+                    <div className="flex items-center">
+                      <div className="mr-4">
+                        <div className="h-12 w-12 rounded-full bg-muted overflow-hidden">
+                          <img src={testimonial.avatar} alt={testimonial.name} className="h-full w-full object-cover" />
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold">{testimonial.name}</h4>
+                        <p className="text-sm text-muted-foreground">{testimonial.title}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="flex justify-center mt-6 space-x-2">
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full"
+          onClick={() => emblaApi?.scrollPrev()}
+          disabled={!canScrollPrev}
+        >
+          <ChevronLeft className="h-5 w-5" />
+          <span className="sr-only">Previous testimonial</span>
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full"
+          onClick={() => emblaApi?.scrollNext()}
+          disabled={!canScrollNext}
+        >
+          <ChevronRight className="h-5 w-5" />
+          <span className="sr-only">Next testimonial</span>
+        </Button>
+      </div>
+      
+      <div className="flex justify-center mt-4 space-x-1">
+        {testimonials.map((_, index) => (
+          <button
+            key={index}
+            className={`h-2 rounded-full transition-all ${
+              activeIndex === index ? "w-6 bg-primary" : "w-2 bg-muted"
+            }`}
+            onClick={() => emblaApi?.scrollTo(index)}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Welcome;
