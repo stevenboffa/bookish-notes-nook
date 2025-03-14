@@ -589,3 +589,4 @@ const StepCard = ({ number, title, description, icon }: { number: string; title:
             {number}
           </div>
         </div>
+        <div className
