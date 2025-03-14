@@ -125,19 +125,20 @@ const Welcome = () => {
                 </p>
               </div>
 
-              {/* App Preview Image */}
+              {/* App Preview Image - ENLARGED and NO HOVER EFFECT */}
               <div className="relative z-10 hidden lg:block">
-                <div className="relative mx-auto max-w-xl">
+                <div className="relative mx-auto">
                   {/* Decorative elements */}
                   <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                   <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                   
-                  {/* Main app preview */}
-                  <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-xl overflow-hidden transform rotate-1 hover:rotate-0 transition-transform duration-500">
+                  {/* Main app preview - ENLARGED and NO HOVER EFFECT */}
+                  <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-xl overflow-hidden">
                     <img 
                       src="/lovable-uploads/c90ff096-7c52-4d9b-9bdd-bd1db6a9a761.png" 
                       alt="BookishNotes Library Preview" 
-                      className="w-full h-auto rounded-lg"
+                      className="w-full h-auto rounded-lg max-w-none"
+                      style={{ width: "120%" }}
                     />
                   </div>
                 </div>
@@ -162,7 +163,7 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Testimonial Section - New dedicated section */}
+      {/* Testimonials Section - Now featuring the carousel */}
       <section className="py-16 md:py-24 bg-muted/30 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
