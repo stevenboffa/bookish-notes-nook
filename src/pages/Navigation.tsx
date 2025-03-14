@@ -4,20 +4,50 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Grid, ShoppingCart, PlusCircle, User, Users } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Navigation() {
   const location = useLocation();
   const { session } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Only show navigation when user is authenticated
   if (!session) {
     return null;
   }
 
+  // Check if the current user is an admin
+  const { data: profile } = useQuery({
+    queryKey: ["profile", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user) return null;
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", session.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!session?.user,
+    onSuccess: (data) => {
+      setIsAdmin(data?.email === "hi@stevenboffa.com");
+    }
+  });
+
+  // Create links based on user role
   const links = [
     { href: "/dashboard", label: "Dashboard", icon: Grid },
-    { href: "/buy-books", label: "Buy Books", icon: ShoppingCart },
+    // Only show Buy Books for admin
+    ...(isAdmin ? [{ href: "/buy-books", label: "Buy Books", icon: ShoppingCart }] : []),
     { href: "/add-book", label: "Add Book", icon: PlusCircle },
     { href: "/friends", label: "Friends", icon: Users },
     { href: "/profile", label: "Profile", icon: User },
