@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -59,50 +58,30 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - Removed Blog, FAQ, Contact links */}
         <nav className="hidden md:flex items-center gap-8">
-          <Link 
-            to="/blog" 
-            className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
-            onClick={() => trackButtonClick("header_blog", "header")}
-          >
-            Blog
-          </Link>
-          <Link 
-            to="/faq" 
-            className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
-            onClick={() => trackButtonClick("header_faq", "header")}
-          >
-            FAQ
-          </Link>
-          <Link 
-            to="/contact" 
-            className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
-            onClick={() => trackButtonClick("header_contact", "header")}
-          >
-            Contact
-          </Link>
+          {/* Navigation links removed as requested */}
         </nav>
 
-        {/* Auth buttons */}
+        {/* Auth buttons - Updated styles to match screenshot */}
         <div className="hidden md:flex items-center gap-3">
           <Button 
-            variant="ghost" 
-            className="text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+            variant="outline" 
+            className="text-slate-700 border border-slate-300 rounded-full px-6 hover:bg-slate-50"
             asChild
             trackingId="header_signin"
           >
             <Link to="/auth/sign-in">
-              Sign In
+              Log In
             </Link>
           </Button>
           <Button 
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-6 shadow-md"
             asChild
             trackingId="header_signup"
           >
             <Link to="/auth/sign-up">
-              Sign Up Free
+              Sign Up
             </Link>
           </Button>
         </div>
@@ -133,6 +112,7 @@ export function Header() {
               </div>
               <nav className="flex-1 px-6 py-8">
                 <div className="space-y-5">
+                  {/* Mobile navigation items - keeping Blog, FAQ, Contact as they may still be accessible */}
                   <Link
                     to="/blog"
                     className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
@@ -177,7 +157,7 @@ export function Header() {
                     <p className="text-slate-600 text-sm mb-4">Create your free account and start organizing your reading notes today.</p>
                     <div className="space-y-3">
                       <Button
-                        className="w-full bg-white text-slate-800 border border-slate-200 hover:bg-slate-50"
+                        className="w-full bg-white text-slate-800 border border-slate-200 hover:bg-slate-50 rounded-full"
                         onClick={() => {
                           setIsOpen(false);
                           trackButtonClick("mobile_signin", "mobile_menu");
@@ -186,11 +166,11 @@ export function Header() {
                       >
                         <Link to="/auth/sign-in">
                           <LogIn className="h-4 w-4 mr-2" />
-                          Sign In
+                          Log In
                         </Link>
                       </Button>
                       <Button
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-full"
                         onClick={() => {
                           setIsOpen(false);
                           trackButtonClick("mobile_signup", "mobile_menu");
@@ -199,7 +179,7 @@ export function Header() {
                       >
                         <Link to="/auth/sign-up">
                           <UserPlus className="h-4 w-4 mr-2" />
-                          Create Account
+                          Sign Up
                         </Link>
                       </Button>
                     </div>

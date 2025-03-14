@@ -8,7 +8,6 @@ import { NotesPreview } from "@/components/welcome/NotesPreview";
 import { Badge } from "@/components/ui/badge";
 import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserTestimonials } from "@/components/welcome/UserTestimonials";
 import { BookPreviewGrid } from "@/components/welcome/BookPreviewGrid";
 
 const SITE_CONFIG = {
@@ -169,22 +168,6 @@ const Welcome = () => {
                 </Card>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section - Featuring the carousel */}
-      <section className="py-16 md:py-24 bg-muted/30 overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">From Our Readers</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Discover how BookishNotes has transformed reading experiences for book lovers worldwide
-              </p>
-            </div>
-
-            <UserTestimonials />
           </div>
         </div>
       </section>
