@@ -37,11 +37,15 @@ export function Navigation() {
       
       return data;
     },
-    enabled: !!session?.user,
-    onSuccess: (data) => {
-      setIsAdmin(data?.email === "hi@stevenboffa.com");
-    }
+    enabled: !!session?.user
   });
+
+  // Set isAdmin state whenever profile data changes
+  useEffect(() => {
+    if (profile) {
+      setIsAdmin(profile.email === "hi@stevenboffa.com");
+    }
+  }, [profile]);
 
   // Create links based on user role
   const links = [
