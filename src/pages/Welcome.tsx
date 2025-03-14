@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check } from "lucide-react";
@@ -27,7 +28,7 @@ const Welcome = () => {
       <Meta customTitle="Never Forget What You Read | BookishNotes.com" />
       <Header />
       
-      {/* Hero Section - Redesigned with ClickUp inspiration */}
+      {/* Hero Section - Restructured to match ClickUp layout */}
       <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-slate-100"
@@ -49,98 +50,94 @@ const Welcome = () => {
 
         <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20 relative z-10">
           <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
-                {/* Free badge inspired by ClickUp */}
-                <div className="inline-flex items-center px-3 py-1 mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium shadow-md">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  <span>100% FREE FOREVER — No Credit Card</span>
-                </div>
-                
-                {/* Main headline */}
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight text-slate-900">
-                  The everything app,
-                  <br className="hidden md:block" />
-                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    for books.
-                  </span>
-                </h1>
+            {/* Center-aligned content following ClickUp's layout */}
+            <div className="flex flex-col items-center text-center mb-12">
+              {/* Free badge inspired by ClickUp */}
+              <div className="inline-flex items-center px-3 py-1 mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium shadow-md">
+                <Sparkles className="w-4 h-4 mr-2" />
+                <span>100% FREE FOREVER — No Credit Card</span>
+              </div>
+              
+              {/* Main headline */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight text-slate-900 max-w-4xl">
+                The everything app,
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  {" "}for books.
+                </span>
+              </h1>
 
-                {/* Subheadline */}
-                <p className="text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 leading-relaxed">
-                  One app for notes, highlights, insights, and more.
-                  <br className="hidden md:block" />
-                  Remember everything you read—forever.
-                </p>
+              {/* Subheadline */}
+              <p className="text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 leading-relaxed max-w-3xl">
+                One app for notes, highlights, insights, and more.
+                Remember everything you read—forever.
+              </p>
 
-                {/* Benefits list with checkmarks */}
-                <div className="mb-8 space-y-3 lg:space-y-4 max-w-lg mx-auto lg:mx-0">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                      <Check className="h-3.5 w-3.5 text-green-600" />
-                    </div>
-                    <p className="text-slate-700">Take smart notes that connect your reading</p>
+              {/* Benefits list with checkmarks */}
+              <div className="mb-8 space-y-3 lg:space-y-4 max-w-lg">
+                <div className="flex items-start justify-center">
+                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                    <Check className="h-3.5 w-3.5 text-green-600" />
                   </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                      <Check className="h-3.5 w-3.5 text-green-600" />
-                    </div>
-                    <p className="text-slate-700">Create your own knowledge database of insights</p>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                      <Check className="h-3.5 w-3.5 text-green-600" />
-                    </div>
-                    <p className="text-slate-700">Easily find and reference ideas from past reading</p>
-                  </div>
+                  <p className="text-slate-700">Take smart notes that connect your reading</p>
                 </div>
-
-                {/* CTA Button */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8">
-                  <Button 
-                    size="lg" 
-                    className="h-14 px-8 text-base bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                    asChild
-                  >
-                    <Link to="/auth/sign-up">
-                      Get started. It's FREE!
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="h-14 px-8 text-base border-slate-300 text-slate-700 hover:bg-slate-100 rounded-xl"
-                    asChild
-                  >
-                    <Link to="/auth/sign-in">
-                      Sign In
-                    </Link>
-                  </Button>
+                <div className="flex items-start justify-center">
+                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                    <Check className="h-3.5 w-3.5 text-green-600" />
+                  </div>
+                  <p className="text-slate-700">Create your own knowledge database of insights</p>
                 </div>
-                
-                {/* Free forever text */}
-                <p className="text-sm text-slate-500 mt-4 font-medium">
-                  Free Forever. No Credit Card Required.
-                </p>
+                <div className="flex items-start justify-center">
+                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                    <Check className="h-3.5 w-3.5 text-green-600" />
+                  </div>
+                  <p className="text-slate-700">Easily find and reference ideas from past reading</p>
+                </div>
               </div>
 
-              {/* App Preview Image - ENLARGED and NO HOVER EFFECT */}
-              <div className="relative z-10 hidden lg:block">
-                <div className="relative mx-auto">
-                  {/* Decorative elements */}
-                  <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
-                  <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
-                  
-                  {/* Main app preview - ENLARGED and NO HOVER EFFECT */}
-                  <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-xl overflow-hidden">
-                    <img 
-                      src="/lovable-uploads/c90ff096-7c52-4d9b-9bdd-bd1db6a9a761.png" 
-                      alt="BookishNotes Library Preview" 
-                      className="w-full h-auto rounded-lg max-w-none"
-                      style={{ width: "120%" }}
-                    />
-                  </div>
+              {/* CTA Button */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <Button 
+                  size="lg" 
+                  className="h-14 px-8 text-base bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                  asChild
+                >
+                  <Link to="/auth/sign-up">
+                    Get started. It's FREE!
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="h-14 px-8 text-base border-slate-300 text-slate-700 hover:bg-slate-100 rounded-xl"
+                  asChild
+                >
+                  <Link to="/auth/sign-in">
+                    Sign In
+                  </Link>
+                </Button>
+              </div>
+              
+              {/* Free forever text */}
+              <p className="text-sm text-slate-500 mt-4 font-medium">
+                Free Forever. No Credit Card Required.
+              </p>
+            </div>
+
+            {/* App Preview Image - Much larger now, centered below the content */}
+            <div className="relative z-10 max-w-6xl mx-auto mt-8">
+              <div className="relative">
+                {/* Decorative elements */}
+                <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
+                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
+                
+                {/* Main app preview - MUCH BIGGER */}
+                <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-2xl overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/c6ef2801-ecc1-4254-84df-fb60eb4659c3.png" 
+                    alt="BookishNotes App Preview" 
+                    className="w-full h-auto rounded-lg"
+                  />
                 </div>
               </div>
             </div>
@@ -163,7 +160,61 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Testimonials Section - Now featuring the carousel */}
+      {/* Reader's Insights Section - Restored the scrolling quotes */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-indigo-600 to-purple-700 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[length:16px_16px]"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10 md:mb-16">
+              <Badge variant="outline" className="mb-4 px-4 py-1 border-white/20 bg-white/10 text-white font-medium">
+                Reader Insights
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">What Our Readers Are Saying</h2>
+              <p className="text-base md:text-xl text-white/80 max-w-3xl mx-auto">
+                Join thousands of readers who are capturing insights and building their knowledge base
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10 shadow-xl">
+                <NotesPreview />
+              </div>
+              
+              <div className="space-y-6">
+                <Card className="bg-white/10 backdrop-blur-sm border-white/10 shadow-xl text-white">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-3">Build Your Second Brain</h3>
+                    <p className="text-white/80">
+                      Your brain is for having ideas, not holding them. BookishNotes helps you build a knowledge system that grows with every book you read.
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-white/10 backdrop-blur-sm border-white/10 shadow-xl text-white">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-3">Connect Ideas Across Books</h3>
+                    <p className="text-white/80">
+                      Discover unexpected connections between different authors and concepts, enabling deeper understanding and creative insights.
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-white/10 backdrop-blur-sm border-white/10 shadow-xl text-white">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-3">Never Forget What You Read</h3>
+                    <p className="text-white/80">
+                      Quickly retrieve specific quotes, concepts, and insights years after you've read a book.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section - Featuring the carousel */}
       <section className="py-16 md:py-24 bg-muted/30 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
