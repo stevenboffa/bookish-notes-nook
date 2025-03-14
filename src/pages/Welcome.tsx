@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check } from "lucide-react";
@@ -53,18 +52,9 @@ const Welcome = () => {
           <div className="max-w-7xl mx-auto">
             {/* Center-aligned content following ClickUp's layout */}
             <div className="flex flex-col items-center text-center mb-12">
-              {/* Free badge inspired by ClickUp */}
-              <div className="inline-flex items-center px-3 py-1 mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium shadow-md">
-                <Sparkles className="w-4 h-4 mr-2" />
-                <span>100% FREE FOREVER — No Credit Card</span>
-              </div>
-              
-              {/* Main headline */}
+              {/* Main headline - updated text */}
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight text-slate-900 max-w-4xl">
-                The everything app,
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  {" "}for books.
-                </span>
+                Never forget what you read.
               </h1>
 
               {/* Subheadline */}
@@ -73,7 +63,7 @@ const Welcome = () => {
                 Remember everything you read—forever.
               </p>
 
-              {/* CTA Button */}
+              {/* CTA Button - removed the Sign In button */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
                 <Button 
                   size="lg" 
@@ -83,16 +73,6 @@ const Welcome = () => {
                   <Link to="/auth/sign-up">
                     Get started. It's FREE!
                     <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="h-14 px-8 text-base border-slate-300 text-slate-700 hover:bg-slate-100 rounded-xl"
-                  asChild
-                >
-                  <Link to="/auth/sign-in">
-                    Sign In
                   </Link>
                 </Button>
               </div>
@@ -580,7 +560,7 @@ const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: s
   );
 };
 
-// Step Card Component - Fixed the incomplete component
+// Step Card Component
 const StepCard = ({ number, title, description, icon }: { number: string; title: string; description: string; icon: string }) => {
   return (
     <Card className="border-0 shadow-lg bg-white relative hover:shadow-xl transition-shadow duration-300">
