@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check } from "lucide-react";
@@ -10,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserTestimonials } from "@/components/welcome/UserTestimonials";
+import { BookPreviewGrid } from "@/components/welcome/BookPreviewGrid";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -72,28 +72,6 @@ const Welcome = () => {
                 Remember everything you read—forever.
               </p>
 
-              {/* Benefits list with checkmarks */}
-              <div className="mb-8 space-y-3 lg:space-y-4 max-w-lg">
-                <div className="flex items-start justify-center">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                    <Check className="h-3.5 w-3.5 text-green-600" />
-                  </div>
-                  <p className="text-slate-700">Take smart notes that connect your reading</p>
-                </div>
-                <div className="flex items-start justify-center">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                    <Check className="h-3.5 w-3.5 text-green-600" />
-                  </div>
-                  <p className="text-slate-700">Create your own knowledge database of insights</p>
-                </div>
-                <div className="flex items-start justify-center">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                    <Check className="h-3.5 w-3.5 text-green-600" />
-                  </div>
-                  <p className="text-slate-700">Easily find and reference ideas from past reading</p>
-                </div>
-              </div>
-
               {/* CTA Button */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
                 <Button 
@@ -125,16 +103,16 @@ const Welcome = () => {
             </div>
 
             {/* App Preview Image - Much larger now, centered below the content */}
-            <div className="relative z-10 max-w-6xl mx-auto mt-8">
+            <div className="relative z-10 max-w-7xl mx-auto mt-8">
               <div className="relative">
                 {/* Decorative elements */}
                 <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                 
-                {/* Main app preview - MUCH BIGGER */}
+                {/* Main app preview - MUCH BIGGER with no hover effect */}
                 <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-2xl overflow-hidden">
                   <img 
-                    src="/lovable-uploads/c6ef2801-ecc1-4254-84df-fb60eb4659c3.png" 
+                    src="/lovable-uploads/246539c0-d6ff-409e-a267-306de7cc9aa6.png" 
                     alt="BookishNotes App Preview" 
                     className="w-full h-auto rounded-lg"
                   />
@@ -611,12 +589,3 @@ const StepCard = ({ number, title, description, icon }: { number: string; title:
             {number}
           </div>
         </div>
-        <div className="text-4xl mb-4">{icon}</div>
-        <h3 className="font-semibold text-lg mb-2">{title}</h3>
-        <p className="text-muted-foreground text-sm">{description}</p>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default Welcome;
