@@ -1,7 +1,6 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check } from "lucide-react";
+import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronLeft, ChevronRight, Facebook, Instagram, Sparkles, Check, Play } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Meta } from "@/components/Meta";
@@ -26,6 +25,20 @@ const SITE_CONFIG = {
 
 const Welcome = () => {
   const { session } = useAuth();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsVideoPlaying(true);
+      } else {
+        videoRef.current.pause();
+        setIsVideoPlaying(false);
+      }
+    }
+  };
 
   if (session) {
     return <Link to="/dashboard" replace />;
@@ -104,6 +117,22 @@ const Welcome = () => {
                   </div>
                 </div>
 
+                {/* Watch video button */}
+                <div className="mt-6 mb-6">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      document.getElementById('video-section')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <Play className="h-3 w-3 text-indigo-600 ml-0.5" />
+                    </div>
+                    Watch how it works
+                  </Button>
+                </div>
+
                 {/* CTA Button */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8">
                   <Button 
@@ -165,6 +194,59 @@ const Welcome = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Video Section - NEW */}
+      <section id="video-section" className="py-16 md:py-24 bg-slate-50 relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center mb-10">
+            <Badge variant="outline" className="mb-4 px-4 py-1 border-primary/20 bg-primary/5 text-primary font-medium">
+              See it in action
+            </Badge>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">How BookishNotes Works</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Watch this quick video to see how BookishNotes can transform your reading experience
+              and help you remember everything you read.
+            </p>
+          </div>
+          
+          <div className="relative max-w-3xl mx-auto rounded-xl overflow-hidden shadow-2xl">
+            {/* Video placeholder - Replace the src with your actual video */}
+            <div className="aspect-w-16 aspect-h-9 bg-slate-900 relative">
+              <video 
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                poster="/lovable-uploads/video-thumbnail.jpg" 
+                controls
+                preload="metadata"
+              >
+                <source src="/path-to-your-video.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              
+              {!isVideoPlaying && (
+                <div 
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black bg-opacity-30"
+                  onClick={toggleVideo}
+                >
+                  <div className="w-20 h-20 rounded-full bg-white bg-opacity-80 flex items-center justify-center transition-transform duration-300 hover:scale-110">
+                    <Play className="h-8 w-8 text-indigo-600 ml-1.5" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-sm text-slate-500 max-w-md mx-auto">
+              Join thousands of readers who are already using BookishNotes to enhance their reading experience.
+            </p>
+          </div>
+        </div>
+        
+        {/* Background decorative elements */}
+        <div className="absolute top-20 -left-20 w-64 h-64 rounded-full bg-indigo-50 mix-blend-multiply blur-3xl opacity-70"></div>
+        <div className="absolute bottom-20 -right-20 w-64 h-64 rounded-full bg-purple-50 mix-blend-multiply blur-3xl opacity-70"></div>
       </section>
 
       {/* Rest of existing sections */}
@@ -505,216 +587,3 @@ const Welcome = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/privacy" className="text-sm text-slate-600 hover:text-primary transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4">Get Started</h3>
-              <p className="text-sm text-slate-600 mb-4">Create your free account today and start taking better notes.</p>
-              <Button 
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-                asChild
-              >
-                <Link to="/auth/sign-up">
-                  Create Free Account
-                </Link>
-              </Button>
-            </div>
-          </div>
-          
-          <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center">
-            <div className="text-sm text-slate-500">
-              © {new Date().getFullYear()} {SITE_CONFIG.name}. All rights reserved.
-            </div>
-            <div className="flex items-center mt-4 md:mt-0">
-              <span className="text-xs text-slate-500">Made with ❤️ for readers</span>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-const Feature = ({ 
-  icon, 
-  title, 
-  description 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string;
-}) => (
-  <div 
-    className="p-5 md:p-6 rounded-lg border border-muted/20 bg-card transition-all duration-300 hover:shadow-xl 
-      group relative overflow-hidden h-full flex flex-col"
-  >
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-    
-    <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-primary mb-4 transition-all duration-300
-      bg-primary/10 group-hover:bg-primary/20"
-    >
-      {icon}
-    </div>
-    
-    <h3 className="text-lg md:text-xl font-semibold mb-2 group-hover:text-primary transition-colors duration-300">{title}</h3>
-    <p className="text-muted-foreground text-sm md:text-base">{description}</p>
-  </div>
-);
-
-const StepCard = ({ 
-  number, 
-  title, 
-  description, 
-  icon 
-}: { 
-  number: string; 
-  title: string; 
-  description: string;
-  icon: string;
-}) => (
-  <Card className="flex flex-col items-center text-center p-6 md:p-8 border-primary/10 bg-background hover:shadow-lg transition-all duration-300 relative">
-    <div className="absolute -top-5 bg-background border border-primary/20 rounded-full p-1 shadow-lg">
-      <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary font-bold text-lg md:text-xl">
-        {number}
-      </div>
-    </div>
-    
-    <div className="mt-10 mb-3 text-4xl">{icon}</div>
-    <h3 className="text-lg md:text-xl font-semibold mb-2 text-primary">{title}</h3>
-    <p className="text-sm md:text-base text-muted-foreground">{description}</p>
-    
-    <div className="h-1 w-20 bg-gradient-to-r from-primary/80 to-primary/20 rounded-full mt-5"></div>
-  </Card>
-);
-
-const TestimonialCarousel = () => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setCurrentIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    
-    emblaApi.on('select', onSelect);
-    onSelect();
-    
-    return () => {
-      emblaApi.off('select', onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
-  return (
-    <div className="relative max-w-5xl mx-auto">
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
-          {testimonials.map((testimonial, index) => (
-            <div className="flex-[0_0_100%] min-w-0 pl-4 md:pl-6" key={index}>
-              <div className="bg-background p-6 md:p-8 rounded-2xl shadow-md">
-                <div className="flex items-start mb-4">
-                  <Quote className="text-primary opacity-50 h-8 w-8 mr-2 flex-shrink-0" />
-                  <p className="text-base md:text-lg italic">
-                    {testimonial.quote}
-                  </p>
-                </div>
-                <div className="flex items-center mt-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
-                    {testimonial.initials}
-                  </div>
-                  <div className="ml-4">
-                    <div className="font-semibold">{testimonial.author}</div>
-                    <div className="text-sm text-muted-foreground">{testimonial.title}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <button 
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-background shadow-md rounded-full p-2 z-10 hover:bg-muted transition-colors"
-        onClick={() => emblaApi?.scrollPrev()}
-        aria-label="Previous testimonial"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      
-      <button 
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-background shadow-md rounded-full p-2 z-10 hover:bg-muted transition-colors"
-        onClick={() => emblaApi?.scrollNext()}
-        aria-label="Next testimonial"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-      
-      <div className="flex justify-center gap-1 mt-4">
-        {testimonials.map((_, index) => (
-          <button
-            key={index}
-            className={`h-2 rounded-full transition-all ${
-              currentIndex === index ? "w-4 bg-primary" : "w-2 bg-primary/30"
-            }`}
-            onClick={() => emblaApi?.scrollTo(index)}
-            aria-label={`Go to testimonial ${index + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const testimonials = [
-  {
-    quote: "Before BookishNotes, I'd read a book and forget most of it within weeks. Now I have a system that helps me capture and remember the most important ideas from everything I read. It's changed how I learn from books completely.",
-    author: "Alex Kim",
-    title: "Reads 30+ books per year",
-    initials: "AK"
-  },
-  {
-    quote: "I used to highlight passages in my physical books, but I could never find them again when I needed them. BookishNotes lets me organize my thoughts by theme and concept. It's been a game-changer for my research.",
-    author: "Maria Rodriguez",
-    title: "PhD Student",
-    initials: "MR"
-  },
-  {
-    quote: "As someone who reads across many different subjects, I needed a way to connect ideas between books. This platform makes it so easy to create a web of knowledge that grows with every book I read.",
-    author: "James Wilson",
-    title: "Lifelong learner",
-    initials: "JW"
-  },
-  {
-    quote: "I've tried many note-taking apps, but none were specifically designed for books. The structure that BookishNotes provides—with chapters, themes, and quotes—matches exactly how I think about books.",
-    author: "Sarah Chen",
-    title: "Book club organizer",
-    initials: "SC"
-  },
-  {
-    quote: "The ability to quickly reference concepts from books I read years ago has been invaluable for my work. I can pull up specific ideas and quotes in seconds rather than trying to remember where I saw something.",
-    author: "Michael Johnson",
-    title: "Business consultant",
-    initials: "MJ"
-  },
-  {
-    quote: "I love how BookishNotes helps me see patterns in my reading over time. I've discovered themes I'm drawn to that I never noticed before, which has helped me be more intentional about what I read next.",
-    author: "Emily Patel",
-    title: "Reads across genres",
-    initials: "EP"
-  },
-  {
-    quote: "As an author, I use BookishNotes to track ideas and inspiration from other writers. It's become an essential part of my creative process and research workflow.",
-    author: "David Thompson",
-    title: "Published author",
-    initials: "DT"
-  }
-];
-
-export default Welcome;
