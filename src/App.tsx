@@ -1,8 +1,7 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
-import { Navigation } from "@/components/Navigation";
+import { Navigation } from "@/pages/Navigation";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { HelmetProvider } from 'react-helmet-async';
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
@@ -29,7 +28,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
-// Create a protected route component that handles loading state and authenticated redirects
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   const location = useLocation();
@@ -45,7 +43,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// Create a special admin route for Buy Books page
 const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   const location = useLocation();
@@ -79,7 +76,6 @@ const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/auth/sign-in" state={{ from: location }} replace />;
   }
   
-  // Only allow a specific admin user to access the BuyBooks page
   if (profile?.email !== "hi@stevenboffa.com") {
     return <Navigate to="/dashboard" replace />;
   }
@@ -87,7 +83,6 @@ const BuyBooksRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// Create a public route component that redirects authenticated users
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   
@@ -102,7 +97,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-// Create a layout component that only shows Navigation for authenticated routes
 const AuthenticatedLayout = ({ children, hideNav = false }: { children: React.ReactNode, hideNav?: boolean }) => {
   const { session } = useAuth();
   return (
