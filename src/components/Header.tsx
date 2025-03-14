@@ -3,11 +3,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { Menu, BookOpen, Users, ChevronRight, MessageCircle, Info, LogIn, UserPlus } from "lucide-react";
+import { Menu, BookOpen, Users, ChevronRight, MessageCircle, Info, LogIn, UserPlus, Bookmark, BookCheck, BookMarked } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { trackButtonClick } from "./GoogleAnalytics";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,43 +45,72 @@ export function Header() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b w-full">
-      <div className="flex items-center justify-between h-16 px-4 max-w-6xl mx-auto">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b w-full py-3 md:py-4">
+      <div className="flex items-center justify-between px-4 md:px-6 max-w-7xl mx-auto">
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-          BookishNotes
+        <Link 
+          to="/" 
+          className="flex items-center gap-2 text-xl font-bold"
+          onClick={() => trackButtonClick("header_logo", "header")}
+        >
+          <BookCheck className="h-6 w-6 text-indigo-600" />
+          <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            BookishNotes
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4">
-          {/* Auth buttons with enhanced styling */}
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              className="flex items-center gap-2 text-sm font-medium hover:bg-primary/5 hover:text-primary transition-all duration-200"
-              asChild
-            >
-              <Link to="/auth/sign-in">
-                <LogIn className="h-4 w-4" />
-                Sign In
-              </Link>
-            </Button>
-            <Button 
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-200"
-              asChild
-            >
-              <Link to="/auth/sign-up">
-                <UserPlus className="h-4 w-4" />
-                Create Account
-              </Link>
-            </Button>
-          </div>
+        <nav className="hidden md:flex items-center gap-8">
+          <Link 
+            to="/blog" 
+            className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+            onClick={() => trackButtonClick("header_blog", "header")}
+          >
+            Blog
+          </Link>
+          <Link 
+            to="/faq" 
+            className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+            onClick={() => trackButtonClick("header_faq", "header")}
+          >
+            FAQ
+          </Link>
+          <Link 
+            to="/contact" 
+            className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+            onClick={() => trackButtonClick("header_contact", "header")}
+          >
+            Contact
+          </Link>
         </nav>
+
+        {/* Auth buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            className="text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+            asChild
+            trackingId="header_signin"
+          >
+            <Link to="/auth/sign-in">
+              Sign In
+            </Link>
+          </Button>
+          <Button 
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md"
+            asChild
+            trackingId="header_signup"
+          >
+            <Link to="/auth/sign-up">
+              Sign Up Free
+            </Link>
+          </Button>
+        </div>
 
         {/* Mobile Menu Trigger */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={() => trackButtonClick("mobile_menu", "header")}>
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
@@ -89,18 +119,39 @@ export function Header() {
               <div className="p-6 border-b border-slate-200">
                 <Link 
                   to="/" 
-                  className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"
-                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-xl font-bold"
+                  onClick={() => {
+                    setIsOpen(false);
+                    trackButtonClick("mobile_logo", "mobile_menu");
+                  }}
                 >
-                  BookishNotes
+                  <BookCheck className="h-6 w-6 text-indigo-600" />
+                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    BookishNotes
+                  </span>
                 </Link>
               </div>
               <nav className="flex-1 px-6 py-8">
                 <div className="space-y-5">
                   <Link
+                    to="/blog"
+                    className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
+                    onClick={() => {
+                      setIsOpen(false);
+                      trackButtonClick("mobile_blog", "mobile_menu");
+                    }}
+                  >
+                    <BookMarked className="h-5 w-5 mr-3" />
+                    Blog
+                    <ChevronRight className="ml-auto h-5 w-5 text-slate-400 group-hover:text-white" />
+                  </Link>
+                  <Link
                     to="/contact"
                     className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      setIsOpen(false);
+                      trackButtonClick("mobile_contact", "mobile_menu");
+                    }}
                   >
                     <MessageCircle className="h-5 w-5 mr-3" />
                     Contact
@@ -109,7 +160,10 @@ export function Header() {
                   <Link
                     to="/faq"
                     className="flex items-center px-4 py-3 text-lg font-medium text-slate-700 rounded-lg bg-white shadow-sm hover:bg-primary hover:text-white transition-colors group"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      setIsOpen(false);
+                      trackButtonClick("mobile_faq", "mobile_menu");
+                    }}
                   >
                     <Info className="h-5 w-5 mr-3" />
                     FAQ
@@ -118,13 +172,16 @@ export function Header() {
 
                   <div className="h-px bg-slate-200 my-6" />
 
-                  <div className="bg-primary/5 rounded-xl p-5">
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5">
                     <h3 className="font-medium text-lg mb-3 text-slate-800">Ready to start your journey?</h3>
                     <p className="text-slate-600 text-sm mb-4">Create your free account and start organizing your reading notes today.</p>
                     <div className="space-y-3">
                       <Button
                         className="w-full bg-white text-slate-800 border border-slate-200 hover:bg-slate-50"
-                        onClick={() => setIsOpen(false)}
+                        onClick={() => {
+                          setIsOpen(false);
+                          trackButtonClick("mobile_signin", "mobile_menu");
+                        }}
                         asChild
                       >
                         <Link to="/auth/sign-in">
@@ -133,8 +190,11 @@ export function Header() {
                         </Link>
                       </Button>
                       <Button
-                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-                        onClick={() => setIsOpen(false)}
+                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+                        onClick={() => {
+                          setIsOpen(false);
+                          trackButtonClick("mobile_signup", "mobile_menu");
+                        }}
                         asChild
                       >
                         <Link to="/auth/sign-up">
