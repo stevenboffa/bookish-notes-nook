@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ForgettingCurveGraph } from "@/components/welcome/ForgettingCurveGraph";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookPreviewGrid } from "@/components/welcome/BookPreviewGrid";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SITE_CONFIG = {
   name: "BookishNotes",
@@ -17,6 +18,7 @@ const SITE_CONFIG = {
 
 const Welcome = () => {
   const { session } = useAuth();
+  const isMobile = useIsMobile();
 
   if (session) {
     return <Link to="/dashboard" replace />;
@@ -27,7 +29,7 @@ const Welcome = () => {
       <Meta customTitle="Never Forget What You Read | BookishNotes.com" />
       <Header />
       
-      {/* Hero Section - Restructured to match ClickUp layout */}
+      {/* Hero Section - With conditional mobile/desktop image */}
       <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-slate-100"
@@ -82,21 +84,34 @@ const Welcome = () => {
               </p>
             </div>
 
-            {/* App Preview Image - Much larger now, centered below the content */}
+            {/* App Preview Image - Conditionally show desktop or mobile version */}
             <div className="relative z-10 max-w-7xl mx-auto mt-8">
               <div className="relative">
                 {/* Decorative elements */}
                 <div className="absolute -top-6 -left-6 w-24 h-24 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                 
-                {/* Main app preview - MUCH BIGGER with no hover effect */}
-                <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-2xl overflow-hidden">
-                  <img 
-                    src="/lovable-uploads/246539c0-d6ff-409e-a267-306de7cc9aa6.png" 
-                    alt="BookishNotes App Preview" 
-                    className="w-full h-auto rounded-lg"
-                  />
-                </div>
+                {/* Desktop app preview */}
+                {!isMobile && (
+                  <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-2xl overflow-hidden">
+                    <img 
+                      src="/lovable-uploads/246539c0-d6ff-409e-a267-306de7cc9aa6.png" 
+                      alt="BookishNotes App Preview" 
+                      className="w-full h-auto rounded-lg"
+                    />
+                  </div>
+                )}
+                
+                {/* Mobile app preview - Book list from your image */}
+                {isMobile && (
+                  <div className="bg-white rounded-xl border-4 border-indigo-100/80 shadow-2xl overflow-hidden">
+                    <img 
+                      src="/lovable-uploads/416d1480-d11e-4030-881b-a11830e59197.png" 
+                      alt="BookishNotes Mobile Preview" 
+                      className="w-full h-auto rounded-lg"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
