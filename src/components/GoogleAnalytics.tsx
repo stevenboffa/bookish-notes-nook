@@ -32,7 +32,10 @@ export const GoogleAnalytics = () => {
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
+      gtag('config', '${GA_MEASUREMENT_ID}', {
+        send_page_view: false,
+        debug_mode: true
+      });
     `;
     
     // Only add the scripts if they don't already exist
@@ -68,6 +71,8 @@ export const GoogleAnalytics = () => {
         user_authenticated: isAuthenticated,
         user_id: isAuthenticated ? session.user.id : undefined, // Send user ID for user-specific analytics
       });
+      
+      console.log('GA4: Tracked page view for', location.pathname);
     }
   }, [location, session]);
 
@@ -83,12 +88,17 @@ export const trackEvent = (
   additionalParams?: Record<string, any>
 ) => {
   if (window.gtag) {
-    window.gtag('event', action, {
+    const eventParams = {
       event_category: category,
       event_label: label,
       value: value,
       ...additionalParams
-    });
+    };
+    
+    window.gtag('event', action, eventParams);
+    console.log(`GA4: Tracked event - ${category} > ${action}`, eventParams);
+  } else {
+    console.warn('GA4: gtag not available when trying to track event:', { category, action, label });
   }
 };
 

@@ -233,16 +233,18 @@ export default function AddBook() {
       return;
     }
 
-    import('@/components/GoogleAnalytics').then(({ trackBookAdded }) => {
-      trackBookAdded({
-        id: updatedBook.id,
-        title: updatedBook.title,
-        author: updatedBook.author,
-        genre: updatedBook.genre,
-        format: updatedBook.format,
-        source: searchQuery ? 'google_books_search' : 'manual_entry'
-      });
+    const { trackBookAdded } = await import('@/components/GoogleAnalytics');
+    
+    trackBookAdded({
+      id: updatedBook.id,
+      title: updatedBook.title,
+      author: updatedBook.author,
+      genre: updatedBook.genre,
+      format: updatedBook.format,
+      source: searchQuery ? 'google_books_search' : 'manual_entry'
     });
+    
+    console.log('Book added and tracked in GA4:', updatedBook.title);
 
     toast.success('Book saved successfully!');
     navigate("/dashboard");
