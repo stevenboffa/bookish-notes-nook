@@ -112,3 +112,21 @@ export const trackSearch = (query: string, resultsCount: number) => {
 export const trackFeatureUsage = (featureName: string, detail?: string) => {
   trackEvent('feature', 'use', featureName, undefined, { detail });
 };
+
+// New function to track book additions to dashboard
+export const trackBookAdded = (book: {
+  id: string;
+  title: string;
+  author: string;
+  genre?: string;
+  format?: string;
+  source?: string;
+}) => {
+  trackEvent('book', 'add_to_library', book.title, undefined, {
+    book_id: book.id,
+    author: book.author,
+    genre: book.genre || 'Unknown',
+    format: book.format || 'Unknown',
+    source: book.source || 'manual_entry',
+  });
+};

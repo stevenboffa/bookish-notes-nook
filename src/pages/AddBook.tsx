@@ -233,6 +233,17 @@ export default function AddBook() {
       return;
     }
 
+    import('@/components/GoogleAnalytics').then(({ trackBookAdded }) => {
+      trackBookAdded({
+        id: updatedBook.id,
+        title: updatedBook.title,
+        author: updatedBook.author,
+        genre: updatedBook.genre,
+        format: updatedBook.format,
+        source: searchQuery ? 'google_books_search' : 'manual_entry'
+      });
+    });
+
     toast.success('Book saved successfully!');
     navigate("/dashboard");
   };

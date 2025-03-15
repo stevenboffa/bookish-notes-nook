@@ -220,6 +220,11 @@ const Dashboard = () => {
       ));
       
       setSelectedBook(updatedBook);
+      
+      // Track book update in Google Analytics
+      import('@/components/GoogleAnalytics').then(({ trackBookAction }) => {
+        trackBookAction('update', updatedBook.id, updatedBook.title);
+      });
     } catch (error) {
       console.error('Error updating book:', error);
       toast.error('Error updating book: ' + (error as Error).message);
