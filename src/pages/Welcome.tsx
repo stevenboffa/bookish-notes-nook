@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronRight, Facebook, Instagram, Sparkles, Check, ChevronDown } from "lucide-react";
@@ -569,4 +570,68 @@ const Welcome = () => {
             </div>
             
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-9
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6">Product</h3>
+              <ul className="space-y-4">
+                <li><Link to="#features" className="text-slate-600 hover:text-primary transition-colors">Features</Link></li>
+                <li><Link to="/dashboard" className="text-slate-600 hover:text-primary transition-colors">Dashboard</Link></li>
+                <li><Link to="/faq" className="text-slate-600 hover:text-primary transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6">Company</h3>
+              <ul className="space-y-4">
+                <li><Link to="/about" className="text-slate-600 hover:text-primary transition-colors">About Us</Link></li>
+                <li><Link to="/blog" className="text-slate-600 hover:text-primary transition-colors">Blog</Link></li>
+                <li><Link to="/contact" className="text-slate-600 hover:text-primary transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6">Legal</h3>
+              <ul className="space-y-4">
+                <li><Link to="/terms" className="text-slate-600 hover:text-primary transition-colors">Terms of Service</Link></li>
+                <li><Link to="/privacy-policy" className="text-slate-600 hover:text-primary transition-colors">Privacy Policy</Link></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="pt-8 border-t border-slate-200 text-center text-slate-500 text-sm">
+            <p>&copy; {new Date().getFullYear()} BookishNotes. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+// Feature card component for the features section
+const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:translate-y-[-3px]">
+      <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mb-4 text-primary">
+        {icon}
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
+    </div>
+  );
+};
+
+// Step card component for the steps section
+const StepCard = ({ number, title, description, icon }: { number: string; title: string; description: string; icon: string }) => {
+  return (
+    <div className="bg-white rounded-xl p-6 shadow-xl relative transition-all duration-300 hover:shadow-2xl hover:translate-y-[-3px]">
+      <div className="absolute -top-3 -left-3 bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg z-10">
+        {number}
+      </div>
+      <div className="bg-primary/5 rounded-full w-16 h-16 flex items-center justify-center mb-4 text-2xl">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
+    </div>
+  );
+};
+
+export default Welcome;
