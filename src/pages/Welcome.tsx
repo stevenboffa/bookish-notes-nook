@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronRight, Facebook, Instagram, Sparkles, Check, ChevronDown } from "lucide-react";
@@ -60,8 +59,8 @@ const Welcome = () => {
                 Never read a book and forget it again
               </Badge>
               
-              {/* Main headline - more problem-solution focused */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-slate-900 max-w-4xl bg-clip-text bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-700 text-transparent">
+              {/* Main headline - with fixed line height for descenders */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-slate-900 max-w-4xl bg-clip-text bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-700 text-transparent leading-[1.2] md:leading-[1.2] lg:leading-[1.2] pb-1">
                 Transform your reading into knowledge that lasts forever
               </h1>
 
@@ -570,103 +569,4 @@ const Welcome = () => {
             </div>
             
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6">Resources</h3>
-              <ul className="space-y-4">
-                <li>
-                  <Link to="/blog" className="text-slate-600 hover:text-primary transition-colors">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/faq" className="text-slate-600 hover:text-primary transition-colors">
-                    FAQ
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="text-slate-600 hover:text-primary transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6">Legal</h3>
-              <ul className="space-y-4">
-                <li>
-                  <Link to="/terms" className="text-slate-600 hover:text-primary transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy-policy" className="text-slate-600 hover:text-primary transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-6">Company</h3>
-              <ul className="space-y-4">
-                <li>
-                  <Link to="/about" className="text-slate-600 hover:text-primary transition-colors">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <a href="mailto:hello@bookishnotes.com" className="text-slate-600 hover:text-primary transition-colors">
-                    hello@bookishnotes.com
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-200 pt-8 text-center">
-            <p className="text-slate-500">
-              &copy; {new Date().getFullYear()} BookishNotes. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-};
-
-// Enhanced Feature Card Component
-const Feature = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => {
-  return (
-    <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
-      <CardContent className="p-6">
-        <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
-          <div className="text-primary">
-            {icon}
-          </div>
-        </div>
-        <h3 className="font-semibold text-lg mb-3">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  );
-};
-
-// Enhanced Step Card Component
-const StepCard = ({ number, title, description, icon }: { number: string; title: string; description: string; icon: string }) => {
-  return (
-    <Card className="border-0 shadow-lg bg-white relative hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
-      <CardContent className="p-8 pt-12 text-center">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="h-14 w-14 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-            {number}
-          </div>
-        </div>
-        <div className="text-4xl mb-5">{icon}</div>
-        <h3 className="font-semibold text-lg mb-3">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default Welcome;
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-9
