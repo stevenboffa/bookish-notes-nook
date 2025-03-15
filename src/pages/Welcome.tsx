@@ -54,8 +54,8 @@ const Welcome = () => {
           <div className="max-w-7xl mx-auto">
             {/* More impactful headline and content */}
             <div className="flex flex-col items-center text-center mb-10">
-              {/* Main headline - with fixed line height for descenders */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-slate-900 max-w-4xl bg-clip-text bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-700 text-transparent leading-[1.2] md:leading-[1.2] lg:leading-[1.2] pb-1">
+              {/* Main headline - changed from gradient to solid dark color */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-[#24223e] max-w-4xl leading-[1.2] md:leading-[1.2] lg:leading-[1.2] pb-1">
                 Transform your reading into knowledge that lasts forever
               </h1>
 
@@ -73,7 +73,7 @@ const Welcome = () => {
                   asChild
                 >
                   <Link to="/auth/sign-up">
-                    Start remembering today
+                    Get started. It's FREE!
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
@@ -614,3 +614,4 @@ const StepCard = ({ number, title, description, icon }: { number: string; title:
 };
 
 export default Welcome;
+
