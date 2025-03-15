@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookText, Quote, FolderKanban, Users, Camera, BrainCircuit, BookOpen, ChevronRight, Facebook, Instagram, Sparkles, Check, ChevronDown } from "lucide-react";
@@ -55,11 +54,6 @@ const Welcome = () => {
           <div className="max-w-7xl mx-auto">
             {/* More impactful headline and content */}
             <div className="flex flex-col items-center text-center mb-10">
-              {/* Pre-headline badge */}
-              <Badge variant="outline" className="mb-4 px-4 py-1.5 border-primary/30 bg-primary/5 text-primary font-medium">
-                Never read a book and forget it again
-              </Badge>
-              
               {/* Main headline - with fixed line height for descenders */}
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-slate-900 max-w-4xl bg-clip-text bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-700 text-transparent leading-[1.2] md:leading-[1.2] lg:leading-[1.2] pb-1">
                 Transform your reading into knowledge that lasts forever
@@ -83,27 +77,12 @@ const Welcome = () => {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-14 px-8 text-base border-2 border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl transition-all duration-200"
-                  asChild
-                >
-                  <a href="#how-it-works">
-                    See how it works
-                    <ChevronDown className="ml-2 h-5 w-5" />
-                  </a>
-                </Button>
               </div>
               
-              {/* Enhanced "Free forever" text with better visual presence */}
-              <div className="bg-success px-5 py-2 rounded-full mt-6 inline-flex items-center">
-                <Check className="mr-2 h-4 w-4 text-green-600" />
-                <p className="text-sm text-green-800 font-medium">
-                  Free Forever. No Credit Card Required.
-                </p>
-              </div>
+              {/* Simplified "Free forever" text */}
+              <p className="text-sm text-slate-600 font-medium mt-6">
+                Free Forever. No Credit Card Required.
+              </p>
             </div>
 
             {/* Enhanced App Preview with subtle animation */}
