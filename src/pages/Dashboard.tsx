@@ -14,6 +14,7 @@ import { Book, Collection, Note, Quote } from "@/types/books";
 import { CollectionManager } from "@/components/CollectionManager";
 import { toast } from "sonner";
 import { LibraryStats } from "@/components/LibraryStats";
+import { ReadingStreak } from "@/components/ReadingStreak";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -376,6 +377,10 @@ const Dashboard = () => {
                 Add Book
               </Button>
             </div>
+          </div>
+
+          <div className="px-4 py-2 bg-white">
+            <ReadingStreak />
           </div>
 
           {!isMobile && (
