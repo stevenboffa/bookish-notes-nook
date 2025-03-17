@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,7 @@ import { Note, BookWithNotes } from "@/types/books";
 import { useToast } from "@/hooks/use-toast";
 import { NoteItem } from "./NoteItem";
 import { trackFeatureUsage, trackEvent } from "./GoogleAnalytics";
+import { NotesFilter, NotesFilterOption } from "./NotesFilter";
 
 interface NoteSectionProps {
   book: BookWithNotes;
@@ -14,6 +14,8 @@ interface NoteSectionProps {
 
 export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [currentFilter, setCurrentFilter] = useState<NotesFilterOption>("all");
+  const [currentSort, setCurrentSort] = useState<"newest" | "oldest">("newest");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,6 +63,35 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     loadNotes();
   }, [book.id]);
 
+  const filteredAndSortedNotes = useMemo(() => {
+    let filtered = [...notes];
+    
+    if (currentFilter !== "all") {
+      switch (currentFilter) {
+        case "text":
+          filtered = filtered.filter(note => note.content && (!note.images || note.images.length === 0));
+          break;
+        case "highlights":
+          filtered = filtered.filter(note => note.noteType === "highlight");
+          break;
+        case "quotes":
+          filtered = filtered.filter(note => note.noteType === "quote");
+          break;
+        case "images":
+          filtered = filtered.filter(note => note.images && note.images.length > 0);
+          break;
+      }
+    }
+    
+    if (currentSort === "oldest") {
+      filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    } else {
+      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    
+    return filtered;
+  }, [notes, currentFilter, currentSort]);
+
   const handleAddNote = async (note: {
     content: string;
     pageNumber?: number;
@@ -72,10 +103,8 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     try {
       console.log('Creating note with data:', note);
       
-      // Use empty string for content if only images are provided
       const content = note.content.trim() || (note.images && note.images.length > 0 ? "" : null);
       
-      // Validate that at least images or content is provided
       if (!content && (!note.images || note.images.length === 0)) {
         toast({
           title: "Error",
@@ -123,7 +152,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         notes: [formattedNote, ...notes]
       });
 
-      // Track note creation
       trackFeatureUsage('note_creation', `book_id:${book.id}`);
       trackEvent('note', 'create', 'new_note', undefined, {
         book_id: book.id,
@@ -187,7 +215,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         notes: updatedNotes
       });
 
-      // Track note update
       trackEvent('note', 'update', 'edit_note', undefined, {
         book_id: book.id,
         book_title: book.title,
@@ -218,7 +245,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
 
       if (fetchError) throw fetchError;
 
-      // Delete images if any
       if (noteToDelete?.images && noteToDelete.images.length > 0) {
         const imagePaths = noteToDelete.images.map(url => {
           try {
@@ -241,7 +267,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         }
       }
 
-      // Delete audio if any
       if (noteToDelete?.audio_url) {
         try {
           const audioPath = new URL(noteToDelete.audio_url).pathname.split('/').pop();
@@ -273,7 +298,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         notes: updatedNotes
       });
 
-      // Track note deletion
       trackEvent('note', 'delete', 'delete_note', undefined, {
         book_id: book.id,
         book_title: book.title
@@ -314,7 +338,6 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         notes: updatedNotes
       });
 
-      // Track pin toggle
       trackEvent('note', updatedNote.is_pinned ? 'pin' : 'unpin', 'toggle_pin', undefined, {
         book_id: book.id,
         book_title: book.title,
@@ -335,12 +358,27 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
     }
   };
 
-  // Track when users view the notes section
   useEffect(() => {
     if (book?.id) {
       trackFeatureUsage('view_notes', `book_id:${book.id}`);
     }
   }, [book?.id]);
+
+  const handleFilterChange = (filter: NotesFilterOption) => {
+    setCurrentFilter(filter);
+    trackEvent('notes', 'filter', `filter_${filter}`, undefined, {
+      book_id: book.id,
+      book_title: book.title
+    });
+  };
+
+  const handleSortChange = (sort: "newest" | "oldest") => {
+    setCurrentSort(sort);
+    trackEvent('notes', 'sort', `sort_${sort}`, undefined, {
+      book_id: book.id,
+      book_title: book.title
+    });
+  };
 
   return (
     <div className="space-y-5 px-4 sm:px-6">
@@ -349,14 +387,23 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
       </h3>
       
       <AddNoteForm bookId={book.id} bookFormat={book.format} onSubmit={handleAddNote} />
+      
+      {notes.length > 0 && (
+        <NotesFilter
+          currentFilter={currentFilter}
+          onFilterChange={handleFilterChange}
+          currentSort={currentSort}
+          onSortChange={handleSortChange}
+        />
+      )}
 
-      {notes.length === 0 ? (
+      {filteredAndSortedNotes.length === 0 ? (
         <p className="text-sm text-gray-500 font-normal">
-          No notes added yet.
+          {notes.length > 0 ? "No notes match your filter." : "No notes added yet."}
         </p>
       ) : (
         <div className="space-y-4">
-          {notes.map(note => (
+          {filteredAndSortedNotes.map(note => (
             <NoteItem 
               key={note.id} 
               note={note} 
