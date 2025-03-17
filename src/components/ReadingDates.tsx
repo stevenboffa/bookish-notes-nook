@@ -5,6 +5,7 @@ import { Book } from "@/types/books";
 import { DatePickerField } from "./DatePickerField";
 import { Badge } from "@/components/ui/badge";
 import { Clock, BookOpen, BookCheck } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ReadingDatesProps {
   book: Book;
@@ -25,6 +26,7 @@ export function ReadingDates({ book, onUpdate }: ReadingDatesProps) {
   );
 
   const [readingDays, setReadingDays] = useState<number | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (startDate && endDate && startDate <= endDate) {
@@ -53,57 +55,55 @@ export function ReadingDates({ book, onUpdate }: ReadingDatesProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <DatePickerField
           date={startDate}
           onDateChange={handleStartDateChange}
           label="Started Reading"
           placeholder="When did you start?"
+          className="flex-1"
         />
         <DatePickerField
           date={endDate}
           onDateChange={handleEndDateChange}
           label="Finished Reading"
           placeholder="When did you finish?"
+          className="flex-1"
         />
       </div>
       
-      {readingDays !== null && (
-        <div className="flex justify-center mt-2">
+      <div className="flex flex-wrap justify-center gap-2 mt-1">
+        {readingDays !== null && (
           <Badge 
             variant="outline" 
-            className="px-3 py-1.5 text-sm bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 text-primary flex items-center gap-2"
+            className="px-2.5 py-1 text-xs bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 text-primary flex items-center gap-1.5"
           >
-            <Clock className="h-4 w-4 text-primary/70" />
-            You read this book in {readingDays} {readingDays === 1 ? 'day' : 'days'}!
+            <Clock className="h-3 w-3 text-primary/70" />
+            {readingDays} {readingDays === 1 ? 'day' : 'days'} to read
           </Badge>
-        </div>
-      )}
-      
-      {book.status === "In progress" && startDate && !endDate && (
-        <div className="flex justify-center mt-2">
+        )}
+        
+        {book.status === "In progress" && startDate && !endDate && (
           <Badge 
             variant="outline" 
-            className="px-3 py-1.5 text-sm bg-gradient-to-r from-blue-50 to-blue-100/50 border-blue-200 text-blue-700 flex items-center gap-2"
+            className="px-2.5 py-1 text-xs bg-gradient-to-r from-blue-50 to-blue-100/50 border-blue-200 text-blue-700 flex items-center gap-1.5"
           >
-            <BookOpen className="h-4 w-4 text-blue-500" />
+            <BookOpen className="h-3 w-3 text-blue-500" />
             Currently reading
           </Badge>
-        </div>
-      )}
-      
-      {book.status === "Finished" && startDate && endDate && (
-        <div className="flex justify-center mt-2">
+        )}
+        
+        {book.status === "Finished" && startDate && endDate && (
           <Badge 
             variant="outline" 
-            className="px-3 py-1.5 text-sm bg-gradient-to-r from-green-50 to-green-100/50 border-green-200 text-green-700 flex items-center gap-2"
+            className="px-2.5 py-1 text-xs bg-gradient-to-r from-green-50 to-green-100/50 border-green-200 text-green-700 flex items-center gap-1.5"
           >
-            <BookCheck className="h-4 w-4 text-green-500" />
+            <BookCheck className="h-3 w-3 text-green-500" />
             Completed
           </Badge>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

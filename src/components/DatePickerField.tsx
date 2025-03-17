@@ -28,24 +28,24 @@ export function DatePickerField({
   className,
 }: DatePickerFieldProps) {
   return (
-    <div className={cn("space-y-2", className)}>
-      <Label className="text-sm font-medium text-gray-700">{label}</Label>
+    <div className={cn("w-full", className)}>
+      <Label className="text-xs font-medium text-gray-700 mb-1 block">{label}</Label>
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             className={cn(
-              "w-full justify-start text-left font-normal h-9 px-3 py-2 relative",
+              "w-full justify-start text-left font-normal h-8 px-2.5 py-1.5 relative text-sm",
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
-            {date ? format(date, "PPP") : placeholder}
+            <CalendarIcon className="mr-1.5 h-3.5 w-3.5 opacity-70" />
+            {date ? format(date, "MMM d, yyyy") : placeholder}
             {date && (
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-5 w-5 p-0 absolute right-3 rounded-full hover:bg-gray-200"
+                className="h-5 w-5 p-0 absolute right-2 rounded-full hover:bg-gray-200"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDateChange(undefined);
