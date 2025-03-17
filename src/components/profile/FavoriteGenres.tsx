@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Heart, Loader2 } from "lucide-react";
+import { Bookmark, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -147,17 +147,17 @@ export function FavoriteGenres() {
     <>
       <Button 
         variant="outline" 
-        className="w-full"
+        className="w-full flex items-center justify-center gap-2 bg-accent/30 hover:bg-accent/50 transition-colors"
         onClick={() => setIsOpen(true)}
       >
-        <Heart className="mr-2 h-4 w-4" />
+        <Bookmark className="h-4 w-4" />
         Favorite Genres
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-center">Select Your Favorite Genres</DialogTitle>
+            <DialogTitle className="text-center text-xl font-bold">Select Your Favorite Genres</DialogTitle>
           </DialogHeader>
           
           {isLoading ? (
@@ -168,14 +168,21 @@ export function FavoriteGenres() {
             <div className="space-y-6 py-4">
               {genreCategories.map((category) => (
                 <div key={category.name} className="space-y-3">
-                  <h3 className="font-medium border-b pb-1">{category.name}</h3>
+                  <h3 className="font-medium text-lg border-b border-primary/20 pb-1">{category.name}</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {category.genres.map((genre) => (
-                      <div key={genre} className="flex items-start space-x-2">
+                      <div 
+                        key={genre} 
+                        className={`flex items-start space-x-2 p-2 rounded-md transition-colors ${
+                          selectedGenres.includes(genre) ? 'bg-primary/10' : 'hover:bg-accent/30'
+                        }`}
+                        onClick={() => toggleGenre(genre)}
+                      >
                         <Checkbox 
                           id={genre}
                           checked={selectedGenres.includes(genre)}
                           onCheckedChange={() => toggleGenre(genre)}
+                          className="mt-0.5"
                         />
                         <Label 
                           htmlFor={genre} 
@@ -188,6 +195,9 @@ export function FavoriteGenres() {
                   </div>
                 </div>
               ))}
+              <div className="pt-2 text-sm text-muted-foreground">
+                Selected: {selectedGenres.length} genres
+              </div>
             </div>
           )}
           
