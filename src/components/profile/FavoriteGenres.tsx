@@ -1,10 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Bookmark, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -143,6 +140,25 @@ export function FavoriteGenres() {
     }
   };
 
+  // Genre pill component
+  const GenrePill = ({ genre }: { genre: string }) => {
+    const isSelected = selectedGenres.includes(genre);
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        className={`rounded-full px-4 py-2 h-auto text-sm font-medium transition-colors ${
+          isSelected 
+            ? 'bg-[#9b87f5] text-white border-[#9b87f5] hover:bg-[#7E69AB] hover:border-[#7E69AB]' 
+            : 'bg-background border-input hover:bg-accent/30'
+        }`}
+        onClick={() => toggleGenre(genre)}
+      >
+        {genre}
+      </Button>
+    );
+  };
+
   return (
     <>
       <Button 
@@ -157,7 +173,7 @@ export function FavoriteGenres() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold">Select Your Favorite Genres</DialogTitle>
+            <DialogTitle className="text-center text-xl font-bold">What genres do you usually like to read?</DialogTitle>
           </DialogHeader>
           
           {isLoading ? (
@@ -165,32 +181,13 @@ export function FavoriteGenres() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="space-y-6 py-4">
+            <div className="space-y-8 py-4">
               {genreCategories.map((category) => (
-                <div key={category.name} className="space-y-3">
-                  <h3 className="font-medium text-lg border-b border-primary/20 pb-1">{category.name}</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                <div key={category.name} className="space-y-4">
+                  <h3 className="font-medium text-lg text-muted-foreground">{category.name} genres</h3>
+                  <div className="flex flex-wrap gap-2">
                     {category.genres.map((genre) => (
-                      <div 
-                        key={genre} 
-                        className={`flex items-start space-x-2 p-2 rounded-md transition-colors ${
-                          selectedGenres.includes(genre) ? 'bg-primary/10' : 'hover:bg-accent/30'
-                        }`}
-                        onClick={() => toggleGenre(genre)}
-                      >
-                        <Checkbox 
-                          id={genre}
-                          checked={selectedGenres.includes(genre)}
-                          onCheckedChange={() => toggleGenre(genre)}
-                          className="mt-0.5"
-                        />
-                        <Label 
-                          htmlFor={genre} 
-                          className="text-sm leading-tight cursor-pointer"
-                        >
-                          {genre}
-                        </Label>
-                      </div>
+                      <GenrePill key={genre} genre={genre} />
                     ))}
                   </div>
                 </div>
