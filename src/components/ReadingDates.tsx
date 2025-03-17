@@ -4,7 +4,7 @@ import { differenceInDays, parseISO, isValid } from "date-fns";
 import { Book } from "@/types/books";
 import { DatePickerField } from "./DatePickerField";
 import { Badge } from "@/components/ui/badge";
-import { Clock, BookOpen, BookCheck } from "lucide-react";
+import { Clock, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ReadingDatesProps {
@@ -91,16 +91,6 @@ export function ReadingDates({ book, onUpdate }: ReadingDatesProps) {
           >
             <BookOpen className="h-3 w-3 text-blue-500" />
             Currently reading
-          </Badge>
-        )}
-        
-        {book.status === "Finished" && startDate && endDate && (
-          <Badge 
-            variant="outline" 
-            className="px-2.5 py-1 text-xs bg-gradient-to-r from-green-50 to-green-100/50 border-green-200 text-green-700 flex items-center gap-1.5"
-          >
-            <BookCheck className="h-3 w-3 text-green-500" />
-            Completed
           </Badge>
         )}
       </div>
