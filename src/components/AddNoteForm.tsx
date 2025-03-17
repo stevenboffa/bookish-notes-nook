@@ -82,24 +82,19 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       const recognition = new window.webkitSpeechRecognition();
       recognitionRef.current = recognition;
       
-      // Store the existing content as our starting point
       finalTranscriptRef.current = content;
       
-      // Configure speech recognition settings for better accuracy
-      recognition.continuous = false; // Use discrete recognition sessions
-      recognition.interimResults = true; // Show intermediate results
+      recognition.continuous = false;
+      recognition.interimResults = true;
       recognition.lang = 'en-US';
       
-      // Set maximum number of alternatives for better word recognition
       recognition.maxAlternatives = 3;
 
       recognition.onresult = (event) => {
         let interimTranscript = '';
         let finalTranscript = '';
         
-        // Process all results
         for (let i = 0; i < event.results.length; i++) {
-          // Take the transcript with highest confidence
           const transcript = event.results[i][0].transcript;
           
           if (event.results[i].isFinal) {
@@ -109,25 +104,20 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
           }
         }
         
-        // If we have final text, add it to our saved transcript
         if (finalTranscript) {
           finalTranscriptRef.current += finalTranscript;
           setContent(finalTranscriptRef.current.trim());
         }
         
-        // Display interim results in real time for user feedback
         setInterimText(interimTranscript);
       };
 
       recognition.onend = () => {
-        // When a recognition session ends, update the content with final transcript
         if (textareaRef.current) {
           textareaRef.current.value = finalTranscriptRef.current.trim();
         }
         
-        // Only restart listening if the user hasn't canceled
         if (isListening && recognitionRef.current) {
-          // Brief pause between recognition sessions for better phrase separation
           setTimeout(() => {
             if (isListening && recognitionRef.current) {
               recognitionRef.current.start();
@@ -171,7 +161,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       recognitionRef.current.stop();
     }
     
-    // Merge any interim text into the final content
     if (interimText) {
       finalTranscriptRef.current += " " + interimText;
       setContent(finalTranscriptRef.current.trim());
@@ -223,7 +212,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
       stopListening();
     }
     
-    // Validate that either content or images are provided
     if (!content.trim() && selectedImages.length === 0) {
       toast({
         title: "Error",
@@ -272,7 +260,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
     }
   };
 
-  // Displayed content combines final transcript and interim results
   const displayContent = content + (interimText ? ` ${interimText}` : '');
 
   return (
@@ -319,7 +306,6 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
             <SelectItem value="general">General Note</SelectItem>
             <SelectItem value="overview">Overview</SelectItem>
             <SelectItem value="quote">Quote</SelectItem>
-            <SelectItem value="analysis">Analysis</SelectItem>
             <SelectItem value="insight">Insight</SelectItem>
             <SelectItem value="question">Question</SelectItem>
             <SelectItem value="character-profile">Character Profile</SelectItem>
