@@ -117,17 +117,6 @@ const Welcome = () => {
             </div>
           </div>
         </div>
-        
-        {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-0 right-0 flex justify-center">
-          <a 
-            href="#social-proof" 
-            className="flex flex-col items-center text-slate-400 hover:text-primary transition-colors animate-bounce"
-          >
-            <span className="text-sm mb-2">Scroll to learn more</span>
-            <ChevronDown className="h-5 w-5" />
-          </a>
-        </div>
       </section>
 
       {/* Enhanced Social Proof Section */}
@@ -614,4 +603,3 @@ const StepCard = ({ number, title, description, icon }: { number: string; title:
 };
 
 export default Welcome;
-
