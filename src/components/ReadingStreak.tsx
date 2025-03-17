@@ -189,36 +189,44 @@ export function ReadingStreak() {
   };
 
   const CompactView = () => (
-    <div className="flex items-center justify-between w-full px-3 py-2">
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between w-full px-3 py-1.5">
+      <div className="flex items-center gap-2">
         <div className={cn(
-          "rounded-full flex items-center justify-center p-1.5",
+          "rounded-full flex items-center justify-center p-1",
           currentStreak > 0 ? "bg-gradient-to-br from-amber-100 to-orange-200" : "bg-gray-100"
         )}>
-          <Flame className={cn(getFlameSize(), getFlameColor(), "drop-shadow")} />
+          <Flame className={cn(
+            currentStreak >= 100 ? "h-5 w-5" : "h-4 w-4", 
+            getFlameColor(), 
+            "drop-shadow"
+          )} />
         </div>
-        <div>
-          <div className="font-bold text-base">
-            {currentStreak} Day{currentStreak !== 1 ? 's' : ''}
-            <span className="font-normal text-gray-500 text-sm ml-1.5">Reading Streak</span>
-          </div>
+        <div className="flex items-center">
+          <span className="font-bold text-sm">
+            {currentStreak} <span className="font-normal text-xs text-gray-500">day{currentStreak !== 1 ? 's' : ''}</span>
+          </span>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <Button 
-          onClick={handleCheckIn}
-          disabled={checkedInToday || isLoading}
-          size="sm"
-          className={cn(
-            "shadow-sm h-9",
-            checkedInToday 
-              ? "bg-green-500 hover:bg-green-600" 
-              : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-          )}
-        >
-          {checkedInToday ? "✓ Checked In" : "Check In"}
+      
+      <Button 
+        onClick={handleCheckIn}
+        disabled={checkedInToday || isLoading}
+        size="sm"
+        className={cn(
+          "shadow-sm h-7 text-xs px-2.5 ml-1.5",
+          checkedInToday 
+            ? "bg-green-500 hover:bg-green-600" 
+            : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+        )}
+      >
+        {checkedInToday ? "✓ Done" : "Check In"}
+      </Button>
+      
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-full ml-1">
+          <ChevronDown size={14} />
         </Button>
-      </div>
+      </CollapsibleTrigger>
     </div>
   );
 
@@ -311,19 +319,20 @@ export function ReadingStreak() {
       !isMobile && "max-w-lg mx-auto"
     )}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div className="flex items-center justify-end pr-1 pt-1">
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-full">
-              {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </Button>
-          </CollapsibleTrigger>
-        </div>
-        {!isOpen && <CompactView />}
+        {isOpen ? (
+          <div className="flex items-center justify-end pr-1 pt-1">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-full">
+                <ChevronUp size={14} />
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+        ) : (
+          <CompactView />
+        )}
+        
         <CollapsibleContent>
-          <CardContent className={cn(
-            "p-4",
-            isMobile ? "pt-0" : "pt-0"
-          )}>
+          <CardContent className="p-4 pt-0">
             <FullView />
           </CardContent>
         </CollapsibleContent>
