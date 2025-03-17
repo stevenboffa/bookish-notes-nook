@@ -1,4 +1,3 @@
-
 export interface Book {
   id: string;
   title: string;
@@ -106,4 +105,12 @@ export interface AIBookRecommendation {
   amazonUrl?: string;
   themes?: string[];
   genre?: string;
+}
+
+export interface ReadingActivity {
+  id: string;
+  user_id: string;
+  activity_date: string;
+  activity_type: string;
+  created_at: string;
 }

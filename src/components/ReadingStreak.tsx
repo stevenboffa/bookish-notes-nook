@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { ReadingActivity } from "@/types/books";
 
 export function ReadingStreak() {
   const [currentStreak, setCurrentStreak] = useState<number>(0);
@@ -56,7 +57,7 @@ export function ReadingStreak() {
       }
 
       // Check if user has checked in today
-      const todayCheck = data.find(record => 
+      const todayCheck = data.find((record: ReadingActivity) => 
         isToday(parseISO(record.activity_date))
       );
       setCheckedInToday(!!todayCheck);
@@ -71,7 +72,7 @@ export function ReadingStreak() {
       let latestDate: Date | null = null;
       
       // Sort data by date (newest first)
-      const sortedData = [...data].sort((a, b) => 
+      const sortedData = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
         new Date(b.activity_date).getTime() - new Date(a.activity_date).getTime()
       );
       
@@ -105,7 +106,7 @@ export function ReadingStreak() {
         let tempStreak = 1;
         
         // Sort by oldest first for longest streak calculation
-        const chronological = [...data].sort((a, b) => 
+        const chronological = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
           new Date(a.activity_date).getTime() - new Date(b.activity_date).getTime()
         );
         

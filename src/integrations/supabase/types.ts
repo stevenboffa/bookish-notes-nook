@@ -478,6 +478,30 @@ export type Database = {
           },
         ]
       }
+      reading_activity: {
+        Row: {
+          activity_date: string
+          activity_type: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_date?: string
+          activity_type?: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_date?: string
+          activity_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reading_progress: {
         Row: {
           book_id: string
