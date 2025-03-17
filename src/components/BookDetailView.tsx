@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Save, Star, StarHalf, Check, ChevronDown, Tag, Send, Share2 } from "lucide-react";
+import {
+  X, Save, Star, StarHalf, Check, ChevronDown, Tag, Send, Share2
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -33,6 +35,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ReadingDates } from "./ReadingDates";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -69,6 +72,7 @@ export function BookDetailView({
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(initialOpenDetails);
+  const [bookUpdates, setBookUpdates] = useState<Partial<Book>>({});
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -124,6 +128,7 @@ export function BookDetailView({
         thumbnailUrl: null,
         description: description,
         collections: selectedCollections,
+        ...bookUpdates
       };
       onSave(newBook);
     } else {
@@ -137,6 +142,7 @@ export function BookDetailView({
         rating: parseFloat(rating.toFixed(1)),
         description: description,
         collections: selectedCollections,
+        ...bookUpdates
       };
       onSave(updatedBook);
     }
@@ -145,6 +151,13 @@ export function BookDetailView({
     setTimeout(() => {
       setShowSaveConfirmation(false);
     }, 2000);
+  };
+
+  const handleBookUpdates = (updates: Partial<Book>) => {
+    setBookUpdates(prev => ({
+      ...prev,
+      ...updates
+    }));
   };
 
   const handleCollectionChange = (collectionId: string, isChecked: boolean) => {
@@ -401,6 +414,16 @@ export function BookDetailView({
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              {/* Reading Dates Section */}
+              <div className="pt-2 pb-1">
+                {currentBookWithFormat && (
+                  <ReadingDates 
+                    book={currentBookWithFormat} 
+                    onUpdate={handleBookUpdates} 
+                  />
+                )}
               </div>
 
               <div className="space-y-2">

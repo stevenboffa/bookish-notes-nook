@@ -1,9 +1,12 @@
+
 export interface Book {
   id: string;
   title: string;
   author: string;
   genre?: string;
   dateRead?: string;
+  startDate?: string;
+  endDate?: string;
   status: string;
   isFavorite: boolean;
   rating: number;
