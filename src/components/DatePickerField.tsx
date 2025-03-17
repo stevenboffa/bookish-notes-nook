@@ -32,8 +32,8 @@ export function DatePickerField({
   return (
     <div className={cn("w-full", className)}>
       <Label className={cn(
-        "text-xs font-medium text-gray-700 mb-1 block",
-        compact && "text-2xs"
+        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+        compact && "text-xs"
       )}>
         {label}
       </Label>
@@ -42,7 +42,7 @@ export function DatePickerField({
           <Button
             variant="outline"
             className={cn(
-              "w-full justify-start text-left font-normal relative text-sm",
+              "w-full justify-start text-left font-normal relative text-sm mt-1.5",
               compact ? "h-7 px-2 py-1 text-xs" : "h-8 px-2.5 py-1.5",
               !date && "text-muted-foreground"
             )}
