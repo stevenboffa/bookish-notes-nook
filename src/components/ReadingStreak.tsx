@@ -2,7 +2,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO } from "date-fns";
-import { Flame, Calendar, Trophy } from "lucide-react";
+import { Flame, Calendar, Trophy, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { ReadingActivity } from "@/types/books";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function ReadingStreak() {
   const [currentStreak, setCurrentStreak] = useState<number>(0);
@@ -19,7 +21,9 @@ export function ReadingStreak() {
   const [lastReadDate, setLastReadDate] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [checkedInToday, setCheckedInToday] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(true);
   const { session } = useAuth();
+  const isMobile = useIsMobile();
 
   // Calculate the next milestone
   const nextMilestone = currentStreak < 7 ? 7 : 
@@ -170,10 +174,10 @@ export function ReadingStreak() {
 
   // Determine flame size based on streak
   const getFlameSize = () => {
-    if (currentStreak >= 100) return "h-10 w-10";
-    if (currentStreak >= 30) return "h-8 w-8";
-    if (currentStreak >= 7) return "h-7 w-7";
-    return "h-6 w-6";
+    if (currentStreak >= 100) return "h-8 w-8";
+    if (currentStreak >= 30) return "h-7 w-7";
+    if (currentStreak >= 7) return "h-6 w-6";
+    return "h-5 w-5";
   };
 
   // Determine flame color based on streak
@@ -184,87 +188,146 @@ export function ReadingStreak() {
     return "text-orange-300";
   };
 
-  return (
-    <Card className="mb-4 overflow-hidden border-0 shadow-md bg-gradient-to-r from-amber-50 to-orange-50">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "rounded-full flex items-center justify-center p-2",
-              currentStreak > 0 ? "bg-gradient-to-br from-amber-100 to-orange-200" : "bg-gray-100"
-            )}>
-              <Flame className={cn(getFlameSize(), getFlameColor(), "drop-shadow")} />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg">
-                {currentStreak} Day{currentStreak !== 1 ? 's' : ''} 
-              </h3>
-              <p className="text-sm text-gray-600">Current Reading Streak</p>
-            </div>
-          </div>
-          <Button 
-            onClick={handleCheckIn}
-            disabled={checkedInToday || isLoading}
-            className={cn(
-              "bg-gradient-to-r shadow-sm",
-              checkedInToday 
-                ? "from-green-500 to-emerald-600 opacity-90 hover:from-green-600 hover:to-emerald-700" 
-                : "from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
-            )}
-          >
-            {checkedInToday ? "Checked In Today ✓" : "Check In Today"}
-          </Button>
+  const CompactView = () => (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className={cn(
+          "rounded-full flex items-center justify-center p-1.5",
+          currentStreak > 0 ? "bg-gradient-to-br from-amber-100 to-orange-200" : "bg-gray-100"
+        )}>
+          <Flame className={cn(getFlameSize(), getFlameColor(), "drop-shadow")} />
         </div>
-
-        <div className="flex items-center gap-1.5 mb-1.5 mt-4">
-          <Trophy className="h-4 w-4 text-amber-600" />
-          <span className="text-sm font-medium">Longest Streak: {longestStreak} days</span>
+        <div>
+          <span className="font-bold">
+            {currentStreak} Day{currentStreak !== 1 ? 's' : ''}
+          </span>
+          <span className="text-xs text-gray-500 ml-1">Streak</span>
         </div>
-
-        <div className="space-y-2 mt-2">
-          <div className="flex items-center justify-between text-xs text-gray-600">
-            <span>Progress to {nextMilestone} days</span>
-            <span>{currentStreak}/{nextMilestone}</span>
-          </div>
-          <Progress value={progress} className="h-2 bg-gray-200" />
-        </div>
-
-        <div className="flex flex-wrap gap-2 mt-4">
-          {currentStreak >= 7 && (
-            <Badge 
-              variant="outline" 
-              className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 px-2 py-1"
-            >
-              7 Day Streak 🔥
-            </Badge>
-          )}
-          {currentStreak >= 30 && (
-            <Badge 
-              variant="outline" 
-              className="bg-gradient-to-r from-amber-100 to-orange-100 border-amber-300 text-amber-800 px-2 py-1"
-            >
-              30 Day Streak 🔥🔥
-            </Badge>
-          )}
-          {currentStreak >= 100 && (
-            <Badge 
-              variant="outline" 
-              className="bg-gradient-to-r from-amber-200 to-orange-200 border-amber-400 text-amber-900 px-2 py-1"
-            >
-              100 Day Streak 🔥🔥🔥
-            </Badge>
-          )}
-        </div>
-
-        {lastReadDate && (
-          <div className="flex items-center gap-1.5 mt-4 text-gray-600 text-xs">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>
-              Last reading activity: {format(lastReadDate, 'MMM d, yyyy')}
-            </span>
-          </div>
+      </div>
+      <Button 
+        onClick={handleCheckIn}
+        disabled={checkedInToday || isLoading}
+        size="sm"
+        className={cn(
+          "shadow-sm text-xs",
+          checkedInToday 
+            ? "bg-green-500 hover:bg-green-600" 
+            : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
         )}
-      </CardContent>
+      >
+        {checkedInToday ? "✓ Checked In" : "Check In"}
+      </Button>
+    </div>
+  );
+
+  const FullView = () => (
+    <>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "rounded-full flex items-center justify-center p-2",
+            currentStreak > 0 ? "bg-gradient-to-br from-amber-100 to-orange-200" : "bg-gray-100"
+          )}>
+            <Flame className={cn(getFlameSize(), getFlameColor(), "drop-shadow")} />
+          </div>
+          <div>
+            <h3 className="font-bold text-lg">
+              {currentStreak} Day{currentStreak !== 1 ? 's' : ''} 
+            </h3>
+            <p className="text-sm text-gray-600">Current Reading Streak</p>
+          </div>
+        </div>
+        <Button 
+          onClick={handleCheckIn}
+          disabled={checkedInToday || isLoading}
+          className={cn(
+            "bg-gradient-to-r shadow-sm",
+            checkedInToday 
+              ? "from-green-500 to-emerald-600 opacity-90 hover:from-green-600 hover:to-emerald-700" 
+              : "from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+          )}
+          size={isMobile ? "sm" : "default"}
+        >
+          {checkedInToday ? "Checked In Today ✓" : "Check In Today"}
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-1.5 mb-1.5 mt-3 text-sm">
+        <Trophy className="h-4 w-4 text-amber-600" />
+        <span className="font-medium">Longest Streak: {longestStreak} days</span>
+      </div>
+
+      <div className="space-y-2 mt-2">
+        <div className="flex items-center justify-between text-xs text-gray-600">
+          <span>Progress to {nextMilestone} days</span>
+          <span>{currentStreak}/{nextMilestone}</span>
+        </div>
+        <Progress value={progress} className="h-2 bg-gray-200" />
+      </div>
+
+      <div className="flex flex-wrap gap-1.5 mt-3">
+        {currentStreak >= 7 && (
+          <Badge 
+            variant="outline" 
+            className="bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-700 px-2 py-1 text-xs"
+          >
+            7 Day Streak 🔥
+          </Badge>
+        )}
+        {currentStreak >= 30 && (
+          <Badge 
+            variant="outline" 
+            className="bg-gradient-to-r from-amber-100 to-orange-100 border-amber-300 text-amber-800 px-2 py-1 text-xs"
+          >
+            30 Day Streak 🔥🔥
+          </Badge>
+        )}
+        {currentStreak >= 100 && (
+          <Badge 
+            variant="outline" 
+            className="bg-gradient-to-r from-amber-200 to-orange-200 border-amber-400 text-amber-900 px-2 py-1 text-xs"
+          >
+            100 Day Streak 🔥🔥🔥
+          </Badge>
+        )}
+      </div>
+
+      {lastReadDate && (
+        <div className="flex items-center gap-1.5 mt-3 text-gray-600 text-xs">
+          <Calendar className="h-3.5 w-3.5" />
+          <span>
+            Last reading activity: {format(lastReadDate, 'MMM d, yyyy')}
+          </span>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <Card className={cn(
+      "mb-4 overflow-hidden border-0 shadow-md bg-gradient-to-r from-amber-50 to-orange-50",
+      !isMobile && "max-w-xl mx-auto"
+    )}>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <div className="flex items-center justify-between p-2 pb-0">
+          {!isOpen && <CompactView />}
+          <div className={cn("ml-auto", isOpen && "w-full text-right")}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-full">
+                {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+        </div>
+        <CollapsibleContent>
+          <CardContent className={cn(
+            "p-4",
+            isMobile ? "pt-2" : "pt-0"
+          )}>
+            <FullView />
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
