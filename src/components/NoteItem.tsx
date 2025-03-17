@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Note } from "@/types/books";
 import { Badge } from "./ui/badge";
@@ -7,7 +6,7 @@ import { Card, CardContent, CardFooter } from "./ui/card";
 import { 
   Pin, Trash2, Image as ImageIcon, Calendar, 
   MessageSquare, FileText, Lightbulb, HelpCircle, 
-  Quote, Bookmark, Pen, Check, X
+  Quote, Bookmark, Pen, Check, X, Users, BookOpen
 } from "lucide-react";
 import {
   Dialog,
@@ -77,14 +76,18 @@ export function NoteItem({ note, onDelete, onTogglePin, onUpdateNote, bookFormat
 
   const getNoteTypeIcon = () => {
     switch (note.noteType) {
+      case 'overview':
+        return <BookOpen className="h-5 w-5 text-purple-500" />;
       case 'quote':
         return <Quote className="h-5 w-5 text-blue-500" />;
-      case 'summary':
+      case 'analysis':
         return <FileText className="h-5 w-5 text-green-500" />;
       case 'insight':
         return <Lightbulb className="h-5 w-5 text-yellow-500" />;
       case 'question':
         return <HelpCircle className="h-5 w-5 text-purple-500" />;
+      case 'character-profile':
+        return <Users className="h-5 w-5 text-pink-500" />;
       default:
         return <MessageSquare className="h-5 w-5 text-gray-500" />;
     }
@@ -109,7 +112,10 @@ export function NoteItem({ note, onDelete, onTogglePin, onUpdateNote, bookFormat
             <div className="flex items-center space-x-2">
               {getNoteTypeIcon()}
               <span className="text-sm font-medium capitalize">
-                {note.noteType || "General Note"}
+                {note.noteType ? 
+                  (note.noteType === 'character-profile' ? 'Character Profile' : 
+                  note.noteType.charAt(0).toUpperCase() + note.noteType.slice(1)) 
+                  : "General Note"}
               </span>
               
               {note.isPinned && (
@@ -170,9 +176,10 @@ export function NoteItem({ note, onDelete, onTogglePin, onUpdateNote, bookFormat
                       <SelectContent>
                         <SelectItem value="none">General Note</SelectItem>
                         <SelectItem value="quote">Quote</SelectItem>
-                        <SelectItem value="summary">Summary</SelectItem>
+                        <SelectItem value="analysis">Analysis</SelectItem>
                         <SelectItem value="insight">Insight</SelectItem>
                         <SelectItem value="question">Question</SelectItem>
+                        <SelectItem value="character-profile">Character Profile</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

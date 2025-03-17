@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { ArrowDownNarrowWide, ArrowUpNarrowWide, Filter } from "lucide-react";
 
-export type NotesFilterOption = "all" | "text" | "highlights" | "quotes" | "images";
+export type NotesFilterOption = "all" | "text" | "overview" | "quotes" | "analysis" | "insights" | "questions" | "character-profiles" | "images";
 
 interface NotesFilterProps {
   currentFilter: NotesFilterOption;
@@ -29,8 +29,12 @@ export function NotesFilter({
           <SelectContent>
             <SelectItem value="all" className="text-sm">All notes</SelectItem>
             <SelectItem value="text" className="text-sm">Text only</SelectItem>
-            <SelectItem value="highlights" className="text-sm">Highlights</SelectItem>
+            <SelectItem value="overview" className="text-sm">Overview</SelectItem>
             <SelectItem value="quotes" className="text-sm">Quotes</SelectItem>
+            <SelectItem value="analysis" className="text-sm">Analysis</SelectItem>
+            <SelectItem value="insights" className="text-sm">Insights</SelectItem>
+            <SelectItem value="questions" className="text-sm">Questions</SelectItem>
+            <SelectItem value="character-profiles" className="text-sm">Character Profiles</SelectItem>
             <SelectItem value="images" className="text-sm">With images</SelectItem>
           </SelectContent>
         </Select>

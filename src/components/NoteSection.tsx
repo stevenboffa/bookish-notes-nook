@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { AddNoteForm } from "./AddNoteForm";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,11 +72,23 @@ export const NoteSection = ({ book, onUpdateBook }: NoteSectionProps) => {
         case "text":
           filtered = filtered.filter(note => note.content && (!note.images || note.images.length === 0));
           break;
-        case "highlights":
-          filtered = filtered.filter(note => note.noteType === "highlight");
+        case "overview":
+          filtered = filtered.filter(note => note.noteType === "overview");
           break;
         case "quotes":
           filtered = filtered.filter(note => note.noteType === "quote");
+          break;
+        case "analysis":
+          filtered = filtered.filter(note => note.noteType === "analysis");
+          break;
+        case "insights":
+          filtered = filtered.filter(note => note.noteType === "insight");
+          break;
+        case "questions":
+          filtered = filtered.filter(note => note.noteType === "question");
+          break;
+        case "character-profiles":
+          filtered = filtered.filter(note => note.noteType === "character-profile");
           break;
         case "images":
           filtered = filtered.filter(note => note.images && note.images.length > 0);

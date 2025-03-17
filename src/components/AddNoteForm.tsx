@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -318,10 +317,12 @@ export const AddNoteForm = ({ bookId, bookFormat, onSubmit }: AddNoteFormProps) 
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="general">General Note</SelectItem>
+            <SelectItem value="overview">Overview</SelectItem>
             <SelectItem value="quote">Quote</SelectItem>
-            <SelectItem value="summary">Summary</SelectItem>
+            <SelectItem value="analysis">Analysis</SelectItem>
             <SelectItem value="insight">Insight</SelectItem>
             <SelectItem value="question">Question</SelectItem>
+            <SelectItem value="character-profile">Character Profile</SelectItem>
           </SelectContent>
         </Select>
 
