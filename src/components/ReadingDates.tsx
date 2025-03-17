@@ -56,24 +56,30 @@ export function ReadingDates({ book, onUpdate }: ReadingDatesProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <DatePickerField
-          date={startDate}
-          onDateChange={handleStartDateChange}
-          label="Started Reading"
-          placeholder="When did you start?"
-          className="flex-1"
-        />
-        <DatePickerField
-          date={endDate}
-          onDateChange={handleEndDateChange}
-          label="Finished Reading"
-          placeholder="When did you finish?"
-          className="flex-1"
-        />
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <DatePickerField
+            date={startDate}
+            onDateChange={handleStartDateChange}
+            label="Started"
+            placeholder="Start"
+            className="w-full"
+            compact={true}
+          />
+        </div>
+        <div className="flex-1">
+          <DatePickerField
+            date={endDate}
+            onDateChange={handleEndDateChange}
+            label="Finished"
+            placeholder="End"
+            className="w-full"
+            compact={true}
+          />
+        </div>
       </div>
       
-      <div className="flex flex-wrap justify-center gap-2 mt-1">
+      <div className="flex flex-wrap justify-center gap-2">
         {readingDays !== null && (
           <Badge 
             variant="outline" 
