@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -162,12 +163,11 @@ export function FavoriteGenres() {
   return (
     <>
       <Button 
-        variant="outline" 
-        className="w-full flex items-center justify-center gap-2 bg-accent/30 hover:bg-accent/50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-6 bg-gradient-to-r from-[#9b87f5] to-[#b199ff] text-white hover:from-[#8A78DA] hover:to-[#9F89E5] shadow-md hover:shadow-lg transition-all"
         onClick={() => setIsOpen(true)}
       >
-        <Bookmark className="h-4 w-4" />
-        Favorite Genres
+        <Bookmark className="h-5 w-5" />
+        <span className="text-base font-medium">My Favorite Genres</span>
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
