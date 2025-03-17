@@ -2,7 +2,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO } from "date-fns";
-import { Flame, Calendar, Trophy, ChevronUp, ChevronDown } from "lucide-react";
+import { Flame, Calendar, Trophy, ChevronUp, ChevronDown, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -196,37 +196,53 @@ export function ReadingStreak() {
           currentStreak > 0 ? "bg-gradient-to-br from-amber-100 to-orange-200" : "bg-gray-100"
         )}>
           <Flame className={cn(
-            currentStreak >= 100 ? "h-5 w-5" : "h-4 w-4", 
+            "h-4 w-4", 
             getFlameColor(), 
             "drop-shadow"
           )} />
         </div>
-        <div className="flex items-center">
-          <span className="font-bold text-sm">
-            {currentStreak} <span className="font-normal text-xs text-gray-500">day{currentStreak !== 1 ? 's' : ''}</span>
+        <div className="flex flex-col">
+          <span className="font-bold text-sm leading-tight">
+            {currentStreak} <span className="font-normal text-xs text-gray-500">day streak</span>
+          </span>
+          <span className="text-xs text-gray-500 leading-tight">
+            {nextMilestone > currentStreak ? `${nextMilestone - currentStreak} days to milestone` : 'Milestone reached!'}
           </span>
         </div>
       </div>
       
-      <Button 
-        onClick={handleCheckIn}
-        disabled={checkedInToday || isLoading}
-        size="sm"
-        className={cn(
-          "shadow-sm h-7 text-xs px-2.5 ml-1.5",
-          checkedInToday 
-            ? "bg-green-500 hover:bg-green-600" 
-            : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+      <div className="flex items-center">
+        {longestStreak > 0 && (
+          <div className="flex items-center mr-3">
+            <Trophy className="h-3.5 w-3.5 text-amber-500 mr-1" />
+            <span className="text-xs font-medium">{longestStreak}</span>
+          </div>
         )}
-      >
-        {checkedInToday ? "✓ Done" : "Check In"}
-      </Button>
-      
-      <CollapsibleTrigger asChild>
-        <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-full ml-1">
-          <ChevronDown size={14} />
+        
+        <Button 
+          onClick={handleCheckIn}
+          disabled={checkedInToday || isLoading}
+          size="sm"
+          className={cn(
+            "shadow-sm h-7 text-xs px-2.5",
+            checkedInToday 
+              ? "bg-green-500 hover:bg-green-600 text-white" 
+              : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+          )}
+        >
+          {checkedInToday ? (
+            <span className="flex items-center">
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Checked
+            </span>
+          ) : "Check In"}
         </Button>
-      </CollapsibleTrigger>
+        
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-full ml-1.5">
+            <ChevronDown size={14} />
+          </Button>
+        </CollapsibleTrigger>
+      </div>
     </div>
   );
 
