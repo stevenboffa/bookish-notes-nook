@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Book, BookIcon, Lock, LogOut, User, Camera, AlertTriangle } from "lucide-react";
+import { Book, BookIcon, Lock, LogOut, User, Camera, AlertTriangle, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { Meta } from "@/components/Meta";
+import { FavoriteGenres } from "@/components/profile/FavoriteGenres";
 
 type ReadingStats = {
   notStarted: number;
@@ -417,6 +418,8 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+
+      <FavoriteGenres />
 
       <Card>
         <CardHeader className="space-y-1">

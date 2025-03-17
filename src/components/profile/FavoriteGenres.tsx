@@ -1,0 +1,221 @@
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Heart, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Genre categories and their respective genres
+const genreCategories = [
+  {
+    name: "Fiction",
+    genres: [
+      "Contemporary Fiction",
+      "Literary Fiction",
+      "Mystery & Thriller",
+      "Science Fiction",
+      "Fantasy",
+      "Horror",
+      "Romance",
+      "Historical Fiction",
+      "Young Adult",
+      "Dystopian",
+    ],
+  },
+  {
+    name: "Non-Fiction",
+    genres: [
+      "Biography & Memoir",
+      "Self-Help & Personal Development",
+      "History",
+      "Science & Technology",
+      "Philosophy",
+      "Psychology",
+      "Business & Economics",
+      "Travel",
+      "True Crime",
+      "Politics & Current Affairs",
+    ],
+  },
+  {
+    name: "Other",
+    genres: [
+      "Poetry",
+      "Classics",
+      "Comics & Graphic Novels",
+      "Essays",
+      "Short Stories",
+      "Religion & Spirituality",
+      "Art & Photography",
+      "Cookbooks & Food",
+      "Children's Books",
+    ],
+  },
+];
+
+// Flatten all genres into a single array for validation
+const allGenres = genreCategories.flatMap(category => category.genres);
+
+export function FavoriteGenres() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { session } = useAuth();
+
+  // Fetch the user's current favorite genres when the dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchFavoriteGenres = async () => {
+        try {
+          setIsLoading(true);
+          if (!session?.user) return;
+
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("favorite_genres")
+            .eq("id", session.user.id)
+            .single();
+
+          if (error) throw error;
+
+          // Filter out any invalid genres that might be in the database
+          const validGenres = (data.favorite_genres || []).filter(
+            (genre: string) => allGenres.includes(genre)
+          );
+          
+          setSelectedGenres(validGenres);
+        } catch (error) {
+          console.error("Error fetching favorite genres:", error);
+          toast({
+            title: "Error",
+            description: "Could not load your favorite genres. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchFavoriteGenres();
+    }
+  }, [isOpen, session]);
+
+  const toggleGenre = (genre: string) => {
+    setSelectedGenres(prev => 
+      prev.includes(genre)
+        ? prev.filter(g => g !== genre)
+        : [...prev, genre]
+    );
+  };
+
+  const saveGenres = async () => {
+    try {
+      setIsSaving(true);
+      if (!session?.user) return;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ favorite_genres: selectedGenres })
+        .eq("id", session.user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your favorite genres have been updated.",
+      });
+      
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error saving favorite genres:", error);
+      toast({
+        title: "Error",
+        description: "Could not save your favorite genres. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <Button 
+        variant="outline" 
+        className="w-full"
+        onClick={() => setIsOpen(true)}
+      >
+        <Heart className="mr-2 h-4 w-4" />
+        Favorite Genres
+      </Button>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Select Your Favorite Genres</DialogTitle>
+          </DialogHeader>
+          
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="space-y-6 py-4">
+              {genreCategories.map((category) => (
+                <div key={category.name} className="space-y-3">
+                  <h3 className="font-medium border-b pb-1">{category.name}</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {category.genres.map((genre) => (
+                      <div key={genre} className="flex items-start space-x-2">
+                        <Checkbox 
+                          id={genre}
+                          checked={selectedGenres.includes(genre)}
+                          onCheckedChange={() => toggleGenre(genre)}
+                        />
+                        <Label 
+                          htmlFor={genre} 
+                          className="text-sm leading-tight cursor-pointer"
+                        >
+                          {genre}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsOpen(false)} 
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={saveGenres} 
+              disabled={isSaving} 
+              className="w-full sm:w-auto"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
