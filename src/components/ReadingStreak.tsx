@@ -196,8 +196,8 @@ export function ReadingStreak() {
   };
 
   const CompactView = () => (
-    <div className="flex items-center justify-between w-full px-4 py-2.5">
-      <div className="flex items-center gap-2.5">
+    <div className="flex items-center justify-between w-full px-4 py-3">
+      <div className="flex items-center gap-3">
         <div className={cn(
           "rounded-full flex items-center justify-center p-1.5",
           currentStreak > 0 ? "bg-gradient-to-br from-amber-100 to-orange-200" : "bg-gray-100"
@@ -218,7 +218,7 @@ export function ReadingStreak() {
         </div>
       </div>
       
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-3">
         {longestStreak > 0 && (
           <div className="flex items-center">
             <Trophy className="h-3.5 w-3.5 text-amber-500 mr-1" />
@@ -231,14 +231,14 @@ export function ReadingStreak() {
           disabled={checkedInToday || isLoading}
           size="sm"
           className={cn(
-            "shadow-sm h-8 text-xs font-medium min-w-20",
+            "shadow-sm h-8 text-xs font-medium min-w-[5rem]",
             checkedInToday 
               ? "bg-green-500 hover:bg-green-600 text-white" 
               : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
           )}
         >
           {checkedInToday ? (
-            <span className="flex items-center">
+            <span className="flex items-center justify-center w-full">
               <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Complete
             </span>
           ) : "Check In"}
@@ -255,7 +255,7 @@ export function ReadingStreak() {
 
   const FullView = () => (
     <>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className={cn(
             "rounded-full flex items-center justify-center p-2",
@@ -267,7 +267,7 @@ export function ReadingStreak() {
             <h3 className="font-bold text-lg">
               {currentStreak} Day{currentStreak !== 1 ? 's' : ''} 
             </h3>
-            <p className="text-sm text-gray-600">Current Reading Streak</p>
+            <p className="text-sm text-gray-600">Current Streak</p>
           </div>
         </div>
         <Button 
@@ -285,12 +285,12 @@ export function ReadingStreak() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-1.5 mb-1.5 mt-3 text-sm">
+      <div className="flex items-center gap-1.5 mb-2 mt-3 text-sm">
         <Trophy className="h-4 w-4 text-amber-600" />
         <span className="font-medium">Longest Streak: {longestStreak} days</span>
       </div>
 
-      <div className="space-y-2 mt-2">
+      <div className="space-y-2 mt-3">
         <div className="flex items-center justify-between text-xs text-gray-600">
           <span>Progress to {nextMilestone} days</span>
           <span>{currentStreak}/{nextMilestone}</span>
@@ -298,7 +298,7 @@ export function ReadingStreak() {
         <Progress value={progress} className="h-2 bg-gray-200" />
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mt-3">
+      <div className="flex flex-wrap gap-1.5 mt-4">
         {currentStreak >= 7 && (
           <Badge 
             variant="outline" 
@@ -326,7 +326,7 @@ export function ReadingStreak() {
       </div>
 
       {lastReadDate && (
-        <div className="flex items-center gap-1.5 mt-3 text-gray-600 text-xs">
+        <div className="flex items-center gap-1.5 mt-4 text-gray-600 text-xs">
           <Calendar className="h-3.5 w-3.5" />
           <span>
             Last reading activity: {format(lastReadDate, 'MMM d, yyyy')}
