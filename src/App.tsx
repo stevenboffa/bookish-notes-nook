@@ -1,4 +1,3 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
@@ -25,6 +24,7 @@ import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Resources from "./pages/Resources";
+import CreateAccount from "./pages/resources/CreateAccount";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -140,6 +140,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/resources" element={<Resources />} />
+                <Route path="/resources/create-account" element={<CreateAccount />} />
               </Route>
 
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
