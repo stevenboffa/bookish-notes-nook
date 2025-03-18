@@ -32,131 +32,118 @@ const Welcome = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-sky-50"
-        >
-          <div className="absolute inset-0 opacity-[0.05]" 
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
-        </div>
+      <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-sky-50">
+        <div className="absolute inset-0 opacity-[0.05]" 
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
 
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Hero Section Content */}
+        <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
           <div className="absolute top-20 left-[10%] w-72 h-72 rounded-full bg-purple-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse" />
           <div className="absolute bottom-20 right-[10%] w-72 h-72 rounded-full bg-indigo-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse [animation-delay:1000ms]" />
           <div className="absolute top-1/3 right-[15%] w-56 h-56 rounded-full bg-blue-200 mix-blend-multiply blur-3xl opacity-50 animate-pulse [animation-delay:2000ms]" />
-        </div>
 
-        <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col items-center text-center mb-10">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-[#24223e] max-w-4xl leading-[1.2] md:leading-[1.2] lg:leading-[1.2] pb-1">
-                Transform your reading into knowledge that lasts forever
-              </h1>
+          <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20 relative z-10">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col items-center text-center mb-10">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-[#24223e] max-w-4xl leading-[1.2] md:leading-[1.2] lg:leading-[1.2] pb-1">
+                  Transform your reading into knowledge that lasts forever
+                </h1>
 
-              <p className="text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 leading-relaxed max-w-3xl">
-                Most people forget 90% of what they read within a week. BookishNotes helps you 
-                capture, organize, and remember your most valuable insights—forever.
-              </p>
+                <p className="text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 leading-relaxed max-w-3xl">
+                  Most people forget 90% of what they read within a week. BookishNotes helps you 
+                  capture, organize, and remember your most valuable insights—forever.
+                </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-                <Button 
-                  size="lg" 
-                  className="h-14 px-8 text-base bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                  asChild
-                >
-                  <Link to="/auth/sign-up">
-                    Get started. It's FREE!
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              </div>
-              
-              <p className="text-sm text-slate-600 font-medium mt-6">
-                Free Forever. No Credit Card Required.
-              </p>
-            </div>
-
-            <div className="relative z-10 max-w-7xl mx-auto mt-8 transition-all duration-300 hover:translate-y-[-5px]">
-              <div className="relative">
-                <div className="absolute -top-6 -left-6 w-28 h-28 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
-                <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
-                
-                {!isMobile && (
-                  <div className="bg-white rounded-xl border-8 border-indigo-100/80 shadow-2xl overflow-hidden transform transition-all duration-500">
-                    <img 
-                      src="/lovable-uploads/246539c0-d6ff-409e-a267-306de7cc9aa6.png" 
-                      alt="BookishNotes App Preview" 
-                      className="w-full h-auto rounded-lg"
-                    />
-                  </div>
-                )}
-                
-                {isMobile && (
-                  <div className="bg-white rounded-xl border-8 border-indigo-100/80 shadow-2xl overflow-hidden transform transition-all duration-500">
-                    <img 
-                      src="/lovable-uploads/416d1480-d11e-4030-881b-a11830e59197.png" 
-                      alt="BookishNotes Mobile Preview" 
-                      className="w-full h-auto rounded-lg"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Community Section - Styled to match hero */}
-      <section id="community" className="py-12 relative overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-sky-50"
-        >
-          <div className="absolute inset-0 opacity-[0.05]" 
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
-            }}
-          />
-        </div>
-
-        <div className="absolute top-0 left-[5%] w-24 h-24 bg-purple-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse"></div>
-        <div className="absolute bottom-0 right-[10%] w-32 h-32 bg-indigo-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse [animation-delay:1000ms]"></div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-purple-100/50 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0">
-                  <Users className="h-8 w-8" />
-                </div>
-                
-                <div className="text-center md:text-left">
-                  <h3 className="text-xl md:text-2xl font-semibold text-indigo-900 mb-2">
-                    Join our new and growing community of readers
-                  </h3>
-                  <p className="text-slate-600 mb-4">
-                    Be among the first to build your knowledge system with BookishNotes. 
-                    Join us early, help shape our future, and grow alongside us as we create the ultimate 
-                    platform for thoughtful readers.
-                  </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
                   <Button 
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
-                    size="sm"
+                    size="lg" 
+                    className="h-14 px-8 text-base bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                     asChild
                   >
                     <Link to="/auth/sign-up">
-                      Become a founding member
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      Get started. It's FREE!
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
+                </div>
+                
+                <p className="text-sm text-slate-600 font-medium mt-6">
+                  Free Forever. No Credit Card Required.
+                </p>
+              </div>
+
+              <div className="relative z-10 max-w-7xl mx-auto mt-8 transition-all duration-300 hover:translate-y-[-5px]">
+                <div className="relative">
+                  <div className="absolute -top-6 -left-6 w-28 h-28 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
+                  <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
+                  
+                  {!isMobile && (
+                    <div className="bg-white rounded-xl border-8 border-indigo-100/80 shadow-2xl overflow-hidden transform transition-all duration-500">
+                      <img 
+                        src="/lovable-uploads/246539c0-d6ff-409e-a267-306de7cc9aa6.png" 
+                        alt="BookishNotes App Preview" 
+                        className="w-full h-auto rounded-lg"
+                      />
+                    </div>
+                  )}
+                  
+                  {isMobile && (
+                    <div className="bg-white rounded-xl border-8 border-indigo-100/80 shadow-2xl overflow-hidden transform transition-all duration-500">
+                      <img 
+                        src="/lovable-uploads/416d1480-d11e-4030-881b-a11830e59197.png" 
+                        alt="BookishNotes Mobile Preview" 
+                        className="w-full h-auto rounded-lg"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* Community Section - Integrated with the hero background */}
+        <section id="community" className="py-16 pb-24 relative overflow-hidden">
+          <div className="absolute top-0 left-[5%] w-24 h-24 bg-purple-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse"></div>
+          <div className="absolute bottom-0 right-[10%] w-32 h-32 bg-indigo-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse [animation-delay:1000ms]"></div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-purple-100/50 shadow-lg transition-all duration-300 hover:shadow-xl">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0">
+                    <Users className="h-8 w-8" />
+                  </div>
+                  
+                  <div className="text-center md:text-left">
+                    <h3 className="text-xl md:text-2xl font-semibold text-indigo-900 mb-2">
+                      Join our new and growing community of readers
+                    </h3>
+                    <p className="text-slate-600 mb-4">
+                      Be among the first to build your knowledge system with BookishNotes. 
+                      Join us early, help shape our future, and grow alongside us as we create the ultimate 
+                      platform for thoughtful readers.
+                    </p>
+                    <Button 
+                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                      size="sm"
+                      asChild
+                    >
+                      <Link to="/auth/sign-up">
+                        Become a founding member
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* Reader's Insights Section */}
       <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-br from-indigo-600 to-purple-700 text-white relative overflow-hidden">
