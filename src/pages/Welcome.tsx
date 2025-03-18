@@ -105,14 +105,11 @@ const Welcome = () => {
           </div>
         </section>
 
-        {/* Community Section - Integrated with the hero background */}
-        <section id="community" className="py-16 pb-24 relative overflow-hidden">
-          <div className="absolute top-0 left-[5%] w-24 h-24 bg-purple-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse"></div>
-          <div className="absolute bottom-0 right-[10%] w-32 h-32 bg-indigo-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse [animation-delay:1000ms]"></div>
-          
+        {/* Community Section - Now with solid light gray background */}
+        <section id="community" className="py-16 pb-24 bg-[#F1F0FB] relative">
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-4xl mx-auto">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-purple-100/50 shadow-lg transition-all duration-300 hover:shadow-xl">
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-purple-100/50 shadow-lg transition-all duration-300 hover:shadow-xl">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                   <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0">
                     <Users className="h-8 w-8" />
@@ -546,3 +543,4 @@ const StepCard = ({ number, title, description, icon }: { number: string; title:
 };
 
 export default Welcome;
+
