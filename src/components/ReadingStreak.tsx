@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useEffect, useState } from "react";
-import { differenceInDays, format, isYesterday, isToday, parseISO } from "date-fns";
+import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
 import { Flame, Calendar, Trophy, ChevronUp, ChevronDown, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,6 +33,29 @@ export function ReadingStreak() {
   
   const progress = Math.min(100, (currentStreak / nextMilestone) * 100);
 
+  // Get current date at start of day in user's local timezone
+  const getTodayStart = () => startOfDay(new Date());
+
+  // Convert date string to Date object in user's local timezone
+  const parseLocalDate = (dateString: string) => {
+    const date = parseISO(dateString);
+    return date;
+  };
+
+  // Check if a date is today in user's local timezone
+  const isDateToday = (date: Date) => {
+    const localToday = getTodayStart();
+    return startOfDay(date).getTime() === localToday.getTime();
+  };
+
+  // Check if a date is yesterday in user's local timezone
+  const isDateYesterday = (date: Date) => {
+    const localToday = getTodayStart();
+    const localYesterday = new Date(localToday);
+    localYesterday.setDate(localYesterday.getDate() - 1);
+    return startOfDay(date).getTime() === localYesterday.getTime();
+  };
+
   useEffect(() => {
     if (session?.user?.id) {
       fetchReadingActivity();
@@ -62,13 +85,13 @@ export function ReadingStreak() {
 
       // Check if user has checked in today
       const todayCheck = data.find((record: ReadingActivity) => 
-        isToday(parseISO(record.activity_date))
+        isDateToday(parseLocalDate(record.activity_date))
       );
       setCheckedInToday(!!todayCheck);
 
       // Set the last read date
       if (data[0]) {
-        setLastReadDate(parseISO(data[0].activity_date));
+        setLastReadDate(parseLocalDate(data[0].activity_date));
       }
 
       // Calculate current streak
@@ -82,15 +105,15 @@ export function ReadingStreak() {
       
       // If latest record is from today or yesterday, start counting streak
       if (sortedData.length > 0) {
-        latestDate = parseISO(sortedData[0].activity_date);
+        latestDate = parseLocalDate(sortedData[0].activity_date);
         
-        if (isToday(latestDate) || isYesterday(latestDate)) {
+        if (isDateToday(latestDate) || isDateYesterday(latestDate)) {
           streak = 1; // Count the most recent day
           
           // Check for consecutive previous days
           for (let i = 1; i < sortedData.length; i++) {
-            const currentDate = parseISO(sortedData[i].activity_date);
-            const prevDate = parseISO(sortedData[i-1].activity_date);
+            const currentDate = parseLocalDate(sortedData[i].activity_date);
+            const prevDate = parseLocalDate(sortedData[i-1].activity_date);
             
             // If dates are consecutive
             if (differenceInDays(prevDate, currentDate) === 1) {
@@ -115,8 +138,8 @@ export function ReadingStreak() {
         );
         
         for (let i = 1; i < chronological.length; i++) {
-          const currentDate = parseISO(chronological[i].activity_date);
-          const prevDate = parseISO(chronological[i-1].activity_date);
+          const currentDate = parseLocalDate(chronological[i].activity_date);
+          const prevDate = parseLocalDate(chronological[i-1].activity_date);
           
           // Check if dates are consecutive
           if (differenceInDays(currentDate, prevDate) === 1) {
@@ -152,11 +175,15 @@ export function ReadingStreak() {
 
       setIsLoading(true);
 
+      // Use ISO string but truncate to date only (YYYY-MM-DD) 
+      // which will be interpreted in the user's local timezone
+      const today = new Date().toISOString().split('T')[0];
+
       const { error } = await supabase
         .from('reading_activity')
         .insert({
           user_id: session.user.id,
-          activity_date: new Date().toISOString().split('T')[0],
+          activity_date: today,
           activity_type: 'check_in'
         });
 
