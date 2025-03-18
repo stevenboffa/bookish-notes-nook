@@ -212,7 +212,7 @@ const AddBooks = () => {
                       Already using another reading tracker? You can import your book lists from several popular services.
                     </p>
                     <p className="text-gray-700">
-                      Go to Settings > Import Books and follow the instructions to import from:
+                      Go to Settings {'>'} Import Books and follow the instructions to import from:
                     </p>
                     <ul className="list-disc list-inside space-y-2 text-gray-700 pl-4 mt-2">
                       <li>Goodreads</li>
