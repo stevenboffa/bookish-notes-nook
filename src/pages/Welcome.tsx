@@ -124,7 +124,7 @@ const Welcome = () => {
                       Join us early, help shape our future, and grow alongside us as we create the ultimate 
                       platform for thoughtful readers.
                     </p>
-                    <div className="flex justify-center md:justify-start">
+                    <div className="flex justify-center">
                       <Button 
                         className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
                         size="sm"
