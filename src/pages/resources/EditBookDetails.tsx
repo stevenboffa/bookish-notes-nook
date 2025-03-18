@@ -114,8 +114,6 @@ const EditBookDetails = () => {
                       <ul className="space-y-2 text-gray-700 pl-4">
                         <li><strong>Title:</strong> Update the book title</li>
                         <li><strong>Author:</strong> Change or correct author names</li>
-                        <li><strong>Publication Date:</strong> Set or update when the book was published</li>
-                        <li><strong>ISBN:</strong> Add or correct the book's identifier</li>
                       </ul>
                     </div>
                     
@@ -128,9 +126,8 @@ const EditBookDetails = () => {
                       </div>
                       <ul className="space-y-2 text-gray-700 pl-4">
                         <li><strong>Genre:</strong> Choose from predefined genres or create custom ones</li>
-                        <li><strong>Format:</strong> Specify hardcover, paperback, e-book, audiobook, etc.</li>
+                        <li><strong>Book type:</strong> Book, Audiobook</li>
                         <li><strong>Collections:</strong> Add or remove the book from your collections</li>
-                        <li><strong>Language:</strong> Set the language of your book</li>
                       </ul>
                     </div>
                   </div>
