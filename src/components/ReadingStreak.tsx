@@ -15,6 +15,13 @@ import { ReadingActivity } from "@/types/books";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+interface DailyQuote {
+  id: number;
+  quoted: string;
+  qauthor: string;
+  qbook: string | null;
+}
+
 export function ReadingStreak() {
   const [currentStreak, setCurrentStreak] = useState<number>(0);
   const [longestStreak, setLongestStreak] = useState<number>(0);
@@ -22,6 +29,8 @@ export function ReadingStreak() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [checkedInToday, setCheckedInToday] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [dailyQuote, setDailyQuote] = useState<DailyQuote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState<boolean>(true);
   const { session } = useAuth();
   const isMobile = useIsMobile();
 
@@ -54,8 +63,121 @@ export function ReadingStreak() {
   useEffect(() => {
     if (session?.user?.id) {
       fetchReadingActivity();
+      fetchDailyQuote();
+    } else {
+      // If no authenticated user, just fetch a random quote without tracking
+      fetchRandomQuote();
     }
   }, [session?.user?.id]);
+
+  const fetchDailyQuote = async () => {
+    try {
+      setQuoteLoading(true);
+      const userId = session?.user?.id;
+      
+      if (!userId) return;
+
+      // Get a list of authors that have been seen in the last 10 days
+      const tenDaysAgo = new Date();
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+      
+      const { data: recentAuthors, error: recentAuthorsError } = await supabase
+        .from('user_seen_quotes')
+        .select('streak_quotes!inner(qauthor)')
+        .eq('user_id', userId)
+        .gte('seen_date', tenDaysAgo.toISOString());
+
+      if (recentAuthorsError) throw recentAuthorsError;
+      
+      // Extract unique authors from recent quotes
+      const recentAuthorsList = recentAuthors?.map(item => 
+        (item as any).streak_quotes?.qauthor as string
+      ).filter(Boolean) || [];
+      
+      // Get all quotes the user has already seen
+      const { data: seenQuotes, error: seenQuotesError } = await supabase
+        .from('user_seen_quotes')
+        .select('quote_id')
+        .eq('user_id', userId);
+
+      if (seenQuotesError) throw seenQuotesError;
+      
+      const seenQuoteIds = seenQuotes?.map(item => item.quote_id) || [];
+
+      // Query that excludes quotes from recently seen authors and already seen quotes
+      let query = supabase
+        .from('streak_quotes')
+        .select('*');
+      
+      // Add filter for unseen quotes if the user has seen any
+      if (seenQuoteIds.length > 0) {
+        query = query.not('id', 'in', `(${seenQuoteIds.join(',')})`);
+      }
+      
+      // Add filter for authors if there are recent authors
+      if (recentAuthorsList.length > 0) {
+        query = query.not('qauthor', 'in', `(${recentAuthorsList.map(a => `"${a}"`).join(',')})`);
+      }
+      
+      // Limit to 1 random quote
+      query = query.limit(1).order('id', { ascending: false });
+      
+      const { data: quotes, error: quotesError } = await query;
+
+      if (quotesError) throw quotesError;
+      
+      // If we found a suitable quote
+      if (quotes && quotes.length > 0) {
+        const newQuote = quotes[0] as DailyQuote;
+        setDailyQuote(newQuote);
+        
+        // Record this quote as seen by the user
+        const { error: insertError } = await supabase
+          .from('user_seen_quotes')
+          .insert({
+            user_id: userId,
+            quote_id: newQuote.id
+          });
+          
+        if (insertError) throw insertError;
+      } else {
+        // If no suitable quote found (all quotes seen or all by recent authors),
+        // get a random quote without constraints
+        await fetchRandomQuote();
+      }
+    } catch (error) {
+      console.error('Error fetching daily quote:', error);
+      // Fallback to any random quote
+      await fetchRandomQuote();
+    } finally {
+      setQuoteLoading(false);
+    }
+  };
+
+  const fetchRandomQuote = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('streak_quotes')
+        .select('*')
+        .order('id', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setDailyQuote(data[0] as DailyQuote);
+      }
+    } catch (error) {
+      console.error('Error fetching random quote:', error);
+      // Fallback to a static quote
+      setDailyQuote({
+        id: 0,
+        quoted: "The only limit to our realization of tomorrow will be our doubts of today.",
+        qauthor: "Franklin D. Roosevelt",
+        qbook: null
+      });
+    }
+  };
 
   const fetchReadingActivity = async () => {
     try {
@@ -195,17 +317,30 @@ export function ReadingStreak() {
     return "text-orange-300";
   };
 
-  const DailyQuote = () => {
-    const quote = "The only limit to our realization of tomorrow will be our doubts of today.";
-    const author = "Franklin D. Roosevelt";
+  const DailyQuoteDisplay = () => {
+    if (quoteLoading) {
+      return (
+        <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md animate-pulse">
+          <div className="h-5 bg-amber-100 rounded w-4/5 mb-2"></div>
+          <div className="h-4 bg-amber-100/70 rounded w-1/3"></div>
+        </div>
+      );
+    }
+    
+    if (!dailyQuote) return null;
     
     return (
       <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md">
         <div className="flex gap-2">
           <Quote className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm text-amber-900 font-medium italic">{quote}</p>
-            <p className="text-xs text-amber-700 mt-1">— {author}</p>
+            <p className="text-sm text-amber-900 font-medium italic">{dailyQuote.quoted}</p>
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-xs text-amber-700">— {dailyQuote.qauthor}</p>
+              {dailyQuote.qbook && (
+                <p className="text-xs text-amber-600 italic">{dailyQuote.qbook}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -342,7 +477,7 @@ export function ReadingStreak() {
         )}
       </div>
 
-      <DailyQuote />
+      <DailyQuoteDisplay />
     </>
   );
 

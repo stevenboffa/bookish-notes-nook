@@ -555,6 +555,59 @@ export type Database = {
         }
         Relationships: []
       }
+      streak_quotes: {
+        Row: {
+          created_at: string
+          id: number
+          qauthor: string | null
+          qbook: string | null
+          quoted: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          qauthor?: string | null
+          qbook?: string | null
+          quoted?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          qauthor?: string | null
+          qbook?: string | null
+          quoted?: string | null
+        }
+        Relationships: []
+      }
+      user_seen_quotes: {
+        Row: {
+          id: string
+          quote_id: number
+          seen_date: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          quote_id: number
+          seen_date?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          quote_id?: number
+          seen_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_seen_quotes_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "streak_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
