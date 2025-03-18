@@ -109,20 +109,24 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Community Section - Newly Styled */}
-      <section id="community" className="py-12 bg-gradient-to-br from-indigo-50 via-purple-50 to-sky-50 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.07]" 
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-        
-        <div className="absolute top-0 left-[5%] w-24 h-24 bg-purple-200 rounded-full mix-blend-multiply blur-xl opacity-50"></div>
-        <div className="absolute bottom-0 right-[10%] w-32 h-32 bg-indigo-200 rounded-full mix-blend-multiply blur-xl opacity-50"></div>
+      {/* Community Section - Styled to match hero */}
+      <section id="community" className="py-12 relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-sky-50"
+        >
+          <div className="absolute inset-0 opacity-[0.05]" 
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
+        </div>
+
+        <div className="absolute top-0 left-[5%] w-24 h-24 bg-purple-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse"></div>
+        <div className="absolute bottom-0 right-[10%] w-32 h-32 bg-indigo-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse [animation-delay:1000ms]"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-purple-100 shadow-lg transition-all duration-300 hover:shadow-xl">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-purple-100/50 shadow-lg transition-all duration-300 hover:shadow-xl">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0">
                   <Users className="h-8 w-8" />
