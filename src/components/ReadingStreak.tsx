@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
@@ -42,6 +41,7 @@ export function ReadingStreak() {
   const progress = Math.min(100, (currentStreak / nextMilestone) * 100);
 
   const getTodayStart = () => startOfDay(new Date());
+  const getTodayDateString = () => format(new Date(), 'yyyy-MM-dd');
 
   const parseLocalDate = (dateString: string) => {
     const date = parseISO(dateString);
@@ -76,6 +76,26 @@ export function ReadingStreak() {
       const userId = session?.user?.id;
       
       if (!userId) return;
+
+      const todayDateString = getTodayDateString();
+      
+      // First check if user already has a quote assigned for today
+      const { data: todaysQuote, error: todaysQuoteError } = await supabase
+        .from('user_seen_quotes')
+        .select('streak_quotes(*)')
+        .eq('user_id', userId)
+        .gte('seen_date', `${todayDateString}T00:00:00`)
+        .lt('seen_date', `${todayDateString}T23:59:59.999`)
+        .limit(1);
+      
+      if (todaysQuoteError) throw todaysQuoteError;
+      
+      // If user already has a quote for today, use it
+      if (todaysQuote && todaysQuote.length > 0 && todaysQuote[0].streak_quotes) {
+        setDailyQuote(todaysQuote[0].streak_quotes as DailyQuote);
+        setQuoteLoading(false);
+        return;
+      }
 
       // Get a list of authors that have been seen in the last 10 days
       const tenDaysAgo = new Date();
