@@ -109,28 +109,46 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Community Section */}
-      <section id="community" className="py-12 bg-white shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col items-center text-center px-4 py-2">
-              <h3 className="text-xl md:text-2xl font-medium text-slate-700 mb-3">
-                Join our new and growing community of readers
-              </h3>
-              <p className="text-slate-600 max-w-3xl">
-                Be among the first to build your knowledge system with BookishNotes. 
-                Join us early, help shape our future, and grow alongside us as we create the ultimate 
-                platform for thoughtful readers.
-              </p>
-              <Button 
-                className="mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-                size="sm"
-                asChild
-              >
-                <Link to="/auth/sign-up">
-                  Join the community
-                </Link>
-              </Button>
+      {/* Community Section - Newly Styled */}
+      <section id="community" className="py-12 bg-gradient-to-br from-indigo-50 via-purple-50 to-sky-50 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.07]" 
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+        
+        <div className="absolute top-0 left-[5%] w-24 h-24 bg-purple-200 rounded-full mix-blend-multiply blur-xl opacity-50"></div>
+        <div className="absolute bottom-0 right-[10%] w-32 h-32 bg-indigo-200 rounded-full mix-blend-multiply blur-xl opacity-50"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-purple-100 shadow-lg transition-all duration-300 hover:shadow-xl">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-full w-16 h-16 flex items-center justify-center flex-shrink-0">
+                  <Users className="h-8 w-8" />
+                </div>
+                
+                <div className="text-center md:text-left">
+                  <h3 className="text-xl md:text-2xl font-semibold text-indigo-900 mb-2">
+                    Join our new and growing community of readers
+                  </h3>
+                  <p className="text-slate-600 mb-4">
+                    Be among the first to build your knowledge system with BookishNotes. 
+                    Join us early, help shape our future, and grow alongside us as we create the ultimate 
+                    platform for thoughtful readers.
+                  </p>
+                  <Button 
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    size="sm"
+                    asChild
+                  >
+                    <Link to="/auth/sign-up">
+                      Become a founding member
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
