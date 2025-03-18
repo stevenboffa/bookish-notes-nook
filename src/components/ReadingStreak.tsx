@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
@@ -459,15 +458,13 @@ export function ReadingStreak() {
                 {dailyQuote.quoted}
               </p>
               
-              <div className="flex items-center gap-2 mt-2.5">
-                <span className="text-sm font-semibold text-amber-700">
-                  {dailyQuote.qauthor}
-                </span>
+              <div className="mt-2.5 text-sm text-amber-700">
+                <span className="font-semibold">{dailyQuote.qauthor}</span>
                 {dailyQuote.qbook && (
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <BookOpen className="h-3.5 w-3.5" />
+                  <span className="text-amber-600/80 ml-1">
+                    {" • "}
                     <span className="italic">{dailyQuote.qbook}</span>
-                  </div>
+                  </span>
                 )}
               </div>
             </div>
