@@ -2,7 +2,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
-import { Flame, Calendar, Trophy, ChevronUp, ChevronDown, CheckCircle2 } from "lucide-react";
+import { Flame, Calendar, Trophy, ChevronUp, ChevronDown, CheckCircle2, Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -195,6 +195,23 @@ export function ReadingStreak() {
     return "text-orange-300";
   };
 
+  const DailyQuote = () => {
+    const quote = "The only limit to our realization of tomorrow will be our doubts of today.";
+    const author = "Franklin D. Roosevelt";
+    
+    return (
+      <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md">
+        <div className="flex gap-2">
+          <Quote className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm text-amber-900 font-medium italic">{quote}</p>
+            <p className="text-xs text-amber-700 mt-1">— {author}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const CompactView = () => (
     <div className="flex items-center justify-between w-full px-4 py-3">
       <div className="flex items-center gap-3">
@@ -325,14 +342,7 @@ export function ReadingStreak() {
         )}
       </div>
 
-      {lastReadDate && (
-        <div className="flex items-center gap-1.5 mt-4 text-gray-600 text-xs">
-          <Calendar className="h-3.5 w-3.5" />
-          <span>
-            Last reading activity: {format(lastReadDate, 'MMM d, yyyy')}
-          </span>
-        </div>
-      )}
+      <DailyQuote />
     </>
   );
 
