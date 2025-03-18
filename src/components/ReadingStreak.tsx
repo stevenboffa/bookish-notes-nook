@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
@@ -438,9 +439,10 @@ export function ReadingStreak() {
   const DailyQuoteDisplay = () => {
     if (quoteLoading) {
       return (
-        <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md animate-pulse">
-          <div className="h-5 bg-amber-100/70 rounded w-4/5 mb-2"></div>
-          <div className="h-4 bg-amber-100/50 rounded w-1/3"></div>
+        <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md animate-pulse p-4">
+          <div className="h-5 bg-amber-100/40 rounded w-5/6 mb-3"></div>
+          <div className="h-5 bg-amber-100/40 rounded w-4/6 mb-3"></div>
+          <div className="h-4 bg-amber-100/30 rounded w-1/3 mt-2"></div>
         </div>
       );
     }
@@ -448,28 +450,26 @@ export function ReadingStreak() {
     if (!dailyQuote) return null;
     
     return (
-      <div className="mt-4 overflow-hidden rounded-md border border-amber-200 shadow-sm animate-fade-in">
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 flex items-center gap-2">
-          <Quote className="h-5 w-5 text-amber-500 flex-shrink-0" />
-          <span className="font-medium text-amber-800">Today's Inspiration</span>
-        </div>
-        
-        <div className="px-4 py-3 bg-white">
-          <p className="text-sm text-gray-700 font-medium italic leading-relaxed">
-            "{dailyQuote.quoted}"
-          </p>
-          
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-amber-700">
-                {dailyQuote.qauthor}
-              </span>
-              {dailyQuote.qbook && (
-                <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  <span className="italic">{dailyQuote.qbook}</span>
-                </div>
-              )}
+      <div className="mt-4 rounded-md border border-amber-100 overflow-hidden shadow-sm animate-fade-in bg-gradient-to-r from-amber-50/80 to-orange-50/80">
+        <div className="p-4">
+          <div className="flex gap-2.5">
+            <Quote className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-gray-700 font-medium italic leading-relaxed">
+                {dailyQuote.quoted}
+              </p>
+              
+              <div className="flex items-center gap-2 mt-2.5">
+                <span className="text-sm font-semibold text-amber-700">
+                  {dailyQuote.qauthor}
+                </span>
+                {dailyQuote.qbook && (
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    <span className="italic">{dailyQuote.qbook}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
