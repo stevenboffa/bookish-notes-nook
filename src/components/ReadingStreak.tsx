@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
@@ -195,10 +196,10 @@ export function ReadingStreak() {
   };
 
   const CompactView = () => (
-    <div className="flex items-center justify-between w-full px-3 py-1.5">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between w-full px-4 py-2.5">
+      <div className="flex items-center gap-2.5">
         <div className={cn(
-          "rounded-full flex items-center justify-center p-1",
+          "rounded-full flex items-center justify-center p-1.5",
           currentStreak > 0 ? "bg-gradient-to-br from-amber-100 to-orange-200" : "bg-gray-100"
         )}>
           <Flame className={cn(
@@ -212,14 +213,14 @@ export function ReadingStreak() {
             {currentStreak} <span className="font-normal text-xs text-gray-500">day streak</span>
           </span>
           <span className="text-xs text-gray-500 leading-tight">
-            {nextMilestone > currentStreak ? `${nextMilestone - currentStreak} days to milestone` : 'Milestone reached!'}
+            {nextMilestone > currentStreak ? `${nextMilestone - currentStreak} to milestone` : 'Milestone reached!'}
           </span>
         </div>
       </div>
       
-      <div className="flex items-center">
+      <div className="flex items-center space-x-2">
         {longestStreak > 0 && (
-          <div className="flex items-center mr-3">
+          <div className="flex items-center">
             <Trophy className="h-3.5 w-3.5 text-amber-500 mr-1" />
             <span className="text-xs font-medium">{longestStreak}</span>
           </div>
@@ -230,7 +231,7 @@ export function ReadingStreak() {
           disabled={checkedInToday || isLoading}
           size="sm"
           className={cn(
-            "shadow-sm h-7 text-xs px-2.5",
+            "shadow-sm h-8 text-xs font-medium min-w-20",
             checkedInToday 
               ? "bg-green-500 hover:bg-green-600 text-white" 
               : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
@@ -238,14 +239,14 @@ export function ReadingStreak() {
         >
           {checkedInToday ? (
             <span className="flex items-center">
-              <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Checked
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Complete
             </span>
           ) : "Check In"}
         </Button>
         
         <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="sm" className="p-1 h-7 w-7 rounded-full ml-1.5">
-            <ChevronDown size={14} />
+          <Button variant="ghost" size="sm" className="p-1 h-8 w-8 rounded-full">
+            <ChevronDown size={15} />
           </Button>
         </CollapsibleTrigger>
       </div>
@@ -254,7 +255,7 @@ export function ReadingStreak() {
 
   const FullView = () => (
     <>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className={cn(
             "rounded-full flex items-center justify-center p-2",
