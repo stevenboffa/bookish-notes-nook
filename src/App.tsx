@@ -27,6 +27,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Resources from "./pages/Resources";
 import CreateAccount from "./pages/resources/CreateAccount";
 import AddBooks from "./pages/resources/AddBooks";
+import EditBookDetails from "./pages/resources/EditBookDetails";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -144,6 +145,7 @@ const App = () => (
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/resources/create-account" element={<CreateAccount />} />
                 <Route path="/resources/add-books" element={<AddBooks />} />
+                <Route path="/resources/edit-book-details" element={<EditBookDetails />} />
               </Route>
 
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
