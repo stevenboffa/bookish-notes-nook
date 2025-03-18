@@ -27,7 +27,7 @@ export function ReadingStreak() {
   const [lastReadDate, setLastReadDate] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [checkedInToday, setCheckedInToday] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [dailyQuote, setDailyQuote] = useState<DailyQuote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState<boolean>(true);
   const { session } = useAuth();
