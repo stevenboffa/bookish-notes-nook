@@ -1,4 +1,3 @@
-
 import { Meta } from "@/components/Meta";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -12,7 +11,8 @@ import {
   FolderPlus,
   Key,
   Video,
-  List
+  List,
+  Share
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -72,6 +72,14 @@ const Resources = () => {
       icon: Users,
       readTime: "3 min",
       link: "/resources/connect-friends"
+    },
+    {
+      id: "recommend-book",
+      title: "How to recommend a book to a friend",
+      description: "Learn how to share your favorite books and reading discoveries with friends.",
+      icon: Share,
+      readTime: "3 min",
+      link: "/resources/recommend-book"
     }
   ];
 
