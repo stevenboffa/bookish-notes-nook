@@ -115,25 +115,27 @@ const Welcome = () => {
                     <Users className="h-8 w-8" />
                   </div>
                   
-                  <div className="text-center md:text-left">
+                  <div className="text-center md:text-left flex-1">
                     <h3 className="text-xl md:text-2xl font-semibold text-indigo-900 mb-2">
                       Join our new and growing community of readers
                     </h3>
-                    <p className="text-slate-600 mb-4">
+                    <p className="text-slate-600 mb-6">
                       Be among the first to build your knowledge system with BookishNotes. 
                       Join us early, help shape our future, and grow alongside us as we create the ultimate 
                       platform for thoughtful readers.
                     </p>
-                    <Button 
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
-                      size="sm"
-                      asChild
-                    >
-                      <Link to="/auth/sign-up">
-                        Become a founding member
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <div className="flex justify-center md:justify-start">
+                      <Button 
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                        size="sm"
+                        asChild
+                      >
+                        <Link to="/auth/sign-up">
+                          Join the community
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -543,4 +545,3 @@ const StepCard = ({ number, title, description, icon }: { number: string; title:
 };
 
 export default Welcome;
-
