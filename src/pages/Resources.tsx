@@ -1,4 +1,3 @@
-
 import { Meta } from "@/components/Meta";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -16,7 +15,8 @@ import {
   Share,
   Pencil,
   Star,
-  UserRound
+  UserRound,
+  BookmarkPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -119,6 +119,14 @@ const Resources = () => {
       icon: UserRound,
       readTime: "3 min",
       link: "/resources/profile-customization"
+    },
+    {
+      id: "favorite-genres",
+      title: "Setting your favorite book genres",
+      description: "Customize your reading preferences by selecting your favorite literary genres.",
+      icon: BookmarkPlus,
+      readTime: "2 min",
+      link: "/resources/favorite-genres"
     }
   ];
 
