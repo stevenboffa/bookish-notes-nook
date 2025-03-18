@@ -1,3 +1,4 @@
+
 import { Meta } from "@/components/Meta";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -12,7 +13,10 @@ import {
   Key,
   Video,
   List,
-  Share
+  Share,
+  Pencil,
+  Star,
+  UserRound
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -34,6 +38,14 @@ const Resources = () => {
       icon: BookPlus,
       readTime: "3 min",
       link: "/resources/add-books"
+    },
+    {
+      id: "edit-book-details",
+      title: "How to edit book details",
+      description: "Learn how to modify and update information about books in your library.",
+      icon: Pencil,
+      readTime: "2 min",
+      link: "/resources/edit-book-details"
     }
   ];
 
@@ -53,6 +65,14 @@ const Resources = () => {
       icon: Flame,
       readTime: "2 min",
       link: "/resources/reading-streaks"
+    },
+    {
+      id: "add-review-score",
+      title: "How to add your own personal review score",
+      description: "Rate the books you've read and keep track of your favorites with our rating system.",
+      icon: Star,
+      readTime: "2 min",
+      link: "/resources/add-review-score"
     }
   ];
 
@@ -91,6 +111,14 @@ const Resources = () => {
       icon: Key,
       readTime: "2 min",
       link: "/resources/account-settings"
+    },
+    {
+      id: "profile-customization",
+      title: "Changing your username and adding a profile picture",
+      description: "Personalize your profile to make it uniquely yours.",
+      icon: UserRound,
+      readTime: "3 min",
+      link: "/resources/profile-customization"
     }
   ];
 
