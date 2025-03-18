@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
@@ -25,7 +24,6 @@ export function ReadingStreak() {
   const { session } = useAuth();
   const isMobile = useIsMobile();
 
-  // Calculate the next milestone
   const nextMilestone = currentStreak < 7 ? 7 : 
                        currentStreak < 30 ? 30 :
                        currentStreak < 100 ? 100 : 
@@ -33,22 +31,18 @@ export function ReadingStreak() {
   
   const progress = Math.min(100, (currentStreak / nextMilestone) * 100);
 
-  // Get current date at start of day in user's local timezone
   const getTodayStart = () => startOfDay(new Date());
 
-  // Convert date string to Date object in user's local timezone
   const parseLocalDate = (dateString: string) => {
     const date = parseISO(dateString);
     return date;
   };
 
-  // Check if a date is today in user's local timezone
   const isDateToday = (date: Date) => {
     const localToday = getTodayStart();
     return startOfDay(date).getTime() === localToday.getTime();
   };
 
-  // Check if a date is yesterday in user's local timezone
   const isDateYesterday = (date: Date) => {
     const localToday = getTodayStart();
     const localYesterday = new Date(localToday);
@@ -69,7 +63,6 @@ export function ReadingStreak() {
       
       if (!userId) return;
 
-      // Get all reading activity records for the user
       const { data, error } = await supabase
         .from('reading_activity')
         .select('*')
@@ -83,43 +76,36 @@ export function ReadingStreak() {
         return;
       }
 
-      // Check if user has checked in today
       const todayCheck = data.find((record: ReadingActivity) => 
         isDateToday(parseLocalDate(record.activity_date))
       );
       setCheckedInToday(!!todayCheck);
 
-      // Set the last read date
       if (data[0]) {
         setLastReadDate(parseLocalDate(data[0].activity_date));
       }
 
-      // Calculate current streak
       let streak = 0;
       let latestDate: Date | null = null;
       
-      // Sort data by date (newest first)
       const sortedData = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
         new Date(b.activity_date).getTime() - new Date(a.activity_date).getTime()
       );
       
-      // If latest record is from today or yesterday, start counting streak
       if (sortedData.length > 0) {
         latestDate = parseLocalDate(sortedData[0].activity_date);
         
         if (isDateToday(latestDate) || isDateYesterday(latestDate)) {
-          streak = 1; // Count the most recent day
+          streak = 1;
           
-          // Check for consecutive previous days
           for (let i = 1; i < sortedData.length; i++) {
             const currentDate = parseLocalDate(sortedData[i].activity_date);
             const prevDate = parseLocalDate(sortedData[i-1].activity_date);
             
-            // If dates are consecutive
             if (differenceInDays(prevDate, currentDate) === 1) {
               streak++;
             } else {
-              break; // Break the streak if days are not consecutive
+              break;
             }
           }
         }
@@ -127,12 +113,10 @@ export function ReadingStreak() {
       
       setCurrentStreak(streak);
       
-      // Calculate longest streak
       if (data.length > 0) {
         let maxStreak = 1;
         let tempStreak = 1;
         
-        // Sort by oldest first for longest streak calculation
         const chronological = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
           new Date(a.activity_date).getTime() - new Date(b.activity_date).getTime()
         );
@@ -141,12 +125,11 @@ export function ReadingStreak() {
           const currentDate = parseLocalDate(chronological[i].activity_date);
           const prevDate = parseLocalDate(chronological[i-1].activity_date);
           
-          // Check if dates are consecutive
           if (differenceInDays(currentDate, prevDate) === 1) {
             tempStreak++;
             maxStreak = Math.max(maxStreak, tempStreak);
           } else {
-            tempStreak = 1; // Reset streak counter
+            tempStreak = 1;
           }
         }
         
@@ -175,8 +158,6 @@ export function ReadingStreak() {
 
       setIsLoading(true);
 
-      // Use ISO string but truncate to date only (YYYY-MM-DD) 
-      // which will be interpreted in the user's local timezone
       const today = new Date().toISOString().split('T')[0];
 
       const { error } = await supabase
@@ -199,7 +180,6 @@ export function ReadingStreak() {
     }
   };
 
-  // Determine flame size based on streak
   const getFlameSize = () => {
     if (currentStreak >= 100) return "h-8 w-8";
     if (currentStreak >= 30) return "h-7 w-7";
@@ -207,7 +187,6 @@ export function ReadingStreak() {
     return "h-5 w-5";
   };
 
-  // Determine flame color based on streak
   const getFlameColor = () => {
     if (currentStreak >= 100) return "text-orange-600";
     if (currentStreak >= 30) return "text-orange-500";
@@ -301,7 +280,7 @@ export function ReadingStreak() {
           )}
           size={isMobile ? "sm" : "default"}
         >
-          {checkedInToday ? "Checked In Today ✓" : "Check In Today"}
+          {checkedInToday ? "Complete ✓" : "Check In"}
         </Button>
       </div>
 
