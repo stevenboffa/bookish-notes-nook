@@ -136,32 +136,6 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Enhanced Social Proof Section */}
-      <section id="social-proof" className="py-12 bg-white shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-              <p className="text-slate-700 font-medium text-lg md:text-xl">Trusted by avid readers worldwide</p>
-              
-              <div className="grid grid-cols-3 gap-8 md:gap-16">
-                <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-primary mb-1">12K+</span>
-                  <span className="text-slate-600 text-sm">Active Users</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-primary mb-1">100K+</span>
-                  <span className="text-slate-600 text-sm">Books</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-primary mb-1">500K+</span>
-                  <span className="text-slate-600 text-sm">Notes</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Reader's Insights Section */}
       <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-br from-indigo-600 to-purple-700 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[length:16px_16px]"></div>
