@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Facebook, Instagram } from "lucide-react";
+import { Facebook, Instagram, HelpCircle } from "lucide-react";
 import { SITE_CONFIG } from "@/config/site";
 
 export function Footer() {
@@ -37,6 +37,14 @@ export function Footer() {
               <li>
                 <Link to="/blog" className="text-sm text-slate-600 hover:text-primary transition-colors">
                   Blog
+                </Link>
+              </li>
+              <li>
+                <Link to="/resources" className="text-sm text-slate-600 hover:text-primary transition-colors">
+                  <span className="flex items-center">
+                    <HelpCircle className="h-4 w-4 mr-1" />
+                    How to use BookishNotes
+                  </span>
                 </Link>
               </li>
               <li>
