@@ -1,8 +1,7 @@
-
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
-import { Flame, Calendar, Trophy, ChevronUp, ChevronDown, CheckCircle2, Quote } from "lucide-react";
+import { Flame, Calendar, Trophy, ChevronUp, ChevronDown, CheckCircle2, Quote, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -439,9 +438,9 @@ export function ReadingStreak() {
   const DailyQuoteDisplay = () => {
     if (quoteLoading) {
       return (
-        <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md animate-pulse">
-          <div className="h-5 bg-amber-100 rounded w-4/5 mb-2"></div>
-          <div className="h-4 bg-amber-100/70 rounded w-1/3"></div>
+        <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md animate-pulse">
+          <div className="h-5 bg-amber-100/70 rounded w-4/5 mb-2"></div>
+          <div className="h-4 bg-amber-100/50 rounded w-1/3"></div>
         </div>
       );
     }
@@ -449,15 +448,27 @@ export function ReadingStreak() {
     if (!dailyQuote) return null;
     
     return (
-      <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-md">
-        <div className="flex gap-2">
-          <Quote className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm text-amber-900 font-medium italic">{dailyQuote.quoted}</p>
-            <div className="flex items-center justify-between mt-1">
-              <p className="text-xs text-amber-700">— {dailyQuote.qauthor}</p>
+      <div className="mt-4 overflow-hidden rounded-md border border-amber-200 shadow-sm animate-fade-in">
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 flex items-center gap-2">
+          <Quote className="h-5 w-5 text-amber-500 flex-shrink-0" />
+          <span className="font-medium text-amber-800">Today's Inspiration</span>
+        </div>
+        
+        <div className="px-4 py-3 bg-white">
+          <p className="text-sm text-gray-700 font-medium italic leading-relaxed">
+            "{dailyQuote.quoted}"
+          </p>
+          
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-amber-700">
+                {dailyQuote.qauthor}
+              </span>
               {dailyQuote.qbook && (
-                <p className="text-xs text-amber-600 italic">{dailyQuote.qbook}</p>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  <span className="italic">{dailyQuote.qbook}</span>
+                </div>
               )}
             </div>
           </div>
