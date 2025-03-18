@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
@@ -82,7 +83,7 @@ export function ReadingStreak() {
       // First check if user already has a quote assigned for today
       const { data: todaysQuote, error: todaysQuoteError } = await supabase
         .from('user_seen_quotes')
-        .select('streak_quotes(*)')
+        .select('quote_id, streak_quotes(*)')
         .eq('user_id', userId)
         .gte('seen_date', `${todayDateString}T00:00:00`)
         .lt('seen_date', `${todayDateString}T23:59:59.999`)
@@ -156,7 +157,8 @@ export function ReadingStreak() {
           .from('user_seen_quotes')
           .insert({
             user_id: userId,
-            quote_id: newQuote.id
+            quote_id: newQuote.id,
+            seen_date: new Date().toISOString() // Ensure we store the current date
           });
           
         if (insertError) throw insertError;
@@ -186,6 +188,21 @@ export function ReadingStreak() {
       
       if (data && data.length > 0) {
         setDailyQuote(data[0] as DailyQuote);
+        
+        // If user is authenticated, record this quote as seen
+        if (session?.user?.id) {
+          const { error: insertError } = await supabase
+            .from('user_seen_quotes')
+            .insert({
+              user_id: session.user.id,
+              quote_id: data[0].id,
+              seen_date: new Date().toISOString()
+            });
+            
+          if (insertError) {
+            console.error('Error recording seen quote:', insertError);
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching random quote:', error);
