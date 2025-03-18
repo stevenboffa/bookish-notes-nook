@@ -31,12 +31,11 @@ const Welcome = () => {
       <Meta customTitle="Never Forget What You Read | BookishNotes.com" />
       <Header />
       
-      {/* Improved Hero Section with more impact */}
+      {/* Hero Section */}
       <section className="relative pt-24 md:pt-16 min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-sky-50"
         >
-          {/* Enhanced grid pattern overlay */}
           <div className="absolute inset-0 opacity-[0.05]" 
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
@@ -44,7 +43,6 @@ const Welcome = () => {
           />
         </div>
 
-        {/* Enhanced background decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-[10%] w-72 h-72 rounded-full bg-purple-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse" />
           <div className="absolute bottom-20 right-[10%] w-72 h-72 rounded-full bg-indigo-200 mix-blend-multiply blur-3xl opacity-70 animate-pulse [animation-delay:1000ms]" />
@@ -53,20 +51,16 @@ const Welcome = () => {
 
         <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20 relative z-10">
           <div className="max-w-7xl mx-auto">
-            {/* More impactful headline and content */}
             <div className="flex flex-col items-center text-center mb-10">
-              {/* Main headline - changed from gradient to solid dark color */}
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-[#24223e] max-w-4xl leading-[1.2] md:leading-[1.2] lg:leading-[1.2] pb-1">
                 Transform your reading into knowledge that lasts forever
               </h1>
 
-              {/* Subheadline - more benefits focused */}
               <p className="text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 leading-relaxed max-w-3xl">
                 Most people forget 90% of what they read within a week. BookishNotes helps you 
                 capture, organize, and remember your most valuable insights—forever.
               </p>
 
-              {/* Enhanced CTA section with primary and secondary buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
                 <Button 
                   size="lg" 
@@ -80,20 +74,16 @@ const Welcome = () => {
                 </Button>
               </div>
               
-              {/* Simplified "Free forever" text */}
               <p className="text-sm text-slate-600 font-medium mt-6">
                 Free Forever. No Credit Card Required.
               </p>
             </div>
 
-            {/* Enhanced App Preview with subtle animation */}
             <div className="relative z-10 max-w-7xl mx-auto mt-8 transition-all duration-300 hover:translate-y-[-5px]">
               <div className="relative">
-                {/* Enhanced decorative elements */}
                 <div className="absolute -top-6 -left-6 w-28 h-28 bg-indigo-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                 <div className="absolute -bottom-10 -right-10 w-36 h-36 bg-purple-100 rounded-full mix-blend-multiply blur-xl animate-pulse"></div>
                 
-                {/* Desktop app preview with enhanced shadow and border */}
                 {!isMobile && (
                   <div className="bg-white rounded-xl border-8 border-indigo-100/80 shadow-2xl overflow-hidden transform transition-all duration-500">
                     <img 
@@ -104,7 +94,6 @@ const Welcome = () => {
                   </div>
                 )}
                 
-                {/* Mobile app preview - Book list with enhanced border */}
                 {isMobile && (
                   <div className="bg-white rounded-xl border-8 border-indigo-100/80 shadow-2xl overflow-hidden transform transition-all duration-500">
                     <img 
@@ -120,6 +109,33 @@ const Welcome = () => {
         </div>
       </section>
 
+      {/* Community Section */}
+      <section id="community" className="py-12 bg-white shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col items-center text-center px-4 py-2">
+              <h3 className="text-xl md:text-2xl font-medium text-slate-700 mb-3">
+                Join our new and growing community of readers
+              </h3>
+              <p className="text-slate-600 max-w-3xl">
+                Be among the first to build your knowledge system with BookishNotes. 
+                Join us early, help shape our future, and grow alongside us as we create the ultimate 
+                platform for thoughtful readers.
+              </p>
+              <Button 
+                className="mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                size="sm"
+                asChild
+              >
+                <Link to="/auth/sign-up">
+                  Join the community
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Enhanced Social Proof Section */}
       <section id="social-proof" className="py-12 bg-white shadow-sm">
         <div className="container mx-auto px-4">
@@ -127,7 +143,6 @@ const Welcome = () => {
             <div className="flex flex-col md:flex-row justify-between items-center gap-8">
               <p className="text-slate-700 font-medium text-lg md:text-xl">Trusted by avid readers worldwide</p>
               
-              {/* Enhanced metrics display with icons and larger numbers */}
               <div className="grid grid-cols-3 gap-8 md:gap-16">
                 <div className="flex flex-col items-center">
                   <span className="text-3xl font-bold text-primary mb-1">12K+</span>
@@ -147,7 +162,7 @@ const Welcome = () => {
         </div>
       </section>
 
-      {/* Reader's Insights Section - Enhanced with consistent card styling */}
+      {/* Reader's Insights Section */}
       <section id="how-it-works" className="py-20 md:py-28 bg-gradient-to-br from-indigo-600 to-purple-700 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[length:16px_16px]"></div>
         
@@ -169,7 +184,6 @@ const Welcome = () => {
               </div>
               
               <div className="space-y-6">
-                {/* Standardized card designs with consistent styling */}
                 <Card className="bg-white/10 backdrop-blur-sm border-white/10 shadow-xl text-white transition-all duration-300 hover:bg-white/15 hover:translate-y-[-2px]">
                   <CardContent className="p-6">
                     <div className="flex items-start mb-3">
@@ -455,7 +469,6 @@ const Welcome = () => {
             </div>
 
             <div className="relative">
-              {/* Connection lines for desktop */}
               <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-primary/20 -translate-y-1/2 z-0" />
               
               <div className="grid md:grid-cols-3 gap-8 relative z-10">
