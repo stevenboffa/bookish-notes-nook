@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Search, BookPlus, Import, LibraryBig, Badge, ScanLine } from "lucide-react";
+import { ChevronLeft, Search, BookPlus, Users, Badge } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const AddBooks = () => {
@@ -185,61 +185,25 @@ const AddBooks = () => {
                 <div className="space-y-10">
                   <div>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-indigo-100 text-indigo-600 rounded-full">
-                        <ScanLine className="h-5 w-5" />
+                      <div className="p-2 bg-blue-100 text-blue-600 rounded-full">
+                        <Users className="h-5 w-5" />
                       </div>
-                      <h3 className="font-medium text-gray-900">Scan Barcodes (Mobile App)</h3>
+                      <h3 className="font-medium text-gray-900">Add from Friend's Library</h3>
                     </div>
                     <p className="text-gray-700 mb-3">
-                      With our mobile app, you can scan book barcodes to instantly add books to your library. Perfect for quickly capturing books from your physical collection.
+                      You can add books by browsing your friends' libraries and clicking the "Add Book" button from their collection.
                     </p>
                     <ol className="list-decimal list-inside space-y-2 text-gray-700 pl-4">
-                      <li>Open the BookishNotes mobile app</li>
-                      <li>Tap the "+" icon and select "Scan Barcode"</li>
-                      <li>Point your camera at the book's ISBN barcode</li>
-                      <li>Confirm the details and add to your library</li>
+                      <li>Navigate to the "Friends" page from your dashboard</li>
+                      <li>Select a friend to view their book collection</li>
+                      <li>Browse their library and find a book you'd like to add</li>
+                      <li>Click the "Add Book" button next to any book to add it to your "Not Started" list</li>
                     </ol>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-purple-100 text-purple-600 rounded-full">
-                        <Import className="h-5 w-5" />
-                      </div>
-                      <h3 className="font-medium text-gray-900">Import from Other Services</h3>
+                    <div className="mt-4 bg-blue-50 p-4 rounded-lg">
+                      <p className="text-blue-700 text-sm">
+                        <strong>Tip:</strong> This is a great way to discover new books that your friends have enjoyed and build your reading list based on recommendations from people you trust.
+                      </p>
                     </div>
-                    <p className="text-gray-700 mb-3">
-                      Already using another reading tracker? You can import your book lists from several popular services.
-                    </p>
-                    <p className="text-gray-700">
-                      Go to Settings {'>'} Import Books and follow the instructions to import from:
-                    </p>
-                    <ul className="list-disc list-inside space-y-2 text-gray-700 pl-4 mt-2">
-                      <li>Goodreads</li>
-                      <li>StoryGraph</li>
-                      <li>CSV/Excel spreadsheets</li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-green-100 text-green-600 rounded-full">
-                        <LibraryBig className="h-5 w-5" />
-                      </div>
-                      <h3 className="font-medium text-gray-900">Browse Popular Book Lists</h3>
-                    </div>
-                    <p className="text-gray-700 mb-3">
-                      Discover new books to add to your "Want to Read" collection by browsing curated lists and bestsellers.
-                    </p>
-                    <p className="text-gray-700">
-                      From your dashboard, navigate to "Discover" to browse:
-                    </p>
-                    <ul className="list-disc list-inside space-y-2 text-gray-700 pl-4 mt-2">
-                      <li>New York Times Bestsellers</li>
-                      <li>Award winners</li>
-                      <li>Genre-specific recommendations</li>
-                      <li>Most popular among BookishNotes users</li>
-                    </ul>
                   </div>
                 </div>
               </section>
@@ -261,7 +225,7 @@ const AddBooks = () => {
                   
                   <div className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="h-4 w-4 text-blue-500" />
+                      <Badge className="h-4 w-4 text-blue-500" />
                       <span className="font-medium text-gray-900">In Progress</span>
                     </div>
                     <p className="text-sm text-gray-600">Books you're currently reading</p>
@@ -269,7 +233,7 @@ const AddBooks = () => {
                   
                   <div className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="h-4 w-4 text-green-500" />
+                      <Badge className="h-4 w-4 text-green-500" />
                       <span className="font-medium text-gray-900">Finished</span>
                     </div>
                     <p className="text-sm text-gray-600">Books you've completed reading</p>
@@ -277,7 +241,7 @@ const AddBooks = () => {
                   
                   <div className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="h-4 w-4 text-purple-500" />
+                      <Badge className="h-4 w-4 text-purple-500" />
                       <span className="font-medium text-gray-900">Future Reads</span>
                     </div>
                     <p className="text-sm text-gray-600">Books on your wishlist or TBR (to be read) pile</p>
