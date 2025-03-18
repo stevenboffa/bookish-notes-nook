@@ -22,9 +22,12 @@ const ResourceCard: React.FC<ResourceCardProps> = ({
   readTime,
   link
 }) => {
+  // Format the link to ensure it's correctly structured
+  const formattedLink = link.startsWith('/') ? link : `/resources/${link.toLowerCase().replace(/\s+/g, '-')}`;
+  
   return (
     <Link 
-      to={link} 
+      to={formattedLink} 
       className="block h-full" 
       onClick={() => trackButtonClick(`resource_${id}`, "resources")}
     >
