@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Meta } from "@/components/Meta";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -7,8 +7,67 @@ import { Calendar, Flame, CheckCircle2, Trophy, Sparkles, BarChart4, Clock, Cale
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReadingStreak } from "@/components/ReadingStreak";
+import { supabase } from "@/integrations/supabase/client";
+
+// Define DailyQuote interface to match the one in ReadingStreak component
+interface DailyQuote {
+  id: number;
+  quoted: string;
+  qauthor: string;
+  qbook: string | null;
+}
 
 const ReadingStreaks = () => {
+  const [exampleQuote, setExampleQuote] = useState<DailyQuote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch a random quote for demonstration purposes
+    const fetchRandomQuote = async () => {
+      try {
+        setQuoteLoading(true);
+        const { data, error } = await supabase
+          .from('streak_quotes')
+          .select('*')
+          .order('id', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setExampleQuote(data[0] as DailyQuote);
+        } else {
+          // Fallback quote if no quotes found in the database
+          setExampleQuote({
+            id: 0,
+            quoted: "The more that you read, the more things you will know. The more that you learn, the more places you'll go.",
+            qauthor: "Dr. Seuss",
+            qbook: "I Can Read With My Eyes Shut!"
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching random quote:', error);
+        // Fallback quote on error
+        setExampleQuote({
+          id: 0,
+          quoted: "The more that you read, the more things you will know. The more that you learn, the more places you'll go.",
+          qauthor: "Dr. Seuss",
+          qbook: "I Can Read With My Eyes Shut!"
+        });
+      } finally {
+        setQuoteLoading(false);
+      }
+    };
+
+    fetchRandomQuote();
+  }, []);
+
+  // Pass the quote to the ReadingStreak component using custom props
+  const demoProps = exampleQuote ? { 
+    demoQuote: exampleQuote,
+    isQuoteLoading: quoteLoading
+  } : undefined;
+
   return (
     <>
       <Meta 
@@ -36,7 +95,7 @@ const ReadingStreaks = () => {
           <div className="mb-12">
             <h2 className="text-2xl font-bold mb-4 text-gray-900">How Reading Streaks Work</h2>
             <div className="mb-8">
-              <ReadingStreak />
+              <ReadingStreak demoQuote={demoProps?.demoQuote} isQuoteLoading={demoProps?.isQuoteLoading} />
             </div>
             <p className="text-gray-700 mb-6">
               The reading streak feature shown above is available on your dashboard. Here's how it works and how you can use it to maintain a consistent reading habit.

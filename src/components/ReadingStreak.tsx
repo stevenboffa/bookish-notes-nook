@@ -21,7 +21,12 @@ interface DailyQuote {
   qbook: string | null;
 }
 
-export function ReadingStreak() {
+interface ReadingStreakProps {
+  demoQuote?: DailyQuote;
+  isQuoteLoading?: boolean;
+}
+
+export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps = {}) {
   const [currentStreak, setCurrentStreak] = useState<number>(0);
   const [longestStreak, setLongestStreak] = useState<number>(0);
   const [lastReadDate, setLastReadDate] = useState<Date | null>(null);
@@ -61,14 +66,24 @@ export function ReadingStreak() {
   };
 
   useEffect(() => {
+    if (demoQuote) {
+      setDailyQuote(demoQuote);
+      setQuoteLoading(isQuoteLoading ?? false);
+      setCurrentStreak(12);
+      setLongestStreak(30);
+      setCheckedInToday(true);
+      setIsLoading(false);
+      setIsOpen(true);
+      return;
+    }
+
     if (session?.user?.id) {
       fetchReadingActivity();
       fetchDailyQuote();
     } else {
-      // If no authenticated user, just fetch a random quote without tracking
       fetchRandomQuote();
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, demoQuote, isQuoteLoading]);
 
   const fetchDailyQuote = async () => {
     try {
@@ -80,7 +95,6 @@ export function ReadingStreak() {
       const todayDateString = getTodayDateString();
       console.log('Fetching daily quote for date:', todayDateString);
       
-      // First check if user already has a quote assigned for today using a simpler query
       const { data: userQuotes, error: userQuotesError } = await supabase
         .from('user_seen_quotes')
         .select(`
@@ -98,7 +112,6 @@ export function ReadingStreak() {
       
       console.log('User quotes for today:', userQuotes);
       
-      // If user already has a quote for today, fetch that specific quote
       if (userQuotes && userQuotes.length > 0) {
         const quoteId = userQuotes[0].quote_id;
         
@@ -122,7 +135,6 @@ export function ReadingStreak() {
         }
       }
 
-      // Get a list of authors that have been seen in the last 10 days
       const tenDaysAgo = new Date();
       tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
       
@@ -134,12 +146,10 @@ export function ReadingStreak() {
 
       if (recentAuthorsError) throw recentAuthorsError;
       
-      // Extract unique authors from recent quotes
       const recentAuthorsList = recentAuthors?.map(item => 
         (item as any).streak_quotes?.qauthor as string
       ).filter(Boolean) || [];
       
-      // Get all quotes the user has already seen
       const { data: seenQuotes, error: seenQuotesError } = await supabase
         .from('user_seen_quotes')
         .select('quote_id')
@@ -149,41 +159,35 @@ export function ReadingStreak() {
       
       const seenQuoteIds = seenQuotes?.map(item => item.quote_id) || [];
 
-      // Query that excludes quotes from recently seen authors and already seen quotes
       let query = supabase
         .from('streak_quotes')
         .select('*');
       
-      // Add filter for unseen quotes if the user has seen any
       if (seenQuoteIds.length > 0) {
         query = query.not('id', 'in', `(${seenQuoteIds.join(',')})`);
       }
       
-      // Add filter for authors if there are recent authors
       if (recentAuthorsList.length > 0) {
         query = query.not('qauthor', 'in', `(${recentAuthorsList.map(a => `"${a}"`).join(',')})`);
       }
       
-      // Limit to 1 random quote
       query = query.limit(1).order('id', { ascending: false });
       
       const { data: quotes, error: quotesError } = await query;
 
       if (quotesError) throw quotesError;
       
-      // If we found a suitable quote
       if (quotes && quotes.length > 0) {
         const newQuote = quotes[0] as DailyQuote;
         console.log('Assigning new quote for today:', newQuote);
         setDailyQuote(newQuote);
         
-        // Record this quote as seen by the user - use TODAY as the date
         const { error: insertError } = await supabase
           .from('user_seen_quotes')
           .insert({
             user_id: userId,
             quote_id: newQuote.id,
-            seen_date: `${todayDateString}T12:00:00.000Z` // Use noon on today's date for consistency
+            seen_date: `${todayDateString}T12:00:00.000Z`
           });
           
         if (insertError) {
@@ -193,14 +197,10 @@ export function ReadingStreak() {
         
         console.log('Successfully recorded new quote for today');
       } else {
-        // If no suitable quote found (all quotes seen or all by recent authors),
-        // get a random quote without constraints
-        console.log('No suitable quotes found, using random fallback');
         await assignRandomQuoteForToday();
       }
     } catch (error) {
       console.error('Error in fetchDailyQuote:', error);
-      // Fallback to any random quote
       await assignRandomQuoteForToday();
     } finally {
       setQuoteLoading(false);
@@ -214,7 +214,6 @@ export function ReadingStreak() {
       
       if (!userId) return;
       
-      // Check if we already have a quote assigned for today before assigning a new one
       const { data: existingQuote } = await supabase
         .from('user_seen_quotes')
         .select('id, quote_id')
@@ -222,7 +221,6 @@ export function ReadingStreak() {
         .gte('seen_date', `${todayDateString}T00:00:00`)
         .lt('seen_date', `${todayDateString}T23:59:59.999Z`);
         
-      // If we already have a quote for today, use it instead of assigning a new one
       if (existingQuote && existingQuote.length > 0) {
         console.log('Found existing quote assignment, fetching quote details');
         const { data: quoteData } = await supabase
@@ -237,7 +235,6 @@ export function ReadingStreak() {
         }
       }
       
-      // No existing quote for today, get a random one
       const { data, error } = await supabase
         .from('streak_quotes')
         .select('*')
@@ -250,13 +247,12 @@ export function ReadingStreak() {
         console.log('Assigning random quote for today:', data[0]);
         setDailyQuote(data[0] as DailyQuote);
         
-        // Record this quote as seen for today
         const { error: insertError } = await supabase
           .from('user_seen_quotes')
           .insert({
             user_id: userId,
             quote_id: data[0].id,
-            seen_date: `${todayDateString}T12:00:00.000Z` // Use noon on today's date for consistency
+            seen_date: `${todayDateString}T12:00:00.000Z`
           });
           
         if (insertError) {
@@ -267,7 +263,6 @@ export function ReadingStreak() {
       }
     } catch (error) {
       console.error('Error assigning random quote:', error);
-      // Final fallback - just display a quote but don't save it
       fetchRandomQuote();
     }
   };
@@ -287,7 +282,6 @@ export function ReadingStreak() {
       }
     } catch (error) {
       console.error('Error fetching random quote:', error);
-      // Fallback to a static quote
       setDailyQuote({
         id: 0,
         quoted: "The only limit to our realization of tomorrow will be our doubts of today.",
