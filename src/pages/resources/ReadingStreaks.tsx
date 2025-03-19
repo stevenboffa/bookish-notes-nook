@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Meta } from "@/components/Meta";
 import { Header } from "@/components/Header";
@@ -10,7 +9,6 @@ import { ChevronLeft, Flame, CheckCircle2, Clock, BarChart4, CalendarCheck2 } fr
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { ReadingStreak } from "@/components/ReadingStreak";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { supabase } from "@/integrations/supabase/client";
 
 // Define DailyQuote interface to match the one in ReadingStreak component
@@ -82,29 +80,6 @@ const ReadingStreaks = () => {
       
       <main className="pt-24 pb-16 bg-gradient-to-b from-gray-50 to-white min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumb Navigation */}
-          <div className="mb-8">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to="/">Home</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to="/resources">Resources</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Daily Reading Streaks</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-          
           {/* Back Button - consistent with other resource pages */}
           <div className="mb-8">
             <Button
@@ -124,9 +99,9 @@ const ReadingStreaks = () => {
           {/* Main Content */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Title Section - styled consistently with other pages */}
-            <div className="bg-orange-50 px-6 py-8 border-b border-gray-100">
+            <div className="bg-[#f0f5ff] px-6 py-8 border-b border-gray-100">
               <div className="flex items-center gap-4 mb-4">
-                <div className="rounded-full p-3 bg-orange-100 text-orange-600">
+                <div className="rounded-full p-3 bg-blue-100 text-blue-600">
                   <Flame className="h-6 w-6" />
                 </div>
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -139,7 +114,7 @@ const ReadingStreaks = () => {
             </div>
             
             {/* Content */}
-            <div className="px-6 py-8 prose prose-orange max-w-none">
+            <div className="px-6 py-8 prose prose-blue max-w-none">
               <section className="mb-12">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">How Reading Streaks Work</h2>
                 <div className="mb-8">
@@ -337,7 +312,7 @@ const ReadingStreaks = () => {
                   If you're having trouble with reading streaks or have questions, our support team is here to assist you.
                 </p>
                 <Button
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                   asChild
                   trackingId="contact_from_reading_streaks"
                 >

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Meta } from "@/components/Meta";
 import { Header } from "@/components/Header";
@@ -39,9 +38,9 @@ const AddBooks = () => {
           {/* Main Content */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Title Section */}
-            <div className="bg-blue-50 px-6 py-8 border-b border-gray-100">
+            <div className="bg-[#f2fcf6] px-6 py-8 border-b border-gray-100">
               <div className="flex items-center gap-4 mb-4">
-                <div className="rounded-full p-3 bg-blue-100 text-blue-600">
+                <div className="rounded-full p-3 bg-green-100 text-green-600">
                   <BookPlus className="h-6 w-6" />
                 </div>
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
