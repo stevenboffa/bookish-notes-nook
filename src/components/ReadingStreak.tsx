@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay, addDays } from "date-fns";
@@ -299,31 +298,59 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
       new Date(b.activity_date).getTime() - new Date(a.activity_date).getTime()
     );
     
-    // Check if there's a check-in for today
-    const mostRecentActivity = sortedActivities[0];
-    const mostRecentDate = parseLocalDate(mostRecentActivity.activity_date);
+    // Check if there's activity for today
+    const hasTodayActivity = sortedActivities.some(activity => 
+      isDateToday(parseLocalDate(activity.activity_date))
+    );
     
-    if (!isDateToday(mostRecentDate) && !isDateYesterday(mostRecentDate)) {
-      // If the most recent activity isn't today or yesterday, the streak is broken
-      return 0;
+    // If there's no activity today, check if the most recent is from yesterday
+    if (!hasTodayActivity) {
+      const hasYesterdayActivity = sortedActivities.some(activity => 
+        isDateYesterday(parseLocalDate(activity.activity_date))
+      );
+      
+      // If there's no activity for yesterday either, then streak is broken
+      if (!hasYesterdayActivity) {
+        return 0;
+      }
     }
     
-    // Start counting the streak
-    let streak = 1; // Start with 1 for the most recent activity
-    let expectedDate = mostRecentDate;
+    // Start counting the streak from today or yesterday
+    let streak = hasTodayActivity ? 1 : 0;
+    let currentDate = hasTodayActivity 
+      ? getTodayStart() 
+      : addDays(getTodayStart(), -1); // Start from yesterday if no today check-in
     
-    // Iterate through the rest of the activities to find consecutive days
-    for (let i = 1; i < sortedActivities.length; i++) {
-      const currentDate = parseLocalDate(sortedActivities[i].activity_date);
-      const expectedPreviousDate = addDays(expectedDate, -1);
+    // Look for consecutive days backwards
+    for (let i = 0; i < sortedActivities.length; i++) {
+      const activityDate = parseLocalDate(sortedActivities[i].activity_date);
       
-      // If this activity is from the expected previous day, increment streak
-      if (startOfDay(currentDate).getTime() === startOfDay(expectedPreviousDate).getTime()) {
+      // Skip if this is today's activity and we've already counted it
+      if (hasTodayActivity && i === 0 && isDateToday(activityDate)) {
+        continue;
+      }
+      
+      // If this date matches our current expected date, increment streak
+      if (startOfDay(activityDate).getTime() === startOfDay(currentDate).getTime()) {
         streak++;
-        expectedDate = currentDate;
-      } else {
-        // Chain broken, stop counting
-        break;
+        currentDate = addDays(currentDate, -1); // Move to previous day
+      } 
+      // If we find activity for a previous date, check if it's consecutive
+      else if (startOfDay(activityDate).getTime() < startOfDay(currentDate).getTime()) {
+        // Calculate how many days we've jumped
+        const daysDifference = differenceInDays(
+          currentDate,
+          activityDate
+        );
+        
+        // If more than 1 day gap, the streak is broken
+        if (daysDifference > 1) {
+          break;
+        }
+        
+        // Otherwise, it's the next consecutive day
+        streak++;
+        currentDate = addDays(activityDate, -1); // Move to previous day
       }
     }
     
@@ -420,7 +447,8 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
 
       setIsLoading(true);
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = format(new Date(), 'yyyy-MM-dd');
+      console.log("Checking in for date:", today);
 
       const { error } = await supabase
         .from('reading_activity')
@@ -477,8 +505,9 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
             updatedActivity = [newActivity, ...allActivity];
           }
           
-          // Calculate new streak
+          // Calculate new streak with the today's activity included
           const newStreak = calculateStreak(updatedActivity);
+          console.log("Updated streak after check-in:", newStreak);
           setCurrentStreak(newStreak);
           
           // Update longest streak if needed
