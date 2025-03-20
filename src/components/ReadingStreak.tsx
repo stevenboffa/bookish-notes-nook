@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay, addDays } from "date-fns";
@@ -394,35 +395,8 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
       console.log("Current streak calculated:", streak);
       setCurrentStreak(streak);
       
-      // Calculate longest streak
-      if (data.length > 0) {
-        let maxStreak = 1;
-        let tempStreak = 1;
-        
-        // Sort data chronologically for longest streak calculation
-        const chronological = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
-          new Date(a.activity_date).getTime() - new Date(b.activity_date).getTime()
-        );
-        
-        for (let i = 1; i < chronological.length; i++) {
-          const currentDate = parseLocalDate(chronological[i].activity_date);
-          const prevDate = parseLocalDate(chronological[i-1].activity_date);
-          
-          // Check if dates are consecutive
-          if (differenceInDays(currentDate, prevDate) === 1) {
-            tempStreak++;
-            maxStreak = Math.max(maxStreak, tempStreak);
-          } else {
-            tempStreak = 1;
-          }
-        }
-        
-        // Set longest streak (either previous longest or current)
-        setLongestStreak(Math.max(maxStreak, streak));
-      } else if (streak > 0) {
-        // If there's only one entry (today), set longest streak to 1
-        setLongestStreak(streak);
-      }
+      // Calculate longest streak - use same function for consistency
+      setLongestStreak(Math.max(streak, await calculateLongestStreak(data)));
       
     } catch (error) {
       console.error('Error fetching reading activity:', error);
@@ -430,6 +404,44 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // New function to calculate the longest streak more accurately
+  const calculateLongestStreak = async (activities: ReadingActivity[]): Promise<number> => {
+    if (!activities || activities.length === 0) return 0;
+    
+    // Get all dates with activity
+    const activityDates = activities.map(activity => 
+      format(parseLocalDate(activity.activity_date), 'yyyy-MM-dd')
+    );
+    
+    // Remove duplicate dates
+    const uniqueDates = [...new Set(activityDates)].map(dateStr => parseISO(dateStr));
+    
+    // Sort chronologically (oldest first)
+    uniqueDates.sort((a, b) => a.getTime() - b.getTime());
+    
+    let maxStreak = 0;
+    let currentStreak = 1;  // Start with 1 for the first day
+    
+    // Calculate longest streak by finding consecutive days
+    for (let i = 1; i < uniqueDates.length; i++) {
+      const daysDiff = differenceInDays(uniqueDates[i], uniqueDates[i-1]);
+      
+      if (daysDiff === 1) {
+        // Consecutive day
+        currentStreak++;
+      } else {
+        // Streak broken, reset counter
+        maxStreak = Math.max(maxStreak, currentStreak);
+        currentStreak = 1;
+      }
+    }
+    
+    // Check final streak
+    maxStreak = Math.max(maxStreak, currentStreak);
+    
+    return maxStreak;
   };
 
   const handleCheckIn = async () => {
@@ -509,10 +521,9 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
           console.log("Updated streak after check-in:", newStreak);
           setCurrentStreak(newStreak);
           
-          // Update longest streak if needed
-          if (newStreak > longestStreak) {
-            setLongestStreak(newStreak);
-          }
+          // Update longest streak using the same algorithm for consistency
+          const newLongestStreak = await calculateLongestStreak(updatedActivity);
+          setLongestStreak(Math.max(newStreak, newLongestStreak));
         }
         
         // Update lastReadDate to today
