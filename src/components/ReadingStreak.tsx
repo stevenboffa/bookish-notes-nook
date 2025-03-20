@@ -315,42 +315,41 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
       }
     }
     
-    // Start counting the streak from today or yesterday
-    let streak = hasTodayActivity ? 1 : 0;
-    let currentDate = hasTodayActivity 
+    // Start counting the streak
+    let streak = hasTodayActivity ? 1 : 0; // Start with 1 if we have a check-in today
+    let previousDate = hasTodayActivity 
       ? getTodayStart() 
       : addDays(getTodayStart(), -1); // Start from yesterday if no today check-in
+    
+    // Track which dates we've already counted to avoid double counting
+    const countedDates = new Set<string>();
+    if (hasTodayActivity) {
+      countedDates.add(format(getTodayStart(), 'yyyy-MM-dd'));
+    }
     
     // Look for consecutive days backwards
     for (let i = 0; i < sortedActivities.length; i++) {
       const activityDate = parseLocalDate(sortedActivities[i].activity_date);
+      const dateString = format(startOfDay(activityDate), 'yyyy-MM-dd');
       
-      // Skip if this is today's activity and we've already counted it
-      if (hasTodayActivity && i === 0 && isDateToday(activityDate)) {
+      // Skip if we've already counted this date
+      if (countedDates.has(dateString)) {
         continue;
       }
       
-      // If this date matches our current expected date, increment streak
-      if (startOfDay(activityDate).getTime() === startOfDay(currentDate).getTime()) {
+      // If this date matches our expected previous day, increment streak
+      if (differenceInDays(previousDate, activityDate) === 1) {
         streak++;
-        currentDate = addDays(currentDate, -1); // Move to previous day
+        countedDates.add(dateString);
+        previousDate = activityDate;
       } 
-      // If we find activity for a previous date, check if it's consecutive
-      else if (startOfDay(activityDate).getTime() < startOfDay(currentDate).getTime()) {
-        // Calculate how many days we've jumped
-        const daysDifference = differenceInDays(
-          currentDate,
-          activityDate
-        );
-        
-        // If more than 1 day gap, the streak is broken
-        if (daysDifference > 1) {
-          break;
-        }
-        
-        // Otherwise, it's the next consecutive day
-        streak++;
-        currentDate = addDays(activityDate, -1); // Move to previous day
+      // If we encounter a gap larger than 1 day, the streak is broken
+      else if (differenceInDays(previousDate, activityDate) > 1) {
+        break;
+      }
+      // If it's the same day as previous (duplicate entry), just update previous date
+      else if (differenceInDays(previousDate, activityDate) === 0) {
+        countedDates.add(dateString);
       }
     }
     
@@ -484,7 +483,7 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
         }
         
         if (allActivity) {
-          // Add the new check-in to the activity list if it's not there already
+          // Check if today's activity is already in the dataset
           const todayExists = allActivity.some(activity => 
             isDateToday(parseLocalDate(activity.activity_date))
           );
