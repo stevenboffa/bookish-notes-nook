@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useEffect, useState } from "react";
 import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay, addDays } from "date-fns";
@@ -317,13 +316,13 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
         return;
       }
 
+      // Store the most recent read date
       if (data[0]) {
         setLastReadDate(parseLocalDate(data[0].activity_date));
       }
 
       // Calculate current streak
       let streak = 0;
-      let latestDate: Date | null = null;
       
       // Sort data by date (most recent first)
       const sortedData = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
@@ -331,54 +330,61 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
       );
       
       if (sortedData.length > 0) {
-        // If checked in today, start with 1
-        latestDate = parseLocalDate(sortedData[0].activity_date);
+        const latestDate = parseLocalDate(sortedData[0].activity_date);
         
+        // If checked in today, start with 1
         if (isDateToday(latestDate)) {
           streak = 1;
           
-          // Check previous days
           let previousDate = addDays(getTodayStart(), -1);
+          let consecutiveDays = true;
+          let i = 1;
           
-          for (let i = 1; i < sortedData.length; i++) {
+          // Check for consecutive previous days
+          while (i < sortedData.length && consecutiveDays) {
             const currentDate = parseLocalDate(sortedData[i].activity_date);
             
-            // If the current date matches the expected previous day, increment streak
             if (startOfDay(currentDate).getTime() === startOfDay(previousDate).getTime()) {
               streak++;
               previousDate = addDays(previousDate, -1);
             } else {
-              break;
+              consecutiveDays = false;
             }
+            i++;
           }
-        } else if (isDateYesterday(latestDate)) {
-          // If last check-in was yesterday, streak is at least 1
-          streak = 1;
+        } 
+        // If last check-in was yesterday, we need to count previous days
+        else if (isDateYesterday(latestDate)) {
+          streak = 1; // Start with 1 for yesterday
           
-          // Check previous days
           let previousDate = addDays(latestDate, -1);
+          let consecutiveDays = true;
+          let i = 1;
           
-          for (let i = 1; i < sortedData.length; i++) {
+          // Check for consecutive previous days
+          while (i < sortedData.length && consecutiveDays) {
             const currentDate = parseLocalDate(sortedData[i].activity_date);
             
             if (startOfDay(currentDate).getTime() === startOfDay(previousDate).getTime()) {
               streak++;
               previousDate = addDays(previousDate, -1);
             } else {
-              break;
+              consecutiveDays = false;
             }
+            i++;
           }
         } else {
-          // Last check-in was more than 1 day ago, streak is broken
+          // Last check-in was more than 1 day ago, streak broken
           streak = 0;
         }
       }
       
+      console.log("Current streak calculated:", streak);
       setCurrentStreak(streak);
       
       // Calculate longest streak
       if (data.length > 0) {
-        let maxStreak = streak; // Start with current streak
+        let maxStreak = 1;
         let tempStreak = 1;
         
         // Sort data chronologically for longest streak calculation
@@ -399,7 +405,11 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
           }
         }
         
-        setLongestStreak(maxStreak);
+        // Set longest streak (either previous longest or current)
+        setLongestStreak(Math.max(maxStreak, streak));
+      } else if (streak > 0) {
+        // If there's only one entry (today), set longest streak to 1
+        setLongestStreak(streak);
       }
       
     } catch (error) {
@@ -444,20 +454,36 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
         }
       } else {
         toast.success("Reading activity recorded!");
+        
+        // Update UI immediately
         setCheckedInToday(true);
         
-        // Update the streak immediately for better UX
-        setCurrentStreak(prev => {
-          const lastCheckWasYesterday = lastReadDate && isDateYesterday(lastReadDate);
-          // If previous check was yesterday, increment streak, otherwise start at 1
-          return lastCheckWasYesterday ? prev + 1 : 1;
-        });
+        // Calculate new streak value
+        let newStreakValue = 1; // Start with 1 for today's check-in
+        
+        if (lastReadDate) {
+          // If previous check was yesterday, increment existing streak
+          if (isDateYesterday(lastReadDate)) {
+            newStreakValue = currentStreak + 1;
+          }
+          // Otherwise, this is a new streak starting at 1
+        }
+        
+        console.log("Setting new streak value to:", newStreakValue);
+        setCurrentStreak(newStreakValue);
         
         // Update longest streak if needed
-        setLongestStreak(prev => Math.max(prev, currentStreak + 1));
+        if (newStreakValue > longestStreak) {
+          setLongestStreak(newStreakValue);
+        }
+        
+        // Update lastReadDate to today
+        setLastReadDate(new Date());
         
         // Refresh data from server to ensure everything is correct
-        await fetchReadingActivity();
+        setTimeout(() => {
+          fetchReadingActivity();
+        }, 500);
       }
     } catch (error) {
       console.error('Error recording reading activity:', error);
