@@ -461,9 +461,21 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
             isDateToday(parseLocalDate(activity.activity_date))
           );
           
-          const updatedActivity = todayExists 
-            ? allActivity 
-            : [{ activity_date: today, user_id: session.user.id, activity_type: 'check_in' }, ...allActivity];
+          let updatedActivity = [...allActivity];
+          
+          // If today's check-in isn't already in the data, add it with proper structure
+          if (!todayExists) {
+            // Create a complete ReadingActivity object with all required fields
+            const newActivity: ReadingActivity = {
+              id: crypto.randomUUID(), // Generate a temporary ID
+              user_id: session.user.id,
+              activity_date: today,
+              activity_type: 'check_in',
+              created_at: new Date().toISOString() // Add the current timestamp
+            };
+            
+            updatedActivity = [newActivity, ...allActivity];
+          }
           
           // Calculate new streak
           const newStreak = calculateStreak(updatedActivity);
