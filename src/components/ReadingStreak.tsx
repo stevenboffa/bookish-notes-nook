@@ -1,6 +1,7 @@
+
 import React from "react";
 import { useEffect, useState } from "react";
-import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay } from "date-fns";
+import { differenceInDays, format, isYesterday, isToday, parseISO, startOfDay, addDays } from "date-fns";
 import { Flame, Calendar, Trophy, ChevronUp, ChevronDown, CheckCircle2, Quote, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,8 +61,7 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
 
   const isDateYesterday = (date: Date) => {
     const localToday = getTodayStart();
-    const localYesterday = new Date(localToday);
-    localYesterday.setDate(localYesterday.getDate() - 1);
+    const localYesterday = addDays(localToday, -1);
     return startOfDay(date).getTime() === localYesterday.getTime();
   };
 
@@ -306,52 +306,82 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
 
       if (error) throw error;
 
+      // Check if user checked in today
+      const todayCheck = data?.find((record: ReadingActivity) => 
+        isDateToday(parseLocalDate(record.activity_date))
+      );
+      setCheckedInToday(!!todayCheck);
+
       if (!data || data.length === 0) {
         setIsLoading(false);
         return;
       }
 
-      const todayCheck = data.find((record: ReadingActivity) => 
-        isDateToday(parseLocalDate(record.activity_date))
-      );
-      setCheckedInToday(!!todayCheck);
-
       if (data[0]) {
         setLastReadDate(parseLocalDate(data[0].activity_date));
       }
 
+      // Calculate current streak
       let streak = 0;
       let latestDate: Date | null = null;
       
+      // Sort data by date (most recent first)
       const sortedData = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
         new Date(b.activity_date).getTime() - new Date(a.activity_date).getTime()
       );
       
       if (sortedData.length > 0) {
+        // If checked in today, start with 1
         latestDate = parseLocalDate(sortedData[0].activity_date);
         
-        if (isDateToday(latestDate) || isDateYesterday(latestDate)) {
+        if (isDateToday(latestDate)) {
           streak = 1;
+          
+          // Check previous days
+          let previousDate = addDays(getTodayStart(), -1);
           
           for (let i = 1; i < sortedData.length; i++) {
             const currentDate = parseLocalDate(sortedData[i].activity_date);
-            const prevDate = parseLocalDate(sortedData[i-1].activity_date);
             
-            if (differenceInDays(prevDate, currentDate) === 1) {
+            // If the current date matches the expected previous day, increment streak
+            if (startOfDay(currentDate).getTime() === startOfDay(previousDate).getTime()) {
               streak++;
+              previousDate = addDays(previousDate, -1);
             } else {
               break;
             }
           }
+        } else if (isDateYesterday(latestDate)) {
+          // If last check-in was yesterday, streak is at least 1
+          streak = 1;
+          
+          // Check previous days
+          let previousDate = addDays(latestDate, -1);
+          
+          for (let i = 1; i < sortedData.length; i++) {
+            const currentDate = parseLocalDate(sortedData[i].activity_date);
+            
+            if (startOfDay(currentDate).getTime() === startOfDay(previousDate).getTime()) {
+              streak++;
+              previousDate = addDays(previousDate, -1);
+            } else {
+              break;
+            }
+          }
+        } else {
+          // Last check-in was more than 1 day ago, streak is broken
+          streak = 0;
         }
       }
       
       setCurrentStreak(streak);
       
+      // Calculate longest streak
       if (data.length > 0) {
-        let maxStreak = 1;
+        let maxStreak = streak; // Start with current streak
         let tempStreak = 1;
         
+        // Sort data chronologically for longest streak calculation
         const chronological = [...data].sort((a: ReadingActivity, b: ReadingActivity) => 
           new Date(a.activity_date).getTime() - new Date(b.activity_date).getTime()
         );
@@ -360,6 +390,7 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
           const currentDate = parseLocalDate(chronological[i].activity_date);
           const prevDate = parseLocalDate(chronological[i-1].activity_date);
           
+          // Check if dates are consecutive
           if (differenceInDays(currentDate, prevDate) === 1) {
             tempStreak++;
             maxStreak = Math.max(maxStreak, tempStreak);
@@ -403,10 +434,31 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
           activity_type: 'check_in'
         });
 
-      if (error) throw error;
-
-      toast.success("Reading activity recorded!");
-      await fetchReadingActivity();
+      if (error) {
+        if (error.code === '23505') {
+          // Constraint violation - already checked in today
+          setCheckedInToday(true);
+          toast.info("You've already checked in today!");
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success("Reading activity recorded!");
+        setCheckedInToday(true);
+        
+        // Update the streak immediately for better UX
+        setCurrentStreak(prev => {
+          const lastCheckWasYesterday = lastReadDate && isDateYesterday(lastReadDate);
+          // If previous check was yesterday, increment streak, otherwise start at 1
+          return lastCheckWasYesterday ? prev + 1 : 1;
+        });
+        
+        // Update longest streak if needed
+        setLongestStreak(prev => Math.max(prev, currentStreak + 1));
+        
+        // Refresh data from server to ensure everything is correct
+        await fetchReadingActivity();
+      }
     } catch (error) {
       console.error('Error recording reading activity:', error);
       toast.error('Failed to record reading activity');
