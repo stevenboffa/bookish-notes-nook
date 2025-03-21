@@ -32,6 +32,7 @@ import EditBookDetails from "./pages/resources/EditBookDetails";
 import NoteTaking from "./pages/resources/NoteTaking";
 import ReadingStreaks from "./pages/resources/ReadingStreaks";
 import AddReviewScore from "./pages/resources/AddReviewScore";
+import Collections from "./pages/resources/Collections"; // Add import for Collections page
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -154,6 +155,7 @@ const App = () => (
                 <Route path="/resources/note-taking" element={<NoteTaking />} />
                 <Route path="/resources/reading-streaks" element={<ReadingStreaks />} />
                 <Route path="/resources/add-review-score" element={<AddReviewScore />} />
+                <Route path="/resources/collections" element={<Collections />} /> {/* Add new route */}
               </Route>
 
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
