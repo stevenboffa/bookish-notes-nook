@@ -276,13 +276,6 @@ const ConnectFriends = () => {
                       <p className="text-gray-700 mb-4">
                         You'll see a list of books in your friend's library, including titles, authors, and their personal ratings.
                       </p>
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <img 
-                          src="/lovable-uploads/c6ef2801-ecc1-4254-84df-fb60eb4659c3.png" 
-                          alt="Friend's book library" 
-                          className="rounded-lg shadow-sm w-full"
-                        />
-                      </div>
                     </div>
                   </div>
                 </div>
