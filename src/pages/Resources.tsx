@@ -150,7 +150,6 @@ const Resources = () => {
       <Header />
       
       <main className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-gray-50 to-white">
-        {/* Hero Section */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('/lovable-uploads/339047fc-5091-496e-9e2a-2f7a356dd1b4.png')] bg-no-repeat bg-cover opacity-5"></div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative z-10">
@@ -176,7 +175,6 @@ const Resources = () => {
           </div>
         </section>
 
-        {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <section className="mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
@@ -188,7 +186,6 @@ const Resources = () => {
               Want to see all of our guides? Browse the <Link to="/resources" className="text-indigo-600 hover:underline font-medium">full resource library</Link>!
             </p>
 
-            {/* Resource Sections */}
             <ResourceSection 
               title="Getting Started" 
               resources={gettingStartedResources} 
@@ -220,7 +217,6 @@ const Resources = () => {
             />
           </section>
 
-          {/* Newsletter Signup */}
           <section className="bg-indigo-50 rounded-2xl p-8 mb-16">
             <div className="max-w-3xl mx-auto text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
