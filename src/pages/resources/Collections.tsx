@@ -19,8 +19,6 @@ const Collections = () => {
     { id: "2", name: "Sci-Fi Favorites" }
   ]);
   const [newCollectionName, setNewCollectionName] = useState("");
-  const [tags, setTags] = useState(["fiction", "non-fiction", "recommended", "borrowed"]);
-  const [newTag, setNewTag] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<string | null>("1");
 
   const handleAddCollection = () => {
@@ -40,20 +38,9 @@ const Collections = () => {
     }
   };
 
-  const handleAddTag = () => {
-    if (newTag.trim() === "" || tags.includes(newTag.trim().toLowerCase())) return;
-    setTags([...tags, newTag.trim().toLowerCase()]);
-    setNewTag("");
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent, action: "tag" | "collection") => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (action === "tag") handleAddTag();
-      else handleAddCollection();
+      handleAddCollection();
     }
   };
 
@@ -61,7 +48,7 @@ const Collections = () => {
     <>
       <Meta
         title="Creating Collections and Tagging Books - Resources"
-        description="Learn how to organize your library with collections and tags in BookishNotes."
+        description="Learn how to organize your library with collections in BookishNotes."
       />
       <Header />
       
@@ -96,7 +83,7 @@ const Collections = () => {
                 </h1>
               </div>
               <p className="text-gray-600">
-                Learn how to organize your library effectively with collections and tags in BookishNotes, making it easier to find and group your books.
+                Learn how to organize your library effectively with collections in BookishNotes, making it easier to find and group your books.
               </p>
             </div>
             
@@ -104,22 +91,19 @@ const Collections = () => {
             <div className="px-6 py-8 prose prose-blue max-w-none">
               <section className="mb-12">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  What are Collections and Tags?
+                  What are Collections?
                 </h2>
                 <div className="prose prose-indigo max-w-none">
                   <p>
-                    Collections and tags are two powerful ways to organize your books in BookishNotes:
+                    Collections (sometimes also referred to as tags) are a powerful way to organize your books in BookishNotes:
                   </p>
                   <ul>
                     <li>
                       <strong>Collections</strong> are like virtual bookshelves that help you group books together. For example, you might create collections for "Summer Reading," "Book Club Selections," or "Favorites of 2024."
                     </li>
-                    <li>
-                      <strong>Tags</strong> are flexible labels that can be applied to books across different collections. A book can have multiple tags like "history," "borrowed," "to-discuss," etc.
-                    </li>
                   </ul>
                   <p>
-                    Using both collections and tags gives you a flexible system to organize your reading and find books quickly when you need them.
+                    You can use collections to organize your reading and find books quickly when you need them.
                   </p>
                 </div>
               </section>
@@ -149,7 +133,7 @@ const Collections = () => {
                         placeholder="Collection name (e.g. 'Summer 2024', 'Sci-Fi Favorites')"
                         value={newCollectionName}
                         onChange={(e) => setNewCollectionName(e.target.value)}
-                        onKeyPress={(e) => handleKeyPress(e, "collection")}
+                        onKeyPress={handleKeyPress}
                         className="flex-1"
                       />
                       <Button 
@@ -264,180 +248,47 @@ const Collections = () => {
                 </div>
               </section>
               
-              {/* Tags Section */}
+              {/* Advanced Usage Section */}
               <section className="mb-12">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Using Tags for Flexible Organization
-                </h2>
-                <div className="prose prose-indigo max-w-none mb-6">
-                  <p>
-                    While collections help you group books, tags give you a more flexible way to label and categorize your books. A book can have multiple tags, and you can filter your library by tag.
-                  </p>
-                </div>
-                
-                {/* Demo for Adding Tags */}
-                <Card className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Interactive Demo: Adding Tags</h3>
-                  
-                  <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                    <Label htmlFor="new-tag" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Create a new tag
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="new-tag"
-                        placeholder="Tag name (e.g. 'fiction', 'favorite', 'to-discuss')"
-                        value={newTag}
-                        onChange={(e) => setNewTag(e.target.value)}
-                        onKeyPress={(e) => handleKeyPress(e, "tag")}
-                        className="flex-1"
-                      />
-                      <Button 
-                        onClick={handleAddTag}
-                        disabled={newTag.trim() === "" || tags.includes(newTag.trim().toLowerCase())}
-                      >
-                        <Tag className="h-4 w-4 mr-2" />
-                        Add
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-6">
-                    <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Your tags
-                    </Label>
-                    <div className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex flex-wrap gap-2">
-                        {tags.map(tag => (
-                          <Badge 
-                            key={tag} 
-                            variant="outline" 
-                            className="py-1.5 px-3 bg-white text-gray-700 hover:bg-gray-50 cursor-pointer flex items-center gap-1 group"
-                          >
-                            <Tag className="h-3 w-3 mr-1" />
-                            {tag}
-                            <button 
-                              className="text-gray-400 group-hover:text-gray-600 ml-1"
-                              onClick={() => handleRemoveTag(tag)}
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-sm text-gray-500 italic">
-                    <p>Note: This is a demo only. Tags created here won't be saved to your account.</p>
-                  </div>
-                </Card>
-                
-                <div className="prose prose-indigo max-w-none">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">How to Add and Use Tags</h3>
-                  
-                  <ol className="space-y-6 mt-4">
-                    <li className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-bold">
-                        1
-                      </div>
-                      <div>
-                        <h4 className="text-base font-medium text-gray-900">Open the Book Details</h4>
-                        <p className="text-gray-600 mt-1">Navigate to any book in your library and open its details page.</p>
-                      </div>
-                    </li>
-                    <li className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-bold">
-                        2
-                      </div>
-                      <div>
-                        <h4 className="text-base font-medium text-gray-900">Find the Tags Section</h4>
-                        <p className="text-gray-600 mt-1">Scroll to the "Tags" section in the book details (or click "Edit" if you're viewing the book details).</p>
-                      </div>
-                    </li>
-                    <li className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-bold">
-                        3
-                      </div>
-                      <div>
-                        <h4 className="text-base font-medium text-gray-900">Add Tags to the Book</h4>
-                        <p className="text-gray-600 mt-1">Type tag names in the input field and press Enter after each tag. You can also select from existing tags that you've used before.</p>
-                      </div>
-                    </li>
-                    <li className="flex gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-800 font-bold">
-                        4
-                      </div>
-                      <div>
-                        <h4 className="text-base font-medium text-gray-900">Filter Books by Tag</h4>
-                        <p className="text-gray-600 mt-1">From your library view, use the filter option to show only books with specific tags.</p>
-                      </div>
-                    </li>
-                  </ol>
-                  
-                  <Alert className="bg-indigo-50 border-indigo-200 text-indigo-800 my-6">
-                    <AlertDescription>
-                      <div className="flex items-start gap-3">
-                        <Tag className="h-5 w-5 text-indigo-500 mt-0.5" />
-                        <div>
-                          <p className="font-medium">Tag Ideas for Better Organization</p>
-                          <p className="text-indigo-700/80">
-                            Consider using tags like "to-discuss" for book club picks, "borrowed" for books you need to return, "reference" for books you frequently consult, or emotion-based tags like "inspiring" or "thought-provoking" to help remember how books made you feel.
-                          </p>
-                        </div>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              </section>
-              
-              {/* Combined Strategy Section */}
-              <section className="mb-12">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Combining Collections and Tags for Better Organization
+                  Advanced Collection Usage
                 </h2>
                 
                 <div className="prose prose-indigo max-w-none">
                   <p>
-                    The most powerful approach is to use both collections and tags together:
+                    Collections in BookishNotes are flexible and powerful. Here are some advanced ways to use them:
                   </p>
                   
                   <div className="my-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Example Organization System</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Example Collection System</h3>
                     
                     <div className="mb-4">
-                      <strong className="text-indigo-700">Collections:</strong>
                       <ul className="mt-2 space-y-1">
                         <li>📚 Currently Reading</li>
                         <li>📚 Book Club Selections</li>
                         <li>📚 Summer 2024</li>
                         <li>📚 To Read Next</li>
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <strong className="text-amber-700">Tags:</strong>
-                      <ul className="mt-2 space-y-1">
-                        <li>🏷️ fiction, non-fiction, biography, history</li>
-                        <li>🏷️ favorite, recommended, must-read</li>
-                        <li>🏷️ borrowed, library-book, owned</li>
-                        <li>🏷️ work-related, personal-development</li>
+                        <li>📚 Fiction</li>
+                        <li>📚 Non-Fiction</li>
+                        <li>📚 Borrowed</li>
+                        <li>📚 Favorites</li>
+                        <li>📚 Work-Related</li>
                       </ul>
                     </div>
                   </div>
                   
                   <p>
-                    With this system, you could have a book in your "Book Club Selections" collection that has tags like "fiction," "favorite," and "owned."
+                    With this system, you could have a book in both your "Book Club Selections" collection and your "Fiction" collection, making it easy to find regardless of how you're browsing your library.
                   </p>
                   
-                  <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Advanced Filtering</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Collection Combinations</h3>
                   <p>
-                    When you combine collections and tags, you can perform powerful filtering operations like:
+                    One of the most powerful features of collections is that a book can belong to multiple collections at once, allowing you to create different organizational views:
                   </p>
                   <ul>
-                    <li>Show all "fiction" books in your "Summer 2024" collection</li>
-                    <li>Find all "borrowed" books that are in your "Currently Reading" collection</li>
-                    <li>View all books tagged as "favorite" across all your collections</li>
+                    <li>A book can be in both "Science Fiction" and "Favorites" collections</li>
+                    <li>A book can be in both "Currently Reading" and "Book Club" collections</li>
+                    <li>A book can be in "Borrowed" and "Non-Fiction" collections</li>
                   </ul>
                 </div>
                 
@@ -447,8 +298,77 @@ const Collections = () => {
                     Filtering Your Library
                   </h3>
                   <p className="text-amber-700">
-                    In your BookishNotes library, use the filtering options in the sidebar to combine collection and tag filters. This allows you to find exactly the books you're looking for, even in a large library.
+                    In your BookishNotes library, use the filtering options in the sidebar to filter by collection. This allows you to find exactly the books you're looking for, even in a large library.
                   </p>
+                </div>
+              </section>
+              
+              {/* Collection Ideas Section */}
+              <section className="mb-12">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Collection Ideas for Better Organization
+                </h2>
+                
+                <div className="prose prose-indigo max-w-none">
+                  <p>
+                    Here are some collection ideas to help you organize your library effectively:
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                      <h4 className="font-medium text-blue-800 mb-2">Reading Status</h4>
+                      <ul className="text-blue-700 space-y-1 text-sm">
+                        <li>Currently Reading</li>
+                        <li>Finished</li>
+                        <li>To Read Next</li>
+                        <li>DNF (Did Not Finish)</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                      <h4 className="font-medium text-green-800 mb-2">Genres</h4>
+                      <ul className="text-green-700 space-y-1 text-sm">
+                        <li>Fiction</li>
+                        <li>Non-Fiction</li>
+                        <li>Mystery & Thriller</li>
+                        <li>Self Development</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                      <h4 className="font-medium text-amber-800 mb-2">Time-Based</h4>
+                      <ul className="text-amber-700 space-y-1 text-sm">
+                        <li>Summer 2024 Reading</li>
+                        <li>Holiday Reads</li>
+                        <li>Beach Books</li>
+                        <li>Books Read in 2023</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                      <h4 className="font-medium text-purple-800 mb-2">Personal</h4>
+                      <ul className="text-purple-700 space-y-1 text-sm">
+                        <li>Favorites</li>
+                        <li>Borrowed</li>
+                        <li>Book Club</li>
+                        <li>Recommendations</li>
+                      </ul>
+                    </div>
+                  </div>
+                  
+                  <Alert className="bg-indigo-50 border-indigo-200 text-indigo-800 my-6">
+                    <AlertDescription>
+                      <div className="flex items-start gap-3">
+                        <Tag className="h-5 w-5 text-indigo-500 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Collection Naming Tips</p>
+                          <p className="text-indigo-700/80">
+                            Keep collection names short and descriptive. Consider using emoji at the start of collection names (e.g., "📚 Favorites" or "🏖️ Beach Reads") to make them visually distinct and easier to scan.
+                          </p>
+                        </div>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </section>
 
@@ -458,7 +378,7 @@ const Collections = () => {
               <section>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Need Help?</h2>
                 <p className="text-gray-700 mb-4">
-                  If you're having trouble with collections or tags, our support team is here to assist you.
+                  If you're having trouble with collections, our support team is here to assist you.
                 </p>
                 <Button
                   className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -500,15 +420,15 @@ const Collections = () => {
               
               <Card className="border border-gray-100 hover:shadow-md transition-shadow">
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Friends</h3>
-                  <p className="text-gray-600 mb-4">Discover how to connect with friends and share your reading journey.</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Note Taking</h3>
+                  <p className="text-gray-600 mb-4">Discover how to take and organize notes for books you're reading.</p>
                   <Button
                     variant="outline"
                     className="w-full"
                     asChild
-                    trackingId="next_connect_friends"
+                    trackingId="next_note_taking"
                   >
-                    <Link to="/resources/connect-friends">
+                    <Link to="/resources/note-taking">
                       Read Guide →
                     </Link>
                   </Button>
@@ -525,3 +445,4 @@ const Collections = () => {
 };
 
 export default Collections;
+
