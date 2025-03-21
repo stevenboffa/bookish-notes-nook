@@ -6,6 +6,7 @@ import { Navigation } from "@/pages/Navigation";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { HelmetProvider } from 'react-helmet-async';
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import Welcome from "./pages/Welcome";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -120,6 +121,7 @@ const App = () => (
       <HelmetProvider>
         <TooltipProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <GoogleAnalytics />
             <Routes>
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
