@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +63,37 @@ export default function BlogPost() {
 
   const formattedDate = format(new Date(post.published_at), "MMMM d, yyyy");
 
+  // Extract headings from content for table of contents
+  const extractHeadings = (content) => {
+    const regex = /<h2[^>]*>(.*?)<\/h2>/g;
+    const headings = [];
+    let match;
+    
+    while ((match = regex.exec(content)) !== null) {
+      headings.push({
+        text: match[1].replace(/<[^>]*>/g, ''),
+        id: match[1].replace(/<[^>]*>/g, '').toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+      });
+    }
+    
+    return headings;
+  };
+  
+  const headings = extractHeadings(post.content);
+  
+  // Function to add IDs to headings in content
+  const addIdsToHeadings = (content) => {
+    return content.replace(
+      /<h2[^>]*>(.*?)<\/h2>/g, 
+      (match, group) => {
+        const id = group.replace(/<[^>]*>/g, '').toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+        return `<h2 id="${id}" class="scroll-mt-20">${group}</h2>`;
+      }
+    );
+  };
+  
+  const contentWithIds = addIdsToHeadings(post.content);
+
   return (
     <>
       <Helmet>
@@ -98,6 +130,27 @@ export default function BlogPost() {
                     </p>
                   </div>
                 )}
+                
+                {headings.length > 0 && (
+                  <div className="mb-12 p-6 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl">
+                    <h3 className="text-lg font-semibold mb-4">Table of Contents</h3>
+                    <ul className="space-y-2">
+                      {headings.map((heading, idx) => (
+                        <li key={idx}>
+                          <a 
+                            href={`#${heading.id}`}
+                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-2"
+                          >
+                            <span className="inline-block w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-800/50 text-center text-sm leading-6">
+                              {idx + 1}
+                            </span>
+                            <span>{heading.text}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <div 
                   className="prose prose-lg max-w-none dark:prose-invert
@@ -111,14 +164,72 @@ export default function BlogPost() {
                     prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
                     prose-pre:bg-muted prose-pre:text-primary-foreground
                     prose-li:mb-2"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
+                  dangerouslySetInnerHTML={{ __html: contentWithIds }}
                 />
+                
+                <div className="mt-16 p-6 bg-purple-50 dark:bg-purple-950/10 rounded-xl">
+                  <h3 className="text-2xl font-bold mb-4">Start Tracking Your Reading Journey Today</h3>
+                  <p className="text-muted-foreground mb-6">Sign up for BookishNotes to keep track of your books, take smart notes, and remember more of what you read.</p>
+                  <div className="flex flex-wrap gap-4">
+                    <a 
+                      href="/auth/sign-up" 
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                    >
+                      Sign Up Free
+                    </a>
+                    <a 
+                      href="/resources" 
+                      className="bg-white border border-indigo-200 hover:bg-indigo-50 text-indigo-700 px-6 py-3 rounded-lg font-medium transition-colors"
+                    >
+                      Explore Resources
+                    </a>
+                  </div>
+                </div>
               </div>
               
               {!isMobile && (
                 <div className="lg:w-1/3 lg:sticky lg:top-20 lg:self-start">
                   <div className="mt-8">
                     <SignUpWidget />
+                    
+                    <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800/20 rounded-xl">
+                      <h3 className="text-lg font-semibold mb-4">Related Resources</h3>
+                      <ul className="space-y-4">
+                        <li>
+                          <a 
+                            href="/resources/note-taking" 
+                            className="text-indigo-600 dark:text-indigo-400 hover:underline flex gap-2 items-start"
+                          >
+                            <span className="bg-indigo-100 dark:bg-indigo-800/50 p-2 rounded-full text-indigo-600 dark:text-indigo-300">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            </span>
+                            <span>Guide to Insightful Note Taking</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a 
+                            href="/resources/reading-streaks" 
+                            className="text-indigo-600 dark:text-indigo-400 hover:underline flex gap-2 items-start"
+                          >
+                            <span className="bg-indigo-100 dark:bg-indigo-800/50 p-2 rounded-full text-indigo-600 dark:text-indigo-300">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-flame"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                            </span>
+                            <span>Daily Reading Streaks</span>
+                          </a>
+                        </li>
+                        <li>
+                          <a 
+                            href="/resources/collections" 
+                            className="text-indigo-600 dark:text-indigo-400 hover:underline flex gap-2 items-start"
+                          >
+                            <span className="bg-indigo-100 dark:bg-indigo-800/50 p-2 rounded-full text-indigo-600 dark:text-indigo-300">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-folder-plus"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><line x1="12" x2="12" y1="10" y2="16"/><line x1="9" x2="15" y1="13" y2="13"/></svg>
+                            </span>
+                            <span>Creating Collections</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               )}
