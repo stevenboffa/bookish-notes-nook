@@ -35,6 +35,7 @@ import AddReviewScore from "./pages/resources/AddReviewScore";
 import Collections from "./pages/resources/Collections";
 import ConnectFriends from "./pages/resources/ConnectFriends";
 import AccountSettings from "./pages/resources/AccountSettings";
+import ProfileCustomization from "./pages/resources/ProfileCustomization";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -160,6 +161,7 @@ const App = () => (
                 <Route path="/resources/collections" element={<Collections />} />
                 <Route path="/resources/connect-friends" element={<ConnectFriends />} />
                 <Route path="/resources/account-settings" element={<AccountSettings />} />
+                <Route path="/resources/profile-customization" element={<ProfileCustomization />} />
               </Route>
 
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
