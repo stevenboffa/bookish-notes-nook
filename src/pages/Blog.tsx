@@ -24,6 +24,16 @@ export default function Blog() {
         .order("published_at", { ascending: false });
 
       if (error) throw error;
+      
+      // Update the cover image for the specific blog post
+      if (data) {
+        data.forEach(post => {
+          if (post.slug === "how-to-remember-what-you-read") {
+            post.cover_image = "/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png";
+          }
+        });
+      }
+      
       return data;
     },
   });
