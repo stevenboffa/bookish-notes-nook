@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +39,123 @@ export default function BlogPost() {
       if (data && data.slug === "how-to-remember-what-you-read") {
         data.cover_image = "/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png";
         data.cover_image_alt = "Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table";
+        
+        // Also replace images in the content
+        if (data.content) {
+          // Replace specific image in the "Why we forget what we read" section
+          data.content = data.content.replace(
+            /<img[^>]*src="[^"]*"[^>]*alt="[^"]*"[^>]*>/,
+            `<img src="/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png" alt="Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table" class="rounded-lg shadow-md my-8 w-full">`
+          );
+          
+          // Improve spacing for mobile on specific sections
+          data.content = data.content.replace(
+            /<p>The Forgetting Curve - German psychologist Hermann Ebbinghaus discovered[^<]*<\/p>/,
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>The Forgetting Curve</strong> - German psychologist Hermann Ebbinghaus discovered that without active recall, we forget approximately 70% of what we learn within 24 hours.</p></div>`
+          );
+          
+          data.content = data.content.replace(
+            /<p>Passive Reading - Simply passing your eyes over text[^<]*<\/p>/,
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Passive Reading</strong> - Simply passing your eyes over text without active engagement results in minimal retention.</p></div>`
+          );
+          
+          data.content = data.content.replace(
+            /<p>Information Overload - Our brains are constantly[^<]*<\/p>/,
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Information Overload</strong> - Our brains are constantly bombarded with information, making it difficult to prioritize and store new knowledge.</p></div>`
+          );
+          
+          data.content = data.content.replace(
+            /<p>Lack of Connection - Information that isn't[^<]*<\/p>/,
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Lack of Connection</strong> - Information that isn't connected to existing knowledge is harder to remember.</p></div>`
+          );
+          
+          // Improve the spacing for the Notes section
+          data.content = data.content.replace(
+            /<h3>Notes Section<\/h3>\s*<p>This is where you[^<]*<\/p>/,
+            `<div class="p-6 my-8 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+              <h3 class="text-xl font-bold mb-4">Notes Section</h3>
+              <p class="mb-4">This is where you write your main notes during reading.</p>
+            </div>`
+          );
+          
+          // Improve the spacing for the Example section
+          data.content = data.content.replace(
+            /<p>Example: "Author argues that deep work[^<]*<\/p>/,
+            `<div class="p-6 my-6 bg-gray-50 dark:bg-gray-800/20 rounded-xl border border-gray-100 dark:border-gray-800/30">
+              <p class="italic">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily."</p>
+            </div>`
+          );
+          
+          // Improve the spacing for Cues/Questions
+          data.content = data.content.replace(
+            /<h3>Cues\/Questions<\/h3>\s*<p>Write keywords or[^<]*<\/p>/,
+            `<div class="p-6 my-8 bg-amber-50 dark:bg-amber-950/10 rounded-xl border border-amber-100 dark:border-amber-800/30">
+              <h3 class="text-xl font-bold mb-4">Cues/Questions</h3>
+              <p class="mb-4">Write keywords or questions that relate to your notes.</p>
+            </div>`
+          );
+          
+          // Improve spacing for the examples in Cues/Questions
+          data.content = data.content.replace(
+            /<p>"Deep work duration\?"<\/p>\s*<p>"Why 4 hours specifically\?<\/p>/,
+            `<div class="p-4 my-4 bg-gray-50 dark:bg-gray-800/20 rounded-lg">
+              <p class="italic mb-2">"Deep work duration?"</p>
+              <p class="italic">"Why 4 hours specifically?"</p>
+            </div>`
+          );
+          
+          // Improve spacing for when to use voice notes
+          data.content = data.content.replace(
+            /<h3>When to Use Voice Notes:<\/h3>\s*<p>When you want[^<]*<\/p>\s*<p>For complex[^<]*<\/p>\s*<p>When on the go[^<]*<\/p>\s*<p>To record[^<]*<\/p>/,
+            `<div class="p-6 my-8 bg-blue-50 dark:bg-blue-950/10 rounded-xl border border-blue-100 dark:border-blue-800/30">
+              <h3 class="text-xl font-bold mb-4">When to Use Voice Notes:</h3>
+              <ul class="list-disc pl-5 space-y-3">
+                <li>When you want to capture your emotional reaction to a passage</li>
+                <li>For complex ideas that are easier to explain verbally than in writing</li>
+                <li>When on the go and reading in places where typing is impractical</li>
+                <li>To record your thoughts during reading for later review</li>
+              </ul>
+            </div>`
+          );
+          
+          // Improve spacing for ways to teach
+          data.content = data.content.replace(
+            /<h3>Ways to "teach" what you've read:<\/h3>\s*<p>Share book[^<]*<\/p>\s*<p>Write a summary[^<]*<\/p>\s*<p>Discuss the book[^<]*<\/p>\s*<p>Create voice[^<]*<\/p>/,
+            `<div class="p-6 my-8 bg-green-50 dark:bg-green-950/10 rounded-xl border border-green-100 dark:border-green-800/30">
+              <h3 class="text-xl font-bold mb-4">Ways to "teach" what you've read:</h3>
+              <ul class="list-disc pl-5 space-y-3">
+                <li>Share book recommendations with friends through BookishNotes</li>
+                <li>Write a summary of the book in your own words</li>
+                <li>Discuss the book's key points with a reading partner</li>
+                <li>Create voice notes explaining complex concepts</li>
+              </ul>
+            </div>`
+          );
+          
+          // Improve the 5-step list at the end
+          data.content = data.content.replace(
+            /<p>1<\/p>\s*<p>Before reading[^<]*<\/p>\s*<p>2<\/p>\s*<p>During reading[^<]*<\/p>\s*<p>3<\/p>\s*<p>Immediately after[^<]*<\/p>\s*<p>4<\/p>\s*<p>Follow the spaced[^<]*<\/p>\s*<p>5<\/p>\s*<p>Share what[^<]*<\/p>/,
+            `<div class="p-6 my-8 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+              <ol class="space-y-4 list-decimal pl-5">
+                <li class="pl-2">
+                  <p class="font-medium">Before reading, scan the book's structure and create a framework in BookishNotes for your notes</p>
+                </li>
+                <li class="pl-2">
+                  <p class="font-medium">During reading, use active note-taking with your preferred method (Cornell, Q-E-C, etc.)</p>
+                </li>
+                <li class="pl-2">
+                  <p class="font-medium">Immediately after finishing a chapter, create a visual map or record a voice summary</p>
+                </li>
+                <li class="pl-2">
+                  <p class="font-medium">Follow the spaced repetition schedule to review your notes</p>
+                </li>
+                <li class="pl-2">
+                  <p class="font-medium">Share what you've learned with others through BookishNotes' social features</p>
+                </li>
+              </ol>
+            </div>`
+          );
+        }
       }
       
       return data;
@@ -68,7 +184,7 @@ export default function BlogPost() {
     return <NotFound />;
   }
 
-  const formattedDate = format(new Date(post.published_at), "MMMM d, yyyy");
+  const formattedDate = post ? format(new Date(post.published_at), "MMMM d, yyyy") : '';
 
   // Extract headings from content for table of contents
   const extractHeadings = (content) => {
@@ -86,7 +202,7 @@ export default function BlogPost() {
     return headings;
   };
   
-  const headings = extractHeadings(post.content);
+  const headings = extractHeadings(post?.content || '');
   
   // Function to add IDs to headings in content
   const addIdsToHeadings = (content) => {
@@ -99,30 +215,31 @@ export default function BlogPost() {
     );
   };
   
-  const contentWithIds = addIdsToHeadings(post.content);
+  const contentWithIds = post ? addIdsToHeadings(post.content) : '';
 
   return (
     <>
       <Helmet>
-        <title>{post.title} - BookishNotes Blog</title>
-        <meta name="description" content={post.meta_description || post.excerpt} />
-        {post.meta_keywords?.length > 0 && (
+        <title>{post?.title} - BookishNotes Blog</title>
+        <meta name="description" content={post?.meta_description || post?.excerpt} />
+        {post?.meta_keywords?.length > 0 && (
           <meta name="keywords" content={post.meta_keywords.join(", ")} />
         )}
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.meta_description || post.excerpt} />
-        {post.cover_image && <meta property="og:image" content={post.cover_image} />}
+        <meta property="og:title" content={post?.title} />
+        <meta property="og:description" content={post?.meta_description || post?.excerpt} />
+        {post?.cover_image && <meta property="og:image" content={post.cover_image} />}
       </Helmet>
 
       <article className="min-h-screen flex flex-col bg-gradient-to-b from-purple-50 to-white dark:from-purple-950/10 dark:to-background">
         {!session && <Header />}
         
         <BlogHeader
-          title={post.title}
-          author={post.author.email}
+          title={post?.title || ''}
+          author={post?.author?.email || ''}
           date={formattedDate}
-          readingTime={post.reading_time}
-          coverImage={post.cover_image}
+          readingTime={post?.reading_time || 0}
+          coverImage={post?.cover_image}
+          coverImageAlt={post?.cover_image_alt}
           className={!session ? 'mt-16' : ''}
         />
 
@@ -130,7 +247,7 @@ export default function BlogPost() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col lg:flex-row gap-12">
               <div className="lg:w-2/3">
-                {post.excerpt && (
+                {post?.excerpt && (
                   <div className="mb-12">
                     <p className="text-xl text-muted-foreground leading-relaxed font-serif italic border-l-4 border-primary pl-4 py-2">
                       {post.excerpt}
