@@ -1,3 +1,4 @@
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
@@ -33,6 +34,7 @@ import ReadingStreaks from "./pages/resources/ReadingStreaks";
 import AddReviewScore from "./pages/resources/AddReviewScore";
 import Collections from "./pages/resources/Collections";
 import ConnectFriends from "./pages/resources/ConnectFriends";
+import AccountSettings from "./pages/resources/AccountSettings";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -157,6 +159,7 @@ const App = () => (
                 <Route path="/resources/add-review-score" element={<AddReviewScore />} />
                 <Route path="/resources/collections" element={<Collections />} />
                 <Route path="/resources/connect-friends" element={<ConnectFriends />} />
+                <Route path="/resources/account-settings" element={<AccountSettings />} />
               </Route>
 
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
