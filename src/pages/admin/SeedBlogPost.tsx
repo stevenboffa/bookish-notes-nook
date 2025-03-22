@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,7 +38,7 @@ export default function SeedBlogPost() {
   <p class="text-lg">We've all been there. You finish reading a book that seemed valuable and insightful, but a week later you can barely recall what it was about. Whether you're reading for school, work, or personal growth, the ability to remember what you read is crucial. In this guide, we'll explore seven proven methods to help you retain more information from your reading.</p>
 </div>
 
-<img src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b" alt="A person reading and taking notes on a laptop" class="w-full rounded-xl mb-12 shadow-lg" />
+<img src="/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png" alt="Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table" class="w-full rounded-xl mb-12 shadow-lg" />
 
 <h2>Why We Forget What We Read</h2>
 
@@ -415,8 +414,8 @@ export default function SeedBlogPost() {
   <p class="mb-6">Ready to remember more of what you read? Sign up for BookishNotes and transform your reading experience with our specialized note-taking system.</p>
   <a href="/auth/sign-up" class="inline-block bg-indigo-600 hover:bg-indigo-700 transition-colors text-white font-medium py-3 px-6 rounded-lg">Create Your Free Account</a>
 </div>`,
-          cover_image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-          cover_image_alt: "A laptop with a book and reading glasses on a desk",
+          cover_image: "/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png",
+          cover_image_alt: "Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table",
           status: "published",
           meta_description: "Discover 7 proven methods to remember what you read, including note-taking techniques, visual mapping, and spaced repetition. Learn how BookishNotes can help you retain information longer.",
           meta_keywords: ["how to remember what you read", "how to retain what you read", "why can't i retain what i read", "how to retain more information when reading", "how to remember more of what you read", "how to remember what you read in a book", "reading notes", "book notes", "note taking", "spaced repetition"],

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 type BlogHeaderProps = {
   className?: string;
   coverImage?: string | null;
+  coverImageAlt?: string;
   title: string;
   author: string;
   date: string;
@@ -18,6 +19,7 @@ type BlogHeaderProps = {
 export function BlogHeader({ 
   className, 
   coverImage, 
+  coverImageAlt = "Featured image for blog post",
   title, 
   author, 
   date, 
@@ -62,7 +64,7 @@ export function BlogHeader({
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-transparent z-10" />
           <img
             src={coverImage}
-            alt={title}
+            alt={coverImageAlt}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 flex items-center z-20">

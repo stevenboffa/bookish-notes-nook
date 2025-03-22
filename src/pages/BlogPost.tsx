@@ -35,6 +35,13 @@ export default function BlogPost() {
         if (error.code === "PGRST116") return null;
         throw error;
       }
+      
+      // For the specific blog post, replace the image with our new one
+      if (data && data.slug === "how-to-remember-what-you-read") {
+        data.cover_image = "/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png";
+        data.cover_image_alt = "Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table";
+      }
+      
       return data;
     },
   });
