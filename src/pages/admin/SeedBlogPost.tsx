@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,11 +45,11 @@ export default function SeedBlogPost() {
 
 <p>Before diving into solutions, it's important to understand why we forget in the first place. According to cognitive science, there are several reasons:</p>
 
-<ul>
-  <li><strong>The Forgetting Curve</strong> - German psychologist Hermann Ebbinghaus discovered that without active recall, we forget approximately 70% of what we learn within 24 hours.</li>
-  <li><strong>Passive Reading</strong> - Simply passing your eyes over text without active engagement results in minimal retention.</li>
-  <li><strong>Information Overload</strong> - Our brains are constantly bombarded with information, making it difficult to prioritize and store new knowledge.</li>
-  <li><strong>Lack of Connection</strong> - Information that isn't connected to existing knowledge is harder to remember.</li>
+<ul class="space-y-3 my-6">
+  <li class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg"><strong>The Forgetting Curve</strong> - German psychologist Hermann Ebbinghaus discovered that without active recall, we forget approximately 70% of what we learn within 24 hours.</li>
+  <li class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg"><strong>Passive Reading</strong> - Simply passing your eyes over text without active engagement results in minimal retention.</li>
+  <li class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg"><strong>Information Overload</strong> - Our brains are constantly bombarded with information, making it difficult to prioritize and store new knowledge.</li>
+  <li class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg"><strong>Lack of Connection</strong> - Information that isn't connected to existing knowledge is harder to remember.</li>
 </ul>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
@@ -138,8 +139,8 @@ export default function SeedBlogPost() {
 <p>Originally developed for students, the Cornell method is excellent for book notes as well. It divides your notes into three sections:</p>
 
 <div class="my-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
-  <div class="grid grid-cols-3 h-full">
-    <div class="col-span-2 p-6 border-r border-gray-200 dark:border-gray-700">
+  <div class="grid grid-cols-1 md:grid-cols-3 h-full">
+    <div class="col-span-1 md:col-span-2 p-6 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
       <h3 class="font-medium mb-3">Notes Section</h3>
       <p>This is where you write your main notes during reading.</p>
       <p class="mt-2 text-indigo-600 dark:text-indigo-400 italic">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily."</p>
@@ -200,21 +201,21 @@ export default function SeedBlogPost() {
 <div class="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/10 dark:to-blue-900/10 p-6 rounded-xl my-8">
   <h3 class="font-medium text-xl mb-4">When to Use Voice Notes:</h3>
   
-  <ul class="space-y-3">
-    <li class="flex items-start gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+  <ul class="space-y-4">
+    <li class="flex items-start gap-3 bg-white/40 dark:bg-white/5 p-3 rounded-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1 flex-shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
       <span>When you want to capture your emotional reaction to a passage</span>
     </li>
-    <li class="flex items-start gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+    <li class="flex items-start gap-3 bg-white/40 dark:bg-white/5 p-3 rounded-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1 flex-shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
       <span>For complex ideas that are easier to explain verbally than in writing</span>
     </li>
-    <li class="flex items-start gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+    <li class="flex items-start gap-3 bg-white/40 dark:bg-white/5 p-3 rounded-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1 flex-shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
       <span>When on the go and reading in places where typing is impractical</span>
     </li>
-    <li class="flex items-start gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+    <li class="flex items-start gap-3 bg-white/40 dark:bg-white/5 p-3 rounded-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mic text-indigo-600 dark:text-indigo-400 mt-1 flex-shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
       <span>To record your thoughts during reading for later review</span>
     </li>
   </ul>
@@ -323,20 +324,20 @@ export default function SeedBlogPost() {
     <div class="md:w-1/2">
       <h3 class="font-medium text-xl mb-4">Ways to "teach" what you've read:</h3>
       <ul class="space-y-3">
-        <li class="flex items-start gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1"><polyline points="20 6 9 17 4 12"/></svg>
+        <li class="flex items-start gap-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1 flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
           <span>Share book recommendations with friends through BookishNotes</span>
         </li>
-        <li class="flex items-start gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1"><polyline points="20 6 9 17 4 12"/></svg>
+        <li class="flex items-start gap-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1 flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
           <span>Write a summary of the book in your own words</span>
         </li>
-        <li class="flex items-start gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1"><polyline points="20 6 9 17 4 12"/></svg>
+        <li class="flex items-start gap-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1 flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
           <span>Discuss the book's key points with a reading partner</span>
         </li>
-        <li class="flex items-start gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1"><polyline points="20 6 9 17 4 12"/></svg>
+        <li class="flex items-start gap-2 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-green-600 dark:text-green-400 mt-1 flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
           <span>Create voice notes explaining complex concepts</span>
         </li>
       </ul>
@@ -358,8 +359,8 @@ export default function SeedBlogPost() {
   <p class="mb-6">To maximize how much you remember from your reading, combine these approaches into a cohesive system:</p>
   
   <ol class="space-y-4">
-    <li class="flex items-start gap-3">
-      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+    <li class="flex items-start gap-3 bg-white/50 dark:bg-white/5 p-4 rounded-lg">
+      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
         <span class="text-indigo-700 dark:text-indigo-300 font-medium">1</span>
       </div>
       <div>
@@ -367,8 +368,8 @@ export default function SeedBlogPost() {
       </div>
     </li>
     
-    <li class="flex items-start gap-3">
-      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+    <li class="flex items-start gap-3 bg-white/50 dark:bg-white/5 p-4 rounded-lg">
+      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
         <span class="text-indigo-700 dark:text-indigo-300 font-medium">2</span>
       </div>
       <div>
@@ -376,8 +377,8 @@ export default function SeedBlogPost() {
       </div>
     </li>
     
-    <li class="flex items-start gap-3">
-      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+    <li class="flex items-start gap-3 bg-white/50 dark:bg-white/5 p-4 rounded-lg">
+      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
         <span class="text-indigo-700 dark:text-indigo-300 font-medium">3</span>
       </div>
       <div>
@@ -385,8 +386,8 @@ export default function SeedBlogPost() {
       </div>
     </li>
     
-    <li class="flex items-start gap-3">
-      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+    <li class="flex items-start gap-3 bg-white/50 dark:bg-white/5 p-4 rounded-lg">
+      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
         <span class="text-indigo-700 dark:text-indigo-300 font-medium">4</span>
       </div>
       <div>
@@ -394,8 +395,8 @@ export default function SeedBlogPost() {
       </div>
     </li>
     
-    <li class="flex items-start gap-3">
-      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+    <li class="flex items-start gap-3 bg-white/50 dark:bg-white/5 p-4 rounded-lg">
+      <div class="bg-indigo-100 dark:bg-indigo-800/50 h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
         <span class="text-indigo-700 dark:text-indigo-300 font-medium">5</span>
       </div>
       <div>
