@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +41,21 @@ export default function BlogPost() {
         data.cover_image = "/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png";
         data.cover_image_alt = "Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table";
         
+        // Also update title and meta information for better SEO
+        data.title = "How to Remember What You Read: Effective Strategies for Better Retention";
+        data.meta_description = "Discover proven techniques on how to remember what you read, improve reading retention, and understand why we forget information from books. Learn effective strategies to retain more information when reading.";
+        data.meta_keywords = [
+          "how to remember what you read", 
+          "how to retain what you read", 
+          "why can't i retain what i read", 
+          "how to retain more information when reading",
+          "how to remember more of what you read",
+          "how to remember what you read in a book",
+          "reading retention",
+          "active reading",
+          "note-taking strategies"
+        ];
+        
         // Also replace images in the content
         if (data.content) {
           // Replace specific image in the "Why we forget what we read" section
@@ -48,25 +64,61 @@ export default function BlogPost() {
             `<img src="/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png" alt="Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table" class="rounded-lg shadow-md my-8 w-full">`
           );
           
+          // Update introduction paragraph to include main keyword
+          data.content = data.content.replace(
+            /<p>Have you ever finished a book and struggled to recall[^<]*<\/p>/,
+            `<p>Have you ever finished a book and struggled to recall what you read? Learning <strong>how to remember what you read</strong> is a common challenge many readers face. This guide offers practical solutions to help you retain and apply knowledge from books more effectively.</p>`
+          );
+          
+          // Add a new section addressing why people can't retain what they read
+          data.content = data.content.replace(
+            /<h2>Why we forget what we read<\/h2>/,
+            `<h2>Why we forget what we read</h2>
+            <p>Many readers wonder, "<strong>why can't I retain what I read</strong>?" This frustration is common and has several scientific explanations. Understanding these factors is the first step to improving your retention.</p>`
+          );
+          
           // Improve spacing for mobile on specific sections
           data.content = data.content.replace(
             /<p>The Forgetting Curve - German psychologist Hermann Ebbinghaus discovered[^<]*<\/p>/,
-            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>The Forgetting Curve</strong> - German psychologist Hermann Ebbinghaus discovered that without active recall, we forget approximately 70% of what we learn within 24 hours.</p></div>`
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>The Forgetting Curve</strong> - German psychologist Hermann Ebbinghaus discovered that without active recall, we forget approximately 70% of what we learn within 24 hours. This explains why it's hard to <strong>remember what you read in a book</strong> even just days later.</p></div>`
           );
           
           data.content = data.content.replace(
             /<p>Passive Reading - Simply passing your eyes over text[^<]*<\/p>/,
-            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Passive Reading</strong> - Simply passing your eyes over text without active engagement results in minimal retention.</p></div>`
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Passive Reading</strong> - Simply passing your eyes over text without active engagement results in minimal retention. To <strong>remember more of what you read</strong>, you need to engage actively with the material.</p></div>`
           );
           
           data.content = data.content.replace(
             /<p>Information Overload - Our brains are constantly[^<]*<\/p>/,
-            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Information Overload</strong> - Our brains are constantly bombarded with information, making it difficult to prioritize and store new knowledge.</p></div>`
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Information Overload</strong> - Our brains are constantly bombarded with information, making it difficult to prioritize and store new knowledge. Learning <strong>how to retain more information when reading</strong> requires strategies to manage this overload.</p></div>`
           );
           
           data.content = data.content.replace(
             /<p>Lack of Connection - Information that isn't[^<]*<\/p>/,
-            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Lack of Connection</strong> - Information that isn't connected to existing knowledge is harder to remember.</p></div>`
+            `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Lack of Connection</strong> - Information that isn't connected to existing knowledge is harder to remember. Effective techniques for <strong>how to retain what you read</strong> involve creating associations with what you already know.</p></div>`
+          );
+          
+          // Add a new section about active reading strategies
+          let activeReadingSection = `
+          <h2>Active Reading Strategies to Remember What You Read</h2>
+          <p>Learning <strong>how to remember what you read</strong> requires shifting from passive consumption to active engagement. Here are proven strategies that can dramatically improve your retention:</p>
+          
+          <div class="p-6 my-8 bg-green-50 dark:bg-green-950/10 rounded-xl border border-green-100 dark:border-green-800/30">
+            <h3 class="text-xl font-bold mb-4">Top Strategies for Better Retention</h3>
+            <ul class="list-disc pl-5 space-y-3">
+              <li><strong>Preview before reading</strong> - Scan headings, summaries, and conclusions to create a mental framework</li>
+              <li><strong>Ask questions</strong> - Generate questions about the content before and during reading</li>
+              <li><strong>Visualize concepts</strong> - Create mental images to represent key ideas</li>
+              <li><strong>Take strategic notes</strong> - Use methods like Cornell or mind mapping</li>
+              <li><strong>Teach what you've learned</strong> - Explaining concepts to others reinforces your understanding</li>
+              <li><strong>Apply spaced repetition</strong> - Review content at increasing intervals to cement knowledge</li>
+            </ul>
+          </div>`;
+          
+          // Insert the new section before the Notes section
+          data.content = data.content.replace(
+            /<h2>How to take better notes<\/h2>/,
+            `${activeReadingSection}<h2>How to take better notes</h2>`
           );
           
           // Improve the spacing for the Notes section
@@ -74,7 +126,7 @@ export default function BlogPost() {
             /<h3>Notes Section<\/h3>\s*<p>This is where you[^<]*<\/p>/,
             `<div class="p-6 my-8 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
               <h3 class="text-xl font-bold mb-4">Notes Section</h3>
-              <p class="mb-4">This is where you write your main notes during reading.</p>
+              <p class="mb-4">This is where you write your main notes during reading. Effective note-taking is essential for <strong>how to remember what you read in a book</strong>. Focus on capturing key ideas rather than copying text verbatim.</p>
             </div>`
           );
           
@@ -82,7 +134,7 @@ export default function BlogPost() {
           data.content = data.content.replace(
             /<p>Example: "Author argues that deep work[^<]*<\/p>/,
             `<div class="p-6 my-6 bg-gray-50 dark:bg-gray-800/20 rounded-xl border border-gray-100 dark:border-gray-800/30">
-              <p class="italic">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily."</p>
+              <p class="italic">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily. This insight helps explain <strong>how to retain more information when reading</strong> - dedicated focus is key."</p>
             </div>`
           );
           
@@ -91,7 +143,7 @@ export default function BlogPost() {
             /<h3>Cues\/Questions<\/h3>\s*<p>Write keywords or[^<]*<\/p>/,
             `<div class="p-6 my-8 bg-amber-50 dark:bg-amber-950/10 rounded-xl border border-amber-100 dark:border-amber-800/30">
               <h3 class="text-xl font-bold mb-4">Cues/Questions</h3>
-              <p class="mb-4">Write keywords or questions that relate to your notes.</p>
+              <p class="mb-4">Write keywords or questions that relate to your notes. This technique is particularly effective for those wondering <strong>why can't I retain what I read</strong> - creating questions forces active engagement with the material.</p>
             </div>`
           );
           
@@ -113,7 +165,7 @@ export default function BlogPost() {
                 <li>When you want to capture your emotional reaction to a passage</li>
                 <li>For complex ideas that are easier to explain verbally than in writing</li>
                 <li>When on the go and reading in places where typing is impractical</li>
-                <li>To record your thoughts during reading for later review</li>
+                <li>To record your thoughts during reading for later review and to help <strong>remember more of what you read</strong></li>
               </ul>
             </div>`
           );
@@ -125,17 +177,31 @@ export default function BlogPost() {
               <h3 class="text-xl font-bold mb-4">Ways to "teach" what you've read:</h3>
               <ul class="list-disc pl-5 space-y-3">
                 <li>Share book recommendations with friends through BookishNotes</li>
-                <li>Write a summary of the book in your own words</li>
+                <li>Write a summary of the book in your own words to better <strong>retain what you read</strong></li>
                 <li>Discuss the book's key points with a reading partner</li>
                 <li>Create voice notes explaining complex concepts</li>
               </ul>
             </div>`
           );
           
+          // Add conclusion section with keyword repetition
+          let conclusionSection = `
+          <h2>Conclusion: Building a System to Remember What You Read</h2>
+          <p>Learning <strong>how to remember what you read</strong> isn't about having a perfect memory—it's about creating a system that works for your specific learning style. By implementing the strategies outlined in this guide, you can dramatically improve <strong>how you retain more information when reading</strong>.</p>
+          
+          <p>Remember that retention improves with practice. The more you actively engage with text using these techniques, the better you'll become at remembering and applying what you learn. BookishNotes provides the perfect toolkit to support your journey toward better reading retention.</p>`;
+          
+          // Add the conclusion before the 5-step list
+          data.content = data.content.replace(
+            /<h2>Putting it all together<\/h2>/,
+            `${conclusionSection}<h2>Putting it all together</h2>`
+          );
+          
           // Improve the 5-step list at the end
           data.content = data.content.replace(
             /<p>1<\/p>\s*<p>Before reading[^<]*<\/p>\s*<p>2<\/p>\s*<p>During reading[^<]*<\/p>\s*<p>3<\/p>\s*<p>Immediately after[^<]*<\/p>\s*<p>4<\/p>\s*<p>Follow the spaced[^<]*<\/p>\s*<p>5<\/p>\s*<p>Share what[^<]*<\/p>/,
             `<div class="p-6 my-8 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+              <h3 class="text-xl font-bold mb-4">5-Step System to Remember What You Read</h3>
               <ol class="space-y-4 list-decimal pl-5">
                 <li class="pl-2">
                   <p class="font-medium">Before reading, scan the book's structure and create a framework in BookishNotes for your notes</p>
@@ -144,13 +210,13 @@ export default function BlogPost() {
                   <p class="font-medium">During reading, use active note-taking with your preferred method (Cornell, Q-E-C, etc.)</p>
                 </li>
                 <li class="pl-2">
-                  <p class="font-medium">Immediately after finishing a chapter, create a visual map or record a voice summary</p>
+                  <p class="font-medium">Immediately after finishing a chapter, create a visual map or record a voice summary to <strong>retain what you read</strong></p>
                 </li>
                 <li class="pl-2">
-                  <p class="font-medium">Follow the spaced repetition schedule to review your notes</p>
+                  <p class="font-medium">Follow the spaced repetition schedule to review your notes and overcome the question of <strong>why can't I retain what I read</strong></p>
                 </li>
                 <li class="pl-2">
-                  <p class="font-medium">Share what you've learned with others through BookishNotes' social features</p>
+                  <p class="font-medium">Share what you've learned with others through BookishNotes' social features to solidify <strong>how to remember what you read in a book</strong></p>
                 </li>
               </ol>
             </div>`

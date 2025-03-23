@@ -30,6 +30,16 @@ export default function Blog() {
         data.forEach(post => {
           if (post.slug === "how-to-remember-what-you-read") {
             post.cover_image = "/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png";
+            // Update title and meta info for better SEO 
+            post.title = "How to Remember What You Read: Effective Strategies for Better Retention";
+            post.excerpt = "Discover proven techniques on how to remember what you read, improve reading retention, and understand why we forget information from books.";
+            post.meta_description = "Learn effective strategies to remember more of what you read and retain information when reading books with these proven techniques.";
+            post.meta_keywords = [
+              "how to remember what you read", 
+              "how to retain what you read", 
+              "why can't i retain what i read", 
+              "reading retention strategies"
+            ];
           }
         });
       }
@@ -40,7 +50,7 @@ export default function Blog() {
 
   return (
     <>
-      <Meta customTitle="Welcome to our Blog | BookishNotes.com" />
+      <Meta customTitle="Reading Retention Tips & Strategies | BookishNotes Blog" />
       
       {!session && <Header />}
       
