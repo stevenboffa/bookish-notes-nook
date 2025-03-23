@@ -354,7 +354,29 @@ export default function BlogPost() {
                     prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
                     prose-pre:bg-muted prose-pre:text-primary-foreground
                     prose-li:mb-2"
-                  dangerouslySetInnerHTML={{ __html: contentWithIds }}
+                  dangerouslySetInnerHTML={{ __html: contentWithIds.replace(
+                    /<div class="p-6 my-8 bg-indigo-50 dark:bg-indigo-950\/10 rounded-xl border border-indigo-100 dark:border-indigo-800\/30">\s*<h3 class="text-xl font-bold mb-4">Notes Section<\/h3>\s*<p class="mb-4">This is where you[^<]*<\/p>\s*<\/div>\s*<div class="p-6 my-6 bg-gray-50 dark:bg-gray-800\/20 rounded-xl border border-gray-100 dark:border-gray-800\/30">\s*<p class="italic">Example: "Author argues that deep work[^<]*<\/p>\s*<\/div>\s*<div class="p-6 my-8 bg-amber-50 dark:bg-amber-950\/10 rounded-xl border border-amber-100 dark:border-amber-800\/30">\s*<h3 class="text-xl font-bold mb-4">Cues\/Questions<\/h3>\s*<p class="mb-4">Write keywords or[^<]*<\/p>\s*<\/div>\s*<div class="p-4 my-4 bg-gray-50 dark:bg-gray-800\/20 rounded-lg">\s*<p class="italic mb-2">"Deep work duration\?"<\/p>\s*<p class="italic">"Why 4 hours specifically\?"<\/p>\s*<\/div>/,
+                    `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
+                      <div class="p-5 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+                        <h3 class="text-xl font-bold mb-3">Notes Section</h3>
+                        <p class="mb-3">This is where you write your main notes during reading. Effective note-taking is essential for <strong>how to remember what you read in a book</strong>. Focus on capturing key ideas rather than copying text verbatim.</p>
+                        
+                        <div class="p-4 mt-3 bg-white dark:bg-gray-800/40 rounded-lg border border-indigo-100/50 dark:border-indigo-800/20">
+                          <p class="italic text-sm md:text-base">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily. This insight helps explain <strong>how to retain more information when reading</strong> - dedicated focus is key."</p>
+                        </div>
+                      </div>
+                      
+                      <div class="p-5 bg-amber-50 dark:bg-amber-950/10 rounded-xl border border-amber-100 dark:border-amber-800/30">
+                        <h3 class="text-xl font-bold mb-3">Cues/Questions</h3>
+                        <p class="mb-3">Write keywords or questions that relate to your notes. This technique is particularly effective for those wondering <strong>why can't I retain what I read</strong> - creating questions forces active engagement with the material.</p>
+                        
+                        <div class="p-4 mt-3 bg-white dark:bg-gray-800/40 rounded-lg border border-amber-100/50 dark:border-amber-800/20">
+                          <p class="italic mb-2 text-sm md:text-base">"Deep work duration?"</p>
+                          <p class="italic text-sm md:text-base">"Why 4 hours specifically?"</p>
+                        </div>
+                      </div>
+                    </div>`
+                  ) }}
                 />
                 
                 <div className="mt-16 p-6 bg-purple-50 dark:bg-purple-950/10 rounded-xl">
