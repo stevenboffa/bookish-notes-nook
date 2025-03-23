@@ -121,7 +121,7 @@ export default function BlogPost() {
           
           data.content = data.content.replace(
             /<p>Example: "Author argues that deep work[^<]*<\/p>/,
-            `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-indigo-100/50 dark:border-indigo-800/20 max-w-full overflow-x-hidden">
+            `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-indigo-100/50 dark:border-indigo-800/20 w-full overflow-x-hidden">
               <p class="italic text-sm md:text-base break-words">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily. This insight helps explain <strong>how to retain more information when reading</strong> - dedicated focus is key."</p>
             </div>`
           );
@@ -136,7 +136,7 @@ export default function BlogPost() {
           
           data.content = data.content.replace(
             /<p>"Deep work duration\?"<\/p>\s*<p>"Why 4 hours specifically\?<\/p>/,
-            `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-amber-100/50 dark:border-amber-800/20 max-w-full overflow-x-hidden">
+            `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-amber-100/50 dark:border-amber-800/20 w-full overflow-x-hidden">
               <p class="italic mb-2 text-sm md:text-base break-words">"Deep work duration?"</p>
               <p class="italic text-sm md:text-base break-words">"Why 4 hours specifically?"</p>
             </div>`
@@ -260,7 +260,38 @@ export default function BlogPost() {
     );
   };
   
-  const contentWithIds = post ? addIdsToHeadings(post.content) : '';
+  // Fix the Cornell Note-Taking Method section on mobile
+  const contentWithIds = post ? addIdsToHeadings(post.content.replace(
+    /<div class="p-4 my-6 bg-indigo-50[^>]*>[\s\S]*?<h3[^>]*>Notes Section<\/h3>[\s\S]*?<p[^>]*>This is where you[^<]*<\/p>[\s\S]*?<\/div>/,
+    `<div class="p-4 my-6 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
+      <h3 class="text-xl font-bold mb-3">Notes Section</h3>
+      <p class="mb-3">This is where you write your main notes during reading. Effective note-taking is essential for <strong>how to remember what you read in a book</strong>. Focus on capturing key ideas rather than copying text verbatim.</p>
+    </div>`
+  ).replace(
+    /<p>Example: "Author argues that deep work[^<]*<\/p>/,
+    `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-indigo-100/50 dark:border-indigo-800/20 w-full overflow-x-hidden">
+      <p class="italic text-sm md:text-base break-words">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily. This insight helps explain <strong>how to retain more information when reading</strong> - dedicated focus is key."</p>
+    </div>`
+  ).replace(
+    /<h3>Cues\/Questions<\/h3>\s*<p>Write keywords or[^<]*<\/p>/,
+    `<div class="p-4 my-6 bg-amber-50 dark:bg-amber-950/10 rounded-xl border border-amber-100 dark:border-amber-800/30">
+      <h3 class="text-xl font-bold mb-3">Cues/Questions</h3>
+      <p class="mb-3">Write keywords or questions that relate to your notes. This technique is particularly effective for those wondering <strong>why can't I retain what I read</strong> - creating questions forces active engagement with the material.</p>
+    </div>`
+  ).replace(
+    /<p>"Deep work duration\?"<\/p>\s*<p>"Why 4 hours specifically\?<\/p>/,
+    `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-amber-100/50 dark:border-amber-800/20 w-full overflow-x-hidden">
+      <p class="italic mb-2 text-sm md:text-base break-words">"Deep work duration?"</p>
+      <p class="italic text-sm md:text-base break-words">"Why 4 hours specifically?"</p>
+    </div>`
+  ).replace(
+    /<h2>Method 2: The Cornell Note-Taking Method<\/h2>[\s\S]*?<p>Originally developed[^<]*<\/p>\s*<div[^>]*class="[^"]*"[^>]*>([\s\S]*?)<\/div>/,
+    (match, innerContent) => {
+      return `<h2>Method 2: The Cornell Note-Taking Method</h2>
+      <p>Originally developed for students, the Cornell method is excellent for book notes as well. It divides your notes into three sections:</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden my-6">${innerContent}</div>`;
+    }
+  )) : '';
 
   return (
     <>
