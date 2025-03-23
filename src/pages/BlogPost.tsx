@@ -35,12 +35,10 @@ export default function BlogPost() {
         throw error;
       }
       
-      // For the specific blog post, replace the image with our new one
       if (data && data.slug === "how-to-remember-what-you-read") {
         data.cover_image = "/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png";
         data.cover_image_alt = "Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table";
         
-        // Also update title and meta information for better SEO
         data.title = "How to Remember What You Read: Effective Strategies for Better Retention";
         data.meta_description = "Discover proven techniques on how to remember what you read, improve reading retention, and understand why we forget information from books. Learn effective strategies to retain more information when reading.";
         data.meta_keywords = [
@@ -55,28 +53,23 @@ export default function BlogPost() {
           "note-taking strategies"
         ];
         
-        // Also replace images in the content
         if (data.content) {
-          // Replace specific image in the "Why we forget what we read" section
           data.content = data.content.replace(
             /<img[^>]*src="[^"]*"[^>]*alt="[^"]*"[^>]*>/,
             `<img src="/lovable-uploads/ecf22006-7ce7-41c9-b066-575d2740e43d.png" alt="Person reading a book in golden sunlight with a coffee, stack of books, and smartphone on a rustic wooden table" class="rounded-lg shadow-md my-8 w-full">`
           );
           
-          // Update introduction paragraph to include main keyword
           data.content = data.content.replace(
             /<p>Have you ever finished a book and struggled to recall[^<]*<\/p>/,
             `<p>Have you ever finished a book and struggled to recall what you read? Learning <strong>how to remember what you read</strong> is a common challenge many readers face. This guide offers practical solutions to help you retain and apply knowledge from books more effectively.</p>`
           );
           
-          // Add a new section addressing why people can't retain what they read
           data.content = data.content.replace(
             /<h2>Why we forget what we read<\/h2>/,
             `<h2>Why we forget what we read</h2>
             <p>Many readers wonder, "<strong>why can't I retain what I read</strong>?" This frustration is common and has several scientific explanations. Understanding these factors is the first step to improving your retention.</p>`
           );
           
-          // Improve spacing for mobile on specific sections
           data.content = data.content.replace(
             /<p>The Forgetting Curve - German psychologist Hermann Ebbinghaus discovered[^<]*<\/p>/,
             `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>The Forgetting Curve</strong> - German psychologist Hermann Ebbinghaus discovered that without active recall, we forget approximately 70% of what we learn within 24 hours. This explains why it's hard to <strong>remember what you read in a book</strong> even just days later.</p></div>`
@@ -97,7 +90,6 @@ export default function BlogPost() {
             `<div class="p-4 my-6 bg-purple-50 dark:bg-purple-950/10 rounded-lg"><p class="mb-4"><strong>Lack of Connection</strong> - Information that isn't connected to existing knowledge is harder to remember. Effective techniques for <strong>how to retain what you read</strong> involve creating associations with what you already know.</p></div>`
           );
           
-          // Add a new section about active reading strategies
           let activeReadingSection = `
           <h2>Active Reading Strategies to Remember What You Read</h2>
           <p>Learning <strong>how to remember what you read</strong> requires shifting from passive consumption to active engagement. Here are proven strategies that can dramatically improve your retention:</p>
@@ -114,14 +106,11 @@ export default function BlogPost() {
             </ul>
           </div>`;
           
-          // Insert the new section before the Notes section
           data.content = data.content.replace(
             /<h2>How to take better notes<\/h2>/,
             `${activeReadingSection}<h2>How to take better notes</h2>`
           );
           
-          // Improve the spacing for the Notes section and Cues/Questions section
-          // Create a more responsive layout for mobile
           data.content = data.content.replace(
             /<h3>Notes Section<\/h3>\s*<p>This is where you[^<]*<\/p>/,
             `<div class="p-4 my-6 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
@@ -130,7 +119,6 @@ export default function BlogPost() {
             </div>`
           );
           
-          // Improve spacing for the examples in Notes Section
           data.content = data.content.replace(
             /<p>Example: "Author argues that deep work[^<]*<\/p>/,
             `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-indigo-100/50 dark:border-indigo-800/20 max-w-full overflow-x-hidden">
@@ -138,7 +126,6 @@ export default function BlogPost() {
             </div>`
           );
           
-          // Improve the spacing for Cues/Questions
           data.content = data.content.replace(
             /<h3>Cues\/Questions<\/h3>\s*<p>Write keywords or[^<]*<\/p>/,
             `<div class="p-4 my-6 bg-amber-50 dark:bg-amber-950/10 rounded-xl border border-amber-100 dark:border-amber-800/30">
@@ -147,7 +134,6 @@ export default function BlogPost() {
             </div>`
           );
           
-          // Improve spacing for the examples in Cues/Questions with better mobile support
           data.content = data.content.replace(
             /<p>"Deep work duration\?"<\/p>\s*<p>"Why 4 hours specifically\?<\/p>/,
             `<div class="p-3 my-3 bg-white dark:bg-gray-800/40 rounded-lg border border-amber-100/50 dark:border-amber-800/20 max-w-full overflow-x-hidden">
@@ -156,7 +142,6 @@ export default function BlogPost() {
             </div>`
           );
           
-          // Improve spacing for when to use voice notes
           data.content = data.content.replace(
             /<h3>When to Use Voice Notes:<\/h3>\s*<p>When you want[^<]*<\/p>\s*<p>For complex[^<]*<\/p>\s*<p>When on the go[^<]*<\/p>\s*<p>To record[^<]*<\/p>/,
             `<div class="p-6 my-8 bg-blue-50 dark:bg-blue-950/10 rounded-xl border border-blue-100 dark:border-blue-800/30">
@@ -170,7 +155,6 @@ export default function BlogPost() {
             </div>`
           );
           
-          // Improve spacing for ways to teach
           data.content = data.content.replace(
             /<h3>Ways to "teach" what you've read:<\/h3>\s*<p>Share book[^<]*<\/p>\s*<p>Write a summary[^<]*<\/p>\s*<p>Discuss the book[^<]*<\/p>\s*<p>Create voice[^<]*<\/p>/,
             `<div class="p-6 my-8 bg-green-50 dark:bg-green-950/10 rounded-xl border border-green-100 dark:border-green-800/30">
@@ -184,20 +168,17 @@ export default function BlogPost() {
             </div>`
           );
           
-          // Add conclusion section with keyword repetition
           let conclusionSection = `
           <h2>Conclusion: Building a System to Remember What You Read</h2>
           <p>Learning <strong>how to remember what you read</strong> isn't about having a perfect memory—it's about creating a system that works for your specific learning style. By implementing the strategies outlined in this guide, you can dramatically improve <strong>how you retain more information when reading</strong>.</p>
           
           <p>Remember that retention improves with practice. The more you actively engage with text using these techniques, the better you'll become at remembering and applying what you learn. BookishNotes provides the perfect toolkit to support your journey toward better reading retention.</p>`;
           
-          // Add the conclusion before the 5-step list
           data.content = data.content.replace(
             /<h2>Putting it all together<\/h2>/,
             `${conclusionSection}<h2>Putting it all together</h2>`
           );
           
-          // Improve the 5-step list at the end
           data.content = data.content.replace(
             /<p>1<\/p>\s*<p>Before reading[^<]*<\/p>\s*<p>2<\/p>\s*<p>During reading[^<]*<\/p>\s*<p>3<\/p>\s*<p>Immediately after[^<]*<\/p>\s*<p>4<\/p>\s*<p>Follow the spaced[^<]*<\/p>\s*<p>5<\/p>\s*<p>Share what[^<]*<\/p>/,
             `<div class="p-6 my-8 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
@@ -252,7 +233,6 @@ export default function BlogPost() {
 
   const formattedDate = post ? format(new Date(post.published_at), "MMMM d, yyyy") : '';
 
-  // Extract headings from content for table of contents
   const extractHeadings = (content) => {
     const regex = /<h2[^>]*>(.*?)<\/h2>/g;
     const headings = [];
@@ -270,7 +250,6 @@ export default function BlogPost() {
   
   const headings = extractHeadings(post?.content || '');
   
-  // Function to add IDs to headings in content
   const addIdsToHeadings = (content) => {
     return content.replace(
       /<h2[^>]*>(.*?)<\/h2>/g, 
@@ -354,29 +333,7 @@ export default function BlogPost() {
                     prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md
                     prose-pre:bg-muted prose-pre:text-primary-foreground
                     prose-li:mb-2"
-                  dangerouslySetInnerHTML={{ __html: contentWithIds.replace(
-                    /<div class="p-6 my-8 bg-indigo-50 dark:bg-indigo-950\/10 rounded-xl border border-indigo-100 dark:border-indigo-800\/30">\s*<h3 class="text-xl font-bold mb-4">Notes Section<\/h3>\s*<p class="mb-4">This is where you[^<]*<\/p>\s*<\/div>\s*<div class="p-6 my-6 bg-gray-50 dark:bg-gray-800\/20 rounded-xl border border-gray-100 dark:border-gray-800\/30">\s*<p class="italic">Example: "Author argues that deep work[^<]*<\/p>\s*<\/div>\s*<div class="p-6 my-8 bg-amber-50 dark:bg-amber-950\/10 rounded-xl border border-amber-100 dark:border-amber-800\/30">\s*<h3 class="text-xl font-bold mb-4">Cues\/Questions<\/h3>\s*<p class="mb-4">Write keywords or[^<]*<\/p>\s*<\/div>\s*<div class="p-4 my-4 bg-gray-50 dark:bg-gray-800\/20 rounded-lg">\s*<p class="italic mb-2">"Deep work duration\?"<\/p>\s*<p class="italic">"Why 4 hours specifically\?"<\/p>\s*<\/div>/,
-                    `<div class="flex flex-col my-8 gap-6">
-                      <div class="p-5 bg-indigo-50 dark:bg-indigo-950/10 rounded-xl border border-indigo-100 dark:border-indigo-800/30">
-                        <h3 class="text-xl font-bold mb-3">Notes Section</h3>
-                        <p class="mb-3">This is where you write your main notes during reading. Effective note-taking is essential for <strong>how to remember what you read in a book</strong>. Focus on capturing key ideas rather than copying text verbatim.</p>
-                        
-                        <div class="p-3 mt-3 bg-white dark:bg-gray-800/40 rounded-lg border border-indigo-100/50 dark:border-indigo-800/20">
-                          <p class="italic text-sm md:text-base break-words">Example: "Author argues that deep work requires 4 hours of uninterrupted focus. Research shows elite performers practice deliberately for 3-4 hours daily. This insight helps explain <strong>how to retain more information when reading</strong> - dedicated focus is key."</p>
-                        </div>
-                      </div>
-                      
-                      <div class="p-5 bg-amber-50 dark:bg-amber-950/10 rounded-xl border border-amber-100 dark:border-amber-800/30">
-                        <h3 class="text-xl font-bold mb-3">Cues/Questions</h3>
-                        <p class="mb-3">Write keywords or questions that relate to your notes. This technique is particularly effective for those wondering <strong>why can't I retain what I read</strong> - creating questions forces active engagement with the material.</p>
-                        
-                        <div class="p-3 mt-3 bg-white dark:bg-gray-800/40 rounded-lg border border-amber-100/50 dark:border-amber-800/20">
-                          <p class="italic mb-2 text-sm md:text-base break-words">"Deep work duration?"</p>
-                          <p class="italic text-sm md:text-base break-words">"Why 4 hours specifically?"</p>
-                        </div>
-                      </div>
-                    </div>`
-                  ) }}
+                  dangerouslySetInnerHTML={{ __html: contentWithIds }}
                 />
                 
                 <div className="mt-16 p-6 bg-purple-50 dark:bg-purple-950/10 rounded-xl">
