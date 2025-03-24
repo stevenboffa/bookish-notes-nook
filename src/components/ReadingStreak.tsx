@@ -305,27 +305,30 @@ export function ReadingStreak({ demoQuote, isQuoteLoading }: ReadingStreakProps 
     );
     
     // If there's no activity today, check if the most recent is from yesterday
-    if (!hasTodayActivity) {
-      const hasYesterdayActivity = sortedActivities.some(activity => 
-        isDateYesterday(parseLocalDate(activity.activity_date))
-      );
-      
-      // If there's no activity for yesterday either, then streak is broken
-      if (!hasYesterdayActivity) {
-        return 0;
-      }
-    }
+    // We'll still count today in the current streak if yesterday is present
+    const hasYesterdayActivity = sortedActivities.some(activity => 
+      isDateYesterday(parseLocalDate(activity.activity_date))
+    );
     
-    // Start counting the streak
-    let streak = hasTodayActivity ? 1 : 0; // Start with 1 if we have a check-in today
+    // Start counting the streak - if we have a yesterday activity but no today activity yet,
+    // we'll start with 1 to account for today (this is the key fix)
+    let streak = hasTodayActivity ? 1 : (hasYesterdayActivity ? 1 : 0);
+    
+    // Set the previous date based on whether we have activity today or not
     let previousDate = hasTodayActivity 
       ? getTodayStart() 
-      : addDays(getTodayStart(), -1); // Start from yesterday if no today check-in
+      : (hasYesterdayActivity ? addDays(getTodayStart(), -1) : null);
+    
+    // If we don't have a valid previous date (no activity today or yesterday), return 0
+    if (!previousDate) return 0;
     
     // Track which dates we've already counted to avoid double counting
     const countedDates = new Set<string>();
     if (hasTodayActivity) {
       countedDates.add(format(getTodayStart(), 'yyyy-MM-dd'));
+    }
+    if (!hasTodayActivity && hasYesterdayActivity) {
+      countedDates.add(format(addDays(getTodayStart(), -1), 'yyyy-MM-dd'));
     }
     
     // Look for consecutive days backwards
