@@ -29,8 +29,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'import.meta.env.VITE_USE_STAGING': JSON.stringify(env.VITE_USE_STAGING || 'false'),
-      'import.meta.env.VITE_SUPABASE_STAGING_URL': JSON.stringify(env.VITE_SUPABASE_STAGING_URL || ''),
+      // Set VITE_USE_STAGING to true by default
+      'import.meta.env.VITE_USE_STAGING': JSON.stringify('true'),
+      'import.meta.env.VITE_SUPABASE_STAGING_URL': JSON.stringify('https://whfwutolaaoppahdlekl.supabase.co'),
       'import.meta.env.VITE_SUPABASE_STAGING_KEY': JSON.stringify(env.VITE_SUPABASE_STAGING_KEY || '')
     }
   };
