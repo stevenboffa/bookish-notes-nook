@@ -51,6 +51,8 @@ This project supports both staging and production environments for Supabase:
    - Copy the "anon public" key
 3. Create a `.env.local` file in the project root with the following variables:
    ```
+   VITE_USE_STAGING=true
+   VITE_SUPABASE_STAGING_URL=your_staging_project_url
    VITE_SUPABASE_STAGING_KEY=your_staging_project_anon_key
    ```
 
@@ -74,6 +76,13 @@ npm run dev
 # Run the application using the production environment
 VITE_USE_STAGING=false npm run dev
 ```
+
+### Deploying to Production
+
+When you deploy the application:
+
+1. For staging deployment: No additional environment variables needed (staging is default)
+2. For production deployment: Set `VITE_USE_STAGING=false` in your deployment environment
 
 **Edit a file directly in GitHub**
 

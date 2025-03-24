@@ -1,11 +1,26 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  
+  // Handle environment switching via URL parameter
+  useEffect(() => {
+    const envParam = searchParams.get('env');
+    if (envParam) {
+      const preferredEnv = envParam === 'production' ? 'false' : 'true';
+      localStorage.setItem('preferredEnvironment', envParam);
+      
+      // Only reload if the environment setting doesn't match the current one
+      if (import.meta.env.VITE_USE_STAGING !== preferredEnv) {
+        window.location.reload();
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!loading) {

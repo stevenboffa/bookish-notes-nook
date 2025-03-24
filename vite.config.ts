@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
   // Load env variables based on mode
   const env = loadEnv(mode, process.cwd(), '');
   
+  // Get environment setting from env or default to staging
+  const useStaging = env.VITE_USE_STAGING !== 'false';
+  
   return {
     server: {
       host: "::",
@@ -29,8 +32,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      // Set VITE_USE_STAGING to true by default
-      'import.meta.env.VITE_USE_STAGING': JSON.stringify('true'),
+      // Allow overriding the staging setting via env
+      'import.meta.env.VITE_USE_STAGING': JSON.stringify(useStaging ? 'true' : 'false'),
       'import.meta.env.VITE_SUPABASE_STAGING_URL': JSON.stringify('https://whfwutolaaoppahdlekl.supabase.co'),
       'import.meta.env.VITE_SUPABASE_STAGING_KEY': JSON.stringify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoZnd1dG9sYWFvcHBhaGRsZWtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4Mjc0NjQsImV4cCI6MjA1ODQwMzQ2NH0.NBr1YsPOYbCczv0cq2bGt__nGm1FCb9Xjr8jJjN9l8Y')
     }
