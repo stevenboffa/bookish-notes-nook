@@ -8,13 +8,18 @@ const Index = () => {
   const { session, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading) {
-      if (session) {
-        navigate("/dashboard");
-      } else {
-        navigate("/welcome");
+    // Add a small delay to allow the preview to render properly
+    const timer = setTimeout(() => {
+      if (!loading) {
+        if (session) {
+          navigate("/dashboard");
+        } else {
+          navigate("/welcome");
+        }
       }
-    }
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [session, loading, navigate]);
 
   // Show loading state while checking auth
@@ -26,7 +31,12 @@ const Index = () => {
     );
   }
 
-  return null; // This won't be rendered as we'll redirect
+  // Return a simple message for the preview
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-lg">Loading application...</p>
+    </div>
+  );
 };
 
 export default Index;
