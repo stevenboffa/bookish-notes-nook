@@ -15,7 +15,6 @@ const environments: Record<string, EnvironmentConfig> = {
     key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvdG10d2FiYmt4cnZianlnbndrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyODk4MDgsImV4cCI6MjA1Mzg2NTgwOH0.o8dtLdlIC6jdU4O1d_7KDXAXP-DPkbINAz5mQ55haVw"
   },
   staging: {
-    // Replace these with your staging project credentials
     url: import.meta.env.VITE_SUPABASE_STAGING_URL || "",
     key: import.meta.env.VITE_SUPABASE_STAGING_KEY || ""
   }
@@ -31,6 +30,7 @@ const SUPABASE_URL = environments[environment].url;
 const SUPABASE_PUBLISHABLE_KEY = environments[environment].key;
 
 console.log(`Using Supabase environment: ${environment}`);
+console.log(`URL: ${SUPABASE_URL}`);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
