@@ -1,9 +1,2 @@
 
 project_id = "cotmtwabbkxrvbjygnwk"
-
-# Staging configuration
-[staging]
-project_id = "whfwutolaaoppahdlekl"  # Your staging project ID extracted from the URL
-
-[production]
-project_id = "cotmtwabbkxrvbjygnwk"

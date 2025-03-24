@@ -1,4 +1,3 @@
-
 # Welcome to your Lovable project
 
 ## Project info
@@ -36,53 +35,6 @@ npm i
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-## Environments (Staging & Production)
-
-This project supports both staging and production environments for Supabase:
-
-### Setting up Staging Environment
-
-1. Create a new Supabase project to serve as your staging environment
-2. Get your staging project anon key from the Supabase dashboard:
-   - Go to https://supabase.com/dashboard
-   - Select your staging project
-   - Go to Project Settings → API
-   - Copy the "anon public" key
-3. Create a `.env.local` file in the project root with the following variables:
-   ```
-   VITE_USE_STAGING=true
-   VITE_SUPABASE_STAGING_URL=your_staging_project_url
-   VITE_SUPABASE_STAGING_KEY=your_staging_project_anon_key
-   ```
-
-Note: The project is currently configured to use the staging environment by default.
-
-### Testing the Environment
-
-You can verify which environment you're using in several ways:
-1. Check your browser's console for a message like: "🔌 Supabase Environment: STAGING"
-2. Look for the environment indicator in the bottom-right corner of the app (in development mode)
-3. Check network requests to see which Supabase URL they're going to
-
-### Running in Staging Mode
-```sh
-# Run the application using the staging environment (default)
-npm run dev
-```
-
-### Running in Production Mode
-```sh
-# Run the application using the production environment
-VITE_USE_STAGING=false npm run dev
-```
-
-### Deploying to Production
-
-When you deploy the application:
-
-1. For staging deployment: No additional environment variables needed (staging is default)
-2. For production deployment: Set `VITE_USE_STAGING=false` in your deployment environment
 
 **Edit a file directly in GitHub**
 
