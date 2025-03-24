@@ -10,6 +10,16 @@ const Index = () => {
   useEffect(() => {
     console.log("Index route - Session state:", !!session, "Loading:", loading);
     
+    // Check if we're coming from a direct logout
+    const directToHomepage = sessionStorage.getItem('direct_to_homepage');
+    
+    if (directToHomepage === 'true') {
+      // Clear the flag
+      sessionStorage.removeItem('direct_to_homepage');
+      console.log("Index route - Direct to homepage flag detected, staying on homepage");
+      return; // Stay on the homepage
+    }
+    
     // Immediately redirect based on session state, no need for timeout
     if (!loading) {
       if (session) {

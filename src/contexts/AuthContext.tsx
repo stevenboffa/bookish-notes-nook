@@ -134,10 +134,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [toast]);
 
-  // Complete sign out function with thorough cleanup
+  // Modified sign out function to go straight to homepage
   const signOut = async () => {
     try {
       console.log("AuthContext: Initiating complete sign out");
+      
+      // Set a flag to prevent the temporary redirect to login
+      sessionStorage.setItem('direct_to_homepage', 'true');
       
       // 1. First clear all stored state
       setSession(null);
@@ -169,10 +172,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       console.log("AuthContext: Successfully signed out locally");
       
-      // 4. Force a page reload to clear any memory state
+      // 4. Force navigation directly to the homepage
       if (typeof window !== 'undefined') {
-        console.log("Forcing full page refresh to complete sign out");
-        // Changed from /welcome to / since we're seeing a 404 on /welcome
+        console.log("Directly navigating to homepage to complete sign out");
         window.location.href = '/';
       }
       
@@ -182,7 +184,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Even with an exception, force session clear and redirect
       if (typeof window !== 'undefined') {
         console.log("Error occurred during sign out, forcing redirect anyway");
-        // Changed from /welcome to / since we're seeing a 404 on /welcome
         window.location.href = '/';
       }
     }
