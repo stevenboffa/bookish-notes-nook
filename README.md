@@ -44,17 +44,28 @@ This project supports both staging and production environments for Supabase:
 ### Setting up Staging Environment
 
 1. Create a new Supabase project to serve as your staging environment
-2. Create a `.env.local` file in the project root with the following variables:
+2. Get your staging project anon key from the Supabase dashboard:
+   - Go to https://supabase.com/dashboard
+   - Select your staging project
+   - Go to Project Settings → API
+   - Copy the "anon public" key
+3. Create a `.env.local` file in the project root with the following variables:
    ```
-   VITE_USE_STAGING=true
-   VITE_SUPABASE_STAGING_URL=your_staging_project_url
    VITE_SUPABASE_STAGING_KEY=your_staging_project_anon_key
    ```
-3. Update the `supabase/config.toml` file with your staging project ID
+
+Note: The project is currently configured to use the staging environment by default.
+
+### Testing the Environment
+
+You can verify which environment you're using in several ways:
+1. Check your browser's console for a message like: "🔌 Supabase Environment: STAGING"
+2. Look for the environment indicator in the bottom-right corner of the app (in development mode)
+3. Check network requests to see which Supabase URL they're going to
 
 ### Running in Staging Mode
 ```sh
-# Run the application using the staging environment
+# Run the application using the staging environment (default)
 npm run dev
 ```
 
