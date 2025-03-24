@@ -39,7 +39,7 @@ type Profile = {
 };
 
 export default function Profile() {
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [stats, setStats] = useState<ReadingStats>({ notStarted: 0, inProgress: 0, finished: 0 });
@@ -276,20 +276,9 @@ export default function Profile() {
 
   const handleLogout = async () => {
     try {
-      console.log("Logging out...");
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Error logging out:", error);
-        toast({
-          title: "Error",
-          description: "Failed to log out. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log("Successfully logged out, navigating to home");
+      console.log("Profile: Logging out...");
+      await signOut();
+      console.log("Profile: Successfully logged out, navigating to home");
       navigate("/");
     } catch (error) {
       console.error("Exception during logout:", error);

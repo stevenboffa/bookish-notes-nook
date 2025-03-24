@@ -8,12 +8,14 @@ type AuthContextType = {
   session: Session | null;
   loading: boolean;
   deleteAccount: () => Promise<{ success: boolean; error: string | null }>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({ 
   session: null, 
   loading: true,
-  deleteAccount: async () => ({ success: false, error: 'AuthContext not initialized' }) 
+  deleteAccount: async () => ({ success: false, error: 'AuthContext not initialized' }),
+  signOut: async () => { console.error('AuthContext not initialized'); }
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -29,31 +31,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Set up initial session
     const initializeSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Error getting session:", error);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: "There was a problem with your session. Please try logging in again.",
-        });
-        return;
-      }
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "There was a problem with your session. Please try logging in again.",
+          });
+          return;
+        }
 
-      if (data.session) {
-        console.log("Found existing session");
-        setSession(data.session);
+        if (data.session) {
+          console.log("Found existing session");
+          setSession(data.session);
+        }
+        
+        setLoading(false);
+      } catch (e) {
+        console.error("Exception during session initialization:", e);
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     initializeSession();
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      console.log("Auth state changed:", event);
+      console.log("Auth state changed:", event, !!currentSession);
 
       // Prevent duplicate events within 2 seconds and identical consecutive events
       const now = Date.now();
@@ -72,6 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Setting new session");
         setSession(currentSession);
       } else {
+        console.log("Clearing session");
         setSession(null);
       }
       
@@ -140,6 +148,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => clearInterval(refreshInterval);
   }, [session]);
 
+  // Sign out function
+  const signOut = async () => {
+    try {
+      console.log("AuthContext: Initiating sign out");
+      // Clear any local session data first
+      localStorage.removeItem('supabase.auth.token');
+      
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Error during sign out:", error);
+        toast({
+          variant: "destructive",
+          title: "Sign Out Error",
+          description: error.message || "Failed to sign out. Please try again.",
+        });
+        return;
+      }
+      
+      console.log("AuthContext: Successfully signed out");
+      // Force clear the session
+      setSession(null);
+      
+    } catch (error) {
+      console.error("Exception during sign out:", error);
+      toast({
+        variant: "destructive",
+        title: "Sign Out Error",
+        description: "An unexpected error occurred during sign out.",
+      });
+    }
+  };
+
   // Account deletion function
   const deleteAccount = async () => {
     try {
@@ -158,7 +199,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem('account_deleted', 'true');
       
       // Sign out the user after account deletion
-      await supabase.auth.signOut();
+      await signOut();
       
       return { success: true, error: null };
     } catch (error) {
@@ -171,7 +212,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, loading, deleteAccount }}>
+    <AuthContext.Provider value={{ session, loading, deleteAccount, signOut }}>
       {children}
     </AuthContext.Provider>
   );

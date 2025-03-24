@@ -8,12 +8,16 @@ const Index = () => {
   const { session, loading } = useAuth();
 
   useEffect(() => {
+    console.log("Index route - Session state:", !!session, "Loading:", loading);
+    
     // Add a small delay to allow the preview to render properly
     const timer = setTimeout(() => {
       if (!loading) {
         if (session) {
+          console.log("Index route - Redirecting to /dashboard");
           navigate("/dashboard");
         } else {
+          console.log("Index route - Redirecting to /welcome");
           navigate("/welcome");
         }
       }
