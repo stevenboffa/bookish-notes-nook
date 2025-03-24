@@ -134,47 +134,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [toast]);
 
-  // Set up automatic session refresh
-  useEffect(() => {
-    if (!session) return;
-
-    const refreshInterval = setInterval(async () => {
-      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
-      if (refreshedSession) {
-        setSession(refreshedSession);
-      }
-    }, 1000 * 60 * 4); // Refresh every 4 minutes
-
-    return () => clearInterval(refreshInterval);
-  }, [session]);
-
-  // Improved sign out function with proper error handling
+  // Complete sign out function with thorough cleanup
   const signOut = async () => {
     try {
-      console.log("AuthContext: Initiating sign out");
+      console.log("AuthContext: Initiating complete sign out");
       
-      // Force clear the session first to ensure UI updates immediately
+      // 1. First clear all stored state
       setSession(null);
+      hasShownWelcomeToast.current = false;
       
-      // Clear any local session data
+      // 2. Clear all authentication data from browser storage
+      // Clear localStorage
       localStorage.removeItem('supabase.auth.token');
-      sessionStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-cotmtwabbkxrvbjygnwk-auth-token');
       
-      // Then sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      // Clear sessionStorage
+      sessionStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('sb-cotmtwabbkxrvbjygnwk-auth-token');
+      
+      // Clear any cookies by setting expired date
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
+      // 3. Then attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut({
+        scope: 'global' // Sign out from all devices
+      });
       
       if (error) {
-        console.error("Error during sign out:", error);
-        
-        // Even if there's an error, we'll continue with local cleanup
+        console.error("Error during sign out from Supabase API:", error);
         console.log("Continuing with local session cleanup despite API error");
       }
       
-      console.log("AuthContext: Successfully signed out");
+      console.log("AuthContext: Successfully signed out locally");
       
-      // Force refresh the page to ensure all auth state is cleared
+      // 4. Force a page reload to clear any memory state
       if (typeof window !== 'undefined') {
-        window.location.href = '/';
+        console.log("Forcing full page refresh to complete sign out");
+        window.location.href = '/welcome';
       }
       
     } catch (error) {
@@ -182,7 +180,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Even with an exception, force session clear and redirect
       if (typeof window !== 'undefined') {
-        window.location.href = '/';
+        console.log("Error occurred during sign out, forcing redirect anyway");
+        window.location.href = '/welcome';
       }
     }
   };
