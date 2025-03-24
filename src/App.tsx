@@ -19,6 +19,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogPosts from "./pages/admin/BlogPosts";
 import EditBlogPost from "./pages/admin/EditBlogPost";
+import SeedBlogPost from "./pages/admin/SeedBlogPost";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import Contact from "./pages/Contact";
@@ -208,6 +209,11 @@ const App = () => (
                 <Route path="/admin/posts/:id" element={
                   <ProtectedRoute>
                     <EditBlogPost />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/seed-blog-post" element={
+                  <ProtectedRoute>
+                    <SeedBlogPost />
                   </ProtectedRoute>
                 } />
               </Route>
