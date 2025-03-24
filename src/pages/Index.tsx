@@ -16,8 +16,8 @@ const Index = () => {
         console.log("Index route - Redirecting to /dashboard");
         navigate("/dashboard", { replace: true });
       } else {
-        console.log("Index route - Redirecting to /welcome");
-        navigate("/welcome", { replace: true });
+        console.log("Index route - Redirecting to /auth/sign-in");
+        navigate("/auth/sign-in", { replace: true });
       }
     }
   }, [session, loading, navigate]);

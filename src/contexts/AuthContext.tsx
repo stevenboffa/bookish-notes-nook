@@ -172,7 +172,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // 4. Force a page reload to clear any memory state
       if (typeof window !== 'undefined') {
         console.log("Forcing full page refresh to complete sign out");
-        window.location.href = '/welcome';
+        // Changed from /welcome to / since we're seeing a 404 on /welcome
+        window.location.href = '/';
       }
       
     } catch (error) {
@@ -181,7 +182,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Even with an exception, force session clear and redirect
       if (typeof window !== 'undefined') {
         console.log("Error occurred during sign out, forcing redirect anyway");
-        window.location.href = '/welcome';
+        // Changed from /welcome to / since we're seeing a 404 on /welcome
+        window.location.href = '/';
       }
     }
   };
