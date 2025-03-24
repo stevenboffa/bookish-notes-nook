@@ -10,20 +10,16 @@ const Index = () => {
   useEffect(() => {
     console.log("Index route - Session state:", !!session, "Loading:", loading);
     
-    // Add a small delay to allow the preview to render properly
-    const timer = setTimeout(() => {
-      if (!loading) {
-        if (session) {
-          console.log("Index route - Redirecting to /dashboard");
-          navigate("/dashboard");
-        } else {
-          console.log("Index route - Redirecting to /welcome");
-          navigate("/welcome");
-        }
+    // Immediately redirect based on session state, no need for timeout
+    if (!loading) {
+      if (session) {
+        console.log("Index route - Redirecting to /dashboard");
+        navigate("/dashboard", { replace: true });
+      } else {
+        console.log("Index route - Redirecting to /welcome");
+        navigate("/welcome", { replace: true });
       }
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    }
   }, [session, loading, navigate]);
 
   // Show loading state while checking auth

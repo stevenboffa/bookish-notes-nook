@@ -278,8 +278,6 @@ export default function Profile() {
     try {
       console.log("Profile: Logging out...");
       await signOut();
-      console.log("Profile: Successfully logged out, navigating to home");
-      navigate("/");
     } catch (error) {
       console.error("Exception during logout:", error);
       toast({

@@ -148,36 +148,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => clearInterval(refreshInterval);
   }, [session]);
 
-  // Sign out function
+  // Improved sign out function with proper error handling
   const signOut = async () => {
     try {
       console.log("AuthContext: Initiating sign out");
-      // Clear any local session data first
-      localStorage.removeItem('supabase.auth.token');
       
+      // Force clear the session first to ensure UI updates immediately
+      setSession(null);
+      
+      // Clear any local session data
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.removeItem('supabase.auth.token');
+      
+      // Then sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error("Error during sign out:", error);
-        toast({
-          variant: "destructive",
-          title: "Sign Out Error",
-          description: error.message || "Failed to sign out. Please try again.",
-        });
-        return;
+        
+        // Even if there's an error, we'll continue with local cleanup
+        console.log("Continuing with local session cleanup despite API error");
       }
       
       console.log("AuthContext: Successfully signed out");
-      // Force clear the session
-      setSession(null);
+      
+      // Force refresh the page to ensure all auth state is cleared
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
       
     } catch (error) {
       console.error("Exception during sign out:", error);
-      toast({
-        variant: "destructive",
-        title: "Sign Out Error",
-        description: "An unexpected error occurred during sign out.",
-      });
+      
+      // Even with an exception, force session clear and redirect
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     }
   };
 
