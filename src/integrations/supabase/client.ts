@@ -3,8 +3,34 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://cotmtwabbkxrvbjygnwk.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvdG10d2FiYmt4cnZianlnbndrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyODk4MDgsImV4cCI6MjA1Mzg2NTgwOH0.o8dtLdlIC6jdU4O1d_7KDXAXP-DPkbINAz5mQ55haVw";
+// Environment configuration
+interface EnvironmentConfig {
+  url: string;
+  key: string;
+}
+
+const environments: Record<string, EnvironmentConfig> = {
+  production: {
+    url: "https://cotmtwabbkxrvbjygnwk.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvdG10d2FiYmt4cnZianlnbndrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyODk4MDgsImV4cCI6MjA1Mzg2NTgwOH0.o8dtLdlIC6jdU4O1d_7KDXAXP-DPkbINAz5mQ55haVw"
+  },
+  staging: {
+    // Replace these with your staging project credentials
+    url: import.meta.env.VITE_SUPABASE_STAGING_URL || "",
+    key: import.meta.env.VITE_SUPABASE_STAGING_KEY || ""
+  }
+};
+
+// Determine current environment
+const isDev = import.meta.env.DEV;
+const isStaging = import.meta.env.VITE_USE_STAGING === 'true';
+const environment = isStaging ? 'staging' : 'production';
+
+// Use the appropriate credentials based on environment
+const SUPABASE_URL = environments[environment].url;
+const SUPABASE_PUBLISHABLE_KEY = environments[environment].key;
+
+console.log(`Using Supabase environment: ${environment}`);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +41,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   },
   global: {
     headers: {
-      'x-client-info': 'lovable-app'
+      'x-client-info': `lovable-app-${environment}`
     }
   },
   auth: {

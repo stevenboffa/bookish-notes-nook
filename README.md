@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -34,6 +35,33 @@ npm i
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
+```
+
+## Environments (Staging & Production)
+
+This project supports both staging and production environments for Supabase:
+
+### Setting up Staging Environment
+
+1. Create a new Supabase project to serve as your staging environment
+2. Create a `.env.local` file in the project root with the following variables:
+   ```
+   VITE_USE_STAGING=true
+   VITE_SUPABASE_STAGING_URL=your_staging_project_url
+   VITE_SUPABASE_STAGING_KEY=your_staging_project_anon_key
+   ```
+3. Update the `supabase/config.toml` file with your staging project ID
+
+### Running in Staging Mode
+```sh
+# Run the application using the staging environment
+npm run dev
+```
+
+### Running in Production Mode
+```sh
+# Run the application using the production environment
+VITE_USE_STAGING=false npm run dev
 ```
 
 **Edit a file directly in GitHub**
