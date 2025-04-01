@@ -15,6 +15,7 @@ import { CollectionManager } from "@/components/CollectionManager";
 import { toast } from "sonner";
 import { LibraryStats } from "@/components/LibraryStats";
 import { ReadingStreak } from "@/components/ReadingStreak";
+import { Meta } from "@/components/Meta";
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -358,6 +359,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex-1 flex">
+      <Meta title="Dashboard" />
       <div className="flex-1 flex flex-col min-w-0">
         <div className={`${!isMobile ? "sticky top-0 z-30" : ""} bg-white`}>
           <div className="bg-white border-b">

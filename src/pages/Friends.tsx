@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Clock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Meta } from "@/components/Meta";
 
 const formatBooks = (books: any[]): Book[] => {
   return books.map(book => ({
@@ -353,6 +353,7 @@ export default function Friends() {
 
   return (
     <div className="container mx-auto px-4 py-8 pb-32 space-y-8">
+      <Meta title="Friends" />
       <h1 className="text-3xl font-bold mb-8 animate-fade-in">Friends</h1>
       
       <AddFriendSection onAddFriend={addFriend} isLoading={isLoading} />

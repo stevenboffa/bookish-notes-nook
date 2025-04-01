@@ -335,221 +335,223 @@ export default function Profile() {
   };
 
   return (
-    <div className="container max-w-md mx-auto p-4 pb-24 space-y-4 mb-16">
+    <div className="container mx-auto px-4 py-8 pb-32">
       <Meta title="Profile" />
-      <Card>
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            <CardTitle>Profile</CardTitle>
-          </div>
-          <CardDescription>Manage your profile settings</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <Avatar className="h-24 w-24">
-                {isUpdating ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
-                ) : (
-                  <>
-                    <AvatarImage src={profile.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/10">
-                      {profile.username?.slice(0, 2).toUpperCase() || 
-                       session?.user.email?.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </>
-                )}
-              </Avatar>
-              <label 
-                htmlFor="avatar-upload" 
-                className="absolute bottom-0 right-0 p-1 bg-background border rounded-full cursor-pointer hover:bg-accent disabled:cursor-not-allowed"
-              >
-                <Camera className="h-4 w-4" />
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarUpload}
-                  disabled={isUpdating}
-                />
-              </label>
+      <div className="max-w-4xl mx-auto space-y-8">
+        <Card>
+          <CardHeader className="space-y-1">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              <CardTitle>Profile</CardTitle>
             </div>
-
-            {isEditing ? (
-              <div className="w-full space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="username"
-                    value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
-                    placeholder="Enter username"
-                  />
-                  <Button 
-                    onClick={handleUpdateProfile} 
+            <CardDescription>Manage your profile settings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <Avatar className="h-24 w-24">
+                  {isUpdating ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : (
+                    <>
+                      <AvatarImage src={profile.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary/10">
+                        {profile.username?.slice(0, 2).toUpperCase() || 
+                         session?.user.email?.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </>
+                  )}
+                </Avatar>
+                <label 
+                  htmlFor="avatar-upload" 
+                  className="absolute bottom-0 right-0 p-1 bg-background border rounded-full cursor-pointer hover:bg-accent disabled:cursor-not-allowed"
+                >
+                  <Camera className="h-4 w-4" />
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
                     disabled={isUpdating}
-                  >
-                    Save
-                  </Button>
+                  />
+                </label>
+              </div>
+
+              {isEditing ? (
+                <div className="w-full space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="username"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      placeholder="Enter username"
+                    />
+                    <Button 
+                      onClick={handleUpdateProfile} 
+                      disabled={isUpdating}
+                    >
+                      Save
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setIsEditing(false);
+                        setNewUsername(profile.username || "");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <p className="font-medium text-lg">{profile.username || "Set username"}</p>
+                  <p className="text-sm text-muted-foreground">{session?.user.email}</p>
                   <Button 
                     variant="outline" 
-                    onClick={() => {
-                      setIsEditing(false);
-                      setNewUsername(profile.username || "");
-                    }}
+                    size="sm" 
+                    onClick={() => setIsEditing(true)}
+                    className="mt-2"
                   >
-                    Cancel
+                    Edit Username
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center">
-                <p className="font-medium text-lg">{profile.username || "Set username"}</p>
-                <p className="text-sm text-muted-foreground">{session?.user.email}</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setIsEditing(true)}
-                  className="mt-2"
-                >
-                  Edit Username
-                </Button>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-      <FavoriteGenres />
+        <FavoriteGenres />
 
-      <Card>
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2">
-            <BookIcon className="h-5 w-5" />
-            <CardTitle>Reading Stats</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="p-4 bg-purple-50 rounded-lg">
-            <p className="text-purple-700 font-medium">Not Started</p>
-            <p className="text-2xl font-bold">{stats.notStarted}</p>
-          </div>
-          <div className="p-4 bg-yellow-50 rounded-lg">
-            <p className="text-yellow-700 font-medium">In Progress</p>
-            <p className="text-2xl font-bold">{stats.inProgress}</p>
-          </div>
-          <div className="p-4 bg-green-50 rounded-lg">
-            <p className="text-green-700 font-medium">Finished</p>
-            <p className="text-2xl font-bold">{stats.finished}</p>
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader className="space-y-1">
+            <div className="flex items-center gap-2">
+              <BookIcon className="h-5 w-5" />
+              <CardTitle>Reading Stats</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <p className="text-purple-700 font-medium">Not Started</p>
+              <p className="text-2xl font-bold">{stats.notStarted}</p>
+            </div>
+            <div className="p-4 bg-yellow-50 rounded-lg">
+              <p className="text-yellow-700 font-medium">In Progress</p>
+              <p className="text-2xl font-bold">{stats.inProgress}</p>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg">
+              <p className="text-green-700 font-medium">Finished</p>
+              <p className="text-2xl font-bold">{stats.finished}</p>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={() => setIsChangePasswordOpen(true)}
-      >
-        <Lock className="mr-2 h-4 w-4" />
-        Change Password
-      </Button>
-
-      <Button
-        variant="destructive"
-        className="w-full"
-        onClick={handleLogout}
-      >
-        <LogOut className="mr-2 h-4 w-4" />
-        Log Out
-      </Button>
-      
-      <div className="pt-8 border-t border-border mt-8">
-        <h3 className="text-lg font-semibold text-destructive mb-2">Danger Zone</h3>
         <Button
           variant="outline"
-          className="w-full border-destructive text-destructive hover:bg-destructive/10"
-          onClick={() => setIsDeleteAccountOpen(true)}
+          className="w-full"
+          onClick={() => setIsChangePasswordOpen(true)}
         >
-          <AlertTriangle className="mr-2 h-4 w-4" />
-          Delete Account
+          <Lock className="mr-2 h-4 w-4" />
+          Change Password
         </Button>
-      </div>
 
-      <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
-              Enter your new password below.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              type="password"
-              placeholder="New password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button onClick={handleChangePassword} className="w-full">
-              Update Password
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={isDeleteAccountOpen} onOpenChange={setIsDeleteAccountOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-destructive flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Delete Account
-            </DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="confirm-email">
-                Type <span className="font-medium">{session?.user.email}</span> to confirm
-              </Label>
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={handleLogout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Log Out
+        </Button>
+        
+        <div className="pt-8 border-t border-border mt-8">
+          <h3 className="text-lg font-semibold text-destructive mb-2">Danger Zone</h3>
+          <Button
+            variant="outline"
+            className="w-full border-destructive text-destructive hover:bg-destructive/10"
+            onClick={() => setIsDeleteAccountOpen(true)}
+          >
+            <AlertTriangle className="mr-2 h-4 w-4" />
+            Delete Account
+          </Button>
+        </div>
+
+        <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Change Password</DialogTitle>
+              <DialogDescription>
+                Enter your new password below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
               <Input
-                id="confirm-email"
-                value={deleteConfirmation}
-                onChange={(e) => setDeleteConfirmation(e.target.value)}
-                placeholder="your@email.com"
+                type="password"
+                placeholder="New password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
               />
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button onClick={handleChangePassword} className="w-full">
+                Update Password
+              </Button>
             </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsDeleteAccountOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                variant="destructive" 
-                onClick={handleDeleteAccount}
-                disabled={isDeletingAccount || deleteConfirmation !== session?.user.email}
-              >
-                {isDeletingAccount ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  "Delete Account"
-                )}
-              </Button>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+        
+        <Dialog open={isDeleteAccountOpen} onOpenChange={setIsDeleteAccountOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-destructive flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Delete Account
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="confirm-email">
+                  Type <span className="font-medium">{session?.user.email}</span> to confirm
+                </Label>
+                <Input
+                  id="confirm-email"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="your@email.com"
+                />
+              </div>
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsDeleteAccountOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDeleteAccount}
+                  disabled={isDeletingAccount || deleteConfirmation !== session?.user.email}
+                >
+                  {isDeletingAccount ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete Account"
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

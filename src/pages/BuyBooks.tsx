@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -177,21 +176,21 @@ export default function BuyBooks() {
         const category = selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy';
         console.log(`Fetching ${category} recommendations...`);
 
-        const [awardWinningResponse, newBooksResponse] = await Promise.all([
-          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-            body: { section: 'award-winning', category }
-          }),
-          supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-            body: { section: 'new', category }
-          })
-        ]);
+        const { data, error } = await supabase.functions.invoke<{
+          awardWinning: AIBookRecommendation[];
+          new: AIBookRecommendation[];
+        }>('book-recommendations', {
+          body: { 
+            category,
+            sections: ['award-winning', 'new']
+          }
+        });
 
-        if (awardWinningResponse.error) throw awardWinningResponse.error;
-        if (newBooksResponse.error) throw newBooksResponse.error;
+        if (error) throw error;
 
         return {
-          awardWinning: awardWinningResponse.data?.recommendations || [],
-          new: newBooksResponse.data?.recommendations || []
+          awardWinning: data?.awardWinning || [],
+          new: data?.new || []
         };
       } catch (error) {
         console.error('Error fetching AI recommendations:', error);
@@ -207,6 +206,7 @@ export default function BuyBooks() {
     retry: 1,
     staleTime: 24 * 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: books = [], isLoading, error } = useQuery({

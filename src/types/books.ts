@@ -1,4 +1,3 @@
-
 export interface Book {
   id: string;
   title: string;
@@ -99,13 +98,17 @@ export interface GoogleBook {
 export interface AIBookRecommendation {
   title: string;
   author: string;
-  description: string;
   publicationYear: string;
+  description: string;
+  themes: string[];
+  rating: string;
   imageUrl?: string;
-  rating?: number;
-  amazonUrl?: string;
-  themes?: string[];
-  genre?: string;
+  amazonUrl: string;
+  awards?: string;
+  targetAudience: string;
+  readingDifficulty: string;
+  pageCount: string;
+  hook: string;
 }
 
 export interface ReadingActivity {

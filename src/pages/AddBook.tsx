@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BookSearchResults } from "@/components/books/BookSearchResults";
+import { Meta } from "@/components/Meta";
 
 interface GoogleBooksResponse {
   items?: GoogleBook[];
@@ -280,6 +281,7 @@ export default function AddBook() {
 
   return (
     <div className="flex-1 md:container">
+      <Meta title="Add Book" />
       {!id && !showManualAdd && (
         <div className="p-4 space-y-6 bg-gradient-to-b from-white via-gray-50 to-white min-h-[calc(100vh-4rem)]">
           <div className="space-y-4 animate-fade-in">
