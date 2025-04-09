@@ -65,3 +65,5 @@ CREATE POLICY "Service role can manage recommendations"
   USING (true)
   WITH CHECK (true);
 
+
+
