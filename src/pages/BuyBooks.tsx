@@ -1,342 +1,284 @@
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { CategorySection } from "@/components/books/CategorySection";
-import { BookSearchResults } from "@/components/books/BookSearchResults";
-import { AIRecommendations } from "@/components/books/AIRecommendations";
-import { GoogleBook, AIBookRecommendation } from "@/types/books";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { bookRecommendations } from "@/data/bookRecommendations";
+import type { AIBookRecommendation } from "@/types/books";
+import { fetchBookCover } from "@/utils/googleBooks";
 
 const categories = {
-  fiction: {
-    title: "Fiction",
-    description: "Explore imaginative worlds and storytelling",
-    imageUrl: "https://images.unsplash.com/photo-1474932430478-367dbb6832c1?w=800&auto=format&fit=crop&q=60",
-    subcategories: [
-      {
-        id: "science-fiction",
+  fiction: [
+    {
         title: "Science Fiction",
-        description: "Journey into imaginative futures",
-        query: "subject:science-fiction&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&auto=format&fit=crop&q=60",
+      description: "Explore the frontiers of imagination with cutting-edge science fiction.",
+      category: "science-fiction",
       },
       {
-        id: "fantasy",
         title: "Fantasy",
-        description: "Magical realms and epic adventures",
-        query: "subject:fantasy&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "literary-fiction",
-        title: "Literary Fiction",
-        description: "Thoughtful and character-driven narratives",
-        query: "subject:literary+fiction&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "mystery-thriller",
+      description: "Journey into magical realms and epic adventures.",
+      category: "fantasy",
+    },
+    {
         title: "Mystery & Thriller",
-        description: "Suspenseful tales and clever mysteries",
-        query: "subject:mystery+thriller&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "historical-fiction",
-        title: "Historical Fiction",
-        description: "Stories set in fascinating past eras",
-        query: "subject:historical+fiction&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "romance",
-        title: "Romance",
-        description: "Love stories and romantic adventures",
-        query: "subject:romance&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1474552226712-ac0f0961a954?w=800&auto=format&fit=crop&q=60",
-      },
-    ],
-  },
-  nonfiction: {
-    title: "Non-Fiction",
-    description: "Discover real-world knowledge and insights",
-    imageUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=800&auto=format&fit=crop&q=60",
-    subcategories: [
-      {
-        id: "biography",
+      description: "Unravel mysteries and experience heart-pounding suspense.",
+      category: "mystery-thriller",
+    },
+    {
+      title: "Romance",
+      description: "Fall in love with captivating stories of romance and relationships.",
+      category: "romance",
+    },
+    {
+      title: "Literary Fiction",
+      description: "Dive into thought-provoking works of literary excellence.",
+      category: "literary-fiction",
+    },
+  ],
+  nonfiction: [
+    {
         title: "Biography & Memoir",
-        description: "Fascinating life stories",
-        query: "subject:biography+autobiography&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?w=800&auto=format&fit=crop&q=60",
+      description: "Discover inspiring life stories and personal journeys.",
+      category: "biography-memoir",
       },
       {
-        id: "history",
         title: "History",
-        description: "Explore the past and its lessons",
-        query: "subject:history&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "science",
-        title: "Science & Technology",
-        description: "Understanding our world and beyond",
-        query: "subject:science&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "self-help",
-        title: "Self-Help & Personal Development",
-        description: "Tools for growth and improvement",
-        query: "subject:self-help&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "business",
+      description: "Travel through time with fascinating historical accounts.",
+      category: "history",
+    },
+    {
+      title: "Science & Nature",
+      description: "Explore the wonders of science and the natural world.",
+      category: "science-nature",
+    },
+    {
         title: "Business & Economics",
-        description: "Professional insights and strategies",
-        query: "subject:business&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&auto=format&fit=crop&q=60",
-      },
-      {
-        id: "philosophy",
-        title: "Philosophy & Psychology",
-        description: "Explore human thought and behavior",
-        query: "subject:philosophy+psychology&maxResults=16&filter=paid-ebooks",
-        imageUrl: "https://images.unsplash.com/photo-1562654501-a0ccc0fc3fb1?w=800&auto=format&fit=crop&q=60",
-      },
-    ],
-  },
+      description: "Learn about markets, entrepreneurship, and economic insights.",
+      category: "business-economics",
+    },
+    {
+      title: "Self-Development",
+      description: "Grow personally and professionally with transformative books.",
+      category: "self-development",
+    },
+  ],
 };
 
-export default function BuyBooks() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [mainCategory, setMainCategory] = useState<"fiction" | "nonfiction" | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const { session } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+function BookCard({ book }: { book: AIBookRecommendation }) {
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!session) {
-      navigate("/");
-    }
-  }, [session, navigate]);
-
-  // Prefetch sci-fi and fantasy recommendations
-  useEffect(() => {
-    const prefetchCategories = ['science-fiction', 'fantasy'];
-    prefetchCategories.forEach(category => {
-      queryClient.prefetchQuery({
-        queryKey: ['ai-recommendations', category],
-        queryFn: async () => {
-          try {
-            const catName = category === 'science-fiction' ? 'Science Fiction' : 'Fantasy';
-            console.log(`Prefetching ${catName} recommendations...`);
-
-            const [awardWinningResponse, newBooksResponse] = await Promise.all([
-              supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-                body: { section: 'award-winning', category: catName }
-              }),
-              supabase.functions.invoke<{ recommendations: AIBookRecommendation[] }>('book-recommendations', {
-                body: { section: 'new', category: catName }
-              })
-            ]);
-
-            if (awardWinningResponse.error) throw awardWinningResponse.error;
-            if (newBooksResponse.error) throw newBooksResponse.error;
-
-            return {
-              awardWinning: awardWinningResponse.data?.recommendations || [],
-              new: newBooksResponse.data?.recommendations || []
-            };
-          } catch (error) {
-            console.error('Error prefetching AI recommendations:', error);
-            throw error;
-          }
-        },
-        staleTime: 24 * 60 * 60 * 1000,
-        gcTime: 24 * 60 * 60 * 1000,
-      });
-    });
-  }, [queryClient]);
-
-  const { data: aiRecommendations, isLoading: isLoadingAI } = useQuery({
-    queryKey: ['ai-recommendations', selectedCategory],
-    queryFn: async () => {
-      if (!['science-fiction', 'fantasy'].includes(selectedCategory)) return { awardWinning: [], new: [] };
-
+    async function loadCover() {
       try {
-        const category = selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy';
-        console.log(`Fetching ${category} recommendations...`);
-
-        const { data, error } = await supabase.functions.invoke<{
-          awardWinning: AIBookRecommendation[];
-          new: AIBookRecommendation[];
-        }>('book-recommendations', {
-          body: { 
-            category,
-            sections: ['award-winning', 'new']
-          }
-        });
-
-        if (error) throw error;
-
-        return {
-          awardWinning: data?.awardWinning || [],
-          new: data?.new || []
-        };
-      } catch (error) {
-        console.error('Error fetching AI recommendations:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch book recommendations. Please try again later."
-        });
-        throw error;
+        setIsLoading(true);
+        setError(null);
+        console.log(`Loading cover for: ${book.title} by ${book.author}`);
+        const url = await fetchBookCover(book.title, book.author);
+        console.log(`Cover URL result for ${book.title}:`, url);
+        setCoverUrl(url);
+      } catch (err) {
+        console.error(`Error loading cover for ${book.title}:`, err);
+        setError(err instanceof Error ? err.message : 'Failed to load cover');
+      } finally {
+        setIsLoading(false);
       }
-    },
-    enabled: ['science-fiction', 'fantasy'].includes(selectedCategory),
-    retry: 1,
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: books = [], isLoading, error } = useQuery({
-    queryKey: ['google-books', searchQuery, selectedCategory],
-    queryFn: async () => {
-      if (['science-fiction', 'fantasy'].includes(selectedCategory)) return [];
-      
-      try {
-        console.log("Starting Google Books search...");
-        
-        let queryString = searchQuery.trim();
-        if (!queryString && selectedCategory) {
-          const category = [...(categories.fiction.subcategories || []), ...(categories.nonfiction.subcategories || [])]
-            .find(c => c.id === selectedCategory);
-          queryString = category?.query || '';
-        }
-        
-        const { data, error } = await supabase.functions.invoke<{ items: GoogleBook[] }>('search-books', {
-          body: { 
-            searchQuery: queryString || 'subject:fiction&orderBy=relevance&maxResults=16&filter=paid-ebooks',
-            maxResults: 16
-          }
-        });
-
-        if (error) throw error;
-
-        return (data?.items || []).filter((book: GoogleBook) => 
-          book.volumeInfo.imageLinks && 
-          book.volumeInfo.title &&
-          book.volumeInfo.authors &&
-          book.volumeInfo.description
-        ).slice(0, 16);
-      } catch (error) {
-        console.error('Error fetching Google books:', error);
-        throw error;
-      }
-    },
-    enabled: !!session && (!!searchQuery || (!!selectedCategory && !['science-fiction', 'fantasy'].includes(selectedCategory))),
-    staleTime: 60 * 1000,
-    retry: 1,
-  });
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Failed to fetch books.'
-      });
     }
-  }, [error, toast]);
-
-  const handleSearch = () => {
-    if (!searchQuery.trim()) return;
-    setSelectedCategory(null);
-    setMainCategory(null);
-    setIsSearching(true);
-    setIsSearching(false);
-  };
-
-  if (!session) return null;
+    loadCover();
+  }, [book.title, book.author]);
 
   return (
-    <div className="flex-1 container mx-auto p-4 space-y-8 pb-32">
-      <h1 className="text-2xl font-bold">Buy Books</h1>
-      
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <Input
-            placeholder="Search by title, author, or subject..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+    <Card className="w-[300px] overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <div className="relative aspect-[2/3] bg-muted">
+        {isLoading ? (
+          <div className="w-full h-full animate-pulse bg-muted" />
+        ) : error ? (
+          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+            Failed to load cover
+          </div>
+        ) : (
+          <img
+            src={coverUrl || '/placeholder-book.jpg'}
+            alt={book.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              console.error(`Image load error for ${book.title}:`, e);
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder-book.jpg';
+            }}
           />
-          <Button onClick={handleSearch} disabled={isSearching}>
-            <Search className="w-4 h-4 mr-2" />
-            Search
+        )}
+        {book.awards && (
+          <div className="absolute top-2 right-2">
+            <Badge variant="secondary" className="bg-white/90 text-black">
+              {book.awards}
+            </Badge>
+          </div>
+        )}
+      </div>
+      <CardHeader>
+        <CardTitle className="text-xl line-clamp-2">{book.title}</CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">
+          {book.author} • {book.publicationYear}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground line-clamp-4">{book.description}</p>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">{book.rating} ★</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {book.themes.map((theme, i) => (
+            <Badge key={i} variant="outline" className="text-xs">
+              {theme}
+            </Badge>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button asChild className="w-full">
+          <a href={book.amazonUrl} target="_blank" rel="noopener noreferrer">
+            View on Amazon
+          </a>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+function BookSection({ title, books }: { title: string; books: AIBookRecommendation[] }) {
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-semibold">{title}</h3>
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {books.map((book, index) => (
+          <BookCard key={index} book={book} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function BuyBooks() {
+  const [activeTab, setActiveTab] = useState("fiction");
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const handleScroll = (direction: "left" | "right") => {
+    const scrollAmount = 300;
+    const newPosition = direction === "left" 
+      ? scrollPosition - scrollAmount 
+      : scrollPosition + scrollAmount;
+    setScrollPosition(newPosition);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Buy Books</h1>
+      
+      <Tabs defaultValue="fiction" className="w-full" onValueChange={setActiveTab}>
+        <TabsList className="w-full justify-start mb-8">
+          <TabsTrigger value="fiction">Fiction</TabsTrigger>
+          <TabsTrigger value="nonfiction">Non-Fiction</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="fiction" className="space-y-12">
+          {categories.fiction.map((category) => (
+            <div key={category.category} className="relative">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold">{category.title}</h2>
+                  <p className="text-muted-foreground">{category.description}</p>
+                </div>
+        <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleScroll("left")}
+                    className="rounded-full"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleScroll("right")}
+                    className="rounded-full"
+                  >
+                    <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
-
-      {!searchQuery && !selectedCategory ? (
-        <CategorySection
-          mainCategory={mainCategory}
-          categories={categories}
-          onSelectMainCategory={setMainCategory}
-          onSelectSubcategory={setSelectedCategory}
-          onBack={() => setMainCategory(null)}
-        />
-      ) : (
-        <div className="space-y-8">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">
-              {selectedCategory 
-                ? [...categories.fiction.subcategories, ...categories.nonfiction.subcategories]
-                    .find(c => c.id === selectedCategory)?.title 
-                : 'Search Results'}
-            </h2>
-            {selectedCategory && (
-              <Button variant="ghost" onClick={() => {
-                setSelectedCategory(null);
-                setMainCategory(null);
-              }}>
-                ← Back to Categories
-              </Button>
+              <ScrollArea className="w-full whitespace-nowrap rounded-md">
+                <div className="flex gap-6 p-4" style={{ transform: `translateX(${scrollPosition}px)` }}>
+                  {bookRecommendations[category.category] && (
+                    <>
+                      <BookSection
+                        title="Award-Winning Books"
+                        books={bookRecommendations[category.category]["award-winning"]}
+                      />
+                      <BookSection
+                        title="New Releases"
+                        books={bookRecommendations[category.category]["new"]}
+                      />
+                    </>
             )}
           </div>
-          
-          {['science-fiction', 'fantasy'].includes(selectedCategory) ? (
-            <div className="space-y-12">
-              <AIRecommendations
-                title={`Award-Winning ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'}`}
-                books={aiRecommendations?.awardWinning || []}
-                isLoading={isLoadingAI}
-              />
-              <AIRecommendations
-                title={`New ${selectedCategory === 'science-fiction' ? 'Science Fiction' : 'Fantasy'} Releases`}
-                books={aiRecommendations?.new || []}
-                isLoading={isLoadingAI}
-              />
+              </ScrollArea>
             </div>
-          ) : (
-            <BookSearchResults
-              books={books}
-              onBookClick={(bookId) => navigate(`/book/${bookId}`)}
-              isLoading={isLoading}
-            />
+          ))}
+        </TabsContent>
+
+        <TabsContent value="nonfiction" className="space-y-12">
+          {categories.nonfiction.map((category) => (
+            <div key={category.category} className="relative">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold">{category.title}</h2>
+                  <p className="text-muted-foreground">{category.description}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleScroll("left")}
+                    className="rounded-full"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleScroll("right")}
+                    className="rounded-full"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <ScrollArea className="w-full whitespace-nowrap rounded-md">
+                <div className="flex gap-6 p-4" style={{ transform: `translateX(${scrollPosition}px)` }}>
+                  {bookRecommendations[category.category] && (
+                    <>
+                      <BookSection
+                        title="Award-Winning Books"
+                        books={bookRecommendations[category.category]["award-winning"]}
+                      />
+                      <BookSection
+                        title="New Releases"
+                        books={bookRecommendations[category.category]["new"]}
+                      />
+                    </>
           )}
         </div>
-      )}
+              </ScrollArea>
+            </div>
+          ))}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

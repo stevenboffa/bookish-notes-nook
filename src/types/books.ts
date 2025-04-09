@@ -17,6 +17,8 @@ export interface Book {
   description?: string;
   collections?: string[];
   readingProgress?: number;
+  ai_summary?: AISummary;
+  last_summary_note_count?: number;
 }
 
 export interface BookWithNotes extends Omit<Book, 'notes'> {
@@ -117,4 +119,14 @@ export interface ReadingActivity {
   activity_date: string;
   activity_type: string;
   created_at: string;
+}
+
+export interface AISummary {
+  overview: string;
+  themes: string[];
+  engagement: string;
+  criticalThinking: string;
+  emotionalResponse: string;
+  keyTakeaways: string[];
+  suggestedReflections: string[];
 }

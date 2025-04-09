@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from "react";
-import { differenceInDays, parseISO, isValid } from "date-fns";
+import { differenceInDays, parseISO, isValid, isBefore, isSameDay } from "date-fns";
 import { Book } from "@/types/books";
 import { DatePickerField } from "./DatePickerField";
 import { Badge } from "@/components/ui/badge";
 import { Clock, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 interface ReadingDatesProps {
   book: Book;
@@ -28,9 +28,26 @@ export function ReadingDates({ book, onUpdate }: ReadingDatesProps) {
   const [readingDays, setReadingDays] = useState<number | null>(null);
   const isMobile = useIsMobile();
 
+  // Update dates when book changes
   useEffect(() => {
-    if (startDate && endDate && startDate <= endDate) {
-      setReadingDays(differenceInDays(endDate, startDate) + 1); // +1 to include both start and end days
+    setStartDate(book.startDate && isValid(parseISO(book.startDate)) 
+      ? parseISO(book.startDate) 
+      : undefined
+    );
+    setEndDate(book.endDate && isValid(parseISO(book.endDate)) 
+      ? parseISO(book.endDate) 
+      : undefined
+    );
+  }, [book.startDate, book.endDate]);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      // If dates are the same day, count as 1 day
+      if (startDate.toISOString().split('T')[0] === endDate.toISOString().split('T')[0]) {
+        setReadingDays(1);
+      } else {
+        setReadingDays(differenceInDays(endDate, startDate) + 1); // +1 to include both start and end days
+      }
     } else {
       setReadingDays(null);
     }
@@ -39,16 +56,32 @@ export function ReadingDates({ book, onUpdate }: ReadingDatesProps) {
   const handleStartDateChange = (date: Date | undefined) => {
     setStartDate(date);
     if (date) {
-      onUpdate({ startDate: date.toISOString() });
+      onUpdate({ startDate: date.toISOString().split('T')[0] });
+      // If end date exists and is now invalid, clear it
+      if (endDate && date > endDate) {
+        setEndDate(undefined);
+        onUpdate({ endDate: undefined });
+        toast.error("Finish date was cleared as it was before the new start date");
+      }
     } else {
       onUpdate({ startDate: undefined });
     }
   };
 
   const handleEndDateChange = (date: Date | undefined) => {
+    if (!startDate && date) {
+      toast.error("Please set a start date first");
+      return;
+    }
+    
+    if (date && startDate && isBefore(date, startDate) && !isSameDay(date, startDate)) {
+      toast.error("Finish date cannot be before start date");
+      return;
+    }
+    
     setEndDate(date);
     if (date) {
-      onUpdate({ endDate: date.toISOString() });
+      onUpdate({ endDate: date.toISOString().split('T')[0] });
     } else {
       onUpdate({ endDate: undefined });
     }
@@ -72,7 +105,7 @@ export function ReadingDates({ book, onUpdate }: ReadingDatesProps) {
             date={endDate}
             onDateChange={handleEndDateChange}
             label="Finished"
-            placeholder="End"
+            placeholder={startDate ? "End" : "Set start date first"}
             className="w-full"
             compact={true}
           />

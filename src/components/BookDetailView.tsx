@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useCallback } from "react";
-import { Book, BookWithNotes, Note, Collection } from "@/types/books";
+import { Book, BookWithNotes, Note, Collection, AISummary } from "@/types/books";
 import { BookCover } from "./BookCover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  X, Save, Star, StarHalf, Check, ChevronDown, Tag, Send, Share2
+  X, Save, Star, StarHalf, Check, ChevronDown, Tag, Send, Share2, Lightbulb
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NoteSection } from "./NoteSection";
@@ -36,6 +35,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ReadingDates } from "./ReadingDates";
+import { BookWrap } from "@/components/books/BookWrap";
+import { supabase } from "@/integrations/supabase/client";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Science Fiction", "Fantasy", 
@@ -75,6 +76,7 @@ export function BookDetailView({
   const [bookUpdates, setBookUpdates] = useState<Partial<Book>>({});
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [showBookWrap, setShowBookWrap] = useState(false);
 
   const updateBookState = useCallback((bookData: Book | null) => {
     if (bookData) {
@@ -230,6 +232,67 @@ export function BookDetailView({
       ...updatedBook
     };
     onSave(bookWithUpdatedNotes);
+  };
+
+  const handleBookWrapClose = () => {
+    setShowBookWrap(false);
+  };
+
+  const handleSummaryGenerated = async () => {
+    if (!book) return;
+
+    // Fetch fresh book data
+    const { data: freshData, error } = await supabase
+      .from('books')
+      .select('*')
+      .eq('id', book.id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching updated book:', error);
+      return;
+    }
+
+    if (freshData) {
+      try {
+        // Parse the AI summary
+        const parsedSummary = typeof freshData.ai_summary === 'string'
+          ? JSON.parse(freshData.ai_summary)
+          : freshData.ai_summary;
+
+        // Validate the parsed summary has the required fields
+        if (parsedSummary && 
+            typeof parsedSummary === 'object' &&
+            'overview' in parsedSummary &&
+            'themes' in parsedSummary &&
+            'engagement' in parsedSummary &&
+            'criticalThinking' in parsedSummary &&
+            'emotionalResponse' in parsedSummary &&
+            'keyTakeaways' in parsedSummary &&
+            'suggestedReflections' in parsedSummary) {
+          
+          // Update the book with fresh data
+          const updatedBook: Book = {
+            ...book,
+            ai_summary: parsedSummary as AISummary,
+            last_summary_note_count: Number((freshData as any).last_summary_note_count) || 0
+          };
+
+          // Update the book in the parent component
+          onSave(updatedBook);
+          // Update local state
+          updateBookState(updatedBook);
+
+          console.log('Updated book with new AI summary:', {
+            bookId: book.id,
+            hasAiSummary: true,
+            newNoteCount: updatedBook.last_summary_note_count
+          });
+        }
+      } catch (e) {
+        console.error('Error parsing AI summary:', e);
+      }
+    }
   };
 
   const renderRatingStars = (rating: number) => {
@@ -550,25 +613,45 @@ export function BookDetailView({
               </Collapsible>
               
               <div className="space-y-4 bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
-                <Label className="text-sm font-medium text-text-muted">Rating</Label>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    {renderRatingStars(rating)}
-                    <span className="text-sm font-medium text-text-muted ml-2">
-                      {rating.toFixed(1)}/10
-                    </span>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-text-muted">Rating</Label>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      {renderRatingStars(rating)}
+                      <span className="text-sm font-medium text-text-muted ml-2">
+                        {rating.toFixed(1)}/10
+                      </span>
+                    </div>
+                    <Slider
+                      id="rating"
+                      min={0}
+                      max={10}
+                      step={0.5}
+                      value={[rating]}
+                      onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
+                      className="flex-1"
+                    />
                   </div>
-                  <Slider
-                    id="rating"
-                    min={0}
-                    max={10}
-                    step={0.5}
-                    value={[rating]}
-                    onValueChange={(value) => setRating(parseFloat(value[0].toFixed(1)))}
-                    className="flex-1"
-                  />
                 </div>
               </div>
+
+              {book && book.status === "Finished" && (
+                <div className="space-y-3 bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb className="h-5 w-5 text-indigo-600" />
+                    <h3 className="text-lg font-semibold text-indigo-900">Book Wrap Analysis</h3>
+                  </div>
+                  <p className="text-sm text-indigo-700">
+                    Generate an AI-powered analysis of your reading journey, including themes, engagement, emotional responses, and reflections.
+                  </p>
+                  <Button
+                    onClick={() => setShowBookWrap(true)}
+                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600"
+                  >
+                    Generate Book Wrap
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -610,6 +693,14 @@ export function BookDetailView({
           )}
         </div>
       </div>
+
+      {showBookWrap && book && (
+        <BookWrap 
+          book={book} 
+          onClose={handleBookWrapClose}
+          onSummaryGenerated={handleSummaryGenerated}
+        />
+      )}
     </div>
   );
 }

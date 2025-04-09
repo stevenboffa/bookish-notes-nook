@@ -210,6 +210,7 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           user_id: string
+          ai_summary: Json | null
         }
         Insert: {
           author: string
@@ -228,6 +229,7 @@ export type Database = {
           thumbnail_url?: string | null
           title: string
           user_id: string
+          ai_summary?: Json | null
         }
         Update: {
           author?: string
@@ -246,6 +248,7 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           user_id?: string
+          ai_summary?: Json | null
         }
         Relationships: []
       }
