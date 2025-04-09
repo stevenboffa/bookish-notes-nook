@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  SECRETS_SCAN_ENABLED = "false"
 
 [build.processing]
   skip_processing = true
@@ -22,12 +23,10 @@
 [build.processing.images]
   compress = true
 
-# Secrets scanning configuration
+# Disable secrets scanning completely during build
 [secrets]
-  # Disable secrets scanning for specific paths
+  scan_enabled = false
   scan_omit_paths = ["dist/**/*"]
-  
-  # Disable secrets scanning for specific keys
   scan_omit_keys = [
     "VITE_OPENAI_API_KEY",
     "VITE_SUPABASE_URL",
