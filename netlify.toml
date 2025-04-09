@@ -20,4 +20,16 @@
   pretty_urls = true
 
 [build.processing.images]
-  compress = true 
+  compress = true
+
+# Secrets scanning configuration
+[secrets]
+  # Disable secrets scanning for specific paths
+  scan_omit_paths = ["dist/**/*"]
+  
+  # Disable secrets scanning for specific keys
+  scan_omit_keys = [
+    "VITE_OPENAI_API_KEY",
+    "VITE_SUPABASE_URL",
+    "VITE_SUPABASE_ANON_KEY"
+  ] 

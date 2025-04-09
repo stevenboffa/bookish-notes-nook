@@ -29,9 +29,15 @@ export default defineConfig(({ mode }) => ({
         drop_console: true,
         drop_debugger: true
       }
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
     }
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
-  }
+  },
+  envPrefix: 'VITE_'
 }));
