@@ -350,271 +350,281 @@ ${JSON.stringify(bookContext.notes.map(note => ({
 
   const modalContent = (
     <div 
-      className="fixed inset-0 z-[100]"
-      style={{ 
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'auto',
-        touchAction: 'pan-y',
-        WebkitOverflowScrolling: 'touch',
-        pointerEvents: 'auto',
-      }}
+      className="fixed inset-0 z-[99999]"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
         }
       }}
     >
-      <div 
-        className="relative w-full max-w-4xl bg-white rounded-lg flex flex-col mx-4 sm:mx-6 my-4 sm:my-6"
-        style={{
-          maxHeight: '90vh',
-          height: 'auto',
-          overflow: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          overscrollBehavior: 'contain',
-          touchAction: 'pan-y',
-          position: 'relative',
-          zIndex: 101,
-          transform: 'translateZ(0)',
-          WebkitTransform: 'translateZ(0)',
-          pointerEvents: 'auto',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header with close button */}
-        <div className="flex justify-between items-center p-3 sm:p-4 border-b bg-white sticky top-0 z-10">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Book Wrap</h2>
-          <div className="flex items-center gap-2">
-            {book.status !== "Finished" ? (
-              <div className="text-xs sm:text-sm text-amber-600">
-                Note: Book wrap can only be generated once you've finished reading.
-              </div>
-            ) : !aiSummary ? (
-              <Button 
-                onClick={generateAISummary} 
-                disabled={isLoadingSummary}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-base px-4 py-2 h-auto min-h-[44px] touch-manipulation"
-              >
-                Generate Book Wrap
-              </Button>
-            ) : hasNewNotes ? (
-              <div className="flex flex-col items-end gap-1">
-                <Button 
-                  onClick={generateAISummary} 
-                  disabled={isLoadingSummary}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-base px-4 py-2 h-auto min-h-[44px] touch-manipulation"
-                >
-                  Generate New
-                </Button>
-                <span className="hidden sm:inline text-xs text-emerald-600">
-                  New notes detected
-                </span>
-              </div>
-            ) : null}
-            <Button 
-              onClick={onClose} 
-              variant="ghost"
-              className="h-9 sm:h-9 w-9 sm:w-9 p-0 min-h-[44px] touch-manipulation"
-              size="sm"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Scrollable content */}
-        <div 
-          className="flex-1 overflow-y-auto"
-          style={{
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'contain',
-            touchAction: 'pan-y',
-            transform: 'translateZ(0)',
-            WebkitTransform: 'translateZ(0)',
-            pointerEvents: 'auto',
-          }}
-        >
-          <div ref={wrapRef} className="p-2 sm:p-8 bg-gradient-to-br from-indigo-50 to-purple-50">
-            {/* Header */}
-            <div className="text-center mb-3 sm:mb-8">
-              <h1 className="text-xl sm:text-3xl font-bold text-indigo-900 mb-1 sm:mb-2">{book.title}</h1>
-              <p className="text-base sm:text-xl text-indigo-700">by {book.author}</p>
-            </div>
-
-            {/* Enhanced Book Info Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-8">
-              <Card className="p-2 sm:p-4 flex items-center space-x-2 sm:space-x-3">
-                <div className="bg-yellow-100 p-1 sm:p-2 rounded-full">
-                  <Star className="text-yellow-500 h-4 w-4 sm:h-6 sm:w-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Rating</p>
-                  <p className="font-semibold text-sm sm:text-lg">{book.rating}/10</p>
-                </div>
-              </Card>
-
-              <Card className="p-2 sm:p-4 flex items-center space-x-2 sm:space-x-3">
-                <div className="bg-blue-100 p-1 sm:p-2 rounded-full">
-                  <Calendar className="text-blue-500 h-4 w-4 sm:h-6 sm:w-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Reading Time</p>
-                  <p className="font-semibold text-sm sm:text-lg">{getReadingTime()}</p>
-                </div>
-              </Card>
-
-              <Card className="p-2 sm:p-4 flex items-center space-x-2 sm:space-x-3 col-span-2 sm:col-span-1">
-                <div className="bg-green-100 p-1 sm:p-2 rounded-full">
-                  <BookOpen className="text-green-500 h-4 w-4 sm:h-6 sm:w-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Genre</p>
-                  <p className="font-semibold text-sm sm:text-lg">{book.genre || "N/A"}</p>
-                </div>
-              </Card>
-
-              {/* Notes Stats Card */}
-              <Card className="p-2 sm:p-6 col-span-full bg-gradient-to-r from-indigo-50 to-purple-50">
-                <h3 className="text-sm sm:text-lg font-semibold text-indigo-900 mb-2 sm:mb-4">Notes & Insights</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
-                  {Object.entries(getNoteStats().stats).map(([type, count]) => (
-                    <div key={type} className="bg-white p-2 sm:p-4 rounded-lg shadow-sm">
-                      <div className="flex items-center gap-1 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="p-1 sm:p-2 rounded-full bg-gray-50">
-                          {getNoteTypeIcon(type)}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-xs font-medium text-gray-600">{getNoteTypeLabel(type)}</h4>
-                          <span className="text-lg sm:text-2xl font-bold text-indigo-600">{count}</span>
-                        </div>
-                      </div>
-                      <div className="w-full bg-gray-200 h-1 rounded-full overflow-hidden">
-                        <div 
-                          className="bg-indigo-600 h-full rounded-full"
-                          style={{ 
-                            width: `${(count / getNoteStats().totalNotes) * 100}%`,
-                          }}
-                        />
-                      </div>
+      <div className="fixed inset-0 bg-black/50" />
+      <div className="fixed inset-0 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-4">
+          <div 
+            className="relative w-full sm:max-w-2xl bg-white rounded-lg shadow-xl flex flex-col"
+            style={{ maxHeight: 'calc(100vh - 2rem)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Fixed header */}
+            <div className="sticky top-0 z-10 p-4 border-b bg-white rounded-t-lg">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Book Wrap</h2>
+                <div className="flex items-center gap-2">
+                  {book.status !== "Finished" ? (
+                    <div className="text-xs sm:text-sm text-amber-600">
+                      Note: Book wrap can only be generated once you've finished reading.
                     </div>
-                  ))}
+                  ) : !aiSummary ? (
+                    <Button 
+                      onClick={generateAISummary} 
+                      disabled={isLoadingSummary}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-base px-4 py-2 h-auto min-h-[44px] touch-manipulation"
+                    >
+                      Generate Book Wrap
+                    </Button>
+                  ) : hasNewNotes ? (
+                    <div className="flex flex-col items-end gap-1">
+                      <Button 
+                        onClick={generateAISummary} 
+                        disabled={isLoadingSummary}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-base px-4 py-2 h-auto min-h-[44px] touch-manipulation"
+                      >
+                        Generate New
+                      </Button>
+                      <span className="hidden sm:inline text-xs text-emerald-600">
+                        New notes detected
+                      </span>
+                    </div>
+                  ) : null}
+                  <Button 
+                    onClick={onClose} 
+                    variant="ghost"
+                    className="h-9 sm:h-9 w-9 sm:w-9 p-0 min-h-[44px] touch-manipulation"
+                    size="sm"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-              </Card>
+              </div>
             </div>
 
-            {/* AI Summary Card */}
-            <Card className="p-2 sm:p-6 bg-gradient-to-r from-emerald-50 to-teal-50">
-              <h3 className="text-sm sm:text-lg font-semibold text-emerald-800 flex items-center gap-1 sm:gap-2 mb-2 sm:mb-4">
-                <Lightbulb className="h-3 w-3 sm:h-5 sm:w-5 text-emerald-600" />
-                <span>AI Reading Analysis</span>
-              </h3>
-              
-              {isLoadingSummary ? (
-                <div className="space-y-2 sm:space-y-4">
-                  <div className="h-3 sm:h-4 bg-emerald-100 rounded animate-pulse" />
-                  <div className="h-3 sm:h-4 bg-emerald-100 rounded animate-pulse w-3/4" />
-                  <div className="h-3 sm:h-4 bg-emerald-100 rounded animate-pulse w-5/6" />
-                </div>
-              ) : aiSummary ? (
-                <div className="space-y-2 sm:space-y-6">
-                  {/* Overview */}
-                  <div className="prose prose-sm sm:prose-base prose-emerald">
-                    <p className="text-sm sm:text-base text-emerald-800 leading-relaxed">{aiSummary.overview}</p>
+            {/* Scrollable content */}
+            <div className="overflow-y-auto">
+              <div className="p-4">
+                <div ref={wrapRef} className="space-y-4">
+                  {/* Header */}
+                  <div className="text-center mb-3 sm:mb-8">
+                    <h1 className="text-xl sm:text-3xl font-bold text-indigo-900 mb-1 sm:mb-2">{book.title}</h1>
+                    <p className="text-base sm:text-xl text-indigo-700">by {book.author}</p>
                   </div>
 
-                  {/* Themes */}
-                  {aiSummary.themes.length > 0 && (
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2">Key Themes</h4>
-                      <div className="flex flex-wrap gap-1 sm:gap-2">
-                        {aiSummary.themes.map((theme, index) => (
-                          <span
-                            key={index}
-                            className="px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-xs sm:text-sm font-medium"
-                          >
-                            {theme}
-                          </span>
+                  {/* Enhanced Book Info Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-8">
+                    <Card className="p-2 sm:p-4 flex items-center space-x-2 sm:space-x-3">
+                      <div className="bg-yellow-100 p-1 sm:p-2 rounded-full">
+                        <Star className="text-yellow-500 h-4 w-4 sm:h-6 sm:w-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Rating</p>
+                        <p className="font-semibold text-sm sm:text-lg">{book.rating}/10</p>
+                      </div>
+                    </Card>
+
+                    <Card className="p-2 sm:p-4 flex items-center space-x-2 sm:space-x-3">
+                      <div className="bg-blue-100 p-1 sm:p-2 rounded-full">
+                        <Calendar className="text-blue-500 h-4 w-4 sm:h-6 sm:w-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Reading Time</p>
+                        <p className="font-semibold text-sm sm:text-lg">{getReadingTime()}</p>
+                      </div>
+                    </Card>
+
+                    <Card className="p-2 sm:p-4 flex items-center space-x-2 sm:space-x-3 col-span-2 sm:col-span-1">
+                      <div className="bg-green-100 p-1 sm:p-2 rounded-full">
+                        <BookOpen className="text-green-500 h-4 w-4 sm:h-6 sm:w-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Genre</p>
+                        <p className="font-semibold text-sm sm:text-lg">{book.genre || "N/A"}</p>
+                      </div>
+                    </Card>
+
+                    {/* Notes Stats Card */}
+                    <Card className="p-2 sm:p-6 col-span-full bg-gradient-to-r from-indigo-50 to-purple-50">
+                      <div className="flex justify-between items-center mb-2 sm:mb-4">
+                        <h3 className="text-sm sm:text-lg font-semibold text-indigo-900">Notes & Insights</h3>
+                        <div className="flex items-center gap-2">
+                          <div className="bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200 flex items-center gap-1.5">
+                            <MessageSquare className="h-3.5 w-3.5 text-indigo-600" />
+                            <span className="text-xs sm:text-sm text-indigo-600 font-semibold">
+                              {getNoteStats().totalNotes} notes
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+                        {Object.entries(getNoteStats().stats).map(([type, count]) => (
+                          <div key={type} className="bg-white p-2 sm:p-4 rounded-lg shadow-sm">
+                            <div className="flex items-center gap-1 sm:gap-3 mb-1 sm:mb-2">
+                              <div className="p-1 sm:p-2 rounded-full bg-gray-50">
+                                {getNoteTypeIcon(type)}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-xs font-medium text-gray-600">{getNoteTypeLabel(type)}</h4>
+                                <span className="text-lg sm:text-2xl font-bold text-indigo-600">{count}</span>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-200 h-1 rounded-full overflow-hidden">
+                              <div 
+                                className="bg-indigo-600 h-full rounded-full"
+                                style={{ 
+                                  width: `${(count / getNoteStats().totalNotes) * 100}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    </Card>
+                  </div>
 
-                  {/* Reading Style */}
-                  <div className="grid grid-cols-1 gap-2 sm:gap-6">
-                    <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
-                      <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                        <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
-                        Reading Engagement
-                      </h4>
-                      <p className="text-xs sm:text-sm text-emerald-700 leading-relaxed">{aiSummary.engagement}</p>
-                    </div>
+                  {/* AI Summary Card */}
+                  <Card className="p-2 sm:p-6 bg-gradient-to-r from-emerald-50 to-teal-50">
+                    <h3 className="text-sm sm:text-lg font-semibold text-emerald-800 flex items-center gap-1 sm:gap-2 mb-2 sm:mb-4">
+                      <Lightbulb className="h-3 w-3 sm:h-5 sm:w-5 text-emerald-600" />
+                      <span>AI Reading Analysis</span>
+                    </h3>
                     
-                    <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
-                      <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                        <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
-                        Critical Analysis
-                      </h4>
-                      <p className="text-xs sm:text-sm text-emerald-700 leading-relaxed">{aiSummary.criticalThinking}</p>
-                    </div>
+                    {isLoadingSummary ? (
+                      <div className="space-y-2 sm:space-y-4">
+                        <div className="h-3 sm:h-4 bg-emerald-100 rounded animate-pulse" />
+                        <div className="h-3 sm:h-4 bg-emerald-100 rounded animate-pulse w-3/4" />
+                        <div className="h-3 sm:h-4 bg-emerald-100 rounded animate-pulse w-5/6" />
+                      </div>
+                    ) : aiSummary ? (
+                      <div className="space-y-2 sm:space-y-6">
+                        {/* Overview */}
+                        <div className="prose prose-sm sm:prose-base prose-emerald">
+                          <p className="text-sm sm:text-base text-emerald-800 leading-relaxed">{aiSummary.overview}</p>
+                        </div>
 
-                    <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
-                      <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                        <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
-                        Emotional Connection
-                      </h4>
-                      <p className="text-xs sm:text-sm text-emerald-700 leading-relaxed">{aiSummary.emotionalResponse}</p>
-                    </div>
-                  </div>
+                        {/* Themes */}
+                        {aiSummary.themes.length > 0 && (
+                          <div>
+                            <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2">Key Themes</h4>
+                            <div className="flex flex-wrap gap-1 sm:gap-2">
+                              {aiSummary.themes.map((theme, index) => (
+                                <span
+                                  key={index}
+                                  className="px-1.5 sm:px-3 py-0.5 sm:py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-xs sm:text-sm font-medium"
+                                >
+                                  {theme}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
-                  {/* Key Takeaways */}
-                  {aiSummary.keyTakeaways.length > 0 && (
-                    <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
-                      <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                        <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4" />
-                        Key Takeaways
-                      </h4>
-                      <ul className="list-disc list-inside space-y-1 sm:space-y-2">
-                        {aiSummary.keyTakeaways.map((takeaway, index) => (
-                          <li key={index} className="text-xs sm:text-sm text-emerald-700 leading-relaxed">
-                            {takeaway}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                        {/* Reading Style */}
+                        <div className="grid grid-cols-1 gap-2 sm:gap-6">
+                          <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
+                            <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
+                              <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Reading Engagement
+                            </h4>
+                            <p className="text-xs sm:text-sm text-emerald-700 leading-relaxed">{aiSummary.engagement}</p>
+                          </div>
+                          
+                          <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
+                            <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
+                              <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Critical Analysis
+                            </h4>
+                            <p className="text-xs sm:text-sm text-emerald-700 leading-relaxed">{aiSummary.criticalThinking}</p>
+                          </div>
 
-                  {/* Suggested Reflections */}
-                  {aiSummary.suggestedReflections.length > 0 && (
-                    <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
-                      <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
-                        <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                        Questions for Reflection
-                      </h4>
-                      <ul className="list-disc list-inside space-y-1 sm:space-y-2">
-                        {aiSummary.suggestedReflections.map((reflection, index) => (
-                          <li key={index} className="text-xs sm:text-sm text-emerald-700 leading-relaxed">
-                            {reflection}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                          <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
+                            <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
+                              <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Emotional Connection
+                            </h4>
+                            <p className="text-xs sm:text-sm text-emerald-700 leading-relaxed">{aiSummary.emotionalResponse}</p>
+                          </div>
+                        </div>
+
+                        {/* Key Takeaways */}
+                        {aiSummary.keyTakeaways.length > 0 && (
+                          <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
+                            <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
+                              <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Key Takeaways
+                            </h4>
+                            <ul className="list-disc list-inside space-y-1 sm:space-y-2">
+                              {aiSummary.keyTakeaways.map((takeaway, index) => (
+                                <li key={index} className="text-xs sm:text-sm text-emerald-700 leading-relaxed">
+                                  {takeaway}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Suggested Reflections */}
+                        {aiSummary.suggestedReflections.length > 0 && (
+                          <div className="bg-emerald-50/50 rounded-lg p-2 sm:p-4">
+                            <h4 className="text-xs sm:text-sm font-medium text-emerald-800 mb-1 sm:mb-2 flex items-center gap-1 sm:gap-2">
+                              <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                              Questions for Reflection
+                            </h4>
+                            <ul className="list-disc list-inside space-y-1 sm:space-y-2">
+                              {aiSummary.suggestedReflections.map((reflection, index) => (
+                                <li key={index} className="text-xs sm:text-sm text-emerald-700 leading-relaxed">
+                                  {reflection}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                  </Card>
                 </div>
-              ) : null}
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 
-  return createPortal(modalContent, document.body);
+  // Add body scroll lock when modal is open
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Find the BookDetailView modal
+    const bookDetailView = document.querySelector('[role="dialog"]');
+    
+    if (bookDetailView) {
+      // Store original styles
+      const originalStyles = {
+        overflow: bookDetailView.style.overflow,
+        touchAction: bookDetailView.style.touchAction
+      };
+      
+      // Prevent the BookDetailView from scrolling
+      bookDetailView.style.overflow = 'hidden';
+      bookDetailView.style.touchAction = 'none';
+      
+      return () => {
+        // Restore original styles
+        Object.assign(bookDetailView.style, originalStyles);
+      };
+    }
+  }, []);
+
+  // Find the BookDetailView modal to use as the portal target
+  const portalTarget = document.querySelector('[role="dialog"]') || document.body;
+
+  return createPortal(modalContent, portalTarget);
 } 
