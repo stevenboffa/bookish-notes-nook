@@ -17,50 +17,27 @@ export default function SignUp() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Sign up form submitted");
-    console.log("Environment:", import.meta.env.MODE);
-    console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
-    console.log("Supabase Anon Key:", import.meta.env.VITE_SUPABASE_ANON_KEY?.slice(0, 10) + "...");
-    console.log("Form data:", { email, password });
     setIsLoading(true);
 
     try {
       console.log("Attempting to sign up with:", { email });
-      
-      // Simplified signup request
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            full_name: email.split('@')[0],
+            email_subscribe: false,
+          }
         }
       });
 
-      console.log("Sign up response:", { 
-        data: {
-          user: data?.user ? {
-            id: data.user.id,
-            email: data.user.email,
-            identities: data.user.identities?.length
-          } : null,
-          session: data?.session ? 'exists' : null
-        },
-        error: error ? {
-          message: error.message,
-          status: error.status,
-          name: error.name
-        } : null
-      });
+      console.log("Sign up response:", { data, error });
 
       if (error) {
         console.error("Sign up error details:", error);
-        if (error.message.includes('Email rate limit exceeded')) {
-          toast.error("Too many signup attempts. Please try again later.");
-        } else if (error.message.includes('User already registered')) {
-          toast.error("This email is already registered. Please sign in instead.");
-        } else {
-          toast.error(error.message || "An error occurred during sign up");
-        }
-        return;
+        throw error;
       }
 
       if (data?.user?.identities?.length === 0) {
@@ -72,11 +49,7 @@ export default function SignUp() {
       navigate("/auth/sign-in");
     } catch (error: any) {
       console.error("Sign up error:", error);
-      if (error.message.includes('Email rate limit exceeded')) {
-        toast.error("Too many signup attempts. Please try again later.");
-      } else {
-        toast.error(error.message || "An error occurred during sign up");
-      }
+      toast.error(error.message || "An error occurred during sign up");
     } finally {
       setIsLoading(false);
     }
