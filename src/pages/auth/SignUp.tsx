@@ -16,28 +16,40 @@ export default function SignUp() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Sign up form submitted");
     setIsLoading(true);
 
     try {
+      console.log("Attempting to sign up with:", { email });
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
-            full_name: email.split('@')[0], // Set a default name from email
+            full_name: email.split('@')[0],
             email_subscribe: false,
           }
         }
       });
 
-      if (error) throw error;
+      console.log("Sign up response:", { data, error });
+
+      if (error) {
+        console.error("Sign up error details:", error);
+        throw error;
+      }
+
+      if (data?.user?.identities?.length === 0) {
+        toast.error("User already registered");
+        return;
+      }
 
       toast.success("Success! Please check your email to verify your account.");
       navigate("/auth/sign-in");
     } catch (error: any) {
       console.error("Sign up error:", error);
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred during sign up");
     } finally {
       setIsLoading(false);
     }
@@ -45,19 +57,24 @@ export default function SignUp() {
 
   const handleGoogleSignUp = async () => {
     try {
+      console.log("Attempting Google sign up");
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
             subscribe: 'false',
           }
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Google sign up error:", error);
+        throw error;
+      }
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("Google sign up error:", error);
+      toast.error(error.message || "An error occurred during Google sign up");
     }
   };
 
