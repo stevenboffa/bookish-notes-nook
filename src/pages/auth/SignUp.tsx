@@ -21,8 +21,6 @@ export default function SignUp() {
 
     try {
       console.log("Attempting to sign up with:", { email });
-      console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -46,8 +44,7 @@ export default function SignUp() {
         error: error ? {
           message: error.message,
           status: error.status,
-          name: error.name,
-          stack: error.stack
+          name: error.name
         } : null
       });
 
@@ -68,11 +65,24 @@ export default function SignUp() {
         return;
       }
 
+      // Call welcome-email function directly
+      if (data?.user) {
+        console.log("Calling welcome-email function for user:", data.user.email);
+        const { error: emailError } = await supabase.functions.invoke('welcome-email', {
+          body: { user: data.user }
+        });
+        
+        if (emailError) {
+          console.error("Error sending welcome email:", emailError);
+        } else {
+          console.log("Welcome email sent successfully");
+        }
+      }
+
       toast.success("Success! Please check your email to verify your account.");
       navigate("/auth/sign-in");
     } catch (error: any) {
       console.error("Sign up error:", error);
-      console.error("Error stack:", error.stack);
       toast.error(error.message || "An error occurred during sign up");
     } finally {
       setIsLoading(false);

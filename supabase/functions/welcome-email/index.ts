@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { Resend } from 'https://esm.sh/resend@2.0.0'
 
 const corsHeaders = {
@@ -16,22 +15,36 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Request received:", {
+      method: req.method,
+      headers: Object.fromEntries(req.headers.entries())
+    });
+
     // Get the user data from the request
     const { user } = await req.json()
     console.log("Received user data:", { 
       id: user?.id,
       email: user?.email,
-      created_at: user?.created_at
+      created_at: user?.created_at,
+      metadata: user?.user_metadata
     });
 
     if (!user?.email) {
+      console.error("No email provided in user data");
       throw new Error('No email provided');
     }
 
     // Initialize Resend
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY not found in environment variables");
+      throw new Error('RESEND_API_KEY not configured');
+    }
+    console.log("Initializing Resend with API key");
+    const resend = new Resend(resendApiKey);
 
     // Send welcome email
+    console.log("Attempting to send welcome email to:", user.email);
     const { data, error } = await resend.emails.send({
       from: 'BookishNotes <welcome@bookishnotes.com>',
       to: user.email,
