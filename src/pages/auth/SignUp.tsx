@@ -17,6 +17,10 @@ export default function SignUp() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Sign up form submitted");
+    console.log("Environment:", import.meta.env.MODE);
+    console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+    console.log("Supabase Anon Key:", import.meta.env.VITE_SUPABASE_ANON_KEY?.slice(0, 10) + "...");
+    console.log("Form data:", { email, password });
     setIsLoading(true);
 
     try {
