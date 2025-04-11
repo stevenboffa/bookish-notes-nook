@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+console.log("Welcome email function started");
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -14,29 +16,16 @@ serve(async (req) => {
   }
 
   try {
-    // Create a Supabase client with the Auth context of the logged in user
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    )
-
     // Get the user data from the request
-    const { user, event } = await req.json()
+    const { user } = await req.json()
+    console.log("Received user data:", { 
+      id: user?.id,
+      email: user?.email,
+      created_at: user?.created_at
+    });
 
-    // Only send welcome email for signup events
-    if (event !== 'SIGNUP') {
-      return new Response(
-        JSON.stringify({ message: 'Not a signup event' }),
-        { 
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
+    if (!user?.email) {
+      throw new Error('No email provided');
     }
 
     // Initialize Resend
@@ -80,6 +69,8 @@ serve(async (req) => {
         }
       )
     }
+
+    console.log("Welcome email sent successfully:", data);
 
     return new Response(
       JSON.stringify({ success: true, data }),
