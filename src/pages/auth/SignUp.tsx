@@ -25,7 +25,6 @@ export default function SignUp() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: email.split('@')[0],
             email_subscribe: false,
@@ -33,11 +32,32 @@ export default function SignUp() {
         }
       });
 
-      console.log("Sign up response:", { data, error });
+      console.log("Sign up response:", { 
+        data: {
+          user: data?.user ? {
+            id: data.user.id,
+            email: data.user.email,
+            identities: data.user.identities?.length
+          } : null,
+          session: data?.session ? 'exists' : null
+        },
+        error: error ? {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        } : null
+      });
 
       if (error) {
         console.error("Sign up error details:", error);
-        throw error;
+        if (error.message.includes('Email rate limit exceeded')) {
+          toast.error("Too many signup attempts. Please try again later.");
+        } else if (error.message.includes('User already registered')) {
+          toast.error("This email is already registered. Please sign in instead.");
+        } else {
+          toast.error(error.message || "An error occurred during sign up");
+        }
+        return;
       }
 
       if (data?.user?.identities?.length === 0) {
@@ -61,7 +81,6 @@ export default function SignUp() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
             subscribe: 'false',
           }
@@ -70,7 +89,7 @@ export default function SignUp() {
 
       if (error) {
         console.error("Google sign up error:", error);
-        throw error;
+        toast.error(error.message || "An error occurred during Google sign up");
       }
     } catch (error: any) {
       console.error("Google sign up error:", error);
