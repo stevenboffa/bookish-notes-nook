@@ -1,4 +1,3 @@
-
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
@@ -39,6 +38,9 @@ import AccountSettings from "./pages/resources/AccountSettings";
 import ProfileCustomization from "./pages/resources/ProfileCustomization";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import TestEmail from "./pages/dev/TestEmail";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -130,6 +132,7 @@ const App = () => (
             <ScrollToTop />
             <GoogleAnalytics />
             <Routes>
+              <Route path="/dev/test-email" element={<TestEmail />} />
               <Route element={<AuthenticatedLayout><Outlet /></AuthenticatedLayout>}>
                 <Route path="/" element={
                   <PublicRoute>
@@ -146,6 +149,8 @@ const App = () => (
                     <SignUp />
                   </PublicRoute>
                 } />
+                <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                <Route path="/auth/reset-password" element={<ResetPassword />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/contact" element={<Contact />} />

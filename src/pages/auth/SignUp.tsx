@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Meta } from "@/components/Meta";
+import { sendWelcomeEmail } from "@/utils/email";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -20,7 +20,7 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -34,7 +34,23 @@ export default function SignUp() {
 
       if (error) throw error;
 
-      toast.success("Success! Please check your email to verify your account.");
+      // Extract username from email (everything before @)
+      const username = email.split('@')[0];
+
+      // Send welcome email
+      const { success: emailSent, error: emailError } = await sendWelcomeEmail(email, username);
+      
+      if (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Don't throw error here, as signup was successful
+      }
+
+      toast.success(
+        emailSent 
+          ? "Success! Please check your email to verify your account. We've also sent you a welcome message!"
+          : "Success! Please check your email to verify your account."
+      );
+      
       navigate("/auth/sign-in");
     } catch (error: any) {
       toast.error(error.message);

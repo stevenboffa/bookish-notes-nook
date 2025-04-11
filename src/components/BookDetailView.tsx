@@ -642,7 +642,7 @@ export function BookDetailView({
                     <h3 className="text-lg font-semibold text-indigo-900">Book Wrap Analysis</h3>
                   </div>
                   <p className="text-sm text-indigo-700">
-                    Generate an AI-powered analysis of your reading journey, including themes, engagement, emotional responses, and reflections.
+                    Generate an AI-powered analysis when you enter notes and finish a book. The more notes you add, the deeper the analysis!
                   </p>
                   <Button
                     onClick={() => setShowBookWrap(true)}
