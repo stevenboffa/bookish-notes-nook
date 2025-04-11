@@ -36,11 +36,14 @@ serve(async (req) => {
 
     // Initialize Resend
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    console.log("Resend API key exists:", !!resendApiKey); // Log if key exists but not the actual key
+    console.log("Resend API key exists:", !!resendApiKey);
+    console.log("Environment variables:", Deno.env.toObject());
+    
     if (!resendApiKey) {
       console.error("RESEND_API_KEY not found in environment variables");
       throw new Error('RESEND_API_KEY not configured');
     }
+
     console.log("Initializing Resend with API key");
     const resend = new Resend(resendApiKey);
 
@@ -78,7 +81,9 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: 'Failed to send welcome email',
-          details: error.message
+          details: error.message,
+          type: error.name,
+          stack: error.stack
         }),
         { 
           status: 500,
@@ -102,7 +107,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         error: 'Internal server error',
-        details: error.message
+        details: error.message,
+        type: error.name,
+        stack: error.stack
       }),
       { 
         status: 500,
