@@ -37,7 +37,21 @@ export default function SignUp() {
         }
       });
 
-      console.log("Sign up response:", { data, error });
+      console.log("Sign up response:", { 
+        data: {
+          user: data?.user ? {
+            id: data.user.id,
+            email: data.user.email,
+            identities: data.user.identities?.length
+          } : null,
+          session: data?.session ? 'exists' : null
+        },
+        error: error ? {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        } : null
+      });
 
       if (error) {
         console.error("Sign up error details:", error);
@@ -49,11 +63,21 @@ export default function SignUp() {
         return;
       }
 
-      toast.success("Success! Please check your email to verify your account.");
-      navigate("/auth/sign-in");
+      // Check if email confirmation is required
+      if (data?.user?.identities?.length === 1) {
+        toast.success("Success! Please check your email to verify your account.");
+        navigate("/auth/sign-in");
+      } else {
+        console.error("Unexpected signup response:", data);
+        toast.error("An unexpected error occurred during sign up");
+      }
     } catch (error: any) {
       console.error("Sign up error:", error);
-      toast.error(error.message || "An error occurred during sign up");
+      if (error.message.includes('Email rate limit exceeded')) {
+        toast.error("Too many signup attempts. Please try again later.");
+      } else {
+        toast.error(error.message || "An error occurred during sign up");
+      }
     } finally {
       setIsLoading(false);
     }

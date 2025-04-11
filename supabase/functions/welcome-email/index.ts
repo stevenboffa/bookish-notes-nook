@@ -26,7 +26,18 @@ serve(async (req) => {
     )
 
     // Get the user data from the request
-    const { user } = await req.json()
+    const { user, event } = await req.json()
+
+    // Only send welcome email for signup events
+    if (event !== 'SIGNUP') {
+      return new Response(
+        JSON.stringify({ message: 'Not a signup event' }),
+        { 
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
 
     // Initialize Resend
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
@@ -39,7 +50,7 @@ serve(async (req) => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #7C3AED;">Welcome to BookishNotes!</h1>
-          <p>Hi ${user.user_metadata?.full_name || 'there'},</p>
+          <p>Hi ${user.user_metadata?.full_name || user.user_metadata?.name || 'there'},</p>
           <p>We're excited to have you join our community of readers! BookishNotes is your personal reading companion, helping you track your reading journey and remember what you read.</p>
           
           <h2 style="color: #7C3AED;">Getting Started</h2>
