@@ -13,11 +13,11 @@ export const Meta = ({
   description,
   canonicalUrl,
   customTitle,
-  ogImage = "https://bookishnotes.com/og-image.png",
+  ogImage = "https://bookishnotes.app/og-image.png",
 }: MetaProps) => {
   const siteTitle = customTitle || (title ? `${title} | BookishNotes` : "BookishNotes");
   const defaultDescription = "Track your reading journey, take notes on books, and connect with other readers.";
-  const currentUrl = canonicalUrl || "https://bookishnotes.com";
+  const currentUrl = canonicalUrl || "https://bookishnotes.app";
   
   return (
     <Helmet>

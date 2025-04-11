@@ -7,7 +7,6 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Meta } from "@/components/Meta";
-import { sendWelcomeEmail } from "@/utils/email";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -24,35 +23,20 @@ export default function SignUp() {
         email,
         password,
         options: {
-          // Disable any email confirmation to prevent duplicate emails
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
-            email_subscribe: false, // Ensure we're not subscribing users to emails by default
+            full_name: email.split('@')[0], // Set a default name from email
+            email_subscribe: false,
           }
         }
       });
 
       if (error) throw error;
 
-      // Extract username from email (everything before @)
-      const username = email.split('@')[0];
-
-      // Send welcome email
-      const { success: emailSent, error: emailError } = await sendWelcomeEmail(email, username);
-      
-      if (emailError) {
-        console.error('Error sending welcome email:', emailError);
-        // Don't throw error here, as signup was successful
-      }
-
-      toast.success(
-        emailSent 
-          ? "Success! Please check your email to verify your account. We've also sent you a welcome message!"
-          : "Success! Please check your email to verify your account."
-      );
-      
+      toast.success("Success! Please check your email to verify your account.");
       navigate("/auth/sign-in");
     } catch (error: any) {
+      console.error("Sign up error:", error);
       toast.error(error.message);
     } finally {
       setIsLoading(false);
@@ -66,7 +50,6 @@ export default function SignUp() {
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
           queryParams: {
-            // Disable any email subscriptions for Google sign-in
             subscribe: 'false',
           }
         }
@@ -161,7 +144,7 @@ export default function SignUp() {
               {isLoading ? "Creating your account..." : "Create your free account"}
             </Button>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground text-center">
               By creating an account, you agree to our{" "}
               <Link to="/terms" className="text-primary hover:text-primary/90 font-medium">
                 Terms of Service
