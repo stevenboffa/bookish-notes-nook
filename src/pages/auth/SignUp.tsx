@@ -25,11 +25,12 @@ export default function SignUp() {
 
     try {
       console.log("Attempting to sign up with:", { email });
+      
+      // First try without redirect URL
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: email.split('@')[0],
             email_subscribe: false,
@@ -37,12 +38,13 @@ export default function SignUp() {
         }
       });
 
-      console.log("Sign up response:", { 
+      console.log("Initial sign up response:", { 
         data: {
           user: data?.user ? {
             id: data.user.id,
             email: data.user.email,
-            identities: data.user.identities?.length
+            identities: data.user.identities?.length,
+            metadata: data.user.user_metadata
           } : null,
           session: data?.session ? 'exists' : null
         },
@@ -55,7 +57,14 @@ export default function SignUp() {
 
       if (error) {
         console.error("Sign up error details:", error);
-        throw error;
+        if (error.message.includes('Email rate limit exceeded')) {
+          toast.error("Too many signup attempts. Please try again later.");
+        } else if (error.message.includes('User already registered')) {
+          toast.error("This email is already registered. Please sign in instead.");
+        } else {
+          toast.error(error.message || "An error occurred during sign up");
+        }
+        return;
       }
 
       if (data?.user?.identities?.length === 0) {
@@ -63,14 +72,20 @@ export default function SignUp() {
         return;
       }
 
-      // Check if email confirmation is required
-      if (data?.user?.identities?.length === 1) {
-        toast.success("Success! Please check your email to verify your account.");
-        navigate("/auth/sign-in");
-      } else {
-        console.error("Unexpected signup response:", data);
-        toast.error("An unexpected error occurred during sign up");
+      // If initial signup succeeds, try to update the redirect URL
+      if (data?.user) {
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: { redirect_url: `${window.location.origin}/auth/callback` }
+        });
+
+        if (updateError) {
+          console.error("Error updating redirect URL:", updateError);
+          // Continue anyway as the user is already created
+        }
       }
+
+      toast.success("Success! Please check your email to verify your account.");
+      navigate("/auth/sign-in");
     } catch (error: any) {
       console.error("Sign up error:", error);
       if (error.message.includes('Email rate limit exceeded')) {
